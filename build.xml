@@ -1,0 +1,34 @@
+<project name="graha" default="compile">
+	<property name = "base.dir" value = "."/>
+	<property name = "src.dir" value = "${base.dir}/src"/>
+	<property name = "build.dir" value = "${base.dir}/bin"/>
+	<property name = "package.dir" value = "${base.dir}/package"/>
+	<presetdef name="javac">
+		<javac includeantruntime="false" />
+	</presetdef>
+	<path id = "master-classpath">
+		<fileset dir = "${base.dir}/lib">
+			<include name = "*.jar"/>
+		</fileset>
+		<pathelement path = "${build.dir}"/>
+	</path>
+	<target name="depends">
+		<mkdir dir="${build.dir}" />
+	</target>
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+	<target name="compile" depends="depends">
+		<javac destdir = "${build.dir}" deprecation="true" debug="true" debuglevel="lines,vars,source" includeAntRuntime="false" optimize="true" nowarn="off" target="1.7" source="1.7">
+			<src path = "${src.dir}"/>
+			<classpath refid = "master-classpath"/>
+		</javac>
+	</target>
+	<target name="package" depends="compile">
+		<jar destfile="${package.dir}/graha.0.5.0.0.jar">
+			<fileset dir="${build.dir}" includes="kr/**/*.class"/>
+			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
+			<fileset dir="${src.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties"/>
+		</jar>
+	</target>
+</project>
