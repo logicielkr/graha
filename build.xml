@@ -7,10 +7,16 @@
 		<javac includeantruntime="false" />
 	</presetdef>
 	<path id = "master-classpath">
+<!--
 		<fileset dir = "${base.dir}/lib">
 			<include name = "*.jar"/>
 		</fileset>
+-->
 		<pathelement path = "${build.dir}"/>
+		<pathelement path = "/opt/java/lib/apache-commons/commons-fileupload-1.1.1.jar" />
+		<pathelement path = "/opt/java/lib/apache-commons/commons-io-1.1.jar" />
+		<pathelement path = "/opt/java/lib/apache-tomcat-7.0.100/catalina.jar" />
+		<pathelement path = "/opt/java/lib/apache-tomcat-7.0.100/servlet-api.jar" />
 	</path>
 	<target name="depends">
 		<mkdir dir="${build.dir}" />
