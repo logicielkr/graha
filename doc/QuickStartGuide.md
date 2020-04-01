@@ -94,13 +94,13 @@ Graha는 전문적인 데이타베이스 관리 도구가 아니기 때문에 �
 
 SQL Runner는 Web 기반의 sql 실행기이다.
 
-웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 http://${SERVER_NAME}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```//localhost/graha-manager/query``` 와 같은 식이다.
+예를 들면 ```http://localhost/graha-manager/query``` 와 같은 식이다.
 
 데이타베이스 설정에 문제가 없다면, 다음과 같은 화면을 볼 수 있을 것이다.
 
-![Graha SQL Runner 화면](//graha.kr/static-contents/images/manager.sql_runner.png)
+![Graha SQL Runner 화면](http://graha.kr/static-contents/images/manager.sql_runner.png)
 
 * ❶ 테이블목록으로 이동하는 버튼
 * ❷ sql 입력창
@@ -142,7 +142,7 @@ PRIMARY KEY (memo_id)
 
 ❶ 테이블목록으로 이동하는 버튼을 클릭하면 다음 화면이 기다리고 있다.
 
-![Graha 테이블 목록 화면](//graha.kr/static-contents/images/manager.table_list.png)
+![Graha 테이블 목록 화면](http://graha.kr/static-contents/images/manager.table_list.png)
 
 * ❶ SQL Runner로 이동하는 버튼
 * ❷ Graha xml 정의 파일을 생성하는 버튼(먼저 테이블을 선택해야 한다)
@@ -159,7 +159,7 @@ Graha xml 정의 파일을 생성하기 전에 table과 column의 comment를 각
 
 table과 column의 comment를 모두 저장하고 나면, ❸ 테이블을 선택하고, ❷ Generation 버튼을 클릭하면 다음 절차로 넘어간다.
 
-![Graha Master 테이블 선택 화면](//graha.kr/static-contents/images/manager.select.png)
+![Graha Master 테이블 선택 화면](http://graha.kr/static-contents/images/manager.select.png)
 
 > 1개의 테이블을 선택한 경우 Generation 버튼을 클릭하면 된다.
 > 여러개의 테이블을 선택한 경우 1개의 master 테이블을 선택해야 한다.  이 경우 나머지 테이블에는 master 테이블의 primary key와 동일한 이름을 갖는 column을 가지고 있어야 하고, 물리적으로 foreign 키 설정과는 관련이 없다.
@@ -338,13 +338,13 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 
 ### 4.2. 화면에서 확인하고 쓸모있게 변경하기
 
-웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 http://${SERVER_NAME}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```//localhost/graha/memo/list.xml``` 와 같은 식이다.
+예를 들면 ```http://localhost/graha/memo/list.xml``` 와 같은 식이다.
 
 #### 4.2.1 목록 화면
 
-![자동생성된 Graha xml 정의 파일의 목록 화면](//graha.kr/static-contents/images/memo001.list.png)
+![자동생성된 Graha xml 정의 파일의 목록 화면](http://graha.kr/static-contents/images/memo001.list.png)
 
 아직 완성형이 아니다.  Graha Manager 는 여기까지다.  이제부터는 프로그래머의 몫이다.
 
@@ -431,11 +431,11 @@ td.last_update_date {
 </header>
 ```
 
-![개선된 목록 화면](//graha.kr/static-contents/images/memo002.list.png)
+![개선된 목록 화면](http://graha.kr/static-contents/images/memo002.list.png)
 
 #### 4.2.2 추가/수정 화면
 
-![자동생성된 Graha xml 정의 파일의 입력/수정 화면](//graha.kr/static-contents/images/memo001.insert.png)
+![자동생성된 Graha xml 정의 파일의 입력/수정 화면](http://graha.kr/static-contents/images/memo001.insert.png)
 
 여기서 해야 할 일은 contents 를 textarea로 변경하고 marked을 checkbox로 변경하고 title 항목의 오른쪽 구석에 넣으면 된다.
 
@@ -490,11 +490,11 @@ th.title {
 </header>
 ```
 
-![개선된 추가/수정 화면](//graha.kr/static-contents/images/memo002.insert.png)
+![개선된 추가/수정 화면](http://graha.kr/static-contents/images/memo002.insert.png)
 
 #### 4.2.3 상세보기 화면
 
-![자동생성된 Graha xml 정의 파일의 상세보기 화면](//graha.kr/static-contents/images/memo001.detail.png)
+![자동생성된 Graha xml 정의 파일의 상세보기 화면](http://graha.kr/static-contents/images/memo001.detail.png)
 
 여기는 제목 등의 label의 넓이를 조정하는 등 화면을 정리해야 하고, 화면에 입력일시와 최종수정일시도 표기하기로 한다.
 
@@ -586,7 +586,7 @@ td.contents {
 </header>
 ```
 
-![개선된 상세보기 화면](//graha.kr/static-contents/images/memo002.detail.png)
+![개선된 상세보기 화면](http://graha.kr/static-contents/images/memo002.detail.png)
 
 ## 5. 결어
 
