@@ -80,8 +80,8 @@
 
 ### 2.6. WEB-INF/graha 디렉토리 생성
 
-매끈한 화면에서 확인하기 위해서 <https://github.com/logicielkr/graha> 에서 sample/base 에서 _base.xml 파일을 WEB-INF/graha/ 에 다운로드 받는다.
-_base.xml은 일종의 css/javascript로 구성된 읿종의 화면 template 과 같은 것이다.
+매끈한 화면으로 확인하기 위해서 <https://github.com/logicielkr/graha> 에서 sample/base 에서 _base.xml 파일을 WEB-INF/graha/ 에 다운로드 받는다.
+_base.xml은 css/javascript로 구성된 읿종의 화면 template 과 같은 것이다.
 
 ## 3. GrahaManager
 
@@ -94,19 +94,19 @@ Graha는 전문적인 데이타베이스 관리 도구가 아니기 때문에 �
 
 SQL Runner는 Web 기반의 sql 실행기이다.
 
-웹브라우저 주소창에 http://${SERVER_NAME}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```http://localhost/graha-manager/query``` 와 같은 식이다.
+예를 들면 ```//localhost/graha-manager/query``` 와 같은 식이다.
 
 데이타베이스 설정에 문제가 없다면, 다음과 같은 화면을 볼 수 있을 것이다.
 
-![Graha SQL Runner 화면](http://graha.kr/static-contents/images/manager.sql_runner.png)
+![Graha SQL Runner 화면](//graha.kr/static-contents/images/manager.sql_runner.png)
 
 * ❶ 테이블목록으로 이동하는 버튼
 * ❷ sql 입력창
 * ❸ sql 실행 버튼 (Ctrl + Enter을 입력해도 된다)
 
-❷ sql 입력창에 다음과 같은 sql을 입력하고 ❸ sql 실행 버튼이나 Ctrl + Enter로 입력하면, 서버의 현재 날짜와 시간을 확인할 수 있다.
+❷ sql 입력창에 다음과 같은 sql을 입력하고 ❸ sql 실행 버튼이나 Ctrl + Enter를 입력하면, 서버의 현재 날짜와 시간을 확인할 수 있다.
 
 ```sql
 select current_timestamp from sysibm.sysdummy1
@@ -142,7 +142,7 @@ PRIMARY KEY (memo_id)
 
 ❶ 테이블목록으로 이동하는 버튼을 클릭하면 다음 화면이 기다리고 있다.
 
-![Graha 테이블 목록 화면](http://graha.kr/static-contents/images/manager.table_list.png)
+![Graha 테이블 목록 화면](//graha.kr/static-contents/images/manager.table_list.png)
 
 * ❶ SQL Runner로 이동하는 버튼
 * ❷ Graha xml 정의 파일을 생성하는 버튼(먼저 테이블을 선택해야 한다)
@@ -152,17 +152,17 @@ PRIMARY KEY (memo_id)
 * ❻ Table의 데이터를 조회하는 기능으로 이동하는 버튼(30개로 제한)
 * ❼ 테이블 comment를 저장하는 기능
 
-Graha xml 정의 파일을 생성하기 전에 table과 column의 comment를 입력해서 저장하는 것을 추천한다.
+Graha xml 정의 파일을 생성하기 전에 table과 column의 comment를 각각 입력해서 저장하는 것을 추천한다.
 
 > Apache Derby의 경우 comment on table 구문을 지원하지 않고, MariaDB의 경우 alter table 구문만을 지원한다.
 > Graha는 Apache Derby와 MariaDB의 경우 graha_tab_comments 와 graha_col_comments 테이블을 자동으로 만든다.
 
 table과 column의 comment를 모두 저장하고 나면, ❸ 테이블을 선택하고, ❷ Generation 버튼을 클릭하면 다음 절차로 넘어간다.
 
-![Graha Master 테이블 선택 화면](http://graha.kr/static-contents/images/manager.select.png)
+![Graha Master 테이블 선택 화면](//graha.kr/static-contents/images/manager.select.png)
 
 > 1개의 테이블을 선택한 경우 Generation 버튼을 클릭하면 된다.
-> 여러개의 테이블을 선택한 경우 1개의 master 테이블을 선택해야 한다.  이 경우 나머지 테이블에는 master 테이블의 primary key와 동일한 이름을 갖는 column을 가지고 있어야 하고, 물리적으로 foreign 키로 설정되어 있을 필요는 없다.
+> 여러개의 테이블을 선택한 경우 1개의 master 테이블을 선택해야 한다.  이 경우 나머지 테이블에는 master 테이블의 primary key와 동일한 이름을 갖는 column을 가지고 있어야 하고, 물리적으로 foreign 키 설정과는 관련이 없다.
 
 ## 4. Graha 를 이용한 프로그램 개발
 
@@ -338,15 +338,15 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 
 ### 4.2. 화면에서 확인하고 쓸모있게 변경하기
 
-웹브라우저 주소창에 http://${SERVER_NAME}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```http://localhost/graha/memo/list.xml``` 와 같은 식이다.
+예를 들면 ```//localhost/graha/memo/list.xml``` 와 같은 식이다.
 
 #### 4.2.1 목록 화면
 
-![자동생성된 Graha xml 정의 파일의 목록 화면](http://graha.kr/static-contents/images/memo001.list.png)
+![자동생성된 Graha xml 정의 파일의 목록 화면](//graha.kr/static-contents/images/memo001.list.png)
 
-아직 완성형이 아니다.  Graha Manager 는 여기까지다.  이제부터는 개발자의 몫이다.
+아직 완성형이 아니다.  Graha Manager 는 여기까지다.  이제부터는 프로그래머의 몫이다.
 
 목록 화면에서는 일반적으로 내용, 마크다운여부 항목은 필요가 없고, 대신 최종수정일시를 추가해야 한다.
 
@@ -378,7 +378,7 @@ order by memo_id desc
 </sql>
 ```
 
-먼저 id 속성값이 list인 query 요소에서 tab 요소만 떼어내자.
+다음은 id 속성값이 list인 query 요소에서 tab 요소만 떼어내자.
 
 ```xml
 <tab name="memo">
@@ -431,11 +431,11 @@ td.last_update_date {
 </header>
 ```
 
-![개선된 목록 화면](http://graha.kr/static-contents/images/memo002.list.png)
+![개선된 목록 화면](//graha.kr/static-contents/images/memo002.list.png)
 
 #### 4.2.2 추가/수정 화면
 
-![자동생성된 Graha xml 정의 파일의 입력/수정 화면](http://graha.kr/static-contents/images/memo001.insert.png)
+![자동생성된 Graha xml 정의 파일의 입력/수정 화면](//graha.kr/static-contents/images/memo001.insert.png)
 
 여기서 해야 할 일은 contents 를 textarea로 변경하고 marked을 checkbox로 변경하고 title 항목의 오른쪽 구석에 넣으면 된다.
 
@@ -490,11 +490,11 @@ th.title {
 </header>
 ```
 
-![개선된 추가/수정 화면](http://graha.kr/static-contents/images/memo002.insert.png)
+![개선된 추가/수정 화면](//graha.kr/static-contents/images/memo002.insert.png)
 
 #### 4.2.3 상세보기 화면
 
-![자동생성된 Graha xml 정의 파일의 상세보기 화면](http://graha.kr/static-contents/images/memo001.detail.png)
+![자동생성된 Graha xml 정의 파일의 상세보기 화면](//graha.kr/static-contents/images/memo001.detail.png)
 
 여기는 제목 등의 label의 넓이를 조정하는 등 화면을 정리해야 하고, 화면에 입력일시와 최종수정일시도 표기하기로 한다.
 
@@ -586,4 +586,18 @@ td.contents {
 </header>
 ```
 
-![개선된 상세보기 화면](http://graha.kr/static-contents/images/memo002.detail.png)
+![개선된 상세보기 화면](//graha.kr/static-contents/images/memo002.detail.png)
+
+## 5. 결어
+
+지금까지 Graha를 이용한 프로그램 개발에 대해 살펴보았다.
+
+Graha Manager가 자동으로 생성한 Graha xml 정의 파일을 원문 그대로 인용하다 보니 본문의 내용이 길어졌지만, 서버쪽 코드를 거의 작성하지 않고 매우 짧은 시간에 기능의 중요 부분을 완성할 수 있었다.
+
+이제부터는 주로 css/javascript 작업만이 남아 있는 셈이다.
+
+물론 Graha는 완전히 새로운 라이브러리이기 때문에 Graha xml 정의 파일의 구문을 익히는데 많은 수고가 필요할 수는 있지만, 저자가 그동안 사용했던 다른 프레임웍이나 라이브러리에 비하면 구문이나 사용방법이 비교적 간단한 편이고, 서버 쪽 코드를 작성할 필요가 거의 없다는 것을 감안하면 충분한 가치가 있다고 생각한다.
+
+저자가 생각하는 Graha 가장 큰 장점은 Graha xml 정의 파일이 프로그램 명세서 수준으로 간결하고 구조적이라는 것이다.
+
+이 글을 쓰고 있는 현재 시점에서는 Graha에 관한 문서들이 부족하기 때문에 이 글을 넘어서는 사용법을 익히는 것이 쉽지 않은 일이지만, 앞으로 시간이 날 때마다 사례를 중심으로 문서화 작업을 진행할 예정이다.
