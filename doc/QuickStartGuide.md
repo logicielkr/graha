@@ -32,8 +32,7 @@
 	type="javax.sql.DataSource" 
 	driverClassName="kr.xdbc.driver.GenericDriver"
 	url="xdbc:jdbc:derby:memo;create=true"
-	username="postgres"
-	password="password" />
+/>
 ```
 
 ### 2.2. conf/context.xml 파일에서 ResourceLink(Element) 요소 추가
