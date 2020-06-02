@@ -199,6 +199,8 @@ public class XSLGenerator {
 							sb.append("<xsl:attribute name=\"href\">");
 							if(link.hasAttribute("type") && link.getAttribute("type").equals("query")) {
 								sb.append("<xsl:value-of select=\"" + this._tag.path("row", link.getAttribute("value"), null, false) + "\"/>");
+							} else if(link.hasAttribute("type") && link.getAttribute("type").equals("external")) {
+								sb.append(link.getAttribute("path"));
 							} else {
 								sb.append(this.getPath(link.getAttribute("path")));
 							}
