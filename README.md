@@ -2,7 +2,7 @@
 
 ## 1. about
 
-Graha는 데이타베이스에 기반한 웹 프로그램의 개발 생산성을 극대화하는 프로그래밍 도구이다.
+Graha는 데이타베이스에 기반한 웹 프로그램의 개발 생산성을 높이고 구조화하기 위한 프로그래밍 도구이다.
 
 ### 1.1. Graha의 특징
 
@@ -27,7 +27,7 @@ Graha는 데이타베이스에 기반한 웹 프로그램의 개발 생산성을
 * org.apache.derby.jdbc.AutoloadedDriver
 * org.hsqldb.jdbc.JDBCDriver
 * org.h2.Driver
-* 다른 데이타베이스도 사용할 수 있는 방법은 있다.
+* 다른 데이타베이스도 방법은 있다.
 
 ### 1.4. 배포하는 곳
 
