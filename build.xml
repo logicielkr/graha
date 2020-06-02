@@ -31,7 +31,7 @@
 		</javac>
 	</target>
 	<target name="package" depends="compile">
-		<jar destfile="${package.dir}/graha.0.5.0.0.jar">
+		<jar destfile="${package.dir}/graha.0.5.0.1.jar">
 			<fileset dir="${build.dir}" includes="kr/**/*.class"/>
 			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
 			<fileset dir="${src.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties"/>
