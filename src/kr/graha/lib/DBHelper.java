@@ -137,28 +137,32 @@ public final class DBHelper {
 		}
 		return info;
 	}
+	public static Connection getConnection(String jndi) {
+		Connection con = null;
+		try {
+			javax.naming.InitialContext cxt = new javax.naming.InitialContext();
+			String source = null;
+			if(jndi.startsWith("java:")) {
+				source = jndi;
+			} else {
+				source = "java:/comp/env/" + jndi;
+			}
+			javax.sql.DataSource ds = (javax.sql.DataSource)cxt.lookup(source);
+			con = ds.getConnection();
+		} catch (SQLException | NamingException e2) {
+			if(logger.isLoggable(Level.SEVERE)) {
+				logger.severe(LogHelper.toString(e2));
+			}
+		}
+		return con;
+	}
 	public static Connection getConnection(Record info) {
 		Connection con = null;
 		if(info.hasKey("type") && info.getString("type").equals("jndi")) {
-			try {
-				javax.naming.InitialContext cxt = new javax.naming.InitialContext();
-				String source = null;
-				if(info.getString("name").startsWith("java:")) {
-					source = info.getString("name");
-				} else {
-					source = "java:/comp/env/" + info.getString("name");
-				}
-				javax.sql.DataSource ds = (javax.sql.DataSource)cxt.lookup(source);
-				con = ds.getConnection();
-			} catch (SQLException | NamingException e2) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e2));
-				}
-			}
+			con = DBHelper.getConnection(info.getString("name"));
 		} else if(info.hasKey("type") && info.getString("type").equals("jdbc") && info.hasKey("driverClassName") && info.hasKey("url")) {
 			try {
 				Class.forName(info.getString("driverClassName"));
-				
 				con = DriverManager.getConnection(info.getString("url"), info.getString("username"), info.getString("password"));
 			} catch (ClassNotFoundException | SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
