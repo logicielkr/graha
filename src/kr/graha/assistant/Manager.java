@@ -255,16 +255,16 @@ public class Manager extends HttpServlet {
 			sb.append("<document>");
 			if(cm.getJndiSize() > 1) {
 				String[] jndis = cm.getJndis();
-				if(jndis != null) {
+				if(jndis != null && jndis.length > 0) {
+					sb.append("<rows id=\"jndi\">");
 					for(int q = 0; q < jndis.length; q++) {
-						sb.append("<rows id=\"jndi\">");
 						sb.append("<row>");
 						sb.append("<name>");
 						sb.append(jndis[q]);
 						sb.append("</name>");
 						sb.append("</row>");
-						sb.append("</rows>");
 					}
+					sb.append("</rows>");
 				}
 			}
 			sb.append("<rows id=\"tables\">");
@@ -361,16 +361,16 @@ public class Manager extends HttpServlet {
 			sb.append("<document>");
 			if(cm.getJndiSize() > 1) {
 				String[] jndis = cm.getJndis();
-				if(jndis != null) {
+				if(jndis != null && jndis.length > 0) {
+					sb.append("<rows id=\"jndi\">");
 					for(int q = 0; q < jndis.length; q++) {
-						sb.append("<rows id=\"jndi\">");
 						sb.append("<row>");
 						sb.append("<name>");
 						sb.append(jndis[q]);
 						sb.append("</name>");
 						sb.append("</row>");
-						sb.append("</rows>");
 					}
+					sb.append("</rows>");
 				}
 			}
 			java.util.List<Table> tabs = db.getTables(con);
@@ -575,7 +575,7 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
-			sb.append("<jndi>" + request.getParameter("jndi") + "</jndi>");
+			sb.append("<param><jndi>" + request.getParameter("jndi") + "</jndi></param>");
 		}
 		sb.append("</params></document>");
 		if(sb.length() > 0) {
@@ -1177,16 +1177,16 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			sb.append("<document>");
 			if(cm.getJndiSize() > 1) {
 				String[] jndis = cm.getJndis();
-				if(jndis != null) {
+				if(jndis != null && jndis.length > 0) {
+					sb.append("<rows id=\"jndi\">");
 					for(int q = 0; q < jndis.length; q++) {
-						sb.append("<rows id=\"jndi\">");
 						sb.append("<row>");
 						sb.append("<name>");
 						sb.append(jndis[q]);
 						sb.append("</name>");
 						sb.append("</row>");
-						sb.append("</rows>");
 					}
+					sb.append("</rows>");
 				}
 			}
 			java.util.List<Table> tabs = db.getTables(con);
@@ -1332,16 +1332,16 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			sb.append("<document>");
 			if(cm.getJndiSize() > 1) {
 				String[] jndis = cm.getJndis();
-				if(jndis != null) {
+				if(jndis != null && jndis.length > 0) {
+					sb.append("<rows id=\"jndi\">");
 					for(int q = 0; q < jndis.length; q++) {
-						sb.append("<rows id=\"jndi\">");
 						sb.append("<row>");
 						sb.append("<name>");
 						sb.append(jndis[q]);
 						sb.append("</name>");
 						sb.append("</row>");
-						sb.append("</rows>");
 					}
+					sb.append("</rows>");
 				}
 			}
 			sb.append("<params><param>");
