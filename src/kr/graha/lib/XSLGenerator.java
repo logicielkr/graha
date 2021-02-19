@@ -401,10 +401,10 @@ public class XSLGenerator {
 					}
 					sb.appendL(this._html.theadE());
 				}
+				sb.appendL(this._html.tbody());
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				}
-				sb.appendL(this._html.tbody());
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
 					sb.appendL(this._html.tr());
@@ -435,10 +435,10 @@ public class XSLGenerator {
 					}
 					sb.appendL(this._html.trE());
 				}
-				sb.appendL(this._html.tbodyE());
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.appendL("</xsl:for-each>");
 				}
+				sb.appendL(this._html.tbodyE());
 			}
 			
 			sb.appendL(this._html.tableE());
@@ -627,8 +627,8 @@ public class XSLGenerator {
 					sb.appendL(this._html.trE());
 				}
 				sb.appendL(this._html.theadE());
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				sb.appendL(this._html.tbody());
+				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
 					this._expr = this._xpath.compile("column");
@@ -653,14 +653,13 @@ public class XSLGenerator {
 					}
 					sb.appendL(this._html.trE());
 				}
-				
-				sb.appendL(this._html.tbodyE());
 				sb.append("</xsl:for-each>");
+				sb.appendL(this._html.tbodyE());
 			} else {
+				sb.appendL(this._html.tbody());
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.append("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				}
-				sb.appendL(this._html.tbody());
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
 					if(row.hasAttribute("height")) {
@@ -712,10 +711,10 @@ public class XSLGenerator {
 					}
 					sb.append(this._html.trE());
 				}
-				sb.append(this._html.tbodyE());
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.append("</xsl:for-each>");
 				}
+				sb.append(this._html.tbodyE());
 			}
 			sb.append(this._html.tableE());
 		}
