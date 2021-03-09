@@ -961,9 +961,10 @@ public class XSLGenerator {
 				sb.append("<select class=\"" + name + " " + readonlyClass + "\" name=\"" + name + "\" value=\"" + valueExpr2 + "\"" + readonly + expr + follow + datatype + constraint + disabled + ">");
 			}
 			if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
+				sb.append("<xsl:variable name=\"selected\"><xsl:value-of select=\"" + valueExpr + "\" /></xsl:variable>");
 				sb.append("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
 				sb.append("	<xsl:choose>");
-				sb.append("	<xsl:when test=\"@" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
+				sb.append("	<xsl:when test=\"@" + this._tag.path("code", "value", null, isFull) + " = $selected\">");
 				sb.append("		<option value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></option>");
 				sb.append("	</xsl:when>");
 				sb.append("	<xsl:otherwise>");
