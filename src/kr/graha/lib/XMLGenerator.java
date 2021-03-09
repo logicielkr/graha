@@ -1315,7 +1315,9 @@ public class XMLGenerator {
 										}
 										for(int xx = 0; xx < cc.getLength(); xx++) {
 											Element e = (Element)cc.item(xx);
-											
+											if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
+												continue;
+											}
 											if(!this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
 												iscontinue = false;
 												isnext = false;
@@ -1373,6 +1375,9 @@ public class XMLGenerator {
 						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
 							for(int xx = 0; xx < cc.getLength(); xx++) {
 								Element e = (Element)cc.item(xx);
+								if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
+									continue;
+								}
 								if(!this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
 									iscontinue = false;
 									isnext = false;
