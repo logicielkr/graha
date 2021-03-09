@@ -520,6 +520,7 @@ public class Record extends HashMap {
 					if(v instanceof String) {
 						if(!((String)v).trim().equals("")) {
 							result = true;
+							break;
 						}
 					} else {
 						result = true;
