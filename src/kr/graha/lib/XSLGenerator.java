@@ -1699,6 +1699,7 @@ public class XSLGenerator {
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
+							sb.appendL("}");
 						}
 						if(e.hasAttribute("number-format") && e.getAttribute("number-format") != null) {
 							sb.appendL("if(!_numberFormat(form, \"" + key + "\", \"" + (String)e.getAttribute("number-format") + "\")) {");
