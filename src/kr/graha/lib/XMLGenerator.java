@@ -1318,6 +1318,9 @@ public class XMLGenerator {
 											if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
 												continue;
 											}
+											if(e.hasAttribute("disabled") && !e.getAttribute("disabled").equals("")) {
+												continue;
+											}
 											if(!this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
 												iscontinue = false;
 												isnext = false;
@@ -1376,6 +1379,9 @@ public class XMLGenerator {
 							for(int xx = 0; xx < cc.getLength(); xx++) {
 								Element e = (Element)cc.item(xx);
 								if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
+									continue;
+								}
+								if(e.hasAttribute("disabled") && !e.getAttribute("disabled").equals("")) {
 									continue;
 								}
 								if(!this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
