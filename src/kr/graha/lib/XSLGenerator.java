@@ -1059,13 +1059,15 @@ public class XSLGenerator {
 		if(item.getChildNodes().getLength() == 1 && (item.getTextContent()).equals("page")) {
 			sb.append("<ul class=\"pages\">");
 			sb.append("<xsl:for-each select=\"" + this._tag.path("page", null) + "\">");
-
-			sb.append("<li class=\"page\">");
 			sb.append("<xsl:choose>");
 			sb.append("<xsl:when test=\"" + this._tag.path("param", "page", null, true) + " = " + this._tag.path("page", "no", null, false) + "\">");
+			
+			sb.append("<li class=\"page selected\">");
 			sb.append("<xsl:value-of select=\"" + this._tag.path("page", "text", null, false) + "\" />");
+			sb.append("</li>");
 			sb.append("</xsl:when>");
 			sb.append("<xsl:otherwise>");
+			sb.append("<li class=\"page\">");
 			sb.append("<a href=\"?page={" + this._tag.path("page", "no", null, false) + "}");
 			if(this._params != null && !this._params.isEmpty()) {
 				Iterator<String> it = this._params.keySet().iterator();
@@ -1077,9 +1079,9 @@ public class XSLGenerator {
 				}
 			}
 			sb.append("\" style=\"text-decoration:none;\"><xsl:value-of select=\"" + this._tag.path("page", "text", null, false) + "\" /></a>");
+			sb.append("</li>");
 			sb.append("</xsl:otherwise>");
 			sb.append("</xsl:choose>");
-			sb.append("</li>");
 			sb.append("</xsl:for-each>");
 			sb.append("</ul>");
 		} else {
