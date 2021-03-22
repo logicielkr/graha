@@ -290,7 +290,7 @@ public class XMLGenerator {
 					
 					Element sql = (Element)this._expr.evaluate(command, XPathConstants.NODE);
 					String s = DBHelper.getSql(sql, this._params);
-					if(command.hasAttribute("type") && command.getAttribute("type") != null && !command.getAttribute("type").equals("") && command.getAttribute("type").equals("plsql")) {
+					if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("plsql")) {
 						cstmt = this.prepareCall(s);
 					} else {
 						stmt = this.prepareStatement(s);
@@ -314,12 +314,14 @@ public class XMLGenerator {
 						}
 					}
 					int result = 0;
-					if(command.hasAttribute("type") && command.getAttribute("type") != null && !command.getAttribute("type").equals("") && command.getAttribute("type").equals("plsql")) {
-						result = cstmt.executeUpdate();
+					if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("plsql")) {
+						cstmt.executeUpdate();
+						result = cstmt.getUpdateCount();
 						cstmt.close();
 						cstmt = null;
 					} else {
-						result = stmt.executeUpdate();
+						stmt.executeUpdate();
+						result = stmt.getUpdateCount();
 						stmt.close();
 						stmt = null;
 					}
@@ -745,7 +747,8 @@ public class XMLGenerator {
 						}
 					}
 				}
-				int result = stmt.executeUpdate();
+				stmt.executeUpdate();
+				int result = stmt.getUpdateCount();
 				totalUpdateCount += result;
 				stmt.close();
 				stmt = null;
@@ -1599,7 +1602,8 @@ public class XMLGenerator {
 						int result = 0;
 						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
 							if(isNew) {
-								result = stmtInsert.executeUpdate();
+								stmtInsert.executeUpdate();
+								result = stmtInsert.getUpdateCount();
 								totalUpdateCount += result;
 								this._expr = this._xpath.compile("column[@primary='true' and @insert='generate']");
 								NodeList coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
@@ -1619,14 +1623,17 @@ public class XMLGenerator {
 									rs = null;
 								}
 							} else if(isDelete) {
-								result = stmtDelete.executeUpdate();
+								stmtDelete.executeUpdate();
+								result = stmtDelete.getUpdateCount();
 								totalUpdateCount += result;
 							} else {
-								result = stmtUpdate.executeUpdate();
+								stmtUpdate.executeUpdate();
+								result = stmtUpdate.getUpdateCount();
 								totalUpdateCount += result;
 							}
 						} else {
-							result = stmt.executeUpdate();
+							stmt.executeUpdate();
+							result = stmt.getUpdateCount();
 							totalUpdateCount += result;
 							if(isNew) {
 								this._expr = this._xpath.compile("column[@primary='true' and @insert='generate']");
