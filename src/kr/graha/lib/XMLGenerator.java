@@ -1308,6 +1308,11 @@ public class XMLGenerator {
 								if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
 									this._expr = this._xpath.compile("layout/middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
 									NodeList cc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+									NodeList ddd = null;
+									if(cc == null || cc.getLength() <= 0) {
+										this._expr = this._xpath.compile("column");
+										ddd = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
+									}
 									index = 1;
 									boolean iscontinue = true;
 									while(iscontinue) {
@@ -1316,6 +1321,12 @@ public class XMLGenerator {
 											index++;
 											continue;
 										}
+/*
+이건 치명적인 버그가 있다.
+while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한다.
+들어온 값이 1개도 없으면 날라가야 한다.
+*/
+/*
 										for(int xx = 0; xx < cc.getLength(); xx++) {
 											Element e = (Element)cc.item(xx);
 											if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
@@ -1325,6 +1336,7 @@ public class XMLGenerator {
 												continue;
 											}
 											if(!this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
+												logger.info("param." + e.getAttribute("name") + "." + index + " is empty");
 												iscontinue = false;
 												isnext = false;
 											}
@@ -1332,10 +1344,34 @@ public class XMLGenerator {
 												isnext = true;
 											}
 										}
+*/
+										iscontinue = false;
+										if(cc != null && cc.getLength() > 0) {
+											for(int xx = 0; xx < cc.getLength(); xx++) {
+												Element e = (Element)cc.item(xx);
+												if(this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
+													iscontinue = true;
+												}
+												if(this._params.hasKey("param." + e.getAttribute("name") + "." + index)) {
+													isnext = true;
+												}
+											}
+											index++;
+										} else {
+											for(int xx = 0; xx < ddd.getLength(); xx++) {
+												Element e = (Element)ddd.item(xx);
+												if(this._params.containsKey(e.getAttribute("value") + "." + index)) {
+													iscontinue = true;
+												}
+												if(this._params.hasKey(e.getAttribute("value") + "." + index)) {
+													isnext = true;
+												}
+											}
+											index++;
+										}
 										if(iscontinue && isnext) {
 											this._params.put((String)c.getAttribute("insert") + "." + index, DBHelper.getNextSequenceValue(stmt));
 										}
-										index++;
 									}
 								}
 								stmt.close();
@@ -1371,14 +1407,48 @@ public class XMLGenerator {
 					
 					boolean iscontinue = true;
 					NodeList cc = null;
+					NodeList ddd = null;
 					if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
 						this._expr = this._xpath.compile("layout/middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
 						cc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+						if(cc == null || cc.getLength() <= 0) {
+							this._expr = this._xpath.compile("column");
+							ddd = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
+						}
 					}
+					
 					int idx = 1;
 					while(iscontinue) {
 						boolean isnext = false;
 						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+							iscontinue = false;
+							if(cc != null && cc.getLength() > 0) {
+								for(int xx = 0; xx < cc.getLength(); xx++) {
+									Element e = (Element)cc.item(xx);
+									if(this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
+										iscontinue = true;
+									}
+									if(this._params.hasKey("param." + e.getAttribute("name") + "." + idx)) {
+										isnext = true;
+									}
+								}
+							} else {
+								for(int xx = 0; xx < ddd.getLength(); xx++) {
+									Element e = (Element)ddd.item(xx);
+									if(this._params.containsKey(e.getAttribute("value") + "." + idx)) {
+										iscontinue = true;
+									}
+									if(this._params.hasKey(e.getAttribute("value") + "." + idx)) {
+										isnext = true;
+									}
+								}
+							}
+/*
+이건 치명적인 버그가 있다.
+while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한다.
+들어온 값이 1개도 없으면 날라가야 한다.
+*/
+/*
 							for(int xx = 0; xx < cc.getLength(); xx++) {
 								Element e = (Element)cc.item(xx);
 								if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
@@ -1388,6 +1458,7 @@ public class XMLGenerator {
 									continue;
 								}
 								if(!this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
+									logger.info("param." + e.getAttribute("name") + "." + idx + " is empty");
 									iscontinue = false;
 									isnext = false;
 								}
@@ -1401,6 +1472,7 @@ public class XMLGenerator {
 									}
 								}
 							}
+*/
 						} else {
 							isnext = true;
 						}
