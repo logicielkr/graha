@@ -57,10 +57,58 @@ public class DBUtilOracleImpl extends DBUtil {
 		return "sysdate";
 	}
 	public String getNextval(Connection con, String tableName, String columnName) {
-/*
-select SEQUENCE_NAME from user_sequences
-*/
-		return tableName + "$" + columnName + ".nextval";
+		String sequence = getSequence(con, tableName + "$" + columnName);
+		if(sequence == null) {
+			return "&quot;" + tableName + "$" + columnName + "&quot;.nextval";
+		} else {
+			return "&quot;" + sequence + "&quot;.nextval";
+		}
+	}
+	public String getSequence(Connection con, String sequenceName) {
+		String sequence = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "SELECT SEQUENCE_NAME FROM user_sequences where lower(SEQUENCE_NAME) = lower(?)";
+
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, sequenceName);
+
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				sequence = rs.getString(1);
+			}
+			rs.close();
+			rs = null;
+			pstmt.close();
+			pstmt = null;
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) {
+				logger.info(LogHelper.toString(e));
+			}
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+					rs = null;
+				} catch (SQLException e) {
+					if(logger.isLoggable(Level.SEVERE)) {
+						logger.severe(LogHelper.toString(e));
+					}
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+					pstmt = null;
+				} catch (SQLException e) {
+					if(logger.isLoggable(Level.SEVERE)) {
+						logger.severe(LogHelper.toString(e));
+					}
+				}
+			}
+		}
+		return sequence;
 	}
 	public void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
