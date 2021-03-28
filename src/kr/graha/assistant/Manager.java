@@ -1218,7 +1218,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				if(schemaName != null) {
 					t = schemaName + "." + tableName;
 				}
-				if(m.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+				if(m.getDatabaseProductName().equalsIgnoreCase("Oracle") || m.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
 					pstmt = con.prepareStatement("select * from " + t + " where rownum <= 30");
 				} else if(m.getDatabaseProductName().equalsIgnoreCase("Apache Derby")) {
 					pstmt = con.prepareStatement("select * from " + t + " { limit 30 }");

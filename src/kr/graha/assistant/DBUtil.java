@@ -55,7 +55,9 @@ public class DBUtil {
 	public static DBUtil getDBUtil(Connection con, String def, String mapping) throws SQLException, IOException {
 		DatabaseMetaData m = con.getMetaData();
 		DBUtil db = null;
-		if(m.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+		if(
+			m.getDatabaseProductName().equalsIgnoreCase("Oracle") || m.getDatabaseProductName().equalsIgnoreCase("Tibero")
+		) {
 			db = new DBUtilOracleImpl();
 		} else if(m.getDatabaseProductName().equalsIgnoreCase("Apache Derby")) {
 			db = new DBUtilDerbyImpl();

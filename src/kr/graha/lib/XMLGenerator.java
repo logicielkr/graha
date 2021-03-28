@@ -469,7 +469,7 @@ public class XMLGenerator {
 					sb.append(this._tag.tag("row", null, true));
 					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 						if(
-							this.dmd.getDatabaseProductName().equalsIgnoreCase("Oracle")
+							(this.dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || this.dmd.getDatabaseProductName().equalsIgnoreCase("Tibero"))
 							&& rsmd.getColumnName(x) != null && rsmd.getColumnName(x).equals("RNUM$") 
 						) {
 							continue;

@@ -318,7 +318,7 @@ public final class DBHelper {
 				}
 			}
 		}
-		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || dmd.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
 			return "select * from (select a$.*, rownum as rnum$ from (" + sql + ")  a$ where rownum <= ?) where rnum$ >= ?";
 		} else if(dmd.getDatabaseProductName().equalsIgnoreCase("Apache Derby")) {
 //			return "select * from (select a_.*, ROW_NUMBER() OVER() as rnum_ from (" + sql + ")  as a_) as a__ where rnum_ <= ? and rnum_ >= ?";
@@ -341,7 +341,7 @@ public final class DBHelper {
 				}
 			}
 		}
-		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || dmd.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
 			return ("select count(*) from (" + sql + ")");
 		} else {
 			return ("select count(*) from (" + sql + ") as _");
@@ -359,7 +359,7 @@ public final class DBHelper {
 				}
 			}
 		}
-		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || dmd.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
 			return ("select " + name + " from dual");
 		} else if(dmd.getDatabaseProductName().equalsIgnoreCase("Apache Derby")) {
 			return ("select " + name + " from sysibm.sysdummy1");

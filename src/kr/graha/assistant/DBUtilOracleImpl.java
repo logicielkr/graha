@@ -160,9 +160,9 @@ select * from user_views c where a.table_name = c.view_name
 		ResultSet rs = null;
 		String sql = "";
 		if(tableName == null) {
-			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where exists (select * from user_tables b where a.table_name = b.table_name) or exists(select * from user_views c where a.table_name = c.view_name)";
+			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where exists (select * from user_tables b where a.table_name = b.table_name) or exists (select * from user_views c where a.table_name = c.view_name)";
 		} else {
-			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where a.table_name = ? and (exists (select * from user_tables b where a.table_name = b.table_name) or exists(select * from user_views c where a.table_name = c.view_name))";
+			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where a.table_name = ? and (exists (select * from user_tables b where a.table_name = b.table_name) or exists (select * from user_views c where a.table_name = c.view_name))";
 		}
 		try {
 			pstmt = con.prepareStatement(sql);
