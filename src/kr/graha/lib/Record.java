@@ -795,16 +795,16 @@ public class Record extends HashMap {
 				if(this.get(key) instanceof String[]) {
 					for(int i = 0; i < ((String[])this.get(key)).length; i++) {
 						if(logger.isLoggable(level)) {
-							logger.log(level, key + "." + i + "=" + ((String[])this.get(key))[i]);
+							logger.log(level, key + "." + i + "(SA)=" + ((String[])this.get(key))[i]);
 						}
 					}
 				} else if(this.isArray(key)) {
 					for (Object v : (List)this.get(key)) {
-						logger.log(level, key + "=" + v);
+						logger.log(level, key + "(A)=" + v);
 					}
 				} else {
 					if(logger.isLoggable(level)) {
-						logger.log(level, key + "=" + this.get(key));
+						logger.log(level, key + "(NA)=" + this.get(key));
 					}
 				}
 			}
