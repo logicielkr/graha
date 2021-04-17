@@ -16,7 +16,16 @@ body, input, textarea, select, button, table, p, td, a {
 	font-family: Dotum,Helvetica,sans-serif;
 	font-size:medium;
 }
-
+form.graha_xml_config input {
+	float:right;
+	margin-bottom:10px;
+}
+form.graha_xml_config textarea {
+	display:none;
+}
+form#query input {
+	float:left;
+}
 h1, h2, h3, h4, h5 {
 	font-family: Dotum,Helvetica,sans-serif;
 	text-decoration:none;
@@ -98,7 +107,15 @@ function bodyload() {
 		document.getElementById("_history").innerHTML = txt;
 	}
 }
-
+function toggleGen(obj) {
+	if(document.getElementById('gen').style.display == "block") {
+		document.getElementById('gen').style.display='none';
+		obj.value = "Graha XML Config";
+	} else {
+		document.getElementById('gen').style.display='block';
+		obj.value = "Hide Graha XML Config";
+	}
+}
 //]]>
 </script>
 </head>
@@ -138,6 +155,12 @@ function bodyload() {
 	<textarea name="sql" style="width:100%;height:100px;" onkeypress="ctrlenter(event)" id="sql"><xsl:value-of select="/document/params/param/sql" /></textarea>
 	<input type="submit" value="Search" />
 </form>
+<form class="graha_xml_config">
+<xsl:if test="/document/rows[@id='gen']/row/gen">
+	<input type="button" value="Graha XML Config" onclick="toggleGen(this)" />
+	<textarea name="gen" id="gen" style="width:100%;height:100px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
+</xsl:if>
+</form>
  <xsl:if test="/document/errors/error">
 	<table style="width:100%;" id="_error">
 		<tr>
@@ -162,17 +185,20 @@ function bodyload() {
 		</tr>
 	</table>
 </xsl:if>
-<xsl:if test="/document/rows[@id='data']/row">
+<xsl:if test="/document/rows[@id='data']/row or /document/rows[@id='meta']/row">
 	<table style="width:100%;" id="_data">
+		<xsl:if test="/document/rows[@id='meta']/row">
 		<thead>
 			<tr style="background-color:#788BBD;">
-				<xsl:for-each select="/document/rows[@id='data']/row[position() = 1]/*">
+				<xsl:for-each select="/document/rows[@id='meta']/row/*">
 					<th style="padding:8px;">
-						<xsl:value-of select="@name" />
+						<xsl:value-of select="." />
 					</th>
 				</xsl:for-each>
 			</tr>
 		</thead>
+		</xsl:if>
+		<xsl:if test="/document/rows[@id='data']/row">
 		<tbody>
 			<xsl:for-each select="/document/rows[@id='data']/row">
 			<tr class="tr_{position() mod 2}">
@@ -184,6 +210,7 @@ function bodyload() {
 			</tr>
 			</xsl:for-each>
 		</tbody>
+		</xsl:if>
 	</table>
 </xsl:if>
 <ul>

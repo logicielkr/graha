@@ -1307,6 +1307,64 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
+	protected StringBuffer getGrahaConfig(String sql, ResultSetMetaData rsmd, int fetchCount) throws SQLException {
+		StringBuffer bw = new StringBuffer();
+		if(rsmd != null) {
+			if(fetchCount == 1) {
+				bw.append("	<query id=\"input query id!!!\" funcType=\"detail\" label=\"input label!!!\">\n");
+			} else {
+				bw.append("	<query id=\"input query id!!!\" funcType=\"listAll\" label=\"input label!!!\">\n");
+			}
+		} else {
+			bw.append("	<query id=\"input query id!!!\" funcType=\"query\" label=\"input label!!!\">\n");
+		}
+		bw.append("		<header>\n");
+		bw.append("		</header>\n");
+		bw.append("		<commands>\n");
+		bw.append("			<command name=\"default\">\n");
+		bw.append("				<sql>\n");
+		bw.append(sql);
+		bw.append("\n");
+		bw.append("				</sql>\n");
+		bw.append("				<!--params>\n");
+		bw.append("					<param default=\"null\" name=\"input column name!!!\" datatype=\"input data type!!!\" value=\"input value!!!\" />\n");
+		bw.append("				</params-->\n");
+		bw.append("			</command>\n");
+		bw.append("		</commands>\n");
+		if(rsmd != null) {
+			bw.append("		<layout>\n");
+			bw.append("			<top>\n");
+			bw.append("				<left />\n");
+			bw.append("				<center />\n");
+			bw.append("				<right />\n");
+			bw.append("			</top>\n");
+			bw.append("			<middle>\n");
+			bw.append("				<tab name=\"default\" label=\"input label!!!\">\n");
+			for(int x = 1; x <= rsmd.getColumnCount(); x++) {
+				if(fetchCount == 1) {
+					bw.append("					<row>\n");
+					bw.append("						<column label=\"" + rsmd.getColumnName(x) + "\" name=\"" + rsmd.getColumnName(x) + "\" />\n");
+					bw.append("					</row>\n");
+				} else {
+					bw.append("						<column label=\"" + rsmd.getColumnName(x) + "\" name=\"" + rsmd.getColumnName(x) + "\" />\n");
+				}
+			}
+			bw.append("				</tab>\n");
+			bw.append("			</middle>\n");
+			bw.append("			<bottom>\n");
+			bw.append("				<left />\n");
+			bw.append("				<center />\n");
+			bw.append("				<right />\n");
+			bw.append("			</bottom>\n");
+			bw.append("		</layout>\n");
+		} else {
+			bw.append("		<redirect path=\"list\">\n");
+			bw.append("			<param name=\"page\" type=\"param\" value=\"page\" />\n");
+			bw.append("		</redirect>\n");
+		}
+		bw.append("	</query>\n");
+		return bw;
+	}
 	protected void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
@@ -1315,6 +1373,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuffer sb = new StringBuffer();
+		StringBuffer bw = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			if(logger.isLoggable(Level.SEVERE)) {
@@ -1367,21 +1426,34 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				if(pstmt.execute()) {
 					rs = pstmt.getResultSet();
 					ResultSetMetaData rsmd = rs.getMetaData();
+					sb.append("<rows id=\"meta\">");
+					sb.append("<row>");
+					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
+						sb.append("<c" + x + "><![CDATA[");
+						sb.append(rsmd.getColumnName(x));
+						sb.append("]]></c" + x + ">\n");
+					}
+					sb.append("</row>");
+					sb.append("</rows>");
 					sb.append("<rows id=\"data\">");
 					isAppendRows = true;
+					int index = 0;
 					while(rs.next()) {
 						sb.append("<row>");
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
-							sb.append("<c" + x + " name=\"" + rsmd.getColumnName(x).replace("\"", "&quot;") + "\"><![CDATA[");
+							sb.append("<c" + x + "><![CDATA[");
 							sb.append(rs.getString(x));
 							sb.append("]]></c" + x + ">\n");
 						}
 						sb.append("</row>");
+						index++;
 					}
 					sb.append("</rows>");
+					bw = getGrahaConfig(sql, rsmd, index);
 					rs.close();
 					rs = null;
 				} else {
+					bw = getGrahaConfig(sql, null, pstmt.getUpdateCount());
 					sb.append("<rows id=\"count\"><row>");
 					sb.append("<count>" + pstmt.getUpdateCount() + "</count>");
 					sb.append("</row></rows>");
@@ -1389,7 +1461,11 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				pstmt.close();
 				pstmt = null;
 			}
-			
+			if(bw.length() > 0) {
+				sb.append("<rows id=\"gen\"><row>");
+				sb.append("<gen><![CDATA[" + bw.toString() + "]]></gen>");
+				sb.append("</row></rows>");
+			}
 			sb.append("</document>");
 			
 			con.close();
