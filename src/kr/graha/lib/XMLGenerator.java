@@ -722,7 +722,7 @@ public class XMLGenerator {
 				if(where != null) {
 					if(!((Element)where.getParentNode()).hasAttribute("method") || !this._params.hasKey("header.method") || (this._params.getString("header.method")).equals(((Element)where.getParentNode()).getAttribute("method"))) {
 						sql += " and ";
-						sql += where.getFirstChild().getNodeValue();
+						sql += DBHelper.getSql(where, this._params);
 					}
 				}
 				
@@ -742,8 +742,10 @@ public class XMLGenerator {
 						NodeList param = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 						for(int x = 0; x < param.getLength(); x++) {
 							Element pp = (Element)param.item(x);
-							this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, pp.getAttribute("default"), pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
-							index++;
+							if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
+								this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, pp.getAttribute("default"), pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+								index++;
+							}
 						}
 					}
 				}
@@ -898,7 +900,7 @@ public class XMLGenerator {
 					if(where != null) {
 						if(!((Element)where.getParentNode()).hasAttribute("method") || !this._params.hasKey("header.method") || (this._params.getString("header.method")).equals(((Element)where.getParentNode()).getAttribute("method"))) {
 							sql += " and ";
-							sql += where.getFirstChild().getNodeValue();
+							sql += DBHelper.getSql(where, this._params);
 						}
 					}
 					
@@ -938,8 +940,10 @@ public class XMLGenerator {
 							NodeList param = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 							for(int x = 0; x < param.getLength(); x++) {
 								Element pp = (Element)param.item(x);
-								this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, pp.getAttribute("default"), pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
-								index++;
+								if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
+									this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, pp.getAttribute("default"), pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+									index++;
+								}
 							}
 						}
 					}
@@ -1289,10 +1293,10 @@ public class XMLGenerator {
 					if(where != null) {
 						if(!((Element)where.getParentNode()).hasAttribute("method") || !this._params.hasKey("header.method") || (this._params.getString("header.method")).equals(((Element)where.getParentNode()).getAttribute("method"))) {
 							sqlUpdate += " and ";
-							sqlUpdate += where.getFirstChild().getNodeValue();
+							sqlUpdate += DBHelper.getSql(where, this._params);
 							
 							sqlDelete += " and ";
-							sqlDelete += where.getFirstChild().getNodeValue();
+							sqlDelete += DBHelper.getSql(where, this._params);
 						}
 					}
 					
@@ -1659,14 +1663,23 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 										}
 										if(this._params.compare(p.getAttribute("multi"), "true")) {
 											if(isDelete) {
-												this.bind(stmtDelete, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+												if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
+													this.bind(stmtDelete, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+													index++;
+												}
 											} else {
-												this.bind(stmtUpdate, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+												if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
+													this.bind(stmtUpdate, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+													index++;
+												}
 											}
 										} else {
-											this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+											if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
+												this.bind(stmt, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
+												index++;
+											}
 										}
-										index++;
+										
 									}
 								}
 							}
