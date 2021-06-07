@@ -217,7 +217,7 @@ public final class DBHelper {
 	}
 	public static int getNextSequenceValue(Connection con, String value, Record info, DatabaseMetaData dmd) throws SQLException {
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+//		ResultSet rs = null;
 		String name = null;
 		int result = 0;
 		if(value.startsWith("sequence.")) {
@@ -236,6 +236,7 @@ public final class DBHelper {
 			}
 			throw e;
 		} finally {
+/*
 			if(rs != null) {
 				try {
 					rs.close();
@@ -246,6 +247,7 @@ public final class DBHelper {
 					}
 				}
 			}
+*/
 			if(pstmt != null) {
 				try {
 					pstmt.close();
