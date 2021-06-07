@@ -90,7 +90,7 @@ select count(*) from memo where insert_id = ?
 
 #### 2.1.2. 화면출력
 
-![목록형의 예제화면](http://graha.kr/static-contents/images/memo.list.png)
+![목록형의 예제화면](https://graha.kr/static-contents/images/memo.list.png)
 
 ### 2.2. 입력/수정형
 
@@ -165,7 +165,7 @@ insert_id = ?
 
 #### 2.2.2. 화면출력
 
-![입력/수정형의 예제화면](http://graha.kr/static-contents/images/memo.insert.png)
+![입력/수정형의 예제화면](https://graha.kr/static-contents/images/memo.insert.png)
 
 ### 2.3. 다른 유형들
 
