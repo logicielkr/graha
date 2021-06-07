@@ -481,11 +481,19 @@ public class XSLGenerator {
 	}
 	public String getPath(String href) {
 		if(href.startsWith("/")) {
-			return this._params.getString("system.prefix") + href + this._params.getString("system.suffix");
+			if(href.endsWith("!")) {
+				return this._params.getString("system.prefix") + href.substring(0, href.length() - 1);
+			} else {
+				return this._params.getString("system.prefix") + href + this._params.getString("system.suffix");
+			}
 		} else if(href == null || href.trim().equals("")) {
 			return "";
 		} else {
-			return this._params.getString("system.prefix") + this._params.getString("system.config.file.name") + href + this._params.getString("system.suffix");
+			if(href.endsWith("!")) {
+				return this._params.getString("system.prefix") + this._params.getString("system.config.file.name") + href.substring(0, href.length() - 1);
+			} else {
+				return this._params.getString("system.prefix") + this._params.getString("system.config.file.name") + href + this._params.getString("system.suffix");
+			}
 		}
 	}
 	public Buffer insert() throws XPathExpressionException {
