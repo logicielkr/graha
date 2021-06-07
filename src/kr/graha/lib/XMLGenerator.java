@@ -446,8 +446,8 @@ public class XMLGenerator {
 					}
 				}
 				if(this._query.getAttribute("funcType").equals("list")) {
-					setInt(stmt, index + 0, pageSize);
-					setInt(stmt, index + 1, (page - 1) * pageSize);
+					this.setInt(stmt, index + 0, pageSize);
+					this.setInt(stmt, index + 1, (page - 1) * pageSize);
 				}
 				rs = stmt.executeQuery();
 				
@@ -595,12 +595,14 @@ public class XMLGenerator {
 								try {
 									stream = Files.newDirectoryStream(Paths.get(filePath));
 									for(Path path : stream) {
-										sb.append(this._tag.tag("file", null, true));
-										sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
-										sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
-										sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
-										sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
-										sb.append(this._tag.tag("file", null, false));
+										if(path.toFile().isFile()) {
+											sb.append(this._tag.tag("file", null, true));
+											sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
+											sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
+											sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
+											sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
+											sb.append(this._tag.tag("file", null, false));
+										}
 									}
 									stream.close();
 									stream = null;
@@ -1079,13 +1081,15 @@ public class XMLGenerator {
 								try {
 									stream = Files.newDirectoryStream(Paths.get(filePath));
 									for(Path path : stream) {
-										sb.append(this._tag.tag("file", null, true));
-										sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
-										sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
-										sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
-										sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
-										sb.append(this._tag.tag("file", null, false));
-										index++;
+										if(path.toFile().isFile()) {
+											sb.append(this._tag.tag("file", null, true));
+											sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
+											sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
+											sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
+											sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
+											sb.append(this._tag.tag("file", null, false));
+											index++;
+										}
 									}
 									stream.close();
 									stream = null;
@@ -1302,91 +1306,9 @@ public class XMLGenerator {
 					
 					boolean isNew = false;
 					if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
-
-						this._expr = this._xpath.compile("column[@primary='true']");
-						NodeList coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-						for(int x = 0; x < coln.getLength(); x++) {
-							Element c = (Element)coln.item(x);
-							if(c.hasAttribute("insert") && ((String)c.getAttribute("insert")).startsWith("sequence.")) {
-								stmt = this.prepareStatement(DBHelper.getSeqSql(((String)c.getAttribute("insert")).substring(9), this._info, this.dmd));
-								if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
-									this._expr = this._xpath.compile("layout/middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
-									NodeList cc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-									NodeList ddd = null;
-									if(cc == null || cc.getLength() <= 0) {
-										this._expr = this._xpath.compile("column");
-										ddd = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-									}
-									index = 1;
-									boolean iscontinue = true;
-									while(iscontinue) {
-										boolean isnext = false;
-										if(this._params.hasKey(c.getAttribute("value") + "." + index)) {
-											index++;
-											continue;
-										}
-/*
-이건 치명적인 버그가 있다.
-while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한다.
-들어온 값이 1개도 없으면 날라가야 한다.
-*/
-/*
-										for(int xx = 0; xx < cc.getLength(); xx++) {
-											Element e = (Element)cc.item(xx);
-											if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
-												continue;
-											}
-											if(e.hasAttribute("disabled") && !e.getAttribute("disabled").equals("")) {
-												continue;
-											}
-											if(!this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
-												logger.info("param." + e.getAttribute("name") + "." + index + " is empty");
-												iscontinue = false;
-												isnext = false;
-											}
-											if(this._params.hasKey("param." + e.getAttribute("name") + "." + index)) {
-												isnext = true;
-											}
-										}
-*/
-										iscontinue = false;
-										if(cc != null && cc.getLength() > 0) {
-											for(int xx = 0; xx < cc.getLength(); xx++) {
-												Element e = (Element)cc.item(xx);
-												if(this._params.containsKey("param." + e.getAttribute("name") + "." + index)) {
-													iscontinue = true;
-												}
-												if(this._params.hasKey("param." + e.getAttribute("name") + "." + index)) {
-													isnext = true;
-												}
-											}
-											index++;
-										} else {
-											for(int xx = 0; xx < ddd.getLength(); xx++) {
-												Element e = (Element)ddd.item(xx);
-												if(this._params.containsKey(e.getAttribute("value") + "." + index)) {
-													iscontinue = true;
-												}
-												if(this._params.hasKey(e.getAttribute("value") + "." + index)) {
-													isnext = true;
-												}
-											}
-											index++;
-										}
-										if(iscontinue && isnext) {
-											this._params.put((String)c.getAttribute("insert") + "." + index, DBHelper.getNextSequenceValue(stmt));
-										}
-									}
-								}
-								stmt.close();
-								stmt = null;
-							}
-						}
-						
 						stmtInsert = this.prepareStatement(sqlInsert);
 						stmtUpdate = this.prepareStatement(sqlUpdate);
 						stmtDelete = this.prepareStatement(sqlDelete);
-
 					} else {
 						this._expr = this._xpath.compile("column[@primary='true']");
 						NodeList coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
@@ -1397,12 +1319,6 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 							}
 						}
 						if(isNew) {
-							for(int x = 0; x < coln.getLength(); x++) {
-								Element c = (Element)coln.item(x);
-								if(c.hasAttribute("insert") && ((String)c.getAttribute("insert")).startsWith("sequence.")) {
-									this._params.put((String)c.getAttribute("insert"), DBHelper.getNextSequenceValue(this._con, (String)c.getAttribute("insert"), this._info, this.dmd));
-								}
-							}
 							stmt = this.prepareStatement(sqlInsert);
 						} else {
 							stmt = this.prepareStatement(sqlUpdate);
@@ -1447,36 +1363,6 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 									}
 								}
 							}
-/*
-이건 치명적인 버그가 있다.
-while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한다.
-들어온 값이 1개도 없으면 날라가야 한다.
-*/
-/*
-							for(int xx = 0; xx < cc.getLength(); xx++) {
-								Element e = (Element)cc.item(xx);
-								if(e.hasAttribute("type") && e.getAttribute("type").equals("checkbox")) {
-									continue;
-								}
-								if(e.hasAttribute("disabled") && !e.getAttribute("disabled").equals("")) {
-									continue;
-								}
-								if(!this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
-									logger.info("param." + e.getAttribute("name") + "." + idx + " is empty");
-									iscontinue = false;
-									isnext = false;
-								}
-								if(this._params.hasKey("param." + e.getAttribute("name") + "." + idx)) {
-									isnext = true;
-								}
-								if(e.hasAttribute("primary") && e.getAttribute("primary").equals("true")) {
-									if(this._params.hasKey("param." + e.getAttribute("name") + "." + idx)) {
-										isnext = true;
-										break;
-									}
-								}
-							}
-*/
 						} else {
 							isnext = true;
 						}
@@ -1563,12 +1449,18 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 								}
 								if(c.hasAttribute("insert") && ((String)c.getAttribute("insert")).startsWith("sequence.")) {
 									if(this._params.compare(p.getAttribute("multi"), "true")) {
+										this._params.put((String)c.getAttribute("insert") + "." + idx, DBHelper.getNextSequenceValue(this._con, (String)c.getAttribute("insert"), this._info, this.dmd));
 										if(isNew) {
 											this.bind(stmtInsert, "int", index, new String[] {c.getAttribute("insert")}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 										} else {
+/*
+!!!이상한 코드!!!
+Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 있는 case 가 있는지 의구심이 있음.
+*/
 											this.bind(stmtUpdate, "int", index, new String[] {c.getAttribute("insert")}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 										}
 									} else {
+										this._params.put((String)c.getAttribute("insert"), DBHelper.getNextSequenceValue(this._con, (String)c.getAttribute("insert"), this._info, this.dmd));
 										this.bind(stmt, "int", index, new String[] {c.getAttribute("insert")}, -1, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 									}
 									index++;
@@ -1587,6 +1479,11 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 												if(isNew) {
 													this.bind(stmtInsert, "int", index, new String[] {insert}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 												} else {
+/*
+!!!이상한 코드!!!
+위의 !this._params.hasKey(c.getAttribute("value")) 조건에 의해 insert 에서만 실행되는 것으로 생각됨.
+프로그램적으로 Foreign Key 값이 바뀔 일도 없을 것으로 생각됨.
+*/
 													this.bind(stmtUpdate, "int", index, new String[] {insert}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 												}
 											} else {
@@ -1692,8 +1589,7 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 								totalUpdateCount += result;
 								this._expr = this._xpath.compile("column[@primary='true' and @insert='generate']");
 								NodeList coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-								
-								
+
 								if(coln.getLength() > 0) {
 									String generated = "";
 									for(int x = 0; x < coln.getLength(); x++) {
@@ -2123,32 +2019,6 @@ while(true) 에서 false로 변경되는 것을 감지하는 정도이어야 한
 				String key = (String)it.next();
 				if(key.startsWith("param.")) {
 					BufferHelper.addRecord(key, this._params, sb, this._tag);
-					/*
-					if(this._params.isArray(key)) {
-						java.util.List<String> items = this._params.getArray(key);
-						for(String item : items){
-							sb.append(this._tag.tag("param", key.substring(6), null, true));
-							sb.append("<![CDATA[");
-							if(item instanceof String) {
-								sb.append(item.replace("]]>", "]]]]><![CDATA[>"));
-							} else {
-								sb.append(item);
-							}
-							sb.append("]]>");
-							sb.appendL(this._tag.tag("param", key.substring(6), null, false));
-						}
-					} else {
-						sb.append(this._tag.tag("param", key.substring(6), null, true));
-						sb.append("<![CDATA[");
-						if(this._params.get(key) instanceof String) {
-							sb.append(((String)this._params.get(key)).replace("]]>", "]]]]><![CDATA[>"));
-						} else {
-							sb.append(this._params.get(key));
-						}
-						sb.append("]]>");
-						sb.appendL(this._tag.tag("param", key.substring(6), null, false));
-					}
-					*/
 				} else if(key.startsWith("result.")) {
 					isResult = true;
 				}
