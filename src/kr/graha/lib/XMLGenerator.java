@@ -1355,6 +1355,15 @@ public class XMLGenerator {
 							} else {
 								for(int xx = 0; xx < ddd.getLength(); xx++) {
 									Element e = (Element)ddd.item(xx);
+									if(e.hasAttribute("primary") && e.getAttribute("primary").equals("true")) {
+										continue;
+									}
+									if(!e.hasAttribute("value")) {
+										continue;
+									}
+									if(e.hasAttribute("value") && !e.getAttribute("value").startsWith("param.")) {
+										continue;
+									}
 									if(this._params.containsKey(e.getAttribute("value") + "." + idx)) {
 										iscontinue = true;
 									}
@@ -1395,11 +1404,19 @@ public class XMLGenerator {
 										}
 									}
 								} else {
+									/*
 									this._expr = this._xpath.compile("column");
 									coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-									for(int x = 0; x < coln.getLength(); x++) {
-										Element c = (Element)coln.item(x);
+									*/
+									for(int x = 0; x < ddd.getLength(); x++) {
+										Element c = (Element)ddd.item(x);
 										if(c.hasAttribute("primary") && c.getAttribute("primary").equals("true")) {
+											continue;
+										}
+										if(!c.hasAttribute("value")) {
+											continue;
+										}
+										if(c.hasAttribute("value") && !c.getAttribute("value").startsWith("param.")) {
 											continue;
 										}
 										if(this._params.hasKey(c.getAttribute("value") + "." + idx)) {
