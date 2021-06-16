@@ -8,6 +8,21 @@ import java.io.IOException;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 
+/**
+ * Graha(그라하) 소스코드를 Apache Tomcat 10 에 맞춰서 변경한다.
+ * Apache Tomcat 10 이후의 버전에서는 변경사항은 다음과 같다.
+ * jakarta.servlet으로 변경되었다.
+ * 오래된 Apache Common FileUpload 라이브러리가 동작하지 않는 대신, Apache Tomcat 10 에 내장된 것을 사용한다.
+ * 주의사항 : import 구문만을 변경한다.
+ * import javax.servlet 을 import jakarta.servlet 으로 변경한다.
+ * import org.apache.commons.fileupload 를 import org.apache.tomcat.util.http.fileupload 로 변경한다.
+ * Graha(그라하) 소스코드가 아닌 경우 오동작 할 가능성이 매우 높다.
+
+ * @author HeonJik, KIM
+ * @version 0.5
+ * @since 0.5.0.2
+ */
+
 public class Converter {
 	public static void main(String[] args) throws Exception {
 		Converter c = new Converter();
