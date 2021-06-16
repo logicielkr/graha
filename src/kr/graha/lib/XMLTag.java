@@ -157,7 +157,6 @@ public class XMLTag {
 				if(isFull) {
 					if(name != null) {
 						return "/document/rows[@id = '" + name + "']/row/" + tagName;
-						
 					} else {
 						return "/document/rows/row/" + tagName;
 					}
