@@ -345,7 +345,10 @@ public class XSLGenerator {
 			
 			this._expr = this._xpath.compile("commands/command[@name='" + tab.getAttribute("name") + "']");
 			Element table = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
-			
+			if(table == null && this._query.hasAttribute("extends")) {
+				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/commands/command[@name='" + tab.getAttribute("name") + "']");
+				table = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
+			}
 			this._expr = this._xpath.compile("row");
 			NodeList rows = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
 			if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() == 1) {
