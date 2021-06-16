@@ -49,6 +49,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.security.NoSuchProviderException;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -180,7 +182,7 @@ public class XMLGenerator {
 		}
 		return this._con.prepareCall(sql);
 	}
-	public void processor(boolean before) throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException {
+	public void processor(boolean before) throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
 		if(before) {
 			this._expr = this._xpath.compile("processors/processor[@before = 'true']");
 		} else {
@@ -202,7 +204,10 @@ public class XMLGenerator {
 			}
 			
 			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
+				/*
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).newInstance();
+				*/
+				Processor processor = (Processor) Class.forName(command.getAttribute("class")).getConstructor().newInstance();
 				processor.execute(request, response, this._params, this._con);
 			} else if(command.hasAttribute("type") && command.getAttribute("type") != null && (command.getAttribute("type").equals("query") || command.getAttribute("type").equals("plsql"))) {
 				PreparedStatement stmt = null;
@@ -271,7 +276,7 @@ public class XMLGenerator {
 			}
 		}
 	}
-	public Buffer query() throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException {
+	public Buffer query() throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		CallableStatement cstmt = null;
@@ -282,7 +287,10 @@ public class XMLGenerator {
 		for(int q = 0; q < commands.getLength(); q++) {
 			Element command = (Element)commands.item(q);
 			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
+				/*
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).newInstance();
+				*/
+				Processor processor = (Processor) Class.forName(command.getAttribute("class")).getConstructor().newInstance();
 				processor.execute(request, response, this._params, this._con);
 			} else {
 				try {
@@ -477,7 +485,13 @@ public class XMLGenerator {
 						String value = rs.getString(x);
 						if(value != null) {
 							if(this._query.getAttribute("funcType").equals("detail") || this._query.getAttribute("funcType").equals("user")) {
-								this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
+								if(command.hasAttribute("name") && !command.getAttribute("name").equals("")) {
+									if(command.hasAttribute("multi") && command.getAttribute("multi").equals("true")) {
+										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
+									} else {
+										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
+									}
+								}
 							}
 							sb.append("<");
 							sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
@@ -970,7 +984,13 @@ public class XMLGenerator {
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 							String value = rs.getString(x);
 							if(value != null) {
-								this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
+								if(p.hasAttribute("name") && !p.getAttribute("name").equals("")) {
+									if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
+									} else {
+										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
+									}
+								}
 								sb.append("<");
 								sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
 								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
@@ -1358,6 +1378,9 @@ public class XMLGenerator {
 									if(e.hasAttribute("primary") && e.getAttribute("primary").equals("true")) {
 										continue;
 									}
+									if(e.hasAttribute("foreign") && e.getAttribute("foreign").equals("true")) {
+										continue;
+									}
 									if(!e.hasAttribute("value")) {
 										continue;
 									}
@@ -1411,6 +1434,9 @@ public class XMLGenerator {
 									for(int x = 0; x < ddd.getLength(); x++) {
 										Element c = (Element)ddd.item(x);
 										if(c.hasAttribute("primary") && c.getAttribute("primary").equals("true")) {
+											continue;
+										}
+										if(c.hasAttribute("foreign") && c.getAttribute("foreign").equals("true")) {
 											continue;
 										}
 										if(!c.hasAttribute("value")) {
@@ -2238,8 +2264,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		java.util.Map<String, Encryptor> encryptor = new java.util.Hashtable();
 		if(node.hasAttribute("encrypt") && node.getAttribute("encrypt") != null && !node.getAttribute("encrypt").equals("")) {
 			try {
+				/*
 				encryptor.put("true", (Encryptor) Class.forName(node.getAttribute("encrypt")).newInstance());
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				*/
+				encryptor.put("true", (Encryptor) Class.forName(node.getAttribute("encrypt")).getConstructor().newInstance());
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
 				if(logger.isLoggable(Level.SEVERE)) {
 					logger.severe(LogHelper.toString(e));
@@ -2251,8 +2280,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		for(int a = 0; a < encryptList.getLength(); a++) {
 			Element encrypt = (Element)encryptList.item(a);
 			try {
+				/*
 				encryptor.put(encrypt.getAttribute("key"), (Encryptor) Class.forName(encrypt.getAttribute("name")).newInstance());
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				*/
+				encryptor.put(encrypt.getAttribute("key"), (Encryptor) Class.forName(encrypt.getAttribute("name")).getConstructor().newInstance());
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
 				if(logger.isLoggable(Level.SEVERE)) {
 					logger.severe(LogHelper.toString(e));
