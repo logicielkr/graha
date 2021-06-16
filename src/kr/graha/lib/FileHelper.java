@@ -84,8 +84,8 @@ public final class FileHelper {
 				if(node.hasAttribute("maxMemorySize")) {
 					info.put("maxMemorySize", node.getAttribute("maxMemorySize"));
 				}
-				if(node.hasAttribute("maxRequestSize")) {
-					info.put("tempDirectory", node.getAttribute("maxRequestSize"));
+				if(node.hasAttribute("tempDirectory")) {
+					info.put("tempDirectory", node.getAttribute("tempDirectory"));
 				}
 				if(node.hasAttribute("maxRequestSize")) {
 					info.put("maxRequestSize", node.getAttribute("maxRequestSize"));
