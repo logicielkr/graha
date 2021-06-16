@@ -1099,6 +1099,11 @@ public class XSLGenerator {
 			NodeList links = (NodeList)this._expr.evaluate(item, XPathConstants.NODESET);
 			for(int i = 0; i < links.getLength(); i++) {
 				Element link = (Element)links.item(i);
+				if(link.hasAttribute("cond") && link.getAttribute("cond") != null) {
+					if(!(AuthParser.auth(link.getAttribute("cond"), this._params))) {
+						continue;
+					}
+				}
 				if(!link.hasAttribute("full") || !link.getAttribute("full").equals("true")) {
 					String name = "";
 					if(link.hasAttribute("name") && !link.getAttribute("name").equals("")) {
@@ -1187,7 +1192,16 @@ public class XSLGenerator {
 			NodeList searches = (NodeList)this._expr.evaluate(item, XPathConstants.NODESET);
 			for(int i = 0; i < searches.getLength(); i++) {
 				Element search = (Element)searches.item(i);
-				sb.append("<form action=\"" + this.getPath(search.getAttribute("path")) + "\">");
+				if(search.hasAttribute("cond") && search.getAttribute("cond") != null) {
+					if(!(AuthParser.auth(search.getAttribute("cond"), this._params))) {
+						continue;
+					}
+				}
+				String name = "";
+				if(search.hasAttribute("name") && !search.getAttribute("name").equals("")) {
+					name = " name=\"" + search.getAttribute("name") + "\" class=\"" + search.getAttribute("name") + "\"";
+				}
+				sb.append("<form action=\"" + this.getPath(search.getAttribute("path")) + "\"" + name + ">");
 				this._expr = this._xpath.compile("params/param");
 				NodeList inputs = (NodeList)this._expr.evaluate(search, XPathConstants.NODESET);
 				for(int x = 0; x < inputs.getLength(); x++) {
@@ -1912,6 +1926,10 @@ public class XSLGenerator {
 		if(layout.hasAttribute("template") && layout.getAttribute("template").equals("native")) {
 			this._expr = this._xpath.compile("append");
 			NodeList append = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+			if(append == null && layout == null && this._query.hasAttribute("extends")) {
+				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/append");
+				append = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+			}
 			if(append.getLength() > 0) {
 				for(int i = 0; i < append.getLength(); i++) {
 					sb.append(((Element)append.item(i)).getTextContent());
