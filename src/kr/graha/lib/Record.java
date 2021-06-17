@@ -134,7 +134,10 @@ public class Record extends HashMap {
 			return null;
 		}
 		try {
+			/*
 			return new Integer(Integer.parseInt(value));
+			*/
+			return Integer.valueOf(value);
 		} catch (NumberFormatException e) {
 			return null;
 		}
@@ -196,7 +199,10 @@ public class Record extends HashMap {
 			value = value.replace(",", "");
 			if(value != null && value.equals("")) {return null;}
 			try {
+				/*
 				return new Integer(Integer.parseInt(value));
+				*/
+				return Integer.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
 					logger.warning(LogHelper.toString(e));
@@ -244,7 +250,10 @@ public class Record extends HashMap {
 			value = value.replace(",", "");
 			if(value != null && value.equals("")) {return null;}
 			try {
+				/*
 				return new Float(Float.parseFloat(value));
+				*/
+				return Float.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
 					logger.warning(LogHelper.toString(e));
@@ -292,7 +301,10 @@ public class Record extends HashMap {
 			value = value.replace(",", "");
 			if(value != null && value.equals("")) {return null;}
 			try {
+				/*
 				return new Double(Double.parseDouble(value));
+				*/
+				return Double.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
 					logger.warning(LogHelper.toString(e));
@@ -340,7 +352,10 @@ public class Record extends HashMap {
 			value = value.replace(",", "");
 			if(value != null && value.equals("")) {return null;}
 			try {
+				/*
 				return new Long(Long.parseLong(value));
+				*/
+				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
 					logger.warning(LogHelper.toString(e));
