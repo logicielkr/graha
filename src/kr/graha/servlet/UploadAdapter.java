@@ -33,7 +33,9 @@ import kr.graha.lib.XMLGenerator;
 import kr.graha.lib.LogHelper;
 import kr.graha.lib.FileHelper;
 import org.apache.commons.fileupload.FileItem;
+/*
 import org.apache.commons.io.FilenameUtils;
+*/
 import org.w3c.dom.Element;
 
 
@@ -112,13 +114,14 @@ public class UploadAdapter {
 				}
 				int index = 0;
 				while(true) {
+					String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
 					if(index == 0) {
-						f = new File(path + java.io.File.separator + FilenameUtils.getName(fileItem.getName()));
+						f = new File(path + java.io.File.separator + fileName);
 					} else {
-						if(FilenameUtils.getExtension(FilenameUtils.getName(fileItem.getName())).equals("")) {
-							f = new File(path + java.io.File.separator + FilenameUtils.removeExtension(FilenameUtils.getName(fileItem.getName())) + "-" + index);
+						if(fileName.lastIndexOf(".") > 0) {
+							f = new File(path + java.io.File.separator + fileName.substring(0, fileName.lastIndexOf("."))  + "-" + index + "." + fileName.substring(fileName.lastIndexOf(".") + 1));
 						} else {
-							f = new File(path + java.io.File.separator + FilenameUtils.removeExtension(FilenameUtils.getName(fileItem.getName())) + "-" + index + "." + FilenameUtils.getExtension(FilenameUtils.getName(fileItem.getName())));
+							f = new File(path + java.io.File.separator + fileName + "-" + index);
 						}
 					}
 					if(!f.exists()) {
