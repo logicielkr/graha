@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -43,6 +44,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.OutputKeys;
+
 import kr.graha.lib.AuthParser;
 import kr.graha.lib.Buffer;
 import kr.graha.lib.LogHelper;
@@ -150,10 +152,13 @@ public class GeneratorServlet extends HttpServlet {
 		try {
 			ServletConfig c = this.getServletConfig();
 			if(c.getInitParameter("UserServletAdapter") != null) {
+				/*
 				ServletAdapter adapter = (ServletAdapter)Class.forName(c.getInitParameter("UserServletAdapter")).newInstance();
+				*/
+				ServletAdapter adapter = (ServletAdapter)Class.forName(c.getInitParameter("UserServletAdapter")).getConstructor().newInstance();
 				adapter.execute(request, params);
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
 				logger.severe(LogHelper.toString(e));
 			}
