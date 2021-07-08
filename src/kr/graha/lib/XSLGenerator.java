@@ -43,6 +43,8 @@ import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import kr.graha.helper.LOG;
+
 
 /**
  * Graha(그라하) XSL 생성기
@@ -88,7 +90,7 @@ public class XSLGenerator {
 		
 		this._tag = new XMLTag(this._query.getAttribute("output"), this._query.getAttribute("uc"), request);
 		this._html = new HTMLTag(this._query.getAttribute("htmltype"));
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	public Buffer execute() throws Exception {
 		Buffer sb = new Buffer();
@@ -135,7 +137,7 @@ public class XSLGenerator {
 
 		return sb;
 	}
-	public Buffer list() throws XPathExpressionException {
+	private Buffer list() throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		this._expr = this._xpath.compile("layout");
 		Element layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
@@ -202,7 +204,7 @@ public class XSLGenerator {
 		sb.append(this.nav(layout, "bottom"));
 		return sb;
 	}
-	public Buffer column(
+	private Buffer column(
 		Element column,
 		boolean isFull,
 		String tableName
@@ -250,7 +252,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer code(
+	private Buffer code(
 		Element column, 
 		boolean isFull, 
 		String tableName
@@ -295,7 +297,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer detail() throws XPathExpressionException {
+	private Buffer detail() throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		this._expr = this._xpath.compile("layout");
 		Element layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
@@ -482,7 +484,7 @@ public class XSLGenerator {
 		return sb;
 		
 	}
-	public String getPath(String href) {
+	private String getPath(String href) {
 		if(href.startsWith("/")) {
 			if(href.endsWith("!")) {
 				return this._params.getString("system.prefix") + href.substring(0, href.length() - 1);
@@ -499,7 +501,7 @@ public class XSLGenerator {
 			}
 		}
 	}
-	public Buffer insert() throws XPathExpressionException {
+	private Buffer insert() throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		this._expr = this._xpath.compile("layout");
 		Element layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
@@ -772,7 +774,7 @@ public class XSLGenerator {
 		return sb;
 
 	}
-	public Buffer td(Element col, String tagName) throws XPathExpressionException {
+	private Buffer td(Element col, String tagName) throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		
 		if(tagName != null && tagName.equals("td")) {
@@ -802,7 +804,7 @@ public class XSLGenerator {
 		sb.append(">");
 		return sb;
 	}
-	public Buffer input(
+	private Buffer input(
 		Element col, 
 		boolean isFull, 
 		String tableName
@@ -1034,7 +1036,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer nav(Element layout, String position) throws XPathExpressionException {
+	private Buffer nav(Element layout, String position) throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		sb.append("<div class=\"nav " + position + "\">");
 		this._expr = this._xpath.compile(position + "/left");
@@ -1067,7 +1069,7 @@ public class XSLGenerator {
 		sb.append("</div>");
 		return sb;
 	}
-	public Buffer inner(Element item, Element layout) throws XPathExpressionException {
+	private Buffer inner(Element item, Element layout) throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		if(item.getChildNodes().getLength() == 1 && (item.getTextContent()).equals("page")) {
 			sb.append("<ul class=\"pages\">");
@@ -1275,7 +1277,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer post() throws XPathExpressionException {
+	private Buffer post() throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		Element redirect = null;
 		this._expr = this._xpath.compile("redirect");
@@ -1423,7 +1425,7 @@ public class XSLGenerator {
 		return sb;
 		
 	}
-	public Buffer error() throws XPathExpressionException {
+	private Buffer error() throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -1466,7 +1468,7 @@ public class XSLGenerator {
 		return sb;
 		
 	}
-	public Buffer getTitle(String text) {
+	private Buffer getTitle(String text) {
 		String title = new String(text);
 		Buffer sb = new Buffer();
 		while(true) {
@@ -1488,7 +1490,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer getTitle() {
+	private Buffer getTitle() {
 		Buffer sb = new Buffer();
 		
 		try {
@@ -1508,7 +1510,7 @@ public class XSLGenerator {
 				}
 			}
 		} catch (XPathExpressionException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 		if(sb.length() == 0 && this._query.hasAttribute("label") || this._query.hasAttribute("xLabel")) {
 			if(this._tag.isRDF && this._query.hasAttribute("xLabel")) {
@@ -1519,7 +1521,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer before() {
+	private Buffer before() {
 		Buffer sb = new Buffer();
 		Buffer title = this.getTitle();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -1675,7 +1677,7 @@ public class XSLGenerator {
 			}
 			
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 		
 		try {
@@ -1837,7 +1839,7 @@ public class XSLGenerator {
 			}
 			
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 		if(title.length() > 0) {
 			sb.append("<h2 class=\"title\">");
@@ -1846,7 +1848,7 @@ public class XSLGenerator {
 		}
 		return sb;
 	}
-	public Buffer after() {
+	private Buffer after() {
 		Buffer sb = new Buffer();
 		try {
 			this._expr = this._xpath.compile("header");
@@ -1902,7 +1904,7 @@ public class XSLGenerator {
 				}
 			}
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 /*
 		sb.append("Version:");
@@ -1940,7 +1942,7 @@ public class XSLGenerator {
 			}
 		}
 		} catch (XPathExpressionException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 
 		sb.appendL("</xsl:stylesheet>");

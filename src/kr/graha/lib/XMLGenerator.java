@@ -62,6 +62,8 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.DirectoryStream;
 
+import kr.graha.helper.LOG;
+
 /**
  * Graha(그라하) XML 생성기
 
@@ -124,7 +126,7 @@ public class XMLGenerator {
 		);
 		
 		this._info = info;
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	public void setConnection(Connection con) throws SQLException {
 		if(con != null) {
@@ -170,13 +172,13 @@ public class XMLGenerator {
 		sb.append(this.after());
 		return sb;
 	}
-	public PreparedStatement prepareStatement(String sql) throws SQLException {
+	private PreparedStatement prepareStatement(String sql) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(sql);
 		}
 		return this._con.prepareStatement(sql);
 	}
-	public CallableStatement prepareCall(String sql) throws SQLException {
+	private CallableStatement prepareCall(String sql) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(sql);
 		}
@@ -250,7 +252,7 @@ public class XMLGenerator {
 						}
 				} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 					throw e;
 				} finally {
@@ -260,7 +262,7 @@ public class XMLGenerator {
 						}
 					} catch (SQLException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					}
 					try {
@@ -269,14 +271,14 @@ public class XMLGenerator {
 						}
 					} catch (SQLException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					}
 				}
 			}
 		}
 	}
-	public Buffer query() throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
+	private Buffer query() throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		CallableStatement cstmt = null;
@@ -342,7 +344,7 @@ public class XMLGenerator {
 					totalUpdateCount += result;
 				} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 					throw e;
 				} finally {
@@ -352,7 +354,7 @@ public class XMLGenerator {
 						}
 					} catch (SQLException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					}
 					try {
@@ -361,7 +363,7 @@ public class XMLGenerator {
 						}
 					} catch (SQLException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					}
 				}
@@ -373,7 +375,7 @@ public class XMLGenerator {
 		return sb;
 	}
 	
-	public Buffer list() throws XPathExpressionException, SQLException, NoSuchProviderException, IOException  {
+	private Buffer list() throws XPathExpressionException, SQLException, NoSuchProviderException, IOException  {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -622,7 +624,7 @@ public class XMLGenerator {
 									stream = null;
 								} catch(IOException ex) {
 									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LogHelper.toString(ex));
+										logger.severe(LOG.toString(ex));
 									}
 									throw ex;
 								} finally {
@@ -660,7 +662,7 @@ public class XMLGenerator {
 			}
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException | IOException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -670,7 +672,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -679,7 +681,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -688,7 +690,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -697,14 +699,14 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
 		return sb;
 	}
 	
-	public Buffer delete() throws XPathExpressionException, SQLException, NoSuchProviderException {
+	private Buffer delete() throws XPathExpressionException, SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -814,7 +816,7 @@ public class XMLGenerator {
 			}
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -824,7 +826,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -833,14 +835,14 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
 		return sb;
 	}
 	
-	public Buffer update() throws XPathExpressionException, SQLException, NoSuchProviderException, IOException {
+	private Buffer update() throws XPathExpressionException, SQLException, NoSuchProviderException, IOException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1115,7 +1117,7 @@ public class XMLGenerator {
 									stream = null;
 								} catch(IOException ex) {
 									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LogHelper.toString(ex));
+										logger.severe(LOG.toString(ex));
 									}
 									throw ex;
 								} finally {
@@ -1166,7 +1168,7 @@ public class XMLGenerator {
 			
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException | IOException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -1176,7 +1178,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1185,7 +1187,7 @@ public class XMLGenerator {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
@@ -1193,7 +1195,7 @@ public class XMLGenerator {
 	}
 	
 
-	public Buffer insert() throws XPathExpressionException, SQLException, NoSuchProviderException {
+	private Buffer insert() throws XPathExpressionException, SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		PreparedStatement stmtInsert = null;
@@ -1707,7 +1709,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			this._params.put("query.row.total_update_count", totalUpdateCount);
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -1717,7 +1719,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1726,7 +1728,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1735,7 +1737,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1744,7 +1746,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1753,14 +1755,14 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
 		return sb;
 	}
 	
-	public void setInt(
+	private void setInt(
 		PreparedStatement stmt, 
 		int index, 
 		int value
@@ -1771,7 +1773,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		stmt.setInt(index, value);
 	}
 	
-	public void bind(
+	private void bind(
 		PreparedStatement stmt, 
 		String datatype, 
 		int index, 
@@ -1821,7 +1823,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 	public boolean isError() {
 		return this.isError;
 	}
-	public Buffer before() {
+	private Buffer before() {
 		Buffer sb = new Buffer();
 		sb.appendL("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		if(this.isError) {
@@ -1835,7 +1837,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
 			} catch (XPathExpressionException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			if(
@@ -1878,7 +1880,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 									} catch (UnsupportedEncodingException e) {
 										sb.append("" + key.substring(6) + "=" + item + "");
 										if(logger.isLoggable(Level.SEVERE)) {
-											logger.severe(LogHelper.toString(e));
+											logger.severe(LOG.toString(e));
 										}
 									}
 									index++;
@@ -1894,7 +1896,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 								} catch (UnsupportedEncodingException e) {
 									sb.append("" + key.substring(6) + "=" + this._params.getString(key) + "");
 									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LogHelper.toString(e));
+										logger.severe(LOG.toString(e));
 									}
 								}
 								index++;
@@ -1909,7 +1911,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		sb.appendL(this._tag.tag("document", null, true));
 		return sb;
 	}
-	public Buffer code(Element node) throws SQLException, NoSuchProviderException {
+	private Buffer code(Element node) throws SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1950,12 +1952,12 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			}
 		} catch (SQLException | NoSuchProviderException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} catch (XPathExpressionException | DOMException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			return null;
 		} finally {
@@ -1965,7 +1967,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1974,13 +1976,13 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
 		return sb;
 	}
-	public Buffer after() throws SQLException, NoSuchProviderException {
+	private Buffer after() throws SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		if(this._params.hasKey("header.method") && !this._params.getString("header.method").equals("POST") && !this.isError) {
 			try {
@@ -2050,7 +2052,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
@@ -2181,7 +2183,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		
 		return this.checkFromSQL(command);
 	}
-	public boolean checkFromSQL(Element command) throws XPathExpressionException, SQLException, NoSuchProviderException {
+	private boolean checkFromSQL(Element command) throws XPathExpressionException, SQLException, NoSuchProviderException {
 		boolean result = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -2233,7 +2235,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				result = AuthParser.auth(check, record);
 			} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 				throw e;
 			} finally {
@@ -2243,7 +2245,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					}
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 				try {
@@ -2252,7 +2254,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					}
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -2260,7 +2262,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		
 		return result;
 	}
-	public java.util.Map<String, Encryptor> getEncryptor(Element node) throws XPathExpressionException {
+	private java.util.Map<String, Encryptor> getEncryptor(Element node) throws XPathExpressionException {
 		java.util.Map<String, Encryptor> encryptor = new java.util.Hashtable();
 		if(node.hasAttribute("encrypt") && node.getAttribute("encrypt") != null && !node.getAttribute("encrypt").equals("")) {
 			try {
@@ -2271,7 +2273,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
@@ -2287,7 +2289,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}

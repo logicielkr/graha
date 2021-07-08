@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import kr.graha.lib.Record;
 import kr.graha.lib.XMLGenerator;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.FileHelper;
 import org.w3c.dom.Element;
 
@@ -46,10 +46,10 @@ import org.w3c.dom.Element;
 
 public class DownloadAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public DownloadAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected DownloadAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, HttpServletResponse response, Element query, Record params) throws IOException{
+	protected void execute(HttpServletRequest request, HttpServletResponse response, Element query, Record params) throws IOException{
 		
 		Enumeration<String> p = request.getParameterNames();
 		while (p.hasMoreElements()) {
@@ -106,7 +106,7 @@ public class DownloadAdapter {
 					fis = null;
 				} catch(IOException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 					throw e;
 				} finally {
@@ -115,7 +115,7 @@ public class DownloadAdapter {
 							out.close();
 						} catch (IOException e) {
 							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LogHelper.toString(e));
+								logger.severe(LOG.toString(e));
 							}
 						}
 					}
@@ -124,7 +124,7 @@ public class DownloadAdapter {
 							fis.close();
 						} catch (IOException e) {
 							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LogHelper.toString(e));
+								logger.severe(LOG.toString(e));
 							}
 						}
 					}

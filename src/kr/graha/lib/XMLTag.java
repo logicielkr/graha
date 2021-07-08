@@ -23,6 +23,7 @@ package kr.graha.lib;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.logging.Logger;
+import kr.graha.helper.LOG;
 
 
 /**
@@ -35,14 +36,14 @@ import java.util.logging.Logger;
 
 public class XMLTag {
 	public boolean isRDF = true;
-	public String uc;
+	private String uc;
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public XMLTag(boolean isRDF, String uc) {
+	protected XMLTag(boolean isRDF, String uc) {
 		this.isRDF = isRDF;
 		this.uc = uc;
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
-	public XMLTag(String output, String uc, HttpServletRequest request) {
+	protected XMLTag(String output, String uc, HttpServletRequest request) {
 		if(output != null && output.equals("rdf")) {
 			this.isRDF = true;
 		} else {
@@ -53,16 +54,16 @@ public class XMLTag {
 		} else {
 			this.uc = uc;
 		}
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
-	public String parseUC(HttpServletRequest request) {
+	private String parseUC(HttpServletRequest request) {
 		String id = request.getPathInfo().trim();
 		if(id.startsWith("/")) {
 			id = id.substring(1);
 		}
 		return (request.getScheme() + "://"+ request.getServerName() + ":" + request.getServerPort() + "" + request.getContextPath() + request.getServletPath() + "/" + id.substring(0, id.indexOf("/")+1));
 	}
-	public String path(String tagName, String name) {
+	protected String path(String tagName, String name) {
 		if(tagName != null && tagName.equals("stylesheet")) {
 			if(isRDF) {
 				return "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:RDF=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:uc=\"" + this.uc + "\">";
@@ -141,7 +142,7 @@ public class XMLTag {
 		return "";
 	}
 	
-	public String path(String upperName, String tagName, String name, boolean isFull) {
+	protected String path(String upperName, String tagName, String name, boolean isFull) {
 		if(upperName != null && upperName.equals("row")) {
 			if(isRDF) {
 				if(isFull) {
@@ -236,7 +237,7 @@ public class XMLTag {
 		return "";
 	}
 	
-	public String tag(String tagName, String name, boolean isStart) {
+	protected String tag(String tagName, String name, boolean isStart) {
 		if(tagName != null && tagName.equals("document")) {
 			if(isRDF) {
 				if(isStart) {
@@ -515,7 +516,7 @@ public class XMLTag {
 		return "";
 	}
 	
-	public String tag(String upperName, String tagName, String name, boolean isStart) {
+	protected String tag(String upperName, String tagName, String name, boolean isStart) {
 		if(upperName != null 
 			&& (
 				upperName.equals("param")
@@ -557,7 +558,7 @@ public class XMLTag {
 		}
 		return "";
 	}
-	public String tag(String upperName, String tagName, String value, String label) {
+	protected String tag(String upperName, String tagName, String value, String label) {
 		if(isRDF) {
 			return "<RDF:li><RDF:item uc:value=\"" + value + "\" uc:label=\"" + label + "\" /></RDF:li>";
 		} else {

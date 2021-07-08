@@ -24,7 +24,7 @@ import java.util.Enumeration;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import kr.graha.lib.Record;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) Attribute 처리기
@@ -35,10 +35,10 @@ import kr.graha.lib.LogHelper;
 
 public class AttributeAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public AttributeAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected AttributeAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, Record params) {
+	protected void execute(HttpServletRequest request, Record params) {
 		Enumeration<String> e = request.getAttributeNames();
 		while (e.hasMoreElements()) {
 			String key = e.nextElement();
