@@ -25,6 +25,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) 데이타바인딩 숫자형(int, float, double, long) 구현 클레스
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 public class DataBinderNumberTypeImpl extends DataBinderImpl {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	public DataBinderNumberTypeImpl() {
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	public boolean isSequenceValue(String[] value) {
 		if(value != null && value.length > 0 && value[0] != null && value[0].startsWith("sequence.")) {
