@@ -40,10 +40,19 @@ import org.xml.sax.SAXException;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
+import java.sql.Types;
 import javax.naming.NamingException;
 import java.sql.DriverManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
+import java.sql.Timestamp;
+import kr.graha.helper.DB;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) 데이타베이스(DB) 관련 유틸리티
@@ -137,36 +146,18 @@ public final class DBHelper {
 		}
 		return info;
 	}
-	public static Connection getConnection(String jndi) {
-		Connection con = null;
-		try {
-			javax.naming.InitialContext cxt = new javax.naming.InitialContext();
-			String source = null;
-			if(jndi.startsWith("java:")) {
-				source = jndi;
-			} else {
-				source = "java:/comp/env/" + jndi;
-			}
-			javax.sql.DataSource ds = (javax.sql.DataSource)cxt.lookup(source);
-			con = ds.getConnection();
-		} catch (SQLException | NamingException e2) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e2));
-			}
-		}
-		return con;
-	}
+	
 	public static Connection getConnection(Record info) {
 		Connection con = null;
 		if(info.hasKey("type") && info.getString("type").equals("jndi")) {
-			con = DBHelper.getConnection(info.getString("name"));
+			con = DB.getConnection(info.getString("name"));
 		} else if(info.hasKey("type") && info.getString("type").equals("jdbc") && info.hasKey("driverClassName") && info.hasKey("url")) {
 			try {
 				Class.forName(info.getString("driverClassName"));
 				con = DriverManager.getConnection(info.getString("url"), info.getString("username"), info.getString("password"));
 			} catch (ClassNotFoundException | SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
@@ -195,7 +186,7 @@ public final class DBHelper {
 			rs = null;
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -205,17 +196,17 @@ public final class DBHelper {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return result;
 	}
-	public static int getNextSequenceValue(PreparedStatement pstmt, String value, Record info, DatabaseMetaData dmd) throws SQLException {
+	protected static int getNextSequenceValue(PreparedStatement pstmt, String value, Record info, DatabaseMetaData dmd) throws SQLException {
 		return DBHelper.getNextSequenceValue(pstmt.getConnection(), value, info, dmd);
 	}
-	public static int getNextSequenceValue(Connection con, String value, Record info, DatabaseMetaData dmd) throws SQLException {
+	protected static int getNextSequenceValue(Connection con, String value, Record info, DatabaseMetaData dmd) throws SQLException {
 		PreparedStatement pstmt = null;
 //		ResultSet rs = null;
 		String name = null;
@@ -232,7 +223,7 @@ public final class DBHelper {
 			pstmt = null;
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			throw e;
 		} finally {
@@ -243,7 +234,7 @@ public final class DBHelper {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -254,14 +245,14 @@ public final class DBHelper {
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return result;
 	}
-	public static String getSql(Element node, Record params) {
+	protected static String getSql(Element node, Record params) {
 		if(node == null) {
 			return null;
 		}
@@ -308,7 +299,7 @@ public final class DBHelper {
 		}
 		return sql;
 	}
-	public static String getListSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
+	protected static String getListSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
 		if(info != null && info.hasKey("sql_list_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
@@ -331,7 +322,7 @@ public final class DBHelper {
 		}
 
 	}
-	public static String getCountSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
+	protected static String getCountSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
 		if(info != null && info.hasKey("sql_cnt_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
@@ -349,7 +340,7 @@ public final class DBHelper {
 			return ("select count(*) from (" + sql + ") as _");
 		}
 	}
-	public static String getSeqSql(String name, Record info, DatabaseMetaData dmd) throws SQLException {
+	protected static String getSeqSql(String name, Record info, DatabaseMetaData dmd) throws SQLException {
 		if(info != null && info.hasKey("sql_sequence_template")) {
 			Record p = new Record();
 			p.put("name", name);
