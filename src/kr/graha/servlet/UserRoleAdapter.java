@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import kr.graha.lib.Record;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) UserRole 처리기
@@ -37,10 +37,10 @@ import kr.graha.lib.LogHelper;
 
 public class UserRoleAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public UserRoleAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected UserRoleAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, Record params) {
+	protected void execute(HttpServletRequest request, Record params) {
 		if(request.getUserPrincipal() instanceof org.apache.catalina.realm.GenericPrincipal) {
 			String[] roles = ((org.apache.catalina.realm.GenericPrincipal)request.getUserPrincipal()).getRoles();
 			if(roles != null) {
