@@ -22,6 +22,7 @@
 package kr.graha.lib;
 
 import java.util.logging.Logger;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) XML 태그 처리기
@@ -32,10 +33,10 @@ import java.util.logging.Logger;
  */
 
 public class HTMLTag {
-	public String htmlType;
-	public boolean div = false;
+	private String htmlType;
+	private boolean div = false;
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public HTMLTag(String htmlType) {
+	protected HTMLTag(String htmlType) {
 		this.htmlType = htmlType;
 		if(htmlType == null) {
 			div = false;
@@ -44,9 +45,9 @@ public class HTMLTag {
 		} else {
 			div = false;
 		}
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
-	public String table(String id) {
+	protected String table(String id) {
 		if(id == null || id.equals("")) {
 			if(div) {
 				return "<div class=\"graha table\">";
@@ -61,63 +62,63 @@ public class HTMLTag {
 			}
 		}
 	}
-	public String tableE() {
+	protected String tableE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</table>";
 		}
 	}
-	public String thead() {
+	protected String thead() {
 		if(div) {
 			return "<div class=\"graha thead\">";
 		} else {
 			return "<thead class=\"graha\">";
 		}
 	}
-	public String theadE() {
+	protected String theadE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</thead>";
 		}
 	}
-	public String tbody() {
+	protected String tbody() {
 		if(div) {
 			return "<div class=\"graha tbody\">";
 		} else {
 			return "<tbody class=\"graha\">";
 		}
 	}
-	public String tbodyE() {
+	protected String tbodyE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</tbody>";
 		}
 	}
-	public String tr() {
+	protected String tr() {
 		if(div) {
 			return "<div class=\"graha tr\">";
 		} else {
 			return "<tr class=\"graha\">";
 		}
 	}
-	public String trS() {
+	protected String trS() {
 		if(div) {
 			return "<div class=\"graha tr\"";
 		} else {
 			return "<tr class=\"graha\"";
 		}
 	}
-	public String trE() {
+	protected String trE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</tr>";
 		}
 	}
-	public String th(String name) {
+	protected String th(String name) {
 		if(name == null || name.equals("")) {
 			if(div) {
 				return "<div class=\"graha th\"";
@@ -132,7 +133,7 @@ public class HTMLTag {
 			}
 		}
 	}
-	public String thG(String name) {
+	protected String thG(String name) {
 		/*
 		if(name == null || name.equals("")) {
 			if(div) {
@@ -150,14 +151,14 @@ public class HTMLTag {
 		*/
 		return "";
 	}
-	public String thE() {
+	protected String thE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</th>";
 		}
 	}
-	public String td(String name) {
+	protected String td(String name) {
 		if(name == null || name.equals("")) {
 			if(div) {
 				return "<div class=\"graha td\"";
@@ -172,14 +173,14 @@ public class HTMLTag {
 			}
 		}
 	}
-	public String tdE() {
+	protected String tdE() {
 		if(div) {
 			return "</div>";
 		} else {
 			return "</td>";
 		}
 	}
-	public String tdGE() {
+	protected String tdGE() {
 		return "";
 		/*
 		if(div) {
@@ -189,22 +190,4 @@ public class HTMLTag {
 		}
 		*/
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
