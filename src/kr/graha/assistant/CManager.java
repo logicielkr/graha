@@ -52,7 +52,7 @@ public class CManager {
 	private String sjndi = null;
 	private String resource = null;
 	private List<String> jndis = null;
-	public CManager(ServletConfig c, HttpServletRequest request) {
+	protected CManager(ServletConfig c, HttpServletRequest request) {
 		this.c = c;
 		this.request = request;
 		this.parse();
@@ -81,37 +81,37 @@ public class CManager {
 			}
 		}
 	}
-	public String getJndi() {
+	protected String getJndi() {
 		if(!this.valid()) {
 			return null;
 		} else {
 			return this.sjndi;
 		}
 	}
-	public int getJndiSize() {
+	protected int getJndiSize() {
 		if(!this.valid()) {
 			return 0;
 		} else {
 			return this.jndis.size();
 		}
 	}
-	public String[] getJndis() {
+	protected String[] getJndis() {
 		if(!this.valid()) {
 			return null;
 		} else {
 			return this.jndis.toArray(new String[]{});
 		}
 	}
-	public String getResource() {
+	protected String getResource() {
 		return this.resource;
 	}
-	public String getDef() {
+	protected String getDef() {
 		return this.def;
 	}
-	public String getMapping() {
+	protected String getMapping() {
 		return this.mapping;
 	}
-	public boolean valid() {
+	protected boolean valid() {
 		if(this.jndi == null || this.jndis == null || this.jndis.size() == 0 || this.sjndi == null) {
 			return false;
 		} else if(this.rjndi != null && !this.rjndi.equals(this.sjndi)) {
@@ -120,7 +120,7 @@ public class CManager {
 			return true;
 		}
 	}
-	public Connection getConnection() throws NamingException, SQLException {
+	protected Connection getConnection() throws NamingException, SQLException {
 		if(!this.valid()) {
 			return null;
 		} else {
