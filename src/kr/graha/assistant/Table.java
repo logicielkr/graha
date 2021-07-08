@@ -30,21 +30,21 @@ package kr.graha.assistant;
  */
 
 public class Table {
-	public String name;
-	public String remarks;
-	public String type;
-	public String schema;
-	public String getLowerName() {
+	protected String name;
+	protected String remarks;
+	protected String type;
+	protected String schema;
+	protected String getLowerName() {
 		return name.toLowerCase();
 	}
-	public boolean isNotEmptyRemarks() {
+	protected boolean isNotEmptyRemarks() {
 		if(this.remarks == null || this.remarks.trim().equals("")) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	public String getRemarksOrName() {
+	protected String getRemarksOrName() {
 		if(this.remarks == null || this.remarks.trim().equals("")) {
 			return name;
 		} else {
