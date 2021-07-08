@@ -30,7 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
@@ -46,17 +46,17 @@ import java.io.IOException;
 public class DBUtilOracleImpl extends DBUtil {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Hashtable<String, Integer> map = null;
-	public DBUtilOracleImpl() throws IOException {
-		LogHelper.setLogLevel(logger);
+	protected DBUtilOracleImpl() throws IOException {
+		LOG.setLogLevel(logger);
 	}
-	public void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
+	protected void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
 		super.loadProp(con, def, mapping);
 		this.loadMap(con);
 	}
-	public String getToday() {
+	protected String getToday() {
 		return "sysdate";
 	}
-	public String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName) {
 		String sequence = getSequence(con, tableName + "$" + columnName);
 		if(sequence == null) {
 			return "&quot;" + tableName + "$" + columnName + "&quot;.nextval";
@@ -64,7 +64,7 @@ public class DBUtilOracleImpl extends DBUtil {
 			return "&quot;" + sequence + "&quot;.nextval";
 		}
 	}
-	public String getSequence(Connection con, String sequenceName) {
+	private String getSequence(Connection con, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -84,7 +84,7 @@ public class DBUtilOracleImpl extends DBUtil {
 			pstmt = null;
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LogHelper.toString(e));
+				logger.info(LOG.toString(e));
 			}
 		} finally {
 			if(rs != null) {
@@ -93,7 +93,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -103,14 +103,14 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return sequence;
 	}
-	public void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
+	protected void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = null;
 		try {
@@ -128,14 +128,14 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
 
-	public Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
+	protected Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Table> l = getTables(con, schemaName, tableName);
 		if(l.isEmpty()) {
 			return null;
@@ -143,10 +143,10 @@ public class DBUtilOracleImpl extends DBUtil {
 			return l.get(0);
 		}
 	}
-	public List<Table> getTables(Connection con) throws SQLException {
+	protected List<Table> getTables(Connection con) throws SQLException {
 		return getTables(con, null, null);
 	}
-	public List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
 /*
 select * from user_tab_comments a  where exists (
 select * from user_tables b where a.table_name = b.table_name
@@ -191,7 +191,7 @@ select * from user_views c where a.table_name = c.view_name
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -201,14 +201,14 @@ select * from user_views c where a.table_name = c.view_name
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return l;
 	}
-	public int getDataType(String typeName) {
+	private int getDataType(String typeName) {
 		if(this.map.containsKey(typeName)) {
 			return this.map.get(typeName).intValue();
 		} else {
@@ -218,7 +218,7 @@ select * from user_views c where a.table_name = c.view_name
 		}
 		return 0;
 	}
-	public List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
 /*
 select 
 	a.table_name, 
@@ -270,7 +270,7 @@ where a.table_name = b.table_name
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -279,14 +279,14 @@ where a.table_name = b.table_name
 					pstmt.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return l;
 	}
-	public void loadMap(Connection con) throws SQLException {
+	private void loadMap(Connection con) throws SQLException {
 		if(this.map == null) {
 			this.map = new Hashtable<String, Integer>();
 			ResultSet rs = null;
@@ -307,7 +307,7 @@ where a.table_name = b.table_name
 						rs = null;
 					} catch (SQLException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					}
 				}

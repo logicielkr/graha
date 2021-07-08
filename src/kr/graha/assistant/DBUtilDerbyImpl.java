@@ -30,7 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
@@ -47,13 +47,13 @@ public class DBUtilDerbyImpl extends DBUtil {
 	private Hashtable<String, Integer> map = null;
 	private boolean existsTableCommentTable = false;
 	private boolean existsColumnCommentTable = false;
-	public DBUtilDerbyImpl() throws IOException {
-		LogHelper.setLogLevel(logger);
+	protected DBUtilDerbyImpl() throws IOException {
+		LOG.setLogLevel(logger);
 	}
-	public String getToday() {
+	protected String getToday() {
 		return "current_timestamp";
 	}
-	public String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName) {
 /*
 select SEQUENCENAME from sys.SYSSEQUENCES
 */
@@ -65,7 +65,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 			return "NEXT VALUE FOR &quot;" + sequence + "&quot;";
 		}
 	}
-	public String getSequence(Connection con, String schemaName, String sequenceName) {
+	private String getSequence(Connection con, String schemaName, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -85,7 +85,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 			pstmt = null;
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LogHelper.toString(e));
+				logger.info(LOG.toString(e));
 			}
 		} finally {
 			if(rs != null) {
@@ -94,7 +94,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -104,14 +104,14 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return sequence;
 	}
-	public boolean existCommentTable(Connection con, boolean table) throws SQLException {
+	private boolean existCommentTable(Connection con, boolean table) throws SQLException {
 		if(table && this.existsTableCommentTable) {
 			return true;
 		} else if(!table && this.existsColumnCommentTable) {
@@ -130,7 +130,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 		}
 	}
 
-	public void createCommentTable(Connection con, boolean table) throws SQLException {
+	private void createCommentTable(Connection con, boolean table) throws SQLException {
 		if(existCommentTable(con, table)) {
 			if(table) {
 				this.existsTableCommentTable = true;;
@@ -177,19 +177,19 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
-	public Hashtable<String, String> getTableComments(Connection con, String schemaName, String tableName) {
+	protected Hashtable<String, String> getTableComments(Connection con, String schemaName, String tableName) {
 		return getComments(con, schemaName, tableName, true);
 	}
-	public Hashtable<String, String> getColumnComments(Connection con, String schemaName, String tableName) {
+	protected Hashtable<String, String> getColumnComments(Connection con, String schemaName, String tableName) {
 		return getComments(con, schemaName, tableName, false);
 	}
-	public Hashtable<String, String> getComments(Connection con, String schemaName, String tableName, boolean table) {
+	private Hashtable<String, String> getComments(Connection con, String schemaName, String tableName, boolean table) {
 		Hashtable<String, String> comment = new Hashtable<String, String>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -221,7 +221,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 			pstmt = null;
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LogHelper.toString(e));
+				logger.info(LOG.toString(e));
 			}
 		} finally {
 			if(rs != null) {
@@ -230,7 +230,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -240,20 +240,20 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return comment;
 	}
-	public void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
+	protected void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		updateRemarks(con, schemaName, tableName, null, remarks);
 	}
-	public void updateColumnRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
+	protected void updateColumnRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
 		updateRemarks(con, schemaName, tableName, columnName, remarks);
 	}
-	public void updateRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
+	private void updateRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
 		if(columnName == null) {
 			createCommentTable(con, true);
 		} else {
@@ -305,14 +305,14 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
 
-	public Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
+	protected Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Table> l = getTables(con, schemaName, tableName);
 		if(l.isEmpty()) {
 			return null;
@@ -320,11 +320,11 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 			return l.get(0);
 		}
 	}
-	public List<Table> getTables(Connection con) throws SQLException {
+	protected List<Table> getTables(Connection con) throws SQLException {
 		return getTables(con, null, null);
 	}
 	
-	public List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Table> tabs = super.getTables(con, schemaName, tableName);
 		Hashtable<String, String> comment = getTableComments(con, schemaName, tableName);
 
@@ -339,7 +339,7 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 		}
 		return tabs;
 	}
-	public List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Column> cols = super.getColumns(con, schemaName, tableName);
 		Hashtable<String, String> comment = getColumnComments(con, schemaName, tableName);
 		

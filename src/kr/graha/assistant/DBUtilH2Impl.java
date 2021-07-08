@@ -30,7 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
@@ -44,10 +44,10 @@ import java.io.IOException;
 
 public class DBUtilH2Impl extends DBUtil {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public DBUtilH2Impl() throws IOException {
-		LogHelper.setLogLevel(logger);
+	protected DBUtilH2Impl() throws IOException {
+		LOG.setLogLevel(logger);
 	}
-	public String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName) {
 		/*
 SELECT SEQUENCE_NAME
 FROM INFORMATION_SCHEMA.SEQUENCES

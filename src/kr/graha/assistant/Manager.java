@@ -36,7 +36,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -56,10 +56,10 @@ public class Manager extends HttpServlet {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private String[] TYPES = {"TABLE", "VIEW"};
 	public Manager() {
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	
-	protected void setCharacterEncoding(HttpServletRequest request) throws ServletException, IOException {
+	private void setCharacterEncoding(HttpServletRequest request) throws ServletException, IOException {
 		if(
 			getServletContext().getMajorVersion() < 3
 			|| (
@@ -72,7 +72,7 @@ public class Manager extends HttpServlet {
 			request.setCharacterEncoding("UTF-8");
 		}
 	}
-	protected String value(String value) {
+	private String value(String value) {
 		if(value == null) {
 			return "";
 		} else if(
@@ -146,7 +146,7 @@ public class Manager extends HttpServlet {
 			query(request, response);
 		}
 	}
-	protected void xsl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void xsl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/xml; charset=UTF-8");
 		java.io.InputStream in = null;
 		ServletOutputStream out = null;
@@ -171,7 +171,7 @@ public class Manager extends HttpServlet {
 			out.close();
 		}
 	}
-	protected void _list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Connection con = null;
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
@@ -213,7 +213,7 @@ public class Manager extends HttpServlet {
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		} finally {
 			if(con != null) {
@@ -221,7 +221,7 @@ public class Manager extends HttpServlet {
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -233,7 +233,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	protected void list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Connection con = null;
 		StringBuffer sb = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
@@ -308,7 +308,7 @@ public class Manager extends HttpServlet {
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		} finally {
 			if(con != null) {
@@ -316,7 +316,7 @@ public class Manager extends HttpServlet {
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -328,7 +328,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	protected void table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String table = value(request.getParameter("table"));
 		String schemaName = null;
 		String tableName = null;
@@ -452,7 +452,7 @@ public class Manager extends HttpServlet {
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		} finally {
 			if(con != null) {
@@ -460,7 +460,7 @@ public class Manager extends HttpServlet {
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -472,7 +472,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	protected void _table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		Connection con = null;
 		
@@ -535,7 +535,7 @@ public class Manager extends HttpServlet {
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			
 		} finally {
@@ -544,7 +544,7 @@ public class Manager extends HttpServlet {
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -556,7 +556,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	public void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
 		java.util.Enumeration<String> e = request.getParameterNames();
@@ -585,20 +585,20 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	public String getProperty(Properties messges, String key) {
+	private String getProperty(Properties messges, String key) {
 		String value = messges.getProperty(key);
 		if(value != null) {
 			try {
 				return new String(value.getBytes("iso-8859-1"), "UTF-8");
 			} catch (java.io.UnsupportedEncodingException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
 		return null;
 	}
-	public void _gen(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _gen(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String tab = value(request.getParameter("table"));
 		String schemaName = null;
 		String tableName = null;
@@ -1113,7 +1113,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		} finally {
 			try {
@@ -1122,7 +1122,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			try {
@@ -1131,7 +1131,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				}
 			} catch (IOException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 			
@@ -1144,7 +1144,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		}
 	}
 	
-	protected void data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String table = value(request.getParameter("table"));
 		String schemaName = null;
 		String tableName = null;
@@ -1269,7 +1269,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		} finally {
 			if(rs != null) {
@@ -1277,7 +1277,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					rs.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -1286,7 +1286,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					pstmt.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -1295,7 +1295,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -1307,7 +1307,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	protected StringBuffer getGrahaConfig(String sql, ResultSetMetaData rsmd, int fetchCount) throws SQLException {
+	private StringBuffer getGrahaConfig(String sql, ResultSetMetaData rsmd, int fetchCount) throws SQLException {
 		StringBuffer bw = new StringBuffer();
 		if(rsmd != null) {
 			if(fetchCount == 1) {
@@ -1365,7 +1365,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		bw.append("	</query>\n");
 		return bw;
 	}
-	protected void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
 		
@@ -1472,7 +1472,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			con = null;
 		} catch (NamingException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			sb.setLength(0);
 		} catch (java.sql.SQLSyntaxErrorException e) {
@@ -1489,7 +1489,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			sb.append("</document>");
 			
 			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LogHelper.toString(e));
+				logger.warning(LOG.toString(e));
 			}
 		} catch (SQLException e) {
 			if(isAppendRows) {
@@ -1511,7 +1511,7 @@ for(Throwable t: e){
 */
 			
 			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LogHelper.toString(e));
+				logger.warning(LOG.toString(e));
 			}
 		} finally {
 			if(rs != null) {
@@ -1519,7 +1519,7 @@ for(Throwable t: e){
 					rs.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -1528,7 +1528,7 @@ for(Throwable t: e){
 					pstmt.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
@@ -1537,7 +1537,7 @@ for(Throwable t: e){
 					con.close();
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
