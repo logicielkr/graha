@@ -30,7 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.io.IOException;
 import java.util.Properties;
@@ -44,15 +44,15 @@ import java.util.Properties;
 
 public class DBUtil {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public String[] TYPES = {"TABLE", "VIEW"};
-	public Hashtable<String, Hashtable> pk = null;
+	private String[] TYPES = {"TABLE", "VIEW"};
+	private Hashtable<String, Hashtable> pk = null;
 	private Properties prop = null;
-	public Hashtable<Integer, String> sqlTypes = null;
-	public Properties def = null;
-	public DBUtil() throws IOException {
-		LogHelper.setLogLevel(logger);
+	private Hashtable<Integer, String> sqlTypes = null;
+	private Properties def = null;
+	protected DBUtil() throws IOException {
+		LOG.setLogLevel(logger);
 	}
-	public static DBUtil getDBUtil(Connection con, String def, String mapping) throws SQLException, IOException {
+	protected static DBUtil getDBUtil(Connection con, String def, String mapping) throws SQLException, IOException {
 		DatabaseMetaData m = con.getMetaData();
 		DBUtil db = null;
 		if(
@@ -78,20 +78,20 @@ public class DBUtil {
 		db.loadProp(con, def, mapping);
 		return db;
 	}
-	public boolean supportSequence() {
+	protected boolean supportSequence() {
 		return true;
 	}
-	public String prefixSchema(Connection con, String schemaName) throws SQLException {
+	private String prefixSchema(Connection con, String schemaName) throws SQLException {
 		DatabaseMetaData m = con.getMetaData();
 		return "";
 	}
-	public String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName) {
 /*
 		select sequencename from pg_sequences
 */
 		return "nextval('" + tableName + "$" + columnName + "')";
 	}
-	public void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
+	protected void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
 		if(this.prop == null) {
 			this.prop = new Properties();
 			if(mapping == null) {
@@ -115,16 +115,16 @@ public class DBUtil {
 					this.sqlTypes.put(Integer.valueOf(field.getInt(null)), field.getName());
 				} catch (IllegalAccessException e) {
 					if(logger.isLoggable(Level.WARNING)) {
-						logger.warning(LogHelper.toString(e));
+						logger.warning(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
-	public String getToday() {
+	private String getToday() {
 		return "now()";
 	}
-	public String getDef(String columnName, String prefix) {
+	protected String getDef(String columnName, String prefix) {
 		if(this.def.containsKey(columnName + ".value")) {
 			if(this.def.getProperty(columnName + ".value").equals("sql.today")) {
 				return "sql." + getToday();
@@ -135,28 +135,28 @@ public class DBUtil {
 			return prefix + columnName;
 		}
 	}
-	public boolean isDef(String columnName) {
+	protected boolean isDef(String columnName) {
 		if(this.def.containsKey(columnName + ".value")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	public String getDefOnly(String columnName) {
+	protected String getDefOnly(String columnName) {
 		if(this.def.containsKey(columnName + ".only")) {
 			return this.def.getProperty(columnName + ".only");
 		} else {
 			return "";
 		}
 	}
-	public boolean isDefOnly(String columnName) {
+	protected boolean isDefOnly(String columnName) {
 		if(this.def.containsKey(columnName + ".only")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	public String getGrahaDataType(int dataType) {
+	protected String getGrahaDataType(int dataType) {
 		if(this.sqlTypes.containsKey(Integer.valueOf(dataType))) {
 			if(this.prop.containsKey(this.sqlTypes.get(Integer.valueOf(dataType)))) {
 				return this.prop.getProperty(this.sqlTypes.get(Integer.valueOf(dataType)));
@@ -169,7 +169,7 @@ public class DBUtil {
 			return this.prop.getProperty("default");
 		}
 	}
-	public void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
+	protected void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = null;
 		
@@ -193,13 +193,13 @@ public class DBUtil {
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
-	public void updateColumnRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
+	protected void updateColumnRemarks(Connection con, String schemaName, String tableName, String columnName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = null;
 		
@@ -222,13 +222,13 @@ public class DBUtil {
 					pstmt = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 	}
-	public String getTabRemarks(Connection con, String schemaName, String tableName) throws SQLException {
+	protected String getTabRemarks(Connection con, String schemaName, String tableName) throws SQLException {
 		Table t = getTable(con, schemaName, tableName);
 		if(t == null) {
 			return tableName;
@@ -236,7 +236,7 @@ public class DBUtil {
 			return t.getRemarksOrName();
 		}			
 	}
-	public Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
+	protected Table getTable(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Table> l = getTables(con, schemaName, tableName);
 		if(l.isEmpty()) {
 			return null;
@@ -244,10 +244,10 @@ public class DBUtil {
 			return l.get(0);
 		}
 	}
-	public List<Table> getTables(Connection con) throws SQLException {
+	protected List<Table> getTables(Connection con) throws SQLException {
 		return getTables(con, null, null);
 	}
-	public List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Table> l = new ArrayList<Table>();
 		DatabaseMetaData m = con.getMetaData();
 		ResultSet rs = null;
@@ -276,14 +276,14 @@ public class DBUtil {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return l;
 	}
-	public Hashtable<String, Integer> getPKColumns(Connection con, String schemaName, String tableName) throws SQLException {
+	private Hashtable<String, Integer> getPKColumns(Connection con, String schemaName, String tableName) throws SQLException {
 		Hashtable<String, Integer> pk = new Hashtable<String, Integer>();
 		DatabaseMetaData m = con.getMetaData();
 		ResultSet rs = null;
@@ -303,14 +303,14 @@ public class DBUtil {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
 		}
 		return pk;
 	}
-	public boolean containsKey(Connection con, String schemaName, String tableName, String columnName) throws SQLException {
+	protected boolean containsKey(Connection con, String schemaName, String tableName, String columnName) throws SQLException {
 		if(this.pk == null) {
 			this.pk = new Hashtable<String, Hashtable>();
 		}
@@ -319,7 +319,7 @@ public class DBUtil {
 		}
 		return this.pk.get(schemaName + "." + tableName).containsKey(columnName);
 	}
-	public List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
+	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Column> l = new ArrayList<Column>();
 		ResultSet rs = null;
 		try {
@@ -352,7 +352,7 @@ public class DBUtil {
 					rs = null;
 				} catch (SQLException e) {
 					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LogHelper.toString(e));
+						logger.severe(LOG.toString(e));
 					}
 				}
 			}
