@@ -32,7 +32,7 @@ import java.util.logging.Level;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.Record;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -50,16 +50,16 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
 public class ParameterAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public ParameterAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected ParameterAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public ServletRequestContext getServletRequestContext(HttpServletRequest request) {
+	private ServletRequestContext getServletRequestContext(HttpServletRequest request) {
 		return new ServletRequestContext(request);
 	}
-	public List<FileItem> parseRequest(ServletFileUpload upload, ServletRequestContext src) throws FileUploadException {
+	private List<FileItem> parseRequest(ServletFileUpload upload, ServletRequestContext src) throws FileUploadException {
 		return upload.parseRequest(src);
 	}
-	public List<FileItem> execute(HttpServletRequest request, Record params, Record info) throws UnsupportedEncodingException {
+	protected List<FileItem> execute(HttpServletRequest request, Record params, Record info) throws UnsupportedEncodingException {
 		ServletContext c = request.getServletContext();
 		if(c != null) {
 			Enumeration<String> p = c.getInitParameterNames();
@@ -97,7 +97,7 @@ public class ParameterAdapter {
 				fields = parseRequest(upload, src);
 			} catch (FileUploadException e1) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e1));
+					logger.severe(LOG.toString(e1));
 				}
 			}
 			if(fields != null) {

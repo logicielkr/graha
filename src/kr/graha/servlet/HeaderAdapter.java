@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 import kr.graha.lib.Record;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) HTTP Header 처리기
@@ -36,10 +36,10 @@ import kr.graha.lib.LogHelper;
 
 public class HeaderAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public HeaderAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected HeaderAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, Record params) {
+	protected void execute(HttpServletRequest request, Record params) {
 		Enumeration<String> e = request.getHeaderNames();
 		while (e.hasMoreElements()) {
 			String key = e.nextElement();

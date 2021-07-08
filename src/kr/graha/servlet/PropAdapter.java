@@ -42,7 +42,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import kr.graha.lib.FileHelper;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.Record;
 import kr.graha.lib.AuthParser;
 
@@ -55,10 +55,10 @@ import kr.graha.lib.AuthParser;
 
 public class PropAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public PropAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected PropAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, File config, Element query, Record params) {
+	protected void execute(HttpServletRequest request, File config, Element query, Record params) {
 		try {
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
@@ -120,7 +120,7 @@ public class PropAdapter {
 			}
 		} catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException | IOException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		}
 	}
