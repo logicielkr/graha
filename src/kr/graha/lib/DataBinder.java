@@ -33,7 +33,7 @@ import java.sql.DatabaseMetaData;
  * @since 0.1
  */
 
-public interface DataBinder {
+interface DataBinder {
 	void bind(
 		PreparedStatement stmt, 
 		String datatype,
