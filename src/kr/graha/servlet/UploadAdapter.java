@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import kr.graha.lib.Record;
 import kr.graha.lib.XMLGenerator;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.FileHelper;
 import org.apache.commons.fileupload.FileItem;
 /*
@@ -48,10 +48,10 @@ import org.w3c.dom.Element;
 
 public class UploadAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public UploadAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected UploadAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
+	protected void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
 		Iterator<FileItem> it = fields.iterator();
 		while (it.hasNext()) {
 			FileItem fileItem = it.next();
