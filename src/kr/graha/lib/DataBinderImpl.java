@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) 데이타바인딩 추상클레스
@@ -36,60 +37,60 @@ import java.util.logging.Level;
  */
 
 
-public abstract class DataBinderImpl implements DataBinder {
+abstract class DataBinderImpl implements DataBinder {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	public DataBinderImpl() {
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
-	public void setString(PreparedStatement stmt, int index, String value) throws SQLException {
+	protected void setString(PreparedStatement stmt, int index, String value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setString(index, value);
 	}
-	public void setBoolean(PreparedStatement stmt, int index, boolean value) throws SQLException {
+	protected void setBoolean(PreparedStatement stmt, int index, boolean value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setBoolean(index, value);
 	}
-	public void setInt(PreparedStatement stmt, int index, int value) throws SQLException {
+	protected void setInt(PreparedStatement stmt, int index, int value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setInt(index, value);
 	}
-	public void setFloat(PreparedStatement stmt, int index, float value) throws SQLException {
+	protected void setFloat(PreparedStatement stmt, int index, float value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setFloat(index, value);
 	}
-	public void setLong(PreparedStatement stmt, int index, Long value) throws SQLException {
+	protected void setLong(PreparedStatement stmt, int index, Long value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setLong(index, value);
 	}
-	public void setDouble(PreparedStatement stmt, int index, double value) throws SQLException {
+	protected void setDouble(PreparedStatement stmt, int index, double value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setDouble(index, value);
 	}
-	public void setDate(PreparedStatement stmt, int index, java.sql.Date value) throws SQLException {
+	protected void setDate(PreparedStatement stmt, int index, java.sql.Date value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setDate(index, value);
 	}
-	public void setTimestamp(PreparedStatement stmt, int index, java.sql.Timestamp value) throws SQLException {
+	protected void setTimestamp(PreparedStatement stmt, int index, java.sql.Timestamp value) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = " + value);
 		}
 		stmt.setTimestamp(index, value);
 	}
-	public void setNull(PreparedStatement stmt, int index, int type) throws SQLException {
+	protected void setNull(PreparedStatement stmt, int index, int type) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(index + " = null");
 		}
