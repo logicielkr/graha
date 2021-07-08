@@ -29,31 +29,31 @@ package kr.graha.assistant;
  */
 
 public class Column {
-	public String name;
-	public String typeName;
-	public int dataType;
-	public String isPk;
-	public String isNullable;
-	public String isAutoincrement;
-	public String remarks;
-	public String getLowerName() {
+	protected String name;
+	protected String typeName;
+	protected int dataType;
+	protected String isPk;
+	protected String isNullable;
+	protected String isAutoincrement;
+	protected String remarks;
+	protected String getLowerName() {
 		return name.toLowerCase();
 	}
-	public boolean isNotEmptyRemarks() {
+	protected boolean isNotEmptyRemarks() {
 		if(this.remarks == null || this.remarks.trim().equals("")) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	public String getRemarksOrName() {
+	protected String getRemarksOrName() {
 		if(this.remarks == null || this.remarks.trim().equals("")) {
 			return name;
 		} else {
 			return remarks;
 		}
 	}
-	public boolean isPk() {
+	protected boolean isPk() {
 		return Boolean.parseBoolean(this.isPk);
 	}
 }
