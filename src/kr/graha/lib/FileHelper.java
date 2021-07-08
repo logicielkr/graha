@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.io.UnsupportedEncodingException;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) 파일(File) 관련 유틸리티
@@ -48,10 +49,10 @@ public final class FileHelper {
 	private static Logger logger = Logger.getLogger("kr.graha.lib.FileHelper");
 	private FileHelper() {
 	}
-	public static String escapeFileName(URI uri) {
+	protected static String escapeFileName(URI uri) {
 		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
 	}
-	public static String decodeFileName(URI uri) {
+	protected static String decodeFileName(URI uri) {
 		try {
 			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/")+1), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -60,18 +61,17 @@ public final class FileHelper {
 		}
 	}
 	
-	public static String escapeFileName(String fileName) {
+	protected static String escapeFileName(String fileName) {
 		return decodeFileName(fileName).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
 	}
-	public static String decodeFileName(String fileName) {
+	protected static String decodeFileName(String fileName) {
 		if(Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
 			return fileName;
 		} else {
 			return new String(fileName.getBytes(Charset.defaultCharset()), StandardCharsets.UTF_8);
 		}
 	}
-	
-	
+
 	public static Record getFileInfo(Element query) {
 		Record info = new Record();
 		try {
@@ -116,7 +116,7 @@ public final class FileHelper {
 		}
 		return null;
 	}
-	public static Record getFilePath(String text, Record p) {
+	protected static Record getFilePath(String text, Record p) {
 		return parse(text, p);
 	}
 	public static Record parse(String text, Record p) {
@@ -167,7 +167,7 @@ public final class FileHelper {
 				}
 			}
 		} catch (XPathExpressionException | DOMException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 			
 		}
 		return result;
