@@ -47,7 +47,7 @@ import javax.xml.transform.OutputKeys;
 
 import kr.graha.lib.AuthParser;
 import kr.graha.lib.Buffer;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.Record;
 import kr.graha.lib.XMLGenerator;
 import kr.graha.lib.XSLGenerator;
@@ -72,7 +72,7 @@ public class GeneratorServlet extends HttpServlet {
 		if(c.getInitParameter("LogLevel") != null) {
 			System.setProperty("kr.graha.LogLevel", c.getInitParameter("LogLevel"));
 		}
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -160,7 +160,7 @@ public class GeneratorServlet extends HttpServlet {
 			}
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 		}
 		if(query.hasAttribute("auth") && query.getAttribute("auth") != null && !query.getAttribute("auth").trim().equals("")) {
@@ -198,7 +198,7 @@ public class GeneratorServlet extends HttpServlet {
 						isDownloadable = g.isDownloadable("files/auth");
 					} catch (Exception e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 						response.sendError(500);
 					} finally {
@@ -209,7 +209,7 @@ public class GeneratorServlet extends HttpServlet {
 							}
 						} catch (SQLException e) {
 							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LogHelper.toString(e));
+								logger.severe(LOG.toString(e));
 							}
 						}
 					}
@@ -300,7 +300,7 @@ public class GeneratorServlet extends HttpServlet {
 							gzip = null;
 						} catch (IOException e) {
 							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LogHelper.toString(e));
+								logger.severe(LOG.toString(e));
 							}
 						} finally {
 							if(gzip != null) {
@@ -308,7 +308,7 @@ public class GeneratorServlet extends HttpServlet {
 									gzip.close();
 								} catch (IOException e) {
 									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LogHelper.toString(e));
+										logger.severe(LOG.toString(e));
 									}
 								}
 							}
@@ -417,7 +417,7 @@ public class GeneratorServlet extends HttpServlet {
 							gzip = null;
 						} catch (IOException e) {
 							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LogHelper.toString(e));
+								logger.severe(LOG.toString(e));
 							}
 						} finally {
 							if(gzip != null) {
@@ -425,7 +425,7 @@ public class GeneratorServlet extends HttpServlet {
 									gzip.close();
 								} catch (IOException e) {
 									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LogHelper.toString(e));
+										logger.severe(LOG.toString(e));
 									}
 								}
 							}
@@ -455,7 +455,7 @@ public class GeneratorServlet extends HttpServlet {
 						gzip = null;
 					} catch (IOException e) {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LogHelper.toString(e));
+							logger.severe(LOG.toString(e));
 						}
 					} finally {
 						if(gzip != null) {
@@ -463,7 +463,7 @@ public class GeneratorServlet extends HttpServlet {
 								gzip.close();
 							} catch (IOException e) {
 								if(logger.isLoggable(Level.SEVERE)) {
-									logger.severe(LogHelper.toString(e));
+									logger.severe(LOG.toString(e));
 								}
 							}
 						}
@@ -478,7 +478,7 @@ public class GeneratorServlet extends HttpServlet {
 			params.dump(logger, Level.FINEST);
 		} catch (Exception e) {
 			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LogHelper.toString(e));
+				logger.severe(LOG.toString(e));
 			}
 			try {
 				if(con != null) {
@@ -486,7 +486,7 @@ public class GeneratorServlet extends HttpServlet {
 				}
 			} catch (SQLException error) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(error));
+					logger.severe(LOG.toString(error));
 				}
 			}
 			response.sendError(500);
@@ -499,7 +499,7 @@ public class GeneratorServlet extends HttpServlet {
 				}
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LogHelper.toString(e));
+					logger.severe(LOG.toString(e));
 				}
 			}
 		}
