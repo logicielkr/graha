@@ -22,6 +22,7 @@
 package kr.graha.lib;
 
 import java.util.logging.Logger;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하)에서 StringBuffer 객체 대신에 사용 
@@ -35,7 +36,7 @@ public class Buffer {
 	private StringBuffer sb;
 	public Buffer() {
 		sb = new StringBuffer();
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	public void append(String text) {
 		this.sb.append(text);
