@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import kr.graha.lib.Record;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) HTTP Session 처리기
@@ -37,10 +37,10 @@ import kr.graha.lib.LogHelper;
 
 public class SessionAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public SessionAdapter() {
-		LogHelper.setLogLevel(logger);
+	protected SessionAdapter() {
+		LOG.setLogLevel(logger);
 	}
-	public void execute(HttpServletRequest request, Record params) {
+	protected void execute(HttpServletRequest request, Record params) {
 		HttpSession session = request.getSession();
 		Enumeration<String> e = session.getAttributeNames();
 		while (e.hasMoreElements()) {
