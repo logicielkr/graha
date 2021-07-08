@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Element;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하)에서 파라미터를 관리하기 위해 사용하는 라이브러리
@@ -49,7 +50,7 @@ public class Record extends HashMap {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	public Record() {
 		super();
-		LogHelper.setLogLevel(logger);
+		LOG.setLogLevel(logger);
 	}
 	public void put(String key, String value) {
 		super.put(key, value);
@@ -205,7 +206,7 @@ public class Record extends HashMap {
 				return Integer.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LogHelper.toString(e));
+					logger.warning(LOG.toString(e));
 				}
 			}
 		}
@@ -256,7 +257,7 @@ public class Record extends HashMap {
 				return Float.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LogHelper.toString(e));
+					logger.warning(LOG.toString(e));
 				}
 			}
 		}
@@ -307,7 +308,7 @@ public class Record extends HashMap {
 				return Double.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LogHelper.toString(e));
+					logger.warning(LOG.toString(e));
 				}
 			}
 		}
@@ -358,7 +359,7 @@ public class Record extends HashMap {
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
 				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LogHelper.toString(e));
+					logger.warning(LOG.toString(e));
 				}
 			}
 		}
@@ -425,7 +426,7 @@ public class Record extends HashMap {
 			result = new Date(df.parse(value).getTime());
 		} catch (ParseException e) {
 			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LogHelper.toString(e));
+				logger.warning(LOG.toString(e));
 			}
 		}
 		return result;
@@ -492,7 +493,7 @@ public class Record extends HashMap {
 			result = new Timestamp(df.parse(value).getTime());
 		} catch (ParseException e) {
 			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LogHelper.toString(e));
+				logger.warning(LOG.toString(e));
 			}
 		}
 		return result;
