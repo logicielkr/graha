@@ -35,13 +35,13 @@ public class Converter {
 		}
 		c.execute(f);
 	}
-	public void execute(File f) throws IOException {
+	private void execute(File f) throws IOException {
 		File origin = new File(f.getPath() + java.io.File.separator + "src");
 		
 		File target = new File(f.getPath() + java.io.File.separator + "tomcat10");
 		execute(origin, origin.getPath(), target.getPath());
 	}
-	public void execute(File origin, String prefix, String targetPrefix) throws IOException {
+	private void execute(File origin, String prefix, String targetPrefix) throws IOException {
 		File[] files = origin.listFiles();
 		if(files != null) {
 			for(int i = 0; i < files.length; i++) {
@@ -56,7 +56,7 @@ public class Converter {
 			}
 		}
 	}
-	public void copy(File file, String prefix, String targetPrefix) throws IOException {
+	private void copy(File file, String prefix, String targetPrefix) throws IOException {
 		
 		File target = new File(targetPrefix + file.getPath().substring(prefix.length()));
 		if(!target.getParentFile().exists()) {
