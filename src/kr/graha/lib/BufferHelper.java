@@ -53,7 +53,7 @@ public final class BufferHelper {
 	private static Logger logger = Logger.getLogger("kr.graha.lib.BufferHelper");
 	private BufferHelper() {
 	}
-	public static void addRecord(String key, Record params, Buffer sb, XMLTag tag) {
+	protected static void addRecord(String key, Record params, Buffer sb, XMLTag tag) {
 		if(params.isArray(key)) {
 			java.util.List<String> items = params.getArray(key);
 			for(String item : items){
