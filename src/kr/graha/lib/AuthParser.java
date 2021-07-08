@@ -33,19 +33,19 @@ import java.util.logging.Logger;
 
 public final class AuthParser {
 	private static Logger logger = Logger.getLogger("kr.graha.lib.AuthParser");
-	public static int IsEmpty = 1;
-	public static int IsNotEmpty = 2;
-	public static int NotIn = 3;
-	public static int In = 4;
-	public static int Equals = 5;
-	public static int NotEquals = 6;
-	public static int GreaterThan = 7;
-	public static int GreaterThanOrEqualTo = 8;
-	public static int LessThan = 9;
-	public static int LessThanOrEqualTo = 10;
+	protected static int IsEmpty = 1;
+	protected static int IsNotEmpty = 2;
+	protected static int NotIn = 3;
+	protected static int In = 4;
+	protected static int Equals = 5;
+	protected static int NotEquals = 6;
+	protected static int GreaterThan = 7;
+	protected static int GreaterThanOrEqualTo = 8;
+	protected static int LessThan = 9;
+	protected static int LessThanOrEqualTo = 10;
 	private AuthParser() {
 	}
-	public static AuthInfo parse(String auth) {
+	protected static AuthInfo parse(String auth) {
 		String right = null;
 		String left = null;
 		String op = null;
@@ -89,7 +89,7 @@ public final class AuthParser {
 			return info;
 		}
 	}
-	public static int parseOP(String op) {
+	private static int parseOP(String op) {
 		if(op == null) {
 			return 0;
 		}
@@ -154,30 +154,30 @@ public final class AuthParser {
 		}
 		return true;
 	}
-	public static boolean equals(String left, String right, Record param) {
+	private static boolean equals(String left, String right, Record param) {
 		return param.equals(left, right);
 	}
-	public static boolean in(String left, String right, Record param) {
+	private static boolean in(String left, String right, Record param) {
 		return param.in(left, right);
 	}
-	public static boolean isEmpty(String left, Record param) {
+	private static boolean isEmpty(String left, Record param) {
 		return param.isempty(left);
 	}
-	public static boolean gt(String left, String right, Record param) {
+	private static boolean gt(String left, String right, Record param) {
 		return param.check(left, right, AuthParser.GreaterThan);
 	}
-	public static boolean gteq(String left, String right, Record param) {
+	private static boolean gteq(String left, String right, Record param) {
 		return param.check(left, right, AuthParser.GreaterThanOrEqualTo);
 	}
-	public static boolean lt(String left, String right, Record param) {
+	private static boolean lt(String left, String right, Record param) {
 		return param.check(left, right, AuthParser.LessThan);
 	}
-	public static boolean lteq(String left, String right, Record param) {
+	private static boolean lteq(String left, String right, Record param) {
 		return param.check(left, right, AuthParser.LessThanOrEqualTo);
 	}
 }
 class AuthInfo {
-	String left;
-	String right;
-	int op;
+	protected String left;
+	protected String right;
+	protected int op;
 }
