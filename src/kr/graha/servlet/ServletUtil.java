@@ -34,7 +34,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import kr.graha.lib.LogHelper;
+import kr.graha.helper.LOG;
 import kr.graha.lib.Record;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -50,10 +50,10 @@ import org.xml.sax.SAXException;
 
 public class ServletUtil {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	public ServletUtil() {
-		LogHelper.setLogLevel(logger);
+	protected ServletUtil() {
+		LOG.setLogLevel(logger);
 	}
-	public Element getQuery(File config, String id) {
+	protected Element getQuery(File config, String id) {
 		Element query = null;
 		DocumentBuilderFactory dbf = null;
 		try {
@@ -77,11 +77,11 @@ public class ServletUtil {
 			}
 			query = (Element)expr.evaluate(doc, XPathConstants.NODE);
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LogHelper.toString(e));
+			logger.severe(LOG.toString(e));
 		}
 		return query;
 	}
-	public boolean acceptsGZipEncoding(HttpServletRequest request, String gzip) {
+	protected boolean acceptsGZipEncoding(HttpServletRequest request, String gzip) {
 		boolean result = false;
 		String acceptEncoding = request.getHeader("Accept-Encoding");
 		if(
