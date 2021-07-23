@@ -520,9 +520,9 @@ public class XSLGenerator {
 		this._expr = this._xpath.compile("files/file");
 		NodeList files = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
-			sb.appendL("<form enctype=\"multipart/form-data\" name=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "\" action=\"" + this.getPath(this._query.getAttribute("id")) + "\" method=\"post\" onsubmit=\"return check_submit(this, '" + layout.getAttribute("msg") + "');\">");
+			sb.appendL("<form enctype=\"multipart/form-data\" name=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "\" action=\"" + this.getPath(this._query.getAttribute("id")) + "\" method=\"post\" onsubmit=\"return (document.getElementById('" + this._query.getAttribute("id") + "_submit').form == null) || check_submit(this, '" + layout.getAttribute("msg") + "');\">");
 		} else {
-			sb.appendL("<form name=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "\" action=\"" + this.getPath(this._query.getAttribute("id")) + "\" method=\"post\" onsubmit=\"return check_submit(this, '" + layout.getAttribute("msg") + "');\">");
+			sb.appendL("<form name=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "\" action=\"" + this.getPath(this._query.getAttribute("id")) + "\" method=\"post\" onsubmit=\"return (document.getElementById('" + this._query.getAttribute("id") + "_submit').form == null) || check_submit(this, '" + layout.getAttribute("msg") + "');\">");
 		}
 		String[] position = {"top/left", "top/center", "top/right", "bottom/left", "bottom/center", "bottom/right"};
 		
