@@ -275,7 +275,6 @@ public final class DB {
 			}
 			rs = pstmt.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
-			
 			for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 				out.println("	private " + getJavaDataType(rsmd.getColumnType(x), rsmd.getColumnTypeName(x)) + " " + getFieldName(rsmd.getColumnName(x)) + ";");
 				out.println("	public void set" + getClassOrMethodName(rsmd.getColumnName(x)) + "(" + getJavaDataType(rsmd.getColumnType(x), rsmd.getColumnTypeName(x)) + " " + getFieldName(rsmd.getColumnName(x)) + ") {");
