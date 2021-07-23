@@ -522,6 +522,13 @@ public class Record extends HashMap {
 		DecimalFormat df = new DecimalFormat(pattern);
 		return df.format(d);
 	}
+/**
+ * 키에 해당하는 값이 있는지 검사한다.
+ * 이 메소드는 containsKey와 다르다.
+ * 키에 해당하는 값이 있다고 하더라도, 값이 null 이거나 공백("") 인 경우 fasle 를 반환한다.
+ * @param key 키
+ * @return 키에 해당하는 값이 있는지 여부
+ */
 	public boolean hasKey(String key) {
 		boolean result = false;
 		if(super.containsKey(key)) {
