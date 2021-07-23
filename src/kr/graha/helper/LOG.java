@@ -32,6 +32,8 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Graha(그라하) 로그 관련 유틸리티
@@ -43,6 +45,11 @@ import java.util.logging.Logger;
 public final class LOG {
 	private LOG() {
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(Exception e) {
 		StringWriter sw = null;
 		PrintWriter pw = null;
@@ -73,30 +80,116 @@ public final class LOG {
 			return null;
 		}
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(RuntimeException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(IllegalAccessException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(NoSuchMethodException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(InvocationTargetException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(SQLException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(ClassNotFoundException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(XPathExpressionException e) {
 		return toString((Exception)e);
 	}
+/**
+ * 예외(Exception) 가 발생한 StackTrace 를 반환한다.
+ * @param e 예외(Exception)
+ * @return 예외(Exception) 가 발생한 StackTrace
+ */
 	public static String toString(ParserConfigurationException e) {
 		return toString((Exception)e);
 	}
+/**
+ * HashMap 객체를 보기 좋은 형태로 변경한다.
+ * @param data HashMap 객체
+ * @return 보기 좋은 형태로 변경한 것
+ */
+	public static String toString(HashMap data) {
+		return toString(data, null);
+	}
+/**
+ * HashMap 객체를 보기 좋은 형태로 변경한다.
+ * @param data HashMap 객체
+ * @param prefix 
+ * @return 보기 좋은 형태로 변경한 것
+ */
+	private static String toString(HashMap data, String prefix) {
+		StringBuffer sb = new StringBuffer();
+		Iterator<String> it = data.keySet().iterator();
+		if(prefix != null) {
+			sb.append(prefix);
+		}
+		sb.append("{\n");
+		int index = 0;
+		while(it.hasNext()) {
+			String key = (String)it.next();
+			if(index > 0) {
+				sb.append(",\n");
+			}
+			if(prefix != null) {
+				sb.append(prefix);
+			}
+			sb.append("\t");
+			sb.append(key);
+			if(data.get(key) != null) {
+				sb.append("=");
+				sb.append(data.get(key).toString());
+			}
+			index++;
+		}
+		sb.append("\n");
+		if(prefix != null) {
+			sb.append(prefix);
+		}
+		sb.append("}\n");
+		return sb.toString();
+	}
+
 	public static void setLogLevel(Logger logger) {
 	}
 	public static void setLogLevel2(Logger logger) {
