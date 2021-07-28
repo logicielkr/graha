@@ -161,7 +161,8 @@ function toggleGen(obj) {
 	<textarea name="gen" id="gen" style="width:100%;height:100px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
 </xsl:if>
 </form>
- <xsl:if test="/document/errors/error">
+<div style="clear:both;" />
+<xsl:if test="/document/errors/error">
 	<table style="width:100%;" id="_error">
 		<tr>
 			<th>Message</th>
