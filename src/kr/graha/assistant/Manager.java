@@ -673,6 +673,7 @@ public class Manager extends HttpServlet {
 		java.util.List<Table> tabs = null;
 		try {
 			con = cm.getConnection();
+			String defaultSchema = con.getSchema();
 			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
 			DatabaseMetaData m = con.getMetaData();
 			
@@ -705,21 +706,36 @@ public class Manager extends HttpServlet {
 				}
 				index++;
 			}
-
-			bw.write("					from " + tableName + "\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("					from " + schemaName + "." + tableName + "\n");
+			} else {
+				bw.write("					from " + tableName + "\n");
+			}
 			bw.write("				</sql>\n");
 			bw.write("				<sql_cnt>\n");
-			bw.write("					select count(*) from " + tableName + "\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("					select count(*) from " + schemaName + "." + tableName + "\n");
+			} else {
+				bw.write("					select count(*) from " + tableName + "\n");
+			}
 if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			bw.write("/*\n");
 			bw.write("					SELECT n_live_tup\n");
 			bw.write("					FROM pg_stat_all_tables\n");
-			bw.write("					WHERE relname = '" + tableName + "'\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("					WHERE relname = '" + tableName + "' and schemaname = '" + schemaName + "'\n");
+			} else {
+				bw.write("					WHERE relname = '" + tableName + "'\n");
+			}
 			bw.write("*/\n");
 			bw.write("/*\n");
 			bw.write("					SELECT reltuples\n");
 			bw.write("					FROM pg_class\n");
-			bw.write("					WHERE relname = '" + tableName + "'\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("					WHERE relname = '" + tableName + "' and relnamespace::regnamespace::text = '" + schemaName + "'\n");
+			} else {
+				bw.write("					WHERE relname = '" + tableName + "'\n");
+			}
 			bw.write("*/\n");
 }
 			bw.write("				</sql_cnt>\n");
@@ -763,12 +779,16 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			bw.write("		<header>\n");
 			bw.write("		</header>\n");
 			bw.write("		<tables>\n");
-			bw.write("			<table tableName=\"" + tableName + "\" name=\"" + tableName.toLowerCase() + "\" label=\"" + tableComments + "\">\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("			<table tableName=\"" + schemaName + "." + tableName + "\" name=\"" + tableName.toLowerCase() + "\" label=\"" + tableComments + "\">\n");
+			} else {
+				bw.write("			<table tableName=\"" + tableName + "\" name=\"" + tableName.toLowerCase() + "\" label=\"" + tableComments + "\">\n");
+			}
 			for(Column col : cols){
 				String dataType = db.getGrahaDataType(col.dataType);
 				if(col.isPk()) {
 					if(db.supportSequence()) {
-						bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"sequence." + db.getNextval(con, tableName, col.name) + "\" />\n");
+						bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"sequence." + db.getNextval(con, tableName, col.name, schemaName, defaultSchema) + "\" />\n");
 					} else {
 						bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"generate\" />\n");
 					}
@@ -790,14 +810,18 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 						continue;
 					}
 					String comments = db.getTabRemarks(con, schema, table);
-					bw.write("			<table tableName=\"" + table + "\" name=\"" + table.toLowerCase() + "\" label=\"" + comments + "\"  multi=\"true\" append=\"3\">\n");
+					if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+						bw.write("			<table tableName=\"" + schemaName + "." + tableName + "\" name=\"" + table.toLowerCase() + "\" label=\"" + comments + "\"  multi=\"true\" append=\"3\">\n");
+					} else {
+						bw.write("			<table tableName=\"" + table + "\" name=\"" + table.toLowerCase() + "\" label=\"" + comments + "\"  multi=\"true\" append=\"3\">\n");
+					}
 					
 					cols = db.getColumns(con, schema, table);
 					for(Column col : cols){
 						String dataType = db.getGrahaDataType(col.dataType);
 						if(col.isPk()) {
 							if(db.supportSequence()) {
-								bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + table.toLowerCase() + "." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"sequence." + db.getNextval(con, table, col.name) + "\" />\n");
+								bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + table.toLowerCase() + "." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"sequence." + db.getNextval(con, table, col.name, schemaName, defaultSchema) + "\" />\n");
 							} else {
 								bw.write("				<column name=\"" + col.getLowerName() + "\" value=\"param." + table.toLowerCase() + "." + col.getLowerName() + "\" datatype=\"" + dataType + "\"  primary=\"true\"  insert=\"generate\" />\n");
 							}
@@ -920,7 +944,11 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					}
 					index++;
 			}
-			bw.write("					from " + tableName + "\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("					from " + schemaName + "." + tableName + "\n");
+			} else {
+				bw.write("					from " + tableName + "\n");
+			}
 			index = 0;
 			for(Column col : cols){
 				if(col.isPk()) {
@@ -966,7 +994,11 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 							}
 							index++;
 					}
-					bw.write("					from " + table + "\n");
+					if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+						bw.write("					from " + schemaName + "." + tableName + "\n");
+					} else {
+						bw.write("					from " + table + "\n");
+					}
 					index = 0;
 					for(Column col : cols){
 						if(db.containsKey(con, schemaName, tableName, col.name)) {
@@ -1075,7 +1107,11 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 
 			bw.write("	<query id=\"delete\" funcType=\"delete\" label=\"" + tableComments + "\">\n");
 			bw.write("		<tables>\n");
-			bw.write("			<table tableName=\"" + tableName + "\" name=\"" + tableName.toLowerCase() + "\">\n");
+			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+				bw.write("			<table tableName=\"" + schemaName + "." + tableName + "\" name=\"" + tableName.toLowerCase() + "\">\n");
+			} else {
+				bw.write("			<table tableName=\"" + tableName + "\" name=\"" + tableName.toLowerCase() + "\">\n");
+			}
 			for(Column col : cols){
 				String dataType = db.getGrahaDataType(col.dataType);
 				if(col.isPk()) {
@@ -1091,7 +1127,11 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					if(table != null && table.equals(tableName)) {
 						continue;
 					}
-					bw.write("			<table tableName=\"" + table + "\" name=\"" + table.toLowerCase() + "\">\n");
+					if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+						bw.write("			<table tableName=\"" + schemaName + "." + tableName + "\" name=\"" + table.toLowerCase() + "\">\n");
+					} else {
+						bw.write("			<table tableName=\"" + table + "\" name=\"" + table.toLowerCase() + "\">\n");
+					}
 					cols = db.getColumns(con, schema, table);
 					for(Column col : cols){
 						String dataType = db.getGrahaDataType(col.dataType);

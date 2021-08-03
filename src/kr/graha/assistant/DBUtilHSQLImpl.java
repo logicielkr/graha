@@ -48,10 +48,14 @@ public class DBUtilHSQLImpl extends DBUtil {
 	protected DBUtilHSQLImpl() throws IOException {
 		LOG.setLogLevel(logger);
 	}
-	protected String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES
 */
-		return "NEXT VALUE FOR &quot;" + tableName + "$" + columnName + "&quot;";
+		String prefix = "";
+		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+			prefix = schemaName + ".";
+		}
+		return "NEXT VALUE FOR &quot;" + prefix + tableName + "$" + columnName + "&quot;";
 	}
 }

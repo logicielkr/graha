@@ -53,16 +53,19 @@ public class DBUtilDerbyImpl extends DBUtil {
 	protected String getToday() {
 		return "current_timestamp";
 	}
-	protected String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 select SEQUENCENAME from sys.SYSSEQUENCES
 */
-
+		String prefix = "";
+		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+			prefix = schemaName + ".";
+		}
 		String sequence = getSequence(con, null, tableName + "$" + columnName);
 		if(sequence == null) {
-			return "NEXT VALUE FOR &quot;" + tableName + "$" + columnName + "&quot;";
+			return "NEXT VALUE FOR &quot;" + prefix + tableName + "$" + columnName + "&quot;";
 		} else {
-			return "NEXT VALUE FOR &quot;" + sequence + "&quot;";
+			return "NEXT VALUE FOR &quot;" + prefix + sequence + "&quot;";
 		}
 	}
 	private String getSequence(Connection con, String schemaName, String sequenceName) {

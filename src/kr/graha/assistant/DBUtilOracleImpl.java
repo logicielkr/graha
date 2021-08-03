@@ -56,12 +56,16 @@ public class DBUtilOracleImpl extends DBUtil {
 	protected String getToday() {
 		return "sysdate";
 	}
-	protected String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
+		String prefix = "";
+		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+			prefix = schemaName + ".";
+		}
 		String sequence = getSequence(con, tableName + "$" + columnName);
 		if(sequence == null) {
-			return "&quot;" + tableName + "$" + columnName + "&quot;.nextval";
+			return "&quot;" + prefix + tableName + "$" + columnName + "&quot;.nextval";
 		} else {
-			return "&quot;" + sequence + "&quot;.nextval";
+			return "&quot;" + prefix + sequence + "&quot;.nextval";
 		}
 	}
 	private String getSequence(Connection con, String sequenceName) {

@@ -53,7 +53,7 @@ public class DBUtilSqliteImpl extends DBUtil {
 	protected String getToday() {
 		return "current_timestamp";
 	}
-	protected String getNextval(String tableName, String columnName) {
+	protected String getNextval(String tableName, String columnName, String schemaName, String defaultSchema) {
 		return null;
 	}
 	private boolean existCommentTable(Connection con, boolean table) throws SQLException {

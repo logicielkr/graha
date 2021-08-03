@@ -51,24 +51,28 @@ public class DBUtilMariaDBImpl extends DBUtil {
 	protected DBUtilMariaDBImpl() throws IOException {
 		LOG.setLogLevel(logger);
 	}
-	protected String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 */
-		String schemaName = null;
+		String catalogName = null;
 		try {
-			schemaName = con.getCatalog();
+			catalogName = con.getCatalog();
 		} catch(SQLException e) {
 			
 		}
-		String sequence = getSequence(con, schemaName, tableName + "$" + columnName);
+		String prefix = "";
+		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+			prefix = schemaName + ".";
+		}
+		String sequence = getSequence(con, catalogName, tableName + "$" + columnName);
 		if(sequence == null) {
-			return "NEXT VALUE FOR " + tableName + "$" + columnName + "";
+			return "NEXT VALUE FOR " + prefix + tableName + "$" + columnName + "";
 		} else {
-			return "NEXT VALUE FOR " + sequence;
+			return "NEXT VALUE FOR " + prefix + sequence;
 		}
 	}
-	private String getSequence(Connection con, String schemaName, String sequenceName) {
+	private String getSequence(Connection con, String catalogName, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -77,7 +81,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 		try {
 			pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, sequenceName);
-			pstmt.setString(2, schemaName);
+			pstmt.setString(2, catalogName);
 			
 
 			rs = pstmt.executeQuery();

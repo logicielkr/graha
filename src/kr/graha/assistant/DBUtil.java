@@ -85,11 +85,15 @@ public class DBUtil {
 		DatabaseMetaData m = con.getMetaData();
 		return "";
 	}
-	protected String getNextval(Connection con, String tableName, String columnName) {
+	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 		select sequencename from pg_sequences
 */
-		return "nextval('" + tableName + "$" + columnName + "')";
+		String prefix = "";
+		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+			prefix = schemaName + ".";
+		}
+		return "nextval('" + prefix + tableName + "$" + columnName + "')";
 	}
 	protected void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
 		if(this.prop == null) {
