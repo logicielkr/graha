@@ -166,9 +166,9 @@ public class DataBinderNumberTypeImpl extends DataBinderImpl {
 			if(column != null && sb != null) {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + sequence + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
-		} else if(defaultValue != null && !params.compare(defaultValue, "null")) {
+		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
 			String dValue = defaultValue;
-			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param."))) {
+			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
 			params.put(value[0], dValue);

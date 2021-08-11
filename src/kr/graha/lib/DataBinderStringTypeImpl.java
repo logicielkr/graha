@@ -96,7 +96,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0]).replace("]]>", "]]]]><![CDATA[>") + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
-		} else if(defaultValue != null && !params.compare(defaultValue, "null")) {
+		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
 			
 			String dValue = defaultValue;
 
@@ -127,7 +127,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					}
 				}
 				dValue = params.getString("system.today.dd");
-			} else if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param."))) {
+			} else if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
 			if(defaultValue != null && !defaultValue.equals("%")) {
