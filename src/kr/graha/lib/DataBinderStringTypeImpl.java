@@ -100,13 +100,13 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 			
 			String dValue = defaultValue;
 
-			if(dValue != null && dValue.startsWith("system.today.yyyy")) {
+			if(dValue != null && dValue.equals("system.today.yyyy")) {
 				if(!params.hasKey("system.today.yyyy")) {
 					int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
 					params.put("system.today.yyyy", Integer.toString(year));
 				}
 				dValue = params.getString("system.today.yyyy");
-			} else if(dValue != null && dValue.startsWith("system.today.mm")) {
+			} else if(dValue != null && dValue.equals("system.today.mm")) {
 				if(!params.hasKey("system.today.mm")) {
 					int month = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH);
 					month++;
@@ -117,7 +117,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					}
 				}
 				dValue = params.getString("system.today.mm");
-			} else if(dValue != null && dValue.startsWith("system.today.dd")) {
+			} else if(dValue != null && dValue.equals("system.today.dd")) {
 				if(!params.hasKey("system.today.dd")) {
 					int day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH);
 					if(day >= 10) {
@@ -127,6 +127,8 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					}
 				}
 				dValue = params.getString("system.today.dd");
+			} else if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param."))) {
+				dValue = params.getString(dValue);
 			}
 			if(defaultValue != null && !defaultValue.equals("%")) {
 				params.put(value[0], dValue);
