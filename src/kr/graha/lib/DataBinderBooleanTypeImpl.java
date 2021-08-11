@@ -86,6 +86,9 @@ public class DataBinderBooleanTypeImpl extends DataBinderImpl {
 		} else if(defaultValue != null && !params.compare(defaultValue, "null")) {
 			
 			String dValue = defaultValue;
+			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param."))) {
+				dValue = params.getString(dValue);
+			}
 
 			if(defaultValue != null && !defaultValue.equals("%")) {
 				params.put(value[0], dValue);
