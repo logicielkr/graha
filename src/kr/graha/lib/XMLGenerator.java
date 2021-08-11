@@ -1823,7 +1823,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 	public boolean isError() {
 		return this.isError;
 	}
-	private Buffer before() {
+	private Buffer before() throws SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		sb.appendL("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		if(this.isError) {
@@ -1909,6 +1909,78 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			}
 		}
 		sb.appendL(this._tag.tag("document", null, true));
+		if(this._params.hasKey("header.method") && !this._params.getString("header.method").equals("POST") && !this.isError) {
+			try {
+				this._expr = this._xpath.compile("header");
+				Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
+				Document doc = null;
+				if(header.hasAttribute("extends")) {
+						File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
+						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+						dbf.setNamespaceAware(true);
+						dbf.setXIncludeAware(true);
+						doc = dbf.newDocumentBuilder().parse(parent);
+						doc.getDocumentElement().normalize();
+						
+//						this._expr = this._xpath.compile("header/codes/code");
+//						code = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+				}
+				this._expr = this._xpath.compile("header/codes/code");
+				NodeList codes = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+				
+				for(int i = 0; i < codes.getLength(); i++) {
+					Element node = (Element)codes.item(i);
+					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
+					}
+					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+					NodeList p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+					if(p.getLength() > 0) {
+						continue;
+					}
+					if(doc != null) {
+						this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+						NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+						if(b.getLength() > 0) {
+							continue;
+						}
+					}
+					sb.append(code(node));
+				}
+				this._expr = this._xpath.compile("header/codes/code");
+				codes = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+				
+				for(int i = 0; i < codes.getLength(); i++) {
+					Element node = (Element)codes.item(i);
+					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
+					}
+					if(doc != null) {
+						this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+						NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+						if(b.getLength() > 0) {
+							continue;
+						}
+					}
+					sb.append(code(node));
+				}
+				if(doc != null) {
+					this._expr = this._xpath.compile("/querys/header/codes/code");
+					codes = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+					for(int i = 0; i < codes.getLength(); i++) {
+						Element node = (Element)codes.item(i);
+						if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+							continue;
+						}
+						sb.append(code(node));
+					}
+				}
+			} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
+				if(logger.isLoggable(Level.SEVERE)) {
+					logger.severe(LOG.toString(e));
+				}
+			}
+		}
 		return sb;
 	}
 	private Buffer code(Element node) throws SQLException, NoSuchProviderException {
@@ -1987,80 +2059,8 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		return sb;
 	}
-	private Buffer after() throws SQLException, NoSuchProviderException {
+	private Buffer after() {
 		Buffer sb = new Buffer();
-		if(this._params.hasKey("header.method") && !this._params.getString("header.method").equals("POST") && !this.isError) {
-			try {
-				this._expr = this._xpath.compile("header");
-				Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-				Document doc = null;
-				if(header.hasAttribute("extends")) {
-						File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-						dbf.setNamespaceAware(true);
-						dbf.setXIncludeAware(true);
-						doc = dbf.newDocumentBuilder().parse(parent);
-						doc.getDocumentElement().normalize();
-						
-//						this._expr = this._xpath.compile("header/codes/code");
-//						code = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-				}
-				this._expr = this._xpath.compile("header/codes/code");
-				NodeList codes = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-				
-				for(int i = 0; i < codes.getLength(); i++) {
-					Element node = (Element)codes.item(i);
-					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-						continue;
-					}
-					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-					NodeList p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-					if(p.getLength() > 0) {
-						continue;
-					}
-					if(doc != null) {
-						this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-						NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-						if(b.getLength() > 0) {
-							continue;
-						}
-					}
-					sb.append(code(node));
-				}
-				this._expr = this._xpath.compile("header/codes/code");
-				codes = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-				
-				for(int i = 0; i < codes.getLength(); i++) {
-					Element node = (Element)codes.item(i);
-					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-						continue;
-					}
-					if(doc != null) {
-						this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-						NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-						if(b.getLength() > 0) {
-							continue;
-						}
-					}
-					sb.append(code(node));
-				}
-				if(doc != null) {
-					this._expr = this._xpath.compile("/querys/header/codes/code");
-					codes = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-					for(int i = 0; i < codes.getLength(); i++) {
-						Element node = (Element)codes.item(i);
-						if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-							continue;
-						}
-						sb.append(code(node));
-					}
-				}
-			} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
-			}
-		}
 		if(this._params != null && !this._params.isEmpty()) {
 			boolean isResult = false;
 			Iterator<String> it = this._params.keySet().iterator();
