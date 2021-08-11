@@ -1930,8 +1930,13 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 				rs = stmt.executeQuery();
 				sb.appendL(this._tag.tag("code", node.getAttribute("name"), true));
+				index = 0;
 				while(rs.next()) {
 					sb.appendL(this._tag.tag("code", "option", rs.getString(1), rs.getString(2)));
+					if(index == 0) {
+						this._params.put("code." + node.getAttribute("name") + ".firstValue", rs.getString(1));
+					}
+					index++;
 				}
 				sb.appendL(this._tag.tag("code", null, false));
 				rs.close();
