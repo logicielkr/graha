@@ -237,7 +237,9 @@ public class XSLGenerator {
 						sb.append("<xsl:value-of select=\"" + this._tag.path("row", p.getAttribute("value"), tableName, isFull) + "\"/>");
 					} else if(p.getAttribute("type").equals("param")) {
 						sb.append("<xsl:value-of select=\"" + this._tag.path("param", p.getAttribute("value"), null, true) + "\"/>");
-					} else if(p.getAttribute("type").equals("default")) {
+					} else if(p.getAttribute("type").equals("prop")) {
+						sb.append("<xsl:value-of select=\"" + this._tag.path("prop", p.getAttribute("value"), null, true) + "\"/>");
+					} else if(p.getAttribute("type").equals("default") || p.getAttribute("type").equals("const")) {
 						sb.append(p.getAttribute("value"));
 					}
 				}
@@ -817,6 +819,10 @@ public class XSLGenerator {
 			value = value.substring(6);
 			upperName = "param";
 			isFull = true;
+		} else if(value.startsWith("prop.")) {
+			value = value.substring(5);
+			upperName = "prop";
+			isFull = true;
 		} else if(value.startsWith("query.")) {
 			value = value.substring(6);
 		}
@@ -1130,7 +1136,7 @@ public class XSLGenerator {
 						if(type == null || type.equals("")) {
 							type = "param";
 						}
-						if(type != null && type.equals("const")) {
+						if(type != null && (type.equals("const") || type.equals("default"))) {
 							value = input.getAttribute("value");
 						} else {
 							String ref = input.getAttribute("ref");
@@ -1217,7 +1223,7 @@ public class XSLGenerator {
 						if(type == null || type.equals("")) {
 							type = "param";
 						}
-						if(type != null && type.equals("const")) {
+						if(type != null && (type.equals("const") || type.equals("default"))) {
 							value = input.getAttribute("value");
 						} else {
 							String ref = input.getAttribute("ref");
@@ -1344,6 +1350,8 @@ public class XSLGenerator {
 						left = this._tag.path("param", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else if(info.left.startsWith("result.")) {
 						left = this._tag.path("result", info.left.substring(info.left.indexOf(".") + 1), null, true);
+					} else if(info.left.startsWith("prop.")) {
+						left = this._tag.path("prop", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else if(info.left.startsWith("query.")) {
 						left = this._tag.path("row", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else {
@@ -1395,13 +1403,21 @@ public class XSLGenerator {
 				if(p.getAttribute("type").equals("param")) {
 					value = this._tag.path("param", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("query")) {
-					value = this._tag.path("row", p.getAttribute("value"), null, true);
+					value = this._tag.path("query", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("result")) {
-					value = this._tag.path("row", p.getAttribute("result"), null, true);
+					value = this._tag.path("result", p.getAttribute("value"), null, true);
+				} else if(p.getAttribute("type").equals("prop")) {
+					value = this._tag.path("prop", p.getAttribute("value"), null, true);
+				} else if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
+					
 				} else {
 					throw new ParsingException();
 				}
-				sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+				if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
+					sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
+				} else {
+					sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+				}
 			}
 			sb.append("<input type=\"submit\" value=\"확인\" />");
 			sb.append("</form>");
