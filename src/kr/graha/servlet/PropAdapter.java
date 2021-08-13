@@ -40,11 +40,23 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import java.security.NoSuchProviderException;
 
 import kr.graha.lib.FileHelper;
 import kr.graha.helper.LOG;
+import kr.graha.helper.DB;
 import kr.graha.lib.Record;
 import kr.graha.lib.AuthParser;
+import kr.graha.lib.XMLGenerator;
+import kr.graha.lib.Encryptor;
+import kr.graha.lib.DBHelper;
+import kr.graha.lib.Buffer;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.ResultSetMetaData;
 
 /**
  * Graha(그라하) 사용자 정의 Property 처리기
@@ -59,6 +71,25 @@ public class PropAdapter {
 		LOG.setLogLevel(logger);
 	}
 	protected void execute(HttpServletRequest request, File config, Element query, Record params) {
+		try {
+			this.execute(request, config, query, params, null, null);
+		} catch (SQLException | NoSuchProviderException e) {
+			if(logger.isLoggable(Level.SEVERE)) {
+				logger.severe(LOG.toString(e));
+			}
+		}
+	}
+	protected void execute(
+			HttpServletRequest request, 
+			File config, 
+			Element query, 
+			Record params, 
+			Connection con, 
+			XMLGenerator g
+		) 
+		throws SQLException,
+			NoSuchProviderException
+	{
 		try {
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
@@ -94,7 +125,7 @@ public class PropAdapter {
 				}
 				for(int i = 0; i < nodes[x].getLength(); i++) {
 					Element node = (Element)nodes[x].item(i);
-					if(node.hasAttribute("name") && node.hasAttribute("value")) {
+					if(node.hasAttribute("name")) {
 						expr = xpath.compile("header/prop[@name='" + node.getAttribute("name") + "' and override='true']");
 						NodeList p = null;
 						if(x == 1) {
@@ -110,9 +141,16 @@ public class PropAdapter {
 							}
 						}
 						if(!node.hasAttribute("cond") || AuthParser.auth(node.getAttribute("cond"), params)) {
-							Record result = FileHelper.parse(node.getAttribute("value"), params);
-							if(result != null && result.get("_system.filepath") != null) {
-								params.puts("prop." + node.getAttribute("name"), result.get("_system.filepath"));
+							if(node.hasAttribute("value")) {
+								Record result = FileHelper.parse(node.getAttribute("value"), params);
+								if(result != null && result.get("_system.filepath") != null) {
+									params.puts("prop." + node.getAttribute("name"), result.get("_system.filepath"));
+									if(node.hasAttribute("public") && node.getAttribute("public") != null && node.getAttribute("public").equals("true")) {
+										params.puts("prop." + node.getAttribute("name") + ".public", "true");
+									}
+								}
+							} else if(con != null && g != null) {
+								execute(params, node, xpath, con, g);
 							}
 						}
 					}
@@ -122,6 +160,69 @@ public class PropAdapter {
 			if(logger.isLoggable(Level.SEVERE)) {
 				logger.severe(LOG.toString(e));
 			}
+		}
+	}
+	protected void execute(
+			Record params, 
+			Element node, 
+			XPath xpath, 
+			Connection con, 
+			XMLGenerator g
+		) 
+		throws XPathExpressionException, 
+			SQLException,
+			NoSuchProviderException
+	{
+		XPathExpression expr = xpath.compile("sql");
+		Element sql = (Element)expr.evaluate(node, XPathConstants.NODE);
+		String s = DBHelper.getSql(sql, params);
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		java.util.Map<String, Encryptor> encryptor = g.getEncryptor(node);
+		try {
+			stmt = g.prepareStatement(s);
+			expr = xpath.compile("params/param");
+			NodeList param = (NodeList)expr.evaluate(node, XPathConstants.NODESET);
+			int index = 1;
+			for(int x = 0; x < param.getLength(); x++) {
+				Element p = (Element)param.item(x);
+				if(!p.hasAttribute("cond") || AuthParser.auth(p.getAttribute("cond"), params)) {
+					g.bind(
+						stmt, 
+						p.getAttribute("datatype"), 
+						index, 
+						new String[] {p.getAttribute("value")}, 
+						-1, 
+						p.getAttribute("default"), 
+						p.getAttribute("pattern"), 
+						null, 
+						null, 
+						encryptor, 
+						p.getAttribute("encrypt"), 
+						(Buffer)null
+					);
+					index++;
+				}
+			}
+			rs = stmt.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			if(rs.next()) {
+				for(int x = 1; x <= rsmd.getColumnCount(); x++) {
+					params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x), rs.getString(x));
+					if(node.hasAttribute("public") && node.getAttribute("public") != null && node.getAttribute("public").equals("true")) {
+						params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x) + ".public", "true");
+					}
+				}
+			}
+			DB.close(rs);
+			DB.close(stmt);
+		} catch (SQLException | NoSuchProviderException e) {
+			if(logger.isLoggable(Level.SEVERE)) {
+				logger.severe(LOG.toString(e));
+			}
+		} finally {
+			DB.close(rs);
+			DB.close(stmt);
 		}
 	}
 }
