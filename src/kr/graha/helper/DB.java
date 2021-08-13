@@ -697,7 +697,7 @@ public final class DB {
 				}
 			}
 			if(pstmt.execute()) {
-				rs = pstmt.executeQuery();
+				rs = pstmt.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				while(rs.next()) {
 					if((c.getName()).equals("java.util.HashMap")) {
@@ -741,7 +741,7 @@ public final class DB {
  * @param table_name 테이블 이름.  ("_" 로 구분된) 형식으로 전달한다.  obj 파라미터가 java.util.HashMap 인 경우 반드시 입력해야 하고, 그렇지 않은 경우 class 이름을 사용한다. 
  * @return 갱신된 카운트(PreparedStatement.getUpdateCount)를 반환한다.
  */
-	public int insert(Connection con, Object obj, String table_name) throws SQLException {
+	public static int insert(Connection con, Object obj, String table_name) throws SQLException {
 		if(obj instanceof HashMap) {
 			if(table_name == null) {
 				throw new SQLException("table_name paramter is null.  if second parameter is java.util.HashMap then table_name parameter is required");
@@ -753,7 +753,7 @@ public final class DB {
 			int index = 0;
 			while(it.hasNext()) {
 				String key = (String)it.next();
-				if(((HashMap)obj).get(key) != null) {
+				if(((HashMap)obj).get(key) == null) {
 					throw new SQLException("if obj parameter type java.util.HashMap then null not allowed");
 				}
 				if(index > 0) {
@@ -833,7 +833,7 @@ public final class DB {
  * @param obj 바인딩할 파라미터. generateClassSource 로 만들어진 Java 클레스로부터 생성된 객체.
  * @return 갱신된 카운트(PreparedStatement.getUpdateCount)를 반환한다.
  */
-	public int insert(Connection con, Object obj) throws SQLException {
+	public static int insert(Connection con, Object obj) throws SQLException {
 		if(obj instanceof HashMap) {
 			throw new SQLException("if second parameter is java.util.HashMap then call fetch(Connection con, Object obj, String table_name) ");
 		}
