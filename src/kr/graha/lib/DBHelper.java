@@ -252,7 +252,7 @@ public final class DBHelper {
 		}
 		return result;
 	}
-	protected static String getSql(Element node, Record params) {
+	public static String getSql(Element node, Record params) {
 		if(node == null) {
 			return null;
 		}
