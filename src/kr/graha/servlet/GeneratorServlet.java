@@ -137,6 +137,8 @@ public class GeneratorServlet extends HttpServlet {
 		params.put("system.prefix", request.getContextPath() + request.getServletPath());
 		params.put("system.config.file.name", File.separator + id.substring(0, id.indexOf("/")) + File.separator);
 		params.put("system.suffix", ".xml");
+		params.put("system.context.root.path", request.getServletContext().getRealPath("/"));
+
 		if(request.getPathInfo().endsWith(".html")) {
 			params.put("system.suffix", ".html");
 		}
@@ -333,6 +335,7 @@ public class GeneratorServlet extends HttpServlet {
 					con.setAutoCommit(false);
 					g.setConnection(con);
 				}
+				new PropAdapter().execute(request, config, query, params, con, g);
 				g.processor(true);
 				sb.append(g.execute());
 				
