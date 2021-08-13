@@ -172,7 +172,7 @@ public class XMLGenerator {
 		sb.append(this.after());
 		return sb;
 	}
-	private PreparedStatement prepareStatement(String sql) throws SQLException {
+	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		if(logger.isLoggable(Level.FINEST)) {
 			logger.finest(sql);
 		}
@@ -1367,6 +1367,16 @@ public class XMLGenerator {
 							if(cc != null && cc.getLength() > 0) {
 								for(int xx = 0; xx < cc.getLength(); xx++) {
 									Element e = (Element)cc.item(xx);
+									if(
+										e.hasAttribute("type") && 
+										(
+											e.getAttribute("type").equals("hidden") || 
+											e.getAttribute("type").equals("select") ||
+											e.getAttribute("type").equals("radio")
+										)
+									) {
+										continue;
+									}
 									if(this._params.containsKey("param." + e.getAttribute("name") + "." + idx)) {
 										iscontinue = true;
 									}
@@ -1421,7 +1431,14 @@ public class XMLGenerator {
 										if(logger.isLoggable(Level.FINE)) {
 											logger.fine(e.getAttribute("name"));
 										}
-										if(e.hasAttribute("type") && e.getAttribute("type").equals("hidden")) {
+										if(
+											e.hasAttribute("type") && 
+											(
+												e.getAttribute("type").equals("hidden") || 
+												e.getAttribute("type").equals("select") ||
+												e.getAttribute("type").equals("radio")
+											)
+										) {
 											continue;
 										}
 										if(this._params.hasKey("param." + e.getAttribute("name") + "." + idx)) {
@@ -1773,7 +1790,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		stmt.setInt(index, value);
 	}
 	
-	private void bind(
+	public void bind(
 		PreparedStatement stmt, 
 		String datatype, 
 		int index, 
@@ -1987,10 +2004,17 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		
+		String sql = null;
 		try {
 			if(node.hasAttribute("sql") && node.getAttribute("sql") != null && !node.getAttribute("sql").equals("")) {
-				stmt = this.prepareStatement(node.getAttribute("sql"));
+				sql = node.getAttribute("sql");
+			} else {
+				this._expr = this._xpath.compile("sql");
+				Element sqlElement = (Element)this._expr.evaluate(node, XPathConstants.NODE);
+				sql = DBHelper.getSql(sqlElement, this._params);
+			}
+			if(sql != null) {
+				stmt = this.prepareStatement(sql);
 				this._expr = this._xpath.compile("params/param");
 				NodeList param = (NodeList)this._expr.evaluate(node, XPathConstants.NODESET);
 				int index = 1;
@@ -2063,6 +2087,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		Buffer sb = new Buffer();
 		if(this._params != null && !this._params.isEmpty()) {
 			boolean isResult = false;
+			boolean isProp = false;
 			Iterator<String> it = this._params.keySet().iterator();
 			sb.appendL(this._tag.tag("params", null, true));
 			while(it.hasNext()) {
@@ -2071,6 +2096,8 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					BufferHelper.addRecord(key, this._params, sb, this._tag);
 				} else if(key.startsWith("result.")) {
 					isResult = true;
+				} else if(key.startsWith("prop.") && key.endsWith(".public")) {
+					isProp = true;
 				}
 			}
 			sb.appendL(this._tag.tag("params", null, false));
@@ -2084,6 +2111,19 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					}
 				}
 				sb.appendL(this._tag.tag("results", null, false));
+			}
+			if(isProp) {
+				it = this._params.keySet().iterator();
+				sb.appendL(this._tag.tag("props", null, true));
+				while(it.hasNext()) {
+					String key = (String)it.next();
+					if(key.startsWith("prop.")) {
+						if(!key.endsWith(".public") && this._params.equals(key + ".public", "true")) {
+							BufferHelper.addRecord(key, this._params, sb, this._tag);
+						}
+					}
+				}
+				sb.appendL(this._tag.tag("props", null, false));
 			}
 		}
 		sb.append(this._tag.tag("document", null, false));
@@ -2267,7 +2307,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		
 		return result;
 	}
-	private java.util.Map<String, Encryptor> getEncryptor(Element node) throws XPathExpressionException {
+	public java.util.Map<String, Encryptor> getEncryptor(Element node) throws XPathExpressionException {
 		java.util.Map<String, Encryptor> encryptor = new java.util.Hashtable();
 		if(node.hasAttribute("encrypt") && node.getAttribute("encrypt") != null && !node.getAttribute("encrypt").equals("")) {
 			try {
