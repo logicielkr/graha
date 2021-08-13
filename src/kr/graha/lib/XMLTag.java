@@ -173,6 +173,13 @@ public class XMLTag {
 				return "/document/params/" + tagName;
 			}
 		}
+		if(upperName != null && upperName.equals("prop")) {
+			if(isRDF) {
+				return "/RDF:RDF/RDF:Description/uc:props/uc:" + tagName;
+			} else {
+				return "/document/props/" + tagName;
+			}
+		}
 		if(upperName != null && upperName.equals("query")) {
 			if(isRDF) {
 				if(name == null || name.equals("")) {
@@ -283,6 +290,21 @@ public class XMLTag {
 				}
 			}
 		}
+		if(tagName != null && tagName.equals("props")) {
+			if(isRDF) {
+				if(isStart) {
+					return "<RDF:Description uc:for=\"urn:root:props\"><uc:results>";
+				} else {
+					return "</uc:props></RDF:Description>";
+				}
+			} else {
+				if(isStart) {
+					return "<props>";
+				} else {
+					return "</props>";
+				}
+			}
+		}
 		if(tagName != null && tagName.equals("errors")) {
 			if(isRDF) {
 				if(isStart) {
@@ -348,6 +370,21 @@ public class XMLTag {
 					return "<result>";
 				} else {
 					return "</result>";
+				}
+			}
+		}
+		if(tagName != null && tagName.equals("prop")) {
+			if(isRDF) {
+				if(isStart) {
+					return "<uc:prop>";
+				} else {
+					return "</uc:prop>";
+				}
+			} else {
+				if(isStart) {
+					return "<prop>";
+				} else {
+					return "</prop>";
 				}
 			}
 		}
@@ -521,6 +558,7 @@ public class XMLTag {
 			&& (
 				upperName.equals("param")
 				|| upperName.equals("result")
+				|| upperName.equals("prop")
 				|| upperName.equals("page") 
 				|| upperName.equals("file") 
 				|| upperName.equals("files")
