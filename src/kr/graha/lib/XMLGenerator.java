@@ -638,26 +638,27 @@ public class XMLGenerator {
 								}
 							}
 						}
-					}
-					sb.append(this._tag.tag("files", null, false));
-					if(file.hasAttribute("name")) {
-						sb.append(this._tag.tag("fileparams", file.getAttribute("name"), true));
-					} else {
-						sb.append(this._tag.tag("fileparams", null, true));
-					}
-						
-					Iterator<String> it = result.keySet().iterator();
-					while(it.hasNext()) {
-						String key = (String)it.next();
-						if(key != null && key.equals("_system.filepath")) {
-							continue;
+					
+						sb.append(this._tag.tag("files", null, false));
+						if(file.hasAttribute("name")) {
+							sb.append(this._tag.tag("fileparams", file.getAttribute("name"), true));
+						} else {
+							sb.append(this._tag.tag("fileparams", null, true));
 						}
-						sb.append(this._tag.tag("param", null, true));
-						sb.append(this._tag.tag("param", "key", null, true) + key + this._tag.tag("param", "key", null, false));
-						sb.append(this._tag.tag("param", "value", null, true) + result.get(key) + this._tag.tag("param", "value", null, false));
-						sb.append(this._tag.tag("param", null, false));
+							
+						Iterator<String> it = result.keySet().iterator();
+						while(it.hasNext()) {
+							String key = (String)it.next();
+							if(key != null && key.equals("_system.filepath")) {
+								continue;
+							}
+							sb.append(this._tag.tag("param", null, true));
+							sb.append(this._tag.tag("param", "key", null, true) + key + this._tag.tag("param", "key", null, false));
+							sb.append(this._tag.tag("param", "value", null, true) + result.get(key) + this._tag.tag("param", "value", null, false));
+							sb.append(this._tag.tag("param", null, false));
+						}
+						sb.append(this._tag.tag("fileparams", null, false));
 					}
-					sb.append(this._tag.tag("fileparams", null, false));
 				}
 			}
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException | IOException e) {
