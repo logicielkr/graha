@@ -113,8 +113,8 @@ public class UploadAdapter {
 					f.mkdirs();
 				}
 				int index = 0;
+				String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
 				while(true) {
-					String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
 					if(index == 0) {
 						f = new File(path + java.io.File.separator + fileName);
 					} else {
