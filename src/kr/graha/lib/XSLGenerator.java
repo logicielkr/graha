@@ -315,29 +315,28 @@ public class XSLGenerator {
 		sb.append(this.nav(layout, "top"));
 		this._expr = this._xpath.compile("middle/tab");
 		NodeList tabs = (NodeList)this._expr.evaluate(layout, XPathConstants.NODESET);
+		
+		this._expr = this._xpath.compile("files/file");
+		NodeList files = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+		
 		if(tabs.getLength() > 1) {
 			sb.appendL("<ul class=\"multitab\">");
 			for(int y = 0; y < tabs.getLength(); y++) {
 				Element tab = (Element)tabs.item(y);
+				fileLI(files, sb, tab.getAttribute("name"), null);
 				if(tab.hasAttribute("label")) {
 					sb.appendL("<li class=\"" + tab.getAttribute("name") + "\">" + tab.getAttribute("label") + "</li>");
 				}
+				fileLI(files, sb, null, tab.getAttribute("name"));
 			}
-			this._expr = this._xpath.compile("files/file");
-			NodeList files = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
-				for(int y = 0; y < files.getLength(); y++) {
-					Element file = (Element)files.item(y);
-					if(file.hasAttribute("label")) {
-						sb.appendL("<li class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</li>");
-					}
-				}
-			}
+			fileLI(files, sb, null, null);
 			sb.appendL("</ul>");
 			sb.appendL("<div class=\"space\" />");
 		}
+
 		for(int y = 0; y < tabs.getLength(); y++) {
 			Element tab = (Element)tabs.item(y);
+			file(files, sb, (tabs.getLength() > 1), tab.getAttribute("name"), null, true);
 			if(tab.hasAttribute("label") && tabs.getLength() > 1) {
 				sb.appendL("<h3 class=\"" + tab.getAttribute("name") + "\">" + tab.getAttribute("label") + "</h3>");
 			}
@@ -447,44 +446,118 @@ public class XSLGenerator {
 				}
 				sb.appendL(this._html.tbodyE());
 			}
-			
 			sb.appendL(this._html.tableE());
+			file(files, sb, (tabs.getLength() > 1), null, tab.getAttribute("name"), true);
 		}
-		this._expr = this._xpath.compile("files/file");
-		NodeList files = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
-			for(int y = 0; y < files.getLength(); y++) {
-				Element file = (Element)files.item(y);
-				if(file.hasAttribute("label") && tabs.getLength() > 1) {
-					sb.appendL("<h3 class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</h3>");
-				}
-				if(file.hasAttribute("name")) {
-					sb.appendL("<ul id=\"" + file.getAttribute("name") + "\">");
-				} else {
-					sb.appendL("<ul>");
-				}
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
-				sb.appendL("<xsl:sort select=\"node() = false()\"/>");
-				sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
-				
-				sb.appendL("<xsl:variable name=\"downloadparam\">");
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("fileparam", file.getAttribute("name")) + "\"><xsl:value-of select=\"" + this._tag.path("fileparam", "key", file.getAttribute("name"), false) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + this._tag.path("fileparam", "value", file.getAttribute("name"), false) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
-				sb.appendL("</xsl:variable>");
-				sb.appendL("<li length=\"{" + this._tag.path("file", "length", null, false) + "}\" lastModified=\"{" + this._tag.path("file", "lastModified", null, false) + "}\">");
-				sb.appendL("<a href=\"" + this.getPath(this._query.getAttribute("id")) + "/download/" + file.getAttribute("name") + "/{" + this._tag.path("file", "name2", null, false) + "}?{$downloadparam}\">");
-				
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path("file", "name", null, false) + "\" />");
-				sb.appendL("</a>");
-				sb.appendL("</li>");
-				
-	
-				sb.appendL("</xsl:for-each>");
-				sb.appendL("</ul>");
-			}
-		}
+		file(files, sb, (tabs.getLength() > 1), null, null, true);
 		sb.append(this.nav(layout, "bottom"));
 		return sb;
 		
+	}
+	private void fileLI(NodeList files, Buffer sb, String before, String after) {
+		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
+			for(int y = 0; y < files.getLength(); y++) {
+				Element file = (Element)files.item(y);
+				if(
+					(
+						before != null && 
+						file.hasAttribute("before") && 
+						file.getAttribute("before") != null &&
+						before.equals(file.getAttribute("before"))
+					) ||
+					(
+						after != null && 
+						file.hasAttribute("after") && 
+						file.getAttribute("after") != null &&
+						after.equals(file.getAttribute("after"))
+					) ||
+					(
+						before == null &&
+						after == null &&
+						!file.hasAttribute("before") &&
+						!file.hasAttribute("after")
+					)
+				) {
+					if(file.hasAttribute("label")) {
+						sb.appendL("<li class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</li>");
+					}
+				}
+			}
+		}
+	}
+	private void file(NodeList files, Buffer sb, boolean isPrintH3, String before, String after, boolean isDetail) {
+		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
+			for(int y = 0; y < files.getLength(); y++) {
+				Element file = (Element)files.item(y);
+				if(
+					(
+						before != null && 
+						file.hasAttribute("before") && 
+						file.getAttribute("before") != null &&
+						before.equals(file.getAttribute("before"))
+					) ||
+					(
+						after != null && 
+						file.hasAttribute("after") && 
+						file.getAttribute("after") != null &&
+						after.equals(file.getAttribute("after"))
+					) ||
+					(
+						before == null &&
+						after == null &&
+						!file.hasAttribute("before") &&
+						!file.hasAttribute("after")
+					)
+				) {
+					if(file.hasAttribute("label") && isPrintH3) {
+						sb.appendL("<h3 class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</h3>");
+					}
+					if(file.hasAttribute("name")) {
+						sb.appendL("<ul id=\"" + file.getAttribute("name") + "\">");
+					} else {
+						sb.appendL("<ul>");
+					}
+					sb.appendL("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
+					if(isDetail) {
+						sb.appendL("<xsl:sort select=\"node() = false()\"/>");
+						sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
+						
+						sb.appendL("<xsl:variable name=\"downloadparam\">");
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("fileparam", file.getAttribute("name")) + "\"><xsl:value-of select=\"" + this._tag.path("fileparam", "key", file.getAttribute("name"), false) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + this._tag.path("fileparam", "value", file.getAttribute("name"), false) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
+						sb.appendL("</xsl:variable>");
+						sb.appendL("<li length=\"{" + this._tag.path("file", "length", null, false) + "}\" lastModified=\"{" + this._tag.path("file", "lastModified", null, false) + "}\">");
+						sb.appendL("<a href=\"" + this.getPath(this._query.getAttribute("id")) + "/download/" + file.getAttribute("name") + "/{" + this._tag.path("file", "name2", null, false) + "}?{$downloadparam}\">");
+						
+						sb.appendL("<xsl:value-of select=\"" + this._tag.path("file", "name", null, false) + "\" />");
+						sb.appendL("</a>");
+						sb.appendL("</li>");
+					} else {
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
+						sb.appendL("<xsl:sort select=\"node() = false()\"/>");
+						sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
+						sb.appendL("<xsl:choose>");
+						sb.appendL("<xsl:when test=\"not(" + this._tag.path("file", "name", null, false) + ")\">");
+						sb.appendL("<li><input type=\"file\" class=\"" + file.getAttribute("name") + "\" name=\"" + file.getAttribute("name") + ".{position()}\"  multiple=\"multiple\" /></li>");
+						sb.appendL("</xsl:when>");
+						sb.appendL("<xsl:otherwise>");
+						sb.appendL("<xsl:variable name=\"downloadparam\">");
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("fileparam", file.getAttribute("name")) + "\"><xsl:value-of select=\"" + this._tag.path("fileparam", "key", file.getAttribute("name"), false) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + this._tag.path("fileparam", "value", file.getAttribute("name"), false) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
+						sb.appendL("</xsl:variable>");
+						sb.appendL("<li length=\"{" + this._tag.path("file", "length", null, false) + "}\" lastModified=\"{" + this._tag.path("file", "lastModified", null, false) + "}\">");
+						sb.appendL("<input type=\"checkbox\" class=\"_deletefile_." + file.getAttribute("name") + "\" name=\"_deletefile_." + file.getAttribute("name") + ".{position()}\" value=\"{" + this._tag.path("file", "name", null, false) + "}\" />");
+						sb.appendL("<a href=\"" + this.getPath(this._query.getAttribute("id")) + "/download/" + file.getAttribute("name") + "/{" + this._tag.path("file", "name2", null, false) + "}?{$downloadparam}\">");
+						
+						sb.appendL("<xsl:value-of select=\"" + this._tag.path("file", "name", null, false) + "\" />");
+						sb.appendL("</a>");
+						sb.appendL("</li>");
+						sb.appendL("</xsl:otherwise>");
+						sb.appendL("</xsl:choose>");
+					}
+					sb.appendL("</xsl:for-each>");
+					sb.appendL("</ul>");
+				}
+			}
+		}
 	}
 	private String getPath(String href) {
 		if(href.startsWith("/")) {
@@ -556,24 +629,19 @@ public class XSLGenerator {
 			sb.appendL("<ul class=\"multitab\">");
 			for(int y = 0; y < tabs.getLength(); y++) {
 				Element tab = (Element)tabs.item(y);
+				fileLI(files, sb, tab.getAttribute("name"), null);
 				if(tab.hasAttribute("label")) {
 					sb.appendL("<li class=\"" + tab.getAttribute("name") + "\">" + tab.getAttribute("label") + "</li>");
 				}
+				fileLI(files, sb, null, tab.getAttribute("name"));
 			}
-			this._expr = this._xpath.compile("files/file");
-			if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
-				for(int y = 0; y < files.getLength(); y++) {
-					Element file = (Element)files.item(y);
-					if(file.hasAttribute("label")) {
-						sb.appendL("<li class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</li>");
-					}
-				}
-			}
+			fileLI(files, sb, null, null);
 			sb.appendL("</ul>");
 			sb.appendL("<div class=\"space\" />");
 		}
 		for(int y = 0; y < tabs.getLength(); y++) {
 			Element tab = (Element)tabs.item(y);
+			file(files, sb, (tabs.getLength() > 1), tab.getAttribute("name"), null, false);
 			if(tab.hasAttribute("label") && tabs.getLength() > 1) {
 				sb.appendL("<h3 class=\"" + tab.getAttribute("name") + "\">" + tab.getAttribute("label") + "</h3>");
 			}
@@ -734,43 +802,9 @@ public class XSLGenerator {
 				sb.append(this._html.tbodyE());
 			}
 			sb.append(this._html.tableE());
+			file(files, sb, (tabs.getLength() > 1), null, tab.getAttribute("name"), false);
 		}
-		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
-			for(int y = 0; y < files.getLength(); y++) {
-				Element file = (Element)files.item(y);
-				if(file.hasAttribute("label") && tabs.getLength() > 1) {
-					sb.append("<h3 class=\"" + file.getAttribute("name") + "\">" + file.getAttribute("label") + "</h3>");
-				}
-				if(file.hasAttribute("name")) {
-					sb.append("<ul id=\"" + file.getAttribute("name") + "\">");
-				} else {
-					sb.append("<ul>");
-				}
-				sb.append("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
-				sb.append("<xsl:sort select=\"node() = false()\"/>");
-				sb.append("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
-				sb.append("<xsl:choose>");
-				sb.append("<xsl:when test=\"not(" + this._tag.path("file", "name", null, false) + ")\">");
-				sb.append("<li><input type=\"file\" class=\"" + file.getAttribute("name") + "\" name=\"" + file.getAttribute("name") + ".{position()}\"  multiple=\"multiple\" /></li>");
-				sb.append("</xsl:when>");
-				sb.append("<xsl:otherwise>");
-				sb.append("<xsl:variable name=\"downloadparam\">");
-				sb.append("<xsl:for-each select=\"" + this._tag.path("fileparam", file.getAttribute("name")) + "\"><xsl:value-of select=\"" + this._tag.path("fileparam", "key", file.getAttribute("name"), false) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + this._tag.path("fileparam", "value", file.getAttribute("name"), false) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
-				sb.append("</xsl:variable>");
-				sb.append("<li length=\"{" + this._tag.path("file", "length", null, false) + "}\" lastModified=\"{" + this._tag.path("file", "lastModified", null, false) + "}\">");
-				sb.append("<input type=\"checkbox\" class=\"_deletefile_." + file.getAttribute("name") + "\" name=\"_deletefile_." + file.getAttribute("name") + ".{position()}\" value=\"{" + this._tag.path("file", "name", null, false) + "}\" />");
-				sb.append("<a href=\"" + this.getPath(this._query.getAttribute("id")) + "/download/" + file.getAttribute("name") + "/{" + this._tag.path("file", "name2", null, false) + "}?{$downloadparam}\">");
-				
-				sb.append("<xsl:value-of select=\"" + this._tag.path("file", "name", null, false) + "\" />");
-				sb.append("</a>");
-				sb.append("</li>");
-				sb.append("</xsl:otherwise>");
-				sb.append("</xsl:choose>");
-	
-				sb.append("</xsl:for-each>");
-				sb.append("</ul>");
-			}
-		}
+		file(files, sb, (tabs.getLength() > 1), null, null, false);
 		sb.append("</form>");
 		sb.append(this.nav(layout, "bottom"));
 		return sb;
