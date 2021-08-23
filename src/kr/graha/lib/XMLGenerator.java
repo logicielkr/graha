@@ -1951,6 +1951,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
 						continue;
 					}
+					if(node.hasAttribute("cond") && node.getAttribute("cond") != null) {
+						if(!(AuthParser.auth(node.getAttribute("cond"), this._params))) {
+							continue;
+						}
+					}
 					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
 					NodeList p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 					if(p.getLength() > 0) {
@@ -1973,6 +1978,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
 						continue;
 					}
+					if(node.hasAttribute("cond") && node.getAttribute("cond") != null) {
+						if(!(AuthParser.auth(node.getAttribute("cond"), this._params))) {
+							continue;
+						}
+					}
 					if(doc != null) {
 						this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
 						NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
@@ -1989,6 +1999,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						Element node = (Element)codes.item(i);
 						if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
 							continue;
+						}
+						if(node.hasAttribute("cond") && node.getAttribute("cond") != null) {
+							if(!(AuthParser.auth(node.getAttribute("cond"), this._params))) {
+								continue;
+							}
 						}
 						sb.append(code(node));
 					}
@@ -2043,11 +2058,16 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			} else {
 				sb.appendL(this._tag.tag("code", node.getAttribute("name"), true));
 				NodeList list = node.getChildNodes();
+				int index = 0;
 				for(int x = 0; x < list.getLength(); x++) {
 					org.w3c.dom.Node n = (org.w3c.dom.Node)list.item(x);
 					if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("option")) {
 						Element e = (Element)n;
 						sb.appendL(this._tag.tag("code", "option", e.getAttribute("value"), e.getAttribute("label")));
+						if(index == 0) {
+							this._params.put("code." + node.getAttribute("name") + ".firstValue", e.getAttribute("value"));
+						}
+						index++;
 					}
 				}
 				sb.appendL(this._tag.tag("code", null, false));
