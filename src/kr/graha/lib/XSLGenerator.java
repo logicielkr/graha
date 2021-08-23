@@ -518,10 +518,9 @@ public class XSLGenerator {
 						sb.appendL("<ul>");
 					}
 					sb.appendL("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
+					sb.appendL("<xsl:sort select=\"node() = false()\"/>");
+					sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
 					if(isDetail) {
-						sb.appendL("<xsl:sort select=\"node() = false()\"/>");
-						sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
-						
 						sb.appendL("<xsl:variable name=\"downloadparam\">");
 						sb.appendL("<xsl:for-each select=\"" + this._tag.path("fileparam", file.getAttribute("name")) + "\"><xsl:value-of select=\"" + this._tag.path("fileparam", "key", file.getAttribute("name"), false) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + this._tag.path("fileparam", "value", file.getAttribute("name"), false) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
 						sb.appendL("</xsl:variable>");
@@ -532,9 +531,6 @@ public class XSLGenerator {
 						sb.appendL("</a>");
 						sb.appendL("</li>");
 					} else {
-						sb.appendL("<xsl:for-each select=\"" + this._tag.path("file", file.getAttribute("name")) + "\">");
-						sb.appendL("<xsl:sort select=\"node() = false()\"/>");
-						sb.appendL("<xsl:sort select=\"" + this._tag.path("file", "name", null, false) + "\" />");
 						sb.appendL("<xsl:choose>");
 						sb.appendL("<xsl:when test=\"not(" + this._tag.path("file", "name", null, false) + ")\">");
 						sb.appendL("<li><input type=\"file\" class=\"" + file.getAttribute("name") + "\" name=\"" + file.getAttribute("name") + ".{position()}\"  multiple=\"multiple\" /></li>");
