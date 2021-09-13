@@ -1433,7 +1433,11 @@ public class XSLGenerator {
 				if(p.getAttribute("type").equals("param")) {
 					value = this._tag.path("param", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("query")) {
-					value = this._tag.path("query", p.getAttribute("value"), null, true);
+					if(p.hasAttribute("ref") && p.getAttribute("ref") != null && !p.getAttribute("ref").equals("")) {
+						value = this._tag.path("query", p.getAttribute("value"), p.getAttribute("ref"), true);
+					} else {
+						value = this._tag.path("query", p.getAttribute("value"), null, true);
+					}
 				} else if(p.getAttribute("type").equals("result")) {
 					value = this._tag.path("result", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("prop")) {
