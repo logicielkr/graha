@@ -2,9 +2,15 @@
 
 ## 1. about
 
+### 1.1. 소개 
+
 Javascript 로 Microsoft Excel 이나 LibreOffice(Openoffice) Calc 에서 제공하는 수식과 유사한 방식으로 처리하기 위한 라이브러리이다.
 
 이 라이브러리는 Graha 의 자동계산기능을 위해 작성되었다.
+
+### 1.2. 다운로드
+
+https://github.com/logicielkr/graha/tree/master/js/formula
 
 ## 2. GrahaFormula 사용방법
 
