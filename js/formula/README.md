@@ -259,7 +259,7 @@ var result = formula.expr.valueOf();
 
 위의 수식은 sum 함수안의 파라미터가 ```.``` 으로 끝나지 않았다.
 
-```salary.1:salary.3``` 같은 형태의 수식은 지원하지 않는다.
+```salary[1]:salary[3]``` 같은 형태의 수식은 지원하지 않는다.
 
 #### 3.5.3. 수식이 참조하는 HTML Form 요소를 얻는 방법
 
