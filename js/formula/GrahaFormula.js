@@ -23,6 +23,8 @@
  * @author HeonJik, KIM (https://graha.kr)
  * @version 0.5
  * @since 0.5
+ * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
+ * https://github.com/logicielkr/graha/tree/master/js/formula
  */
 
 function GrahaFormula() {
@@ -90,17 +92,13 @@ GrahaFormula.Val = function(value, index) {
 GrahaFormula.Val.prototype.valueOf = function() {
 	var name = this.value;
 	if(
-		name.length > 3 &&
-		name.lastIndexOf("[N]") == (name.length - 3) &&
 		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("[N]")))
+		GrahaFormula.util.isArrayName(name)
 	) {
 		name = name.substring(0, name.lastIndexOf("[N]"));
 	} else if(
-		name.length > 3 &&
-		name.lastIndexOf("{N}") == (name.length - 3) &&
 		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("{N}")) + GrahaFormula.INDEX)
+		GrahaFormula.util.isNumberingName(name, GrahaFormula.INDEX)
 	) {
 		name = name.substring(0, name.lastIndexOf("{N}")) + GrahaFormula.INDEX;
 	}
@@ -220,7 +218,6 @@ GrahaFormula.Val._get = function(name) {
 			} else {
 				return null;
 			}
-			
 		} else {
 			return null;
 		}
@@ -292,18 +289,14 @@ GrahaFormula.Val._extract = function(name) {
 			return result;
 		}
 	} else if(
-		name.length > 3 &&
-		name.lastIndexOf("{N}") == (name.length - 3) &&
 		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("{N}")) + GrahaFormula.INDEX)
+		GrahaFormula.util.isNumberingName(name, GrahaFormula.INDEX)
 	) {
 		result.push(name.substring(0, name.lastIndexOf("{N}")) + GrahaFormula.INDEX);
 		return result;
 	} else if(
-		name.length > 3 &&
-		name.lastIndexOf("[N]") == (name.length - 3) &&
 		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("[N]")) + GrahaFormula.INDEX)
+		GrahaFormula.util.isArrayName(name)
 	) {
 		result.push(name);
 		return result;
@@ -337,19 +330,9 @@ GrahaFormula.Val._isExtract = function(name) {
 		} else {
 			return false;
 		}
-	} else if(
-		name.length > 3 &&
-		name.lastIndexOf("{N}") == (name.length - 3) &&
-		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("{N}")) + GrahaFormula.INDEX)
-	) {
+	} else if(GrahaFormula.util.isNumberingName(name, null)) {
 		return true;
-	} else if(
-		name.length > 3 &&
-		name.lastIndexOf("[N]") == (name.length - 3) &&
-		GrahaFormula.INDEX != null &&
-		GrahaFormula.Val._has(name.substring(0, name.lastIndexOf("[N]")))
-	) {
+	} else if(GrahaFormula.util.isArrayName(name)) {
 		return true;
 	} else if(GrahaFormula.Val._typeof(name) == "array") {
 		return true;
@@ -357,7 +340,9 @@ GrahaFormula.Val._isExtract = function(name) {
 	return false;
 };
 GrahaFormula.Val.contains = function(name) {
+	
 	if(name == null || name == "") {
+		
 		return false;
 	} else if(
 		name != null && name.length >= 2 &&
@@ -1250,28 +1235,450 @@ GrahaFormula.parseFormula = function(formula) {
 		refer:refer
 	};
 };
-
-function test(expr, expected) {
-	var result = GrahaFormula.parseFormula(expr);
-	if(typeof(result.expr.valueOf()) == typeof(expected)) {
-		if(result.expr.valueOf() == expected) {
-			if(typeof(log) == "function") {
-				log("Y\t" + expr + " = /" + result.expr.valueOf() + "/" + " = /" + expected + "/");
-			} else {
-				console.log("Y\t" + expr + " = /" + result.expr.valueOf() + "/" + " = /" + expected + "/");
-			}
+GrahaFormula.util = function() {
+};
+GrahaFormula.util.compare = function(data1, data2, isExtract) {
+	if(isExtract) {
+		if(data1 == data2) {
+			return true;
 		} else {
-			if(typeof(log) == "function") {
-				log("N\t" + expr + " = /" + result.expr.valueOf() + "/" + " != /" + expected + "/");
-			} else {
-				console.log("N\t" + expr + " = /" + result.expr.valueOf() + "/" + " != /" + expected + "/");
+			if(GrahaFormula.util.isNumberingName(data1, null)) {
+				var t1 = data1.substring(0, data1.lastIndexOf("{N}"));
+				if(
+					data2.length > t1.length &&
+					data2.indexOf(t1) == 0 &&
+					!isNaN(parseInt(data2.substring(t1.length)))
+				) {
+					return true;
+				}
+			} else if(
+				GrahaFormula.util.isArrayName(data1) &&
+				data2 == data1.substring(0, data1.lastIndexOf("[N]"))
+			) {
+				return true;
+			} else if(GrahaFormula.util.isNumberingName(data2, null)) {
+				var t1 = data2.substring(0, data2.lastIndexOf("{N}"));
+				if(
+					data1.length > t1.length &&
+					data1.indexOf(t1) == 0 &&
+					!isNaN(parseInt(data1.substring(t1.length)))
+				) {
+					return true;
+				}
+			} else if(
+				GrahaFormula.util.isArrayName(data2) &&
+				data1 == data2.substring(0, data2.lastIndexOf("[N]"))
+			) {
+				return true;
 			}
 		}
 	} else {
-		if(typeof(log) == "function") {
-			log("E\t" + expr + " = /" + result.expr.valueOf() + "/:/" + typeof(result.expr.valueOf()) + "/" + " != /" + expected + "/:/" + typeof(expected) + "/");
-		} else {
-			console.log("E\t" + expr + " = /" + result.expr.valueOf() + "/:/" + typeof(result.expr.valueOf()) + "/" + " != /" + expected + "/:/" + typeof(expected) + "/");
+		if(data1 == data2) {
+			return true;
 		}
 	}
-}
+	return false;
+};
+GrahaFormula.util.indexOf = function(arr, data, isExtract) {
+	for(var i = 0; i < arr.length; i++) {
+		if(GrahaFormula.util.compare(arr[i], data, isExtract)) {
+			return i;
+		}
+	}
+	return -1;
+};
+GrahaFormula.util.isArrayName = function(elementName) {
+	return (
+		elementName.length > 3 &&
+		elementName.lastIndexOf("[N]") == (elementName.length - 3) &&
+		GrahaFormula.Val._has(elementName.substring(0, elementName.lastIndexOf("[N]")))
+	);
+};
+
+GrahaFormula.util.getForm = function(formName) {
+	if(formName == null || formName == "") {
+		return null;
+	} else if(typeof($) == "function") {
+		if($("form[name='" + formName + "']").length > 0) {
+			return $("form[name='" + formName + "']");
+		}
+	} else if(document.querySelector && document.querySelectorAll) {
+		if(document.querySelectorAll("form[name='" + formName + "']").length > 0) {
+			return document.querySelectorAll("form[name='" + formName + "']");
+		}
+	} else {
+		if(document.forms[formName]) {
+			return document.forms[formName];
+		}
+	}
+	return null;
+};				
+				
+GrahaFormula.util.isNumberingName = function(elementName, index) {
+	if(index != null && index > 0) {
+		return (
+			elementName.length > 3 &&
+			elementName.lastIndexOf("{N}") == (elementName.length - 3) &&
+			GrahaFormula.Val._has(elementName.substring(0, elementName.lastIndexOf("{N}")) + index)
+		);
+	} else {
+		return (
+			elementName.length > 3 &&
+			elementName.lastIndexOf("{N}") == (elementName.length - 3) &&
+			GrahaFormula.Val._has(elementName.substring(0, elementName.lastIndexOf("{N}")) + "1")
+		);
+	}
+};
+GrahaFormula.util.set = function(obj, value) {
+	if(typeof(value) == "number" && isNaN(value)) {
+		obj.value = "";
+	} else {
+		obj.value = value;
+	}
+};
+GrahaFormula.util.make = function(formName, elementName, index) {
+	if(elementName == null || elementName == "") {
+		throw new Error("elementName is null");
+	}
+	var realElementName = elementName;
+	if(arguments.length > 2 && index != null) {
+		if(GrahaFormula.util.isNumberingName(elementName, index)) {
+			realElementName = elementName.substring(0, elementName.lastIndexOf("{N}")) + index;
+		}
+	}
+	if(formName == null || formName == "") {
+		return realElementName;
+	}
+	if(realElementName.indexOf("#") > 0) {
+		return realElementName;
+	} else {
+		return formName + "#" +  realElementName;
+	}
+};
+GrahaFormula.fire = function(formName, elementName, eventType, index) {
+	var elementNames = new Array();
+	if(elementName != null) {
+		elementNames.push(GrahaFormula.util.make(formName, elementName));
+	}
+	if(index != null && index >= 0) {
+		GrahaFormula.INDEX = index;
+	}
+	if(GrahaFormula.expr) {
+		for(var i = 0; i < GrahaFormula.expr.length; i++) {
+			var refer = null;
+			var isUserDefinedFunction = false;
+			if(GrahaFormula.expr[i].func && GrahaFormula.expr[i].refer != null && GrahaFormula.expr[i].refers) {
+				refer = GrahaFormula.expr[i].refers;
+				isUserDefinedFunction = true;
+			} else if(GrahaFormula.expr[i].expr && GrahaFormula.expr[i].expr != "" && GrahaFormula.expr[i].formula && GrahaFormula.expr[i].formula.refer) {
+				refer = GrahaFormula.expr[i].formula.refer;
+				isUserDefinedFunction = false;
+			}
+			if(
+				refer != null &&
+				(eventType == "blur" || eventType == "ready" || eventType == "submit" || eventType == "focus")  &&
+				GrahaFormula.expr[i].event && 
+				GrahaFormula.expr[i].event != null && 
+				GrahaFormula.expr[i].event.indexOf(eventType) >= 0 
+			) {
+				var elementNameIndex = -1;
+				var exists = false;
+				var isArray = false;
+				if(eventType == "blur") {
+					for(var x = 0; x < refer.length; x++) {
+						elementNameIndex = GrahaFormula.util.indexOf(elementNames, GrahaFormula.util.make(GrahaFormula.expr[i].formName, refer[x]), true);
+						if(elementNameIndex >= 0) {
+							exists = true;
+							elementNames.push(GrahaFormula.util.make(GrahaFormula.expr[i].formName, GrahaFormula.expr[i].name));
+						}
+					}
+				} else if(eventType == "ready") {
+					exists = true;
+				} else if(eventType == "submit") {
+					if(formName == GrahaFormula.expr[i].formName) {
+						exists = true;
+					}
+				} else if(eventType == "focus") {
+					if(
+						GrahaFormula.util.make(GrahaFormula.expr[i].formName, GrahaFormula.expr[i].name) == GrahaFormula.util.make(formName, elementName)
+					) {
+						exists = true;
+					}
+				}
+				if(exists) {
+					var target = null;
+					if(
+						GrahaFormula.INDEX != null &&
+						GrahaFormula.util.isArrayName(GrahaFormula.expr[i].name)
+					) {
+						isArray = true;
+						target = GrahaFormula.Val._get(GrahaFormula.expr[i].name.substring(0, GrahaFormula.expr[i].name.lastIndexOf("[N]")));
+					} else if(
+						GrahaFormula.INDEX != null &&
+						GrahaFormula.util.isNumberingName(GrahaFormula.expr[i].name, GrahaFormula.INDEX)
+					) {
+						target = GrahaFormula.Val._get(GrahaFormula.expr[i].name.substring(0, GrahaFormula.expr[i].name.lastIndexOf("{N}")) + GrahaFormula.INDEX);
+					} else {
+						target = GrahaFormula.Val._get(GrahaFormula.expr[i].name);
+					}
+					if(target != null) {
+						if(isArray && GrahaFormula.INDEX != null && GrahaFormula.INDEX >= 0 && target.length > GrahaFormula.INDEX) {
+							if(isUserDefinedFunction) {
+								GrahaFormula.util.set(target[GrahaFormula.INDEX], GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+							} else {
+								GrahaFormula.util.set(target[GrahaFormula.INDEX], GrahaFormula.expr[i].formula.expr.valueOf());
+							}
+						} else if(target.length && target.length > 0) {
+							if(isUserDefinedFunction) {
+								GrahaFormula.util.set(target[0], GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+							} else {
+								GrahaFormula.util.set(target[0], GrahaFormula.expr[i].formula.expr.valueOf());
+							}
+						} else {
+							if(isUserDefinedFunction) {
+								GrahaFormula.util.set(target, GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+							} else {
+								GrahaFormula.util.set(target, GrahaFormula.expr[i].formula.expr.valueOf());
+							}
+						}
+					} else if(eventType != "focus") {
+						if(GrahaFormula.util.isArrayName(GrahaFormula.expr[i].name)) {
+							target = GrahaFormula.Val._get(GrahaFormula.expr[i].name.substring(0, GrahaFormula.expr[i].name.lastIndexOf("[N]")));
+							for(var z = 0; z < target.length; z++) {
+								GrahaFormula.INDEX = z;
+								if(isUserDefinedFunction) {
+									GrahaFormula.util.set(target[z], GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+								} else {
+									GrahaFormula.util.set(target[z], GrahaFormula.expr[i].formula.expr.valueOf());
+								}
+							}
+							if(index != null && index >= 0) {
+								GrahaFormula.INDEX = index;
+							} else {
+								GrahaFormula.INDEX = null;
+							}
+						} else if(GrahaFormula.util.isNumberingName(GrahaFormula.expr[i].name, null)) {
+							var arr = GrahaFormula.Val._extract(GrahaFormula.expr[i].name.substring(0, GrahaFormula.expr[i].name.lastIndexOf("{N}")));
+							for(var z = 0; z < arr.length; z++) {
+								target = GrahaFormula.Val._get(arr[z]);
+								if(target != null && target.length && target.length > 0) {
+									GrahaFormula.INDEX = (z + 1);
+									if(isUserDefinedFunction) {
+										GrahaFormula.util.set(target[0], GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+									} else {
+										GrahaFormula.util.set(target[0], GrahaFormula.expr[i].formula.expr.valueOf());
+									}
+								} else if(target != null) {
+									GrahaFormula.INDEX = (z + 1);
+									if(isUserDefinedFunction) {
+										GrahaFormula.util.set(target, GrahaFormula.expr[i].func(GrahaFormula.INDEX));
+									} else {
+										GrahaFormula.util.set(target, GrahaFormula.expr[i].formula.expr.valueOf());
+									}
+								}
+							}
+							if(index != null && index >= 0) {
+								GrahaFormula.INDEX = index;
+							} else {
+								GrahaFormula.INDEX = null;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if(eventType == "submit") {
+		return false;
+	}
+};
+GrahaFormula.addEventAll = function(formName, elementName, type) {
+	var isNumbering = false;
+	var obj = null;
+	if(elementName == null) {
+		obj = GrahaFormula.util.getForm(formName);
+	} else if(GrahaFormula.util.isArrayName(elementName)) {
+		obj = GrahaFormula.Val._get(elementName.substring(0, elementName.lastIndexOf("[N]")));
+	} else if(GrahaFormula.util.isNumberingName(elementName, null)) {
+		obj = new Array();
+		var data = GrahaFormula.Val._extract(elementName.substring(0, elementName.lastIndexOf("{N}")));
+		for(var z = 0; z < data.length; z++) {
+			var arr = GrahaFormula.Val._get(data[z]);
+			if(arr != null && arr.length > 0) {
+				Array.prototype.push.apply(obj, arr);
+			}
+		}
+		isNumbering = true;
+	} else {
+		obj = GrahaFormula.Val._get(elementName);
+	}
+	if(obj.length) {
+		for(var a = 0; a < obj.length; a++) {
+			if(isNumbering) {
+				GrahaFormula._addEvent(obj[a], formName, elementName, type, a + 1);
+			} else {
+				GrahaFormula._addEvent(obj[a], formName, elementName, type, a);
+			}
+		}
+	} else {
+		GrahaFormula._addEvent(obj, formName, elementName, type, null);
+	}
+};
+GrahaFormula.ready = function() {
+	if(GrahaFormula.expr) {
+		var executedReadyEvent = false;
+		for(var i = 0; i < GrahaFormula.expr.length; i++) {
+			GrahaFormula.FORM_NAME = GrahaFormula.expr[i].formName;
+			if(GrahaFormula.expr[i].func) {
+				if(GrahaFormula.expr[i].refer != null) {
+					if(GrahaFormula.expr[i].refer instanceof Array) {
+						var refer = new Array();
+						for(var x = 0; x < GrahaFormula.expr[i].refer.length; x++) {
+							if(GrahaFormula.Val._isExtract(GrahaFormula.expr[i].refer[x])) {
+								Array.prototype.push.apply(refer, GrahaFormula.Val._extract(GrahaFormula.expr[i].refer[x]));
+							} else {
+								refer.push(GrahaFormula.expr[i].refer[x]);
+							}
+						}
+						GrahaFormula.expr[i].refers = refer;
+					} else if(GrahaFormula.expr[i].refer != "") {
+						var arr = GrahaFormula.expr[i].refer.trim().split(/\s*(?:,|$)\s*/);
+						var refer = new Array();
+						for(var x = 0; x < arr.length; x++) {
+							if(GrahaFormula.Val._isExtract(arr[x])) {
+								Array.prototype.push.apply(refer, GrahaFormula.Val._extract(arr[x]));
+							} else {
+								refer.push(arr[x]);
+							}
+						}
+						GrahaFormula.expr[i].refers = refer;
+					}
+				}
+			} else if(GrahaFormula.expr[i].expr && GrahaFormula.expr[i].expr != "") {
+				GrahaFormula.expr[i].formula = GrahaFormula.parseFormula(GrahaFormula.expr[i].expr);
+			}
+			if(
+				GrahaFormula.expr[i].event && 
+				GrahaFormula.expr[i].event != null && 
+				GrahaFormula.expr[i].event.indexOf("ready") >= 0 
+			) {
+				executedReadyEvent = true;
+			}
+			if(
+				GrahaFormula.expr[i].event && 
+				GrahaFormula.expr[i].event != null && 
+				GrahaFormula.expr[i].event.indexOf("focus") >= 0 
+			) {
+				var formName = GrahaFormula.expr[i].formName;
+				var elementName = GrahaFormula.expr[i].name;
+				GrahaFormula.addEventAll(formName, elementName, "focus");
+			}
+			if(
+				GrahaFormula.expr[i].event && 
+				GrahaFormula.expr[i].event != null && 
+				GrahaFormula.expr[i].event.indexOf("submit") >= 0 
+			) {
+				var formName = GrahaFormula.expr[i].formName;
+				GrahaFormula.addEventAll(formName, null, "submit");
+			}
+			var refer = null;
+			if(GrahaFormula.expr[i].func && GrahaFormula.expr[i].refer != null && GrahaFormula.expr[i].refers) {
+				refer = GrahaFormula.expr[i].refers;
+			} else if(GrahaFormula.expr[i].expr && GrahaFormula.expr[i].expr != "" && GrahaFormula.expr[i].formula && GrahaFormula.expr[i].formula.refer) {
+				refer = GrahaFormula.expr[i].formula.refer;
+			}
+			if(
+				refer != null &&
+				GrahaFormula.expr[i].event && 
+				GrahaFormula.expr[i].event != null && 
+				GrahaFormula.expr[i].event.indexOf("blur") >= 0 
+			) {
+				for(var x = 0; x < refer.length; x++) {
+					var formName = GrahaFormula.expr[i].formName;
+					var elementName = refer[x];
+					GrahaFormula.addEventAll(formName, elementName, "blur");
+				}
+			}
+		}
+		if(executedReadyEvent) {
+			GrahaFormula.fire(null, null, "ready", null);
+		}
+	}
+};
+
+GrahaFormula._addEvent = function(obj, formName, elementName, type, index) {
+	if(type == "blur") {
+		if(GrahaFormula.blurEventTarget && GrahaFormula.util.indexOf(GrahaFormula.blurEventTarget, GrahaFormula.util.make(formName, elementName, index), false) >= 0) {
+			return;
+		}
+	} else if(type == "focus") {
+		if(GrahaFormula.focusEventTarget && GrahaFormula.util.indexOf(GrahaFormula.focusEventTarget, GrahaFormula.util.make(formName, elementName, index), false) >= 0) {
+			return;
+		}
+	} else if(type == "submit") {
+		if(GrahaFormula.submitEventTarget && GrahaFormula.util.indexOf(GrahaFormula.submitEventTarget, formName) >= 0) {
+			return;
+		}
+	}
+	GrahaFormula.addEvent(obj, GrahaFormula.fire.bind(null, formName, elementName, type, index), type);
+	if(type == "blur") {
+		if(!GrahaFormula.blurEventTarget) {
+			GrahaFormula.blurEventTarget = new Array();
+		}
+		GrahaFormula.blurEventTarget.push(GrahaFormula.util.make(formName, elementName, index));
+	} else if(type == "focus") {
+		if(!GrahaFormula.focusEventTarget) {
+			GrahaFormula.focusEventTarget = new Array();
+		}
+		GrahaFormula.focusEventTarget.push(GrahaFormula.util.make(formName, elementName, index));
+	} else if(type == "submit") {
+		if(!GrahaFormula.submitEventTarget) {
+			GrahaFormula.submitEventTarget = new Array();
+		}
+		GrahaFormula.submitEventTarget.push(formName);
+	}
+};
+
+GrahaFormula.addEvent = function(obj, func, type) {
+	if(typeof($) == "function") {
+		if(type == "ready") {
+			$(document).ready(func);
+		} else if(type == "focus") {
+			$(obj).bind("focus", func);
+		} else if(type == "blur") {
+			$(obj).bind("blur", func);
+		} else if(type == "submit") {
+			$(obj).bind("submit", func);
+		}
+	} else if(window.addEventListener) {
+		if(type == "ready") {
+			window.addEventListener("DOMContentLoaded", func);
+		} else if(type == "focus") {
+			obj.addEventListener("focus", func);
+		} else if(type == "blur") {
+			obj.addEventListener("blur", func);
+		} else if(type == "submit") {
+			obj.addEventListener("sumbit", func);
+		}
+	} else if(window.attachEvent) {
+		if(type == "ready") {
+			window.attachEvent("onload", func);
+		} else if(type == "focus") {
+			obj.attachEvent("onfocus", func);
+		} else if(type == "blur") {
+			obj.attachEvent("onblur", func);
+		} else if(type == "submit") {
+			obj.attachEvent("onsubmit", func);
+		}
+	} else {
+		if(type == "ready") {
+			window.onload = func;
+		} else if(type == "focus") {
+			obj.onfocus = func;
+		} else if(type == "blur") {
+			obj.onblur = func;
+		} else if(type == "submit") {
+			obj.onsubmit = func;
+		}
+	}
+};
