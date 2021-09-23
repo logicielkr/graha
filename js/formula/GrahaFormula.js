@@ -1489,7 +1489,7 @@ GrahaFormula.fire = function(formName, elementName, eventType, index) {
 		}
 	}
 	if(eventType == "submit") {
-		return false;
+		return true;
 	}
 };
 GrahaFormula.addEventAll = function(formName, elementName, type) {
