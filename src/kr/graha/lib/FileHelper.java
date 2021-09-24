@@ -50,19 +50,19 @@ public final class FileHelper {
 	private FileHelper() {
 	}
 	protected static String escapeFileName(URI uri) {
-		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
+		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
 	}
 	protected static String decodeFileName(URI uri) {
 		try {
-			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/")+1), "UTF-8");
+			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/") + 1).replace("+", "%2B"), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return uri.toString().substring(uri.toString().lastIndexOf("/")+1);
 		}
 	}
-	
+	/*
 	protected static String escapeFileName(String fileName) {
-		return decodeFileName(fileName).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
+		return decodeFileName(fileName).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
 	}
 	protected static String decodeFileName(String fileName) {
 		if(Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
@@ -71,7 +71,7 @@ public final class FileHelper {
 			return new String(fileName.getBytes(Charset.defaultCharset()), StandardCharsets.UTF_8);
 		}
 	}
-
+*/
 	public static Record getFileInfo(Element query) {
 		Record info = new Record();
 		try {
