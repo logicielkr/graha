@@ -652,6 +652,11 @@ public class XMLGenerator {
 							if(key != null && key.equals("_system.filepath")) {
 								continue;
 							}
+							if(key != null && key.startsWith("prop.")) {
+								if(key.endsWith(".public") || !this._params.equals(key + ".public", "true")) {
+									continue;
+								}
+							}
 							sb.append(this._tag.tag("param", null, true));
 							sb.append(this._tag.tag("param", "key", null, true) + key + this._tag.tag("param", "key", null, false));
 							sb.append(this._tag.tag("param", "value", null, true) + result.get(key) + this._tag.tag("param", "value", null, false));
@@ -1156,6 +1161,11 @@ public class XMLGenerator {
 							String key = (String)it.next();
 							if(key != null && key.equals("_system.filepath")) {
 								continue;
+							}
+							if(key != null && key.startsWith("prop.")) {
+								if(key.endsWith(".public") || !this._params.equals(key + ".public", "true")) {
+									continue;
+								}
 							}
 							sb.appendL(this._tag.tag("param", null, true));
 							sb.appendL(this._tag.tag("param", "key", null, true) + key + this._tag.tag("param", "key", null, false));
