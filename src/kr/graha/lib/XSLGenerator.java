@@ -1729,7 +1729,49 @@ public class XSLGenerator {
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
 			logger.severe(LOG.toString(e));
 		}
-		
+		try {
+			this._expr = this._xpath.compile("calculator/param");
+			NodeList list = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+			if(list != null && list.getLength() > 0) {
+				sb.appendL("<script>");
+				sb.appendL("GrahaFormula.expr = [");
+				for(int x = 0; x < list.getLength(); x++) {
+					Element node = (Element)list.item(x);
+					if(x > 0) {
+						sb.appendL("	,{");
+					} else {
+						sb.appendL("	{");
+					}
+					if(node.hasAttribute("expr") && node.getAttribute("expr") != null) {
+						String expr = (String)node.getAttribute("expr");
+						sb.appendL("		expr:\"" + expr.replace("\"", "\\\"") + "\",");
+					}
+					if(node.hasAttribute("form") && node.getAttribute("form") != null) {
+						sb.appendL("		formName:\"" + node.getAttribute("form") + "\",");
+					} else {
+						sb.appendL("		formName:\"insert\",");
+					}
+					if(node.hasAttribute("event") && node.getAttribute("event") != null) {
+						sb.appendL("		event:\"" + node.getAttribute("event") + "\",");
+					}
+					if(node.hasAttribute("refer") && node.getAttribute("refer") != null) {
+						sb.appendL("		refer:\"" + node.getAttribute("refer") + "\",");
+					}
+					if(node.hasAttribute("func") && node.getAttribute("func") != null) {
+						sb.appendL("		func:" + node.getAttribute("func") + ",");
+					}
+					if(node.hasAttribute("name") && node.getAttribute("name") != null) {
+						sb.appendL("		name:\"" + node.getAttribute("name") + "\"");
+					}
+					sb.appendL("	}");
+				}
+				sb.appendL("];");
+				sb.appendL("GrahaFormula.addEvent(document, GrahaFormula.ready, \"ready\");");
+				sb.appendL("</script>");
+			}
+		} catch (XPathExpressionException | DOMException e) {
+			e.printStackTrace();
+		}
 		try {
 			this._expr = this._xpath.compile("validation");
 			Element node = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
