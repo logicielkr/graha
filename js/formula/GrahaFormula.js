@@ -425,10 +425,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 		if(typeof(result) == "number") {
 			return "number";
 		} else if(typeof(result) == "string") {
-			if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
-				return "float";
-			} else if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
+			if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
 				return "int";
+			} else if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
+				return "float"; 
 			} else {
 				return "string";
 			}
@@ -448,10 +448,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 		if(typeof(result) == "number") {
 			return "number";
 		} else if(typeof(result) == "string") {
-			if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
-				return "float";
-			} else if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
+			if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
 				return "int";
+			} else if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
+				return "float"; 
 			} else {
 				return "string";
 			}
@@ -459,10 +459,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 	} else if(typeof(data) == "number") {
 		return "number";
 	} else if(typeof(data) == "string") {
-		if(new RegExp(/^-?[0-9.,]+$/).test(data.trim())) {
-			return "float";
-		} else if(new RegExp(/^-?[0-9,]+$/).test(data.trim())) {
+		if(new RegExp(/^-?[0-9,]+$/).test(data.trim())) {
 			return "int";
+		} else if(new RegExp(/^-?[0-9.,]+$/).test(data.trim())) {
+			return "float"; 
 		} else {
 			return "string";
 		}
@@ -476,10 +476,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 			if(typeof(result) == "number") {
 				return "number";
 			} else if(typeof(result) == "string") {
-				if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
-					return "float";
-				} else if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
+				if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
 					return "int";
+				} else if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
+					return "float";
 				} else {
 					return "string";
 				}
@@ -499,10 +499,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 			if(typeof(result) == "number") {
 				return "number";
 			} else if(typeof(result) == "string") {
-				if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
-					return "float";
-				} else if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
+				if(new RegExp(/^-?[0-9,]+$/).test(result.trim())) {
 					return "int";
+				} else if(new RegExp(/^-?[0-9.,]+$/).test(result.trim())) {
+					return "float";
 				} else {
 					return "string";
 				}
@@ -510,10 +510,10 @@ GrahaFormula.Func.udf.typeof = function(data) {
 		} else if(typeof(data[0]) == "number") {
 			return "number";
 		} else if(typeof(data[0]) == "string") {
-			if(new RegExp(/^-?[0-9.,]+$/).test(data[0].trim())) {
-				return "float";
-			} else if(new RegExp(/^-?[0-9,]+$/).test(data[0].trim())) {
+			if(new RegExp(/^-?[0-9,]+$/).test(data[0].trim())) {
 				return "int";
+			} else if(new RegExp(/^-?[0-9.,]+$/).test(data[0].trim())) {
+				return "float";
 			} else {
 				return "string";
 			}
@@ -525,39 +525,93 @@ GrahaFormula.Func.udf.typeof = function(data) {
 	}
 };
 GrahaFormula.Func.udf._int = function(data) {
-	if(new RegExp(/^-?[0-9,]+$/).test(data.trim())) {
+	if(GrahaFormula.Func.udf._isInt(data)) {
 		return parseInt(data.trim().replace(/,/g, ""));
 	} else {
 		return NaN;
 	}
 };
+GrahaFormula.Func.udf._isInt = function(data) {
+	var type = GrahaFormula.Func.udf.typeof(data);
+	if(type == "string") {
+		return false;
+	} else if(type == "float") {
+		return false;
+	} else if(type == "int") {
+		return true;
+	} else if(type == "number") {
+		var value = GrahaFormula.Func.udf.number(data);
+		if(Math.floor(value) === value) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+};
+GrahaFormula.Func.udf._isNumber = function(data) {
+	var type = GrahaFormula.Func.udf.typeof(data);
+	if(type == "string") {
+		return false;
+	} else if(type == "float") {
+		return true;
+	} else if(type == "int") {
+		return true;
+	} else if(type == "number") {
+		return true;
+	} else {
+		return false;
+	}
+};
+GrahaFormula.Func.udf._isFloat = function(data) {
+	var type = GrahaFormula.Func.udf.typeof(data);
+	if(type == "string") {
+		return false;
+	} else if(type == "float") {
+		return true;
+	} else if(type == "int") {
+		return false;
+	} else if(type == "number") {
+		var value = GrahaFormula.Func.udf.number(data);
+		if(Math.floor(value) === value) {
+			return false;
+		} else {
+			return true;
+		}
+	} else {
+		return false;
+	}
+};
 GrahaFormula.Func.udf._float = function(data) {
-	if(new RegExp(/^-?[0-9.,]+$/).test(data.trim())) {
+	if(GrahaFormula.Func.udf._isNumber(data)) {
 		return parseFloat(data.trim().replace(/,/g, ""));
 	} else {
 		return NaN;
 	}
 };
 GrahaFormula.Func.udf.comma = function(data) {
-	var value = GrahaFormula.Func.udf.number(data);
-	if(value == null) {
-		return null;
-	} else if(isNaN(value)) {
-		return NaN;
+	if(GrahaFormula.Func.udf._isNumber(data)) {
+		var value = GrahaFormula.Func.udf.number(data);
+		if(value == null) {
+			return null;
+		} else if(isNaN(value)) {
+			return NaN;
+		} else {
+			return value.toLocaleString();
+		}
 	} else {
-		return value.toLocaleString();
+		return GrahaFormula.Func.udf.string(data);
 	}
 };
 GrahaFormula.Func.udf.nvl = function(data) {
 	if(data.length == 1) {
-		var value = GrahaFormula.Func.udf.number(data[0]);
+		var value = GrahaFormula.Func.udf.string(data[0]);
 		return value;
 	} else if(data.length > 1) {
-		var value = GrahaFormula.Func.udf.number(data[0]);
-		var defaultValue = GrahaFormula.Func.udf.number(data[1]);
+		var value = GrahaFormula.Func.udf.string(data[0]);
+		var defaultValue = GrahaFormula.Func.udf.string(data[1]);
 		if(value == null || value == "") {
-			return defaultValue;
-		} else if(isNaN(value)) {
 			return defaultValue;
 		} else {
 			return value;
