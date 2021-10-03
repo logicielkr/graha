@@ -1398,6 +1398,8 @@ GrahaFormula.util.make = function(formName, elementName, index) {
 	if(arguments.length > 2 && index != null) {
 		if(GrahaFormula.util.isNumberingName(elementName, index)) {
 			realElementName = elementName.substring(0, elementName.lastIndexOf("{N}")) + index;
+		} else if(GrahaFormula.util.isArrayName(elementName, index)) {
+			realElementName = elementName.substring(0, elementName.lastIndexOf("[N]")) + "[" + index + "]";
 		}
 	}
 	if(formName == null || formName == "") {
