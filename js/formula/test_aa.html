@@ -33,7 +33,7 @@ GrahaFormula.expr = [
 	},
 	{
 		name:"local_tax.{N}",
-		expr:"floor((nvl(tax.{N}, 0) * local_tax.taxrate / 100) / 10) * 10",
+		expr:"floor((tax.{N} * local_tax.taxrate / 100) / 10) * 10",
 		formName:"formula",
 		event:"blur ready submit"
 	},
@@ -93,7 +93,13 @@ GrahaFormula.expr = [
 	},
 	{
 		name:"real_amount.{N}",
-		expr:"nvl(salary.{N}, 0) - nvl(tax.{N}, 0) - nvl(local_tax.{N}, 0) - nvl(national_pension_worker.{N}, 0) - nvl(national_health_insurance_worker.{N}, 0) - nvl(long_term_care_insurance_worker.{N}, 0) - nvl(employment_insurance_worker.{N}, 0)",
+		expr:"salary.{N} - tax.{N} - local_tax.{N} - national_pension_worker.{N} - national_health_insurance_worker.{N} - long_term_care_insurance_worker.{N} - employment_insurance_worker.{N}",
+		formName:"formula",
+		event:"blur ready submit"
+	},
+	{
+		name:"real_sum.{N}",
+		expr:"salary.{N} + national_pension_owner.{N} + national_health_insurance_owner.{N} + long_term_care_insurance_owner.{N} + employment_insurance_owner.{N} + industrial_accident_compensation_insurance.{N}",
 		formName:"formula",
 		event:"blur ready submit"
 	},
@@ -171,157 +177,169 @@ GrahaFormula.expr = [
 	},
 	{
 		name:"salary.total",
-		expr:"comma(nvl(salary.total, 0))",
+		expr:"comma(salary.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"tax.total",
-		expr:"comma(nvl(tax.total, 0))",
+		expr:"comma(tax.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"local_tax.total",
-		expr:"comma(nvl(local_tax.total, 0))",
+		expr:"comma(local_tax.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_pension_owner.total",
-		expr:"comma(nvl(national_pension_owner.total, 0))",
+		expr:"comma(national_pension_owner.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_pension_worker.total",
-		expr:"comma(nvl(national_pension_worker.total, 0))",
+		expr:"comma(national_pension_worker.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_health_insurance_owner.total",
-		expr:"comma(nvl(national_health_insurance_owner.total, 0))",
+		expr:"comma(national_health_insurance_owner.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_health_insurance_worker.total",
-		expr:"comma(nvl(national_health_insurance_worker.total, 0))",
+		expr:"comma(national_health_insurance_worker.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"long_term_care_insurance_owner.total",
-		expr:"comma(nvl(long_term_care_insurance_owner.total, 0))",
+		expr:"comma(long_term_care_insurance_owner.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"long_term_care_insurance_worker.total",
-		expr:"comma(nvl(long_term_care_insurance_worker.total, 0))",
+		expr:"comma(long_term_care_insurance_worker.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"employment_insurance_owner.total",
-		expr:"comma(nvl(employment_insurance_owner.total, 0))",
+		expr:"comma(employment_insurance_owner.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"employment_insurance_worker.total",
-		expr:"comma(nvl(employment_insurance_worker.total, 0))",
+		expr:"comma(employment_insurance_worker.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"industrial_accident_compensation_insurance.total",
-		expr:"comma(nvl(industrial_accident_compensation_insurance.total, 0))",
+		expr:"comma(industrial_accident_compensation_insurance.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"real_amount.total",
-		expr:"comma(nvl(salary.total, 0) - nvl(tax.total, 0) - nvl(local_tax.total, 0) - nvl(national_pension_worker.total, 0) - nvl(national_health_insurance_worker.total, 0) - nvl(long_term_care_insurance_worker.total, 0) - nvl(employment_insurance_worker.total, 0))",
+		expr:"comma(salary.total - tax.total - local_tax.total - national_pension_worker.total - national_health_insurance_worker.total - long_term_care_insurance_worker.total - employment_insurance_worker.total)",
+		formName:"formula",
+		event:"blur ready submit"
+	},
+	{
+		name:"real_sum.total",
+		expr:"comma(salary.total + national_pension_owner.total + national_health_insurance_owner.total + long_term_care_insurance_owner.total + employment_insurance_owner.total + industrial_accident_compensation_insurance.total)",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"salary.{N}",
-		expr:"comma(nvl(salary.{N}, 0))",
+		expr:"comma(salary.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"tax.{N}",
-		expr:"comma(nvl(tax.{N}, 0))",
+		expr:"comma(tax.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"local_tax.{N}",
-		expr:"comma(nvl(local_tax.{N}, 0))",
+		expr:"comma(local_tax.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_pension_owner.{N}",
-		expr:"comma(nvl(national_pension_owner.{N}, 0))",
+		expr:"comma(national_pension_owner.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_pension_worker.{N}",
-		expr:"comma(nvl(national_pension_worker.{N}, 0))",
+		expr:"comma(national_pension_worker.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_health_insurance_owner.{N}",
-		expr:"comma(nvl(national_health_insurance_owner.{N}, 0))",
+		expr:"comma(national_health_insurance_owner.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"national_health_insurance_worker.{N}",
-		expr:"comma(nvl(national_health_insurance_worker.{N}, 0))",
+		expr:"comma(national_health_insurance_worker.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"long_term_care_insurance_owner.{N}",
-		expr:"comma(nvl(long_term_care_insurance_owner.{N}, 0))",
+		expr:"comma(long_term_care_insurance_owner.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"long_term_care_insurance_worker.{N}",
-		expr:"comma(nvl(long_term_care_insurance_worker.{N}, 0))",
+		expr:"comma(long_term_care_insurance_worker.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"employment_insurance_owner.{N}",
-		expr:"comma(nvl(employment_insurance_owner.{N}, 0))",
+		expr:"comma(employment_insurance_owner.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"employment_insurance_worker.{N}",
-		expr:"comma(nvl(employment_insurance_worker.{N}, 0))",
+		expr:"comma(employment_insurance_worker.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"industrial_accident_compensation_insurance.{N}",
-		expr:"comma(nvl(industrial_accident_compensation_insurance.{N}, 0))",
+		expr:"comma(industrial_accident_compensation_insurance.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	},
 	{
 		name:"real_amount.{N}",
 		expr:"comma(real_amount.{N})",
+		formName:"formula",
+		event:"blur ready submit"
+	},
+	{
+		name:"real_sum.{N}",
+		expr:"comma(real_sum.{N})",
 		formName:"formula",
 		event:"blur ready submit"
 	}
@@ -343,6 +361,7 @@ input[name='employment_insurance_owner.total'],
 input[name='employment_insurance_worker.total'],
 input[name='industrial_accident_compensation_insurance.total'],
 input[name='real_amount.total'],
+input[name='real_sum.total'],
 input[name='local_tax.taxrate'],
 input[name='national_pension_owner.taxrate'],
 input[name='national_pension_worker.taxrate'],
@@ -365,7 +384,8 @@ input.long_term_care_insurance_worker,
 input.employment_insurance_owner,
 input.employment_insurance_worker,
 input.industrial_accident_compensation_insurance,
-input.real_amount
+input.real_amount,
+input.real_sum
 {
 	text-align:right;
 }
@@ -388,6 +408,7 @@ input[readonly='true'] {
 			<th rowspan="2" colspan="2">고용보험</th>
 			<th rowspan="3">산재보험</th>
 			<th rowspan="3">지급총액</th>
+			<th rowspan="3">부담총액</th>
 		</tr>
 		<tr>
 			<th colspan="2">건강보험료</th>
@@ -418,6 +439,7 @@ input[readonly='true'] {
 			<td><input type="text" name="employment_insurance_worker.total" value="" readonly="true" /></td>
 			<td><input type="text" name="industrial_accident_compensation_insurance.total" value="" readonly="true" /></td>
 			<td><input type="text" name="real_amount.total" value="" readonly="true" /></td>
+			<td><input type="text" name="real_sum.total" value="" readonly="true" /></td>
 		</tr>
 		<tr>
 			<th>세율</th>
@@ -433,6 +455,7 @@ input[readonly='true'] {
 			<td><input type="text" name="employment_insurance_owner.taxrate" value="1.05" /></td>
 			<td><input type="text" name="employment_insurance_worker.taxrate" value="0.8" /></td>
 			<td><input type="text" name="industrial_accident_compensation_insurance.taxrate" value="0.763" /></td>
+			<td></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -450,6 +473,7 @@ input[readonly='true'] {
 			<td><input type="text" name="employment_insurance_worker.1" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="industrial_accident_compensation_insurance.1" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="real_amount.1" value="" class="real_amount" readonly="true" /></td>
+			<td><input type="text" name="real_sum.1" value="" class="real_sum" readonly="true" /></td>
 		</tr>
 		
 		<tr>
@@ -467,6 +491,7 @@ input[readonly='true'] {
 			<td><input type="text" name="employment_insurance_worker.2" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="industrial_accident_compensation_insurance.2" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="real_amount.2" value="" class="real_amount" readonly="true" /></td>
+			<td><input type="text" name="real_sum.2" value="" class="real_sum" readonly="true" /></td>
 		</tr>
 		<tr>
 			<td><input type="text" name="name.3" value="		홍삼동			" class="name" /></td>
@@ -483,6 +508,7 @@ input[readonly='true'] {
 			<td><input type="text" name="employment_insurance_worker.3" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="industrial_accident_compensation_insurance.3" value="" class="national_pension_worker" readonly="true" /></td>
 			<td><input type="text" name="real_amount.3" value="" class="real_amount" readonly="true" /></td>
+			<td><input type="text" name="real_sum.3" value="" class="real_sum" readonly="true" /></td>
 		</tr>
 	</table>
 </form>
