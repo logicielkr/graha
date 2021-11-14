@@ -1242,7 +1242,11 @@ public class XSLGenerator {
 				if(search.hasAttribute("name") && !search.getAttribute("name").equals("")) {
 					name = " name=\"" + search.getAttribute("name") + "\" class=\"" + search.getAttribute("name") + "\"";
 				}
-				sb.append("<form action=\"" + this.getPath(search.getAttribute("path")) + "\"" + name + ">");
+				String method = "";
+				if(search.hasAttribute("method") && !search.getAttribute("method").equals("")) {
+					method = " method=\"" + search.getAttribute("method") + "\"";
+				}
+				sb.append("<form action=\"" + this.getPath(search.getAttribute("path")) + "\"" + name + method + ">");
 				this._expr = this._xpath.compile("params/param");
 				NodeList inputs = (NodeList)this._expr.evaluate(search, XPathConstants.NODESET);
 				for(int x = 0; x < inputs.getLength(); x++) {
