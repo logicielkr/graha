@@ -2052,8 +2052,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				java.util.Map<String, Encryptor> encryptor = getEncryptor(node);
 				for(int x = 0; x < param.getLength(); x++) {
 					Element p = (Element)param.item(x);
-					this.bind(stmt, p.getAttribute("datatype"), index, new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
-					index++;
+					if(!p.hasAttribute("cond") || AuthParser.auth(p.getAttribute("cond"), this._params)) {
+						this.bind(stmt, p.getAttribute("datatype"), index, new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
+						index++;
+					}
 				}
 				rs = stmt.executeQuery();
 				sb.appendL(this._tag.tag("code", node.getAttribute("name"), true));
