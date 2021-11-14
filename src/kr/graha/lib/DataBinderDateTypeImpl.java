@@ -87,6 +87,7 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
+			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
 			if(params.compare(datatype, "date")) {
 				setDate(stmt, index, params.getDate(value[0] + "." + idx, pattern));
@@ -115,89 +116,92 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0] + "." + idx, pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
+			return;
 		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
 			
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			params.put(value[0], dValue);
-			long today = new java.util.Date().getTime();
-			if(params.compare(datatype, "date")) {
-				if(params.compare(defaultValue, "system.today")) {
-					setDate(stmt, index, new java.sql.Date(today));
-					params.put(value[0], params.formatDate(new java.sql.Date(today), pattern));
-				} else {
-					setDate(stmt, index, params.getDate(value[0], pattern));
-				}
-			} else {
-				if(params.compare(defaultValue, "system.today")) {
-					setTimestamp(stmt, index, new java.sql.Timestamp(today));
-					params.put(value[0], params.formatDate(new java.sql.Timestamp(today), pattern));
-				} else {
-					setTimestamp(stmt, index, params.getTimestamp(value[0], pattern));
-				}
-			}
-							
-			if(table != null && column != null) {
-				if(idx >= 0) {
-					if(params.compare(datatype, "date")) {
-						if(params.compare(defaultValue, "system.today")) {
-							params.put("query." + table + "." + column + "." + idx, new java.sql.Date(today));
-						} else {
-							params.put("query." + table + "." + column + "." + idx, params.getDate(value[0], pattern));
-						}
-					} else {
-						if(params.compare(defaultValue, "system.today")) {
-							params.put("query." + table + "." + column + "." + idx, new java.sql.Timestamp(today));
-						} else {
-							params.put("query." + table + "." + column + "." + idx, params.getTimestamp(value[0], pattern));
-						}
-					}
-				} else {
-					if(params.compare(datatype, "date")) {
-						if(params.compare(defaultValue, "system.today")) {
-							params.put("query." + table + "." + column, new java.sql.Date(new java.util.Date().getTime()));
-						} else {
-							params.put("query." + table + "." + column, params.getDate(value[0], pattern));
-						}
-					} else {
-						if(params.compare(defaultValue, "system.today")) {
-							params.put("query." + table + "." + column, new java.sql.Timestamp(new java.util.Date().getTime()));
-						} else {
-							params.put("query." + table + "." + column, params.getTimestamp(value[0], pattern));
-						}
-					}
-				}
-			}
-			if(column != null && sb != null) {
+			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) { 
+				params.put(value[0], dValue);
+				long today = new java.util.Date().getTime();
 				if(params.compare(datatype, "date")) {
 					if(params.compare(defaultValue, "system.today")) {
-						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Date(today) + "]]></" + tag.tag("row", column, null, false) + ">");
+						setDate(stmt, index, new java.sql.Date(today));
+						params.put(value[0], params.formatDate(new java.sql.Date(today), pattern));
 					} else {
-						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDate(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
+						setDate(stmt, index, params.getDate(value[0], pattern));
 					}
 				} else {
 					if(params.compare(defaultValue, "system.today")) {
-						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Timestamp(today) + "]]></" + tag.tag("row", column, null, false) + ">");
+						setTimestamp(stmt, index, new java.sql.Timestamp(today));
+						params.put(value[0], params.formatDate(new java.sql.Timestamp(today), pattern));
 					} else {
-						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
+						setTimestamp(stmt, index, params.getTimestamp(value[0], pattern));
 					}
-					
 				}
+								
+				if(table != null && column != null) {
+					if(idx >= 0) {
+						if(params.compare(datatype, "date")) {
+							if(params.compare(defaultValue, "system.today")) {
+								params.put("query." + table + "." + column + "." + idx, new java.sql.Date(today));
+							} else {
+								params.put("query." + table + "." + column + "." + idx, params.getDate(value[0], pattern));
+							}
+						} else {
+							if(params.compare(defaultValue, "system.today")) {
+								params.put("query." + table + "." + column + "." + idx, new java.sql.Timestamp(today));
+							} else {
+								params.put("query." + table + "." + column + "." + idx, params.getTimestamp(value[0], pattern));
+							}
+						}
+					} else {
+						if(params.compare(datatype, "date")) {
+							if(params.compare(defaultValue, "system.today")) {
+								params.put("query." + table + "." + column, new java.sql.Date(new java.util.Date().getTime()));
+							} else {
+								params.put("query." + table + "." + column, params.getDate(value[0], pattern));
+							}
+						} else {
+							if(params.compare(defaultValue, "system.today")) {
+								params.put("query." + table + "." + column, new java.sql.Timestamp(new java.util.Date().getTime()));
+							} else {
+								params.put("query." + table + "." + column, params.getTimestamp(value[0], pattern));
+							}
+						}
+					}
+				}
+				if(column != null && sb != null) {
+					if(params.compare(datatype, "date")) {
+						if(params.compare(defaultValue, "system.today")) {
+							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Date(today) + "]]></" + tag.tag("row", column, null, false) + ">");
+						} else {
+							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDate(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
+						}
+					} else {
+						if(params.compare(defaultValue, "system.today")) {
+							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Timestamp(today) + "]]></" + tag.tag("row", column, null, false) + ">");
+						} else {
+							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
+						}
+						
+					}
+				}
+				return;
 			}
+		}
+		if(params.compare(datatype, "date")) {
+			setNull(stmt, index, java.sql.Types.DATE);
 		} else {
-			if(params.compare(datatype, "date")) {
-				setNull(stmt, index, java.sql.Types.DATE);
+			setNull(stmt, index, java.sql.Types.TIMESTAMP);
+		}
+		if(table != null && column != null) {
+			if(idx >= 0) {
+				params.put("query." + table + "." + column + "." + idx, null);
 			} else {
-				setNull(stmt, index, java.sql.Types.TIMESTAMP);
-			}
-			if(table != null && column != null) {
-				if(idx >= 0) {
-					params.put("query." + table + "." + column + "." + idx, null);
-				} else {
-					params.put("query." + table + "." + column, null);
-				}
+				params.put("query." + table + "." + column, null);
 			}
 		}
 	}

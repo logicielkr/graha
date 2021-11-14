@@ -76,6 +76,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 			if(column != null && sb != null) {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0])).replace("]]>", "]]]]><![CDATA[>") + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
+			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
 			if(encryptor != null && encrypt != null && !encrypt.trim().equals("") && encryptor.containsKey(encrypt)) {
 				setString(stmt, index, encryptor.get(encrypt).encrypt(params.getString(value[0] + "." + idx)));
@@ -96,60 +97,64 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0]).replace("]]>", "]]]]><![CDATA[>") + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
+			return;
 		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
-			
 			String dValue = defaultValue;
-
-			if(dValue != null && dValue.equals("system.today.yyyy")) {
-				if(!params.hasKey("system.today.yyyy")) {
-					int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
-					params.put("system.today.yyyy", Integer.toString(year));
-				}
-				dValue = params.getString("system.today.yyyy");
-			} else if(dValue != null && dValue.equals("system.today.mm")) {
-				if(!params.hasKey("system.today.mm")) {
-					int month = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH);
-					month++;
-					if(month >= 10) {
-						params.put("system.today.mm", Integer.toString(month));
-					} else {
-						params.put("system.today.mm", "0" + Integer.toString(month));
-					}
-				}
-				dValue = params.getString("system.today.mm");
-			} else if(dValue != null && dValue.equals("system.today.dd")) {
-				if(!params.hasKey("system.today.dd")) {
-					int day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH);
-					if(day >= 10) {
-						params.put("system.today.dd", Integer.toString(day));
-					} else {
-						params.put("system.today.dd", "0" + Integer.toString(day));
-					}
-				}
-				dValue = params.getString("system.today.dd");
-			} else if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
+			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			if(defaultValue != null && !defaultValue.equals("%")) {
-				params.put(value[0], dValue);
-			}
-			if(encryptor != null && encrypt != null && !encrypt.trim().equals("") && encryptor.containsKey(encrypt)) {
-				setString(stmt, index, encryptor.get(encrypt).encrypt(dValue));
-			} else {
-				setString(stmt, index, dValue);
-			}
-			
-			if(table != null && column != null) {
-				if(idx >= 0) {
-					params.put("query." + table + "." + column + "." + idx, dValue);
-				} else {
-					params.put("query." + table + "." + column, dValue);
+			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) {
+				if(defaultValue != null && defaultValue.equals("system.today.yyyy")) {
+					if(!params.hasKey("system.today.yyyy")) {
+						int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+						params.put("system.today.yyyy", Integer.toString(year));
+					}
+					dValue = params.getString("system.today.yyyy");
+				} else if(defaultValue != null && defaultValue.equals("system.today.mm")) {
+					if(!params.hasKey("system.today.mm")) {
+						int month = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH);
+						month++;
+						if(month >= 10) {
+							params.put("system.today.mm", Integer.toString(month));
+						} else {
+							params.put("system.today.mm", "0" + Integer.toString(month));
+						}
+					}
+					dValue = params.getString("system.today.mm");
+				} else if(defaultValue != null && defaultValue.equals("system.today.dd")) {
+					if(!params.hasKey("system.today.dd")) {
+						int day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH);
+						if(day >= 10) {
+							params.put("system.today.dd", Integer.toString(day));
+						} else {
+							params.put("system.today.dd", "0" + Integer.toString(day));
+						}
+					}
+					dValue = params.getString("system.today.dd");
 				}
+				if(defaultValue != null && !defaultValue.equals("%")) {
+					params.put(value[0], dValue);
+				}
+				if(encryptor != null && encrypt != null && !encrypt.trim().equals("") && encryptor.containsKey(encrypt)) {
+					setString(stmt, index, encryptor.get(encrypt).encrypt(dValue));
+				} else {
+					setString(stmt, index, dValue);
+				}
+				
+				if(table != null && column != null) {
+					if(idx >= 0) {
+						params.put("query." + table + "." + column + "." + idx, dValue);
+					} else {
+						params.put("query." + table + "." + column, dValue);
+					}
+				}
+				if(column != null && sb != null) {
+					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + dValue + "]]></" + tag.tag("row", column, null, false) + ">");
+				}
+				return;
 			}
-			if(column != null && sb != null) {
-				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + dValue + "]]></" + tag.tag("row", column, null, false) + ">");
-			}
-		} else if(params.compare(datatype, "char")) {
+		}
+		if(params.compare(datatype, "char")) {
 			setNull(stmt, index, java.sql.Types.CHAR);
 			if(table != null && column != null) {
 				if(idx >= 0) {

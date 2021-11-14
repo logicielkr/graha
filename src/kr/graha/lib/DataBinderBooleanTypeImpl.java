@@ -71,6 +71,7 @@ public class DataBinderBooleanTypeImpl extends DataBinderImpl {
 			if(column != null && sb != null) {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getBoolean(value[0]) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
+			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
 			setBoolean(stmt, index, params.getBoolean(value[0] + "." + idx));
 			if(table != null && column != null) {
@@ -83,36 +84,38 @@ public class DataBinderBooleanTypeImpl extends DataBinderImpl {
 			if(column != null && sb != null) {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getBoolean(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
+			return;
 		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
 			
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-
-			if(defaultValue != null && !defaultValue.equals("%")) {
-				params.put(value[0], dValue);
-			}
-			setBoolean(stmt, index, params.getBoolean(value[0]));
-			
-			if(table != null && column != null) {
-				if(idx >= 0) {
-					params.put("query." + table + "." + column + "." + idx, dValue);
-				} else {
-					params.put("query." + table + "." + column, dValue);
+			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) { 
+				if(defaultValue != null && !defaultValue.equals("%")) {
+					params.put(value[0], dValue);
 				}
-			}
-			if(column != null && sb != null) {
-				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + dValue + "]]></" + tag.tag("row", column, null, false) + ">");
-			}
-		} else {
-			setNull(stmt, index, java.sql.Types.BOOLEAN);
-			if(table != null && column != null) {
-				if(idx >= 0) {
-					params.put("query." + table + "." + column + "." + idx, null);
-				} else {
-					params.put("query." + table + "." + column, null);
+				setBoolean(stmt, index, params.getBoolean(value[0]));
+				
+				if(table != null && column != null) {
+					if(idx >= 0) {
+						params.put("query." + table + "." + column + "." + idx, dValue);
+					} else {
+						params.put("query." + table + "." + column, dValue);
+					}
 				}
+				if(column != null && sb != null) {
+					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + dValue + "]]></" + tag.tag("row", column, null, false) + ">");
+				}
+				return;
+			}
+		}
+		setNull(stmt, index, java.sql.Types.BOOLEAN);
+		if(table != null && column != null) {
+			if(idx >= 0) {
+				params.put("query." + table + "." + column + "." + idx, null);
+			} else {
+				params.put("query." + table + "." + column, null);
 			}
 		}
 	}
