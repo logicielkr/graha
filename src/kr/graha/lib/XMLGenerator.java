@@ -288,6 +288,11 @@ public class XMLGenerator {
 		sb.append(this._tag.tag("rows", null, true));
 		for(int q = 0; q < commands.getLength(); q++) {
 			Element command = (Element)commands.item(q);
+			if(command.hasAttribute("cond") && command.getAttribute("cond") != null) {
+				if(!(AuthParser.auth(command.getAttribute("cond"), this._params))) {
+					continue;
+				}
+			}
 			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
 				/*
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).newInstance();
