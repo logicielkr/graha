@@ -167,17 +167,18 @@ public class XSLGenerator {
 			NodeList columns = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
 			for(int i = 0; i < columns.getLength(); i++) {
 				Element column = (Element)columns.item(i);
+				this.cond(sb, column, true);
+				sb.appendL(this._html.th(column.getAttribute("name")));
 				if(column.hasAttribute("width")) {
-					sb.appendL(this._html.th(column.getAttribute("name")) + " style=\"width:" + column.getAttribute("width") + "\">" + column.getAttribute("label") + this._html.thE());
-				} else {
-					sb.appendL(this._html.th(column.getAttribute("name")) + ">" + column.getAttribute("label") + this._html.thE());
+					sb.appendL(" style=\"width:" + column.getAttribute("width") + "\"");
 				}
+				sb.append(">" + column.getAttribute("label") + this._html.thE());
+				this.cond(sb, column, false);
 			}
 			sb.appendL(this._html.trE());
 			sb.appendL(this._html.theadE());
 			sb.appendL(this._html.tbody());
 			if(tabs.getLength() == 1) {
-				
 				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "\">");
 			} else {
 				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
@@ -185,16 +186,18 @@ public class XSLGenerator {
 			sb.appendL(this._html.tr());
 			for(int i = 0; i < columns.getLength(); i++) {
 				Element column = (Element)columns.item(i);
-					sb.appendL(this._html.td(column.getAttribute("name")));
-					if(column.hasAttribute("align")) {
-						sb.append(" align=\"" + column.getAttribute("align") + "\"");
-					}
-					if(column.hasAttribute("width")) {
-						sb.append(" style=\"width:" + column.getAttribute("width") + "\"");
-					}
-					sb.append(">");
-					sb.append(this.column(column, false, tab.getAttribute("name")));
-					sb.appendL(this._html.tdE());
+				this.cond(sb, column, true);
+				sb.appendL(this._html.td(column.getAttribute("name")));
+				if(column.hasAttribute("align")) {
+					sb.append(" align=\"" + column.getAttribute("align") + "\"");
+				}
+				if(column.hasAttribute("width")) {
+					sb.append(" style=\"width:" + column.getAttribute("width") + "\"");
+				}
+				sb.append(">");
+				sb.append(this.column(column, false, tab.getAttribute("name")));
+				sb.appendL(this._html.tdE());
+				this.cond(sb, column, false);
 			}
 			sb.appendL(this._html.trE());
 			sb.appendL("</xsl:for-each>");
@@ -363,8 +366,10 @@ public class XSLGenerator {
 					sb.appendL(this._html.tr());
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
+						this.cond(sb, col, true);
 						sb.append(this.td(col, "th"));
 						sb.appendL(col.getAttribute("label") + this._html.thE());
+						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -379,11 +384,12 @@ public class XSLGenerator {
 					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
-						
+						this.cond(sb, col, true);
 						sb.append(this.td(col, "td"));
 						sb.append(this.column(col, false, tab.getAttribute("name")));
 //						sb.append(this.code(col, false, tab.getAttribute("name")));
 						sb.appendL(this._html.tdE());
+						this.cond(sb, col, false);
 						
 					}
 					sb.appendL(this._html.trE());
@@ -400,8 +406,10 @@ public class XSLGenerator {
 						sb.appendL(this._html.tr());
 						for(int x = 0; x < cols.getLength(); x++) {
 							Element col = (Element)cols.item(x);
+							this.cond(sb, col, true);
 							sb.append(this.td(col, "th"));
 							sb.appendL(col.getAttribute("label") + this._html.thE());
+							this.cond(sb, col, false);
 						}
 						sb.appendL(this._html.trE());
 					}
@@ -413,11 +421,13 @@ public class XSLGenerator {
 				}
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
+					this.cond(sb, row, true);
 					sb.appendL(this._html.tr());
 					this._expr = this._xpath.compile("column");
 					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
+						this.cond(sb, col, true);
 						sb.appendL(this._html.thG(col.getAttribute("name")));
 						if(!tab.hasAttribute("single") || !tab.getAttribute("single").equals("true")) {
 							if(!col.hasAttribute("islabel") || !col.getAttribute("islabel").equals("false")) {
@@ -438,8 +448,10 @@ public class XSLGenerator {
 						}
 						sb.appendL(this._html.tdE());
 						sb.appendL(this._html.tdGE());
+						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
+					this.cond(sb, row, false);
 				}
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.appendL("</xsl:for-each>");
@@ -453,6 +465,33 @@ public class XSLGenerator {
 		sb.append(this.nav(layout, "bottom"));
 		return sb;
 		
+	}
+	private void cond(Buffer sb, Element element, boolean start) {
+		if(this._tag.isRDF) {
+			if(
+				element.hasAttribute("xTest") &&
+				element.getAttribute("xTest") != null &&
+				!((String)element.getAttribute("xTest")).equals("")
+			) {
+				if(start) {
+					sb.append("<xsl:if test=\"" + element.getAttribute("xTest") + "\">");
+				} else {
+					sb.append("</xsl:if>");
+				}
+			}
+		} else {
+			if(
+				element.hasAttribute("test") &&
+				element.getAttribute("test") != null &&
+				!((String)element.getAttribute("test")).equals("")
+			) {
+				if(start) {
+					sb.append("<xsl:if test=\"" + element.getAttribute("test") + "\">");
+				} else {
+					sb.append("</xsl:if>");
+				}
+			}
+		}
 	}
 	private void fileLI(NodeList files, Buffer sb, String before, String after) {
 		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
@@ -659,11 +698,13 @@ public class XSLGenerator {
 				sb.appendL(this._html.tr());
 				for(int x = 0; x < cols.getLength(); x++) {
 					Element col = (Element)cols.item(x);
+					this.cond(sb, col, true);
 					if(col.hasAttribute("width")) {
 						sb.appendL(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">" + col.getAttribute("label") + this._html.thE());
 					} else {
 						sb.appendL(this._html.th(col.getAttribute("name")) + ">" + col.getAttribute("label") + this._html.thE());
 					}
+					this.cond(sb, col, false);
 				}
 				sb.appendL(this._html.trE());
 				sb.appendL(this._html.theadE());
@@ -672,6 +713,7 @@ public class XSLGenerator {
 				sb.appendL(this._html.tr());
 				for(int x = 0; x < cols.getLength(); x++) {
 					Element col = (Element)cols.item(x);
+					this.cond(sb, col, true);
 					if(col.hasAttribute("width")) {
 						sb.appendL(this._html.td(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">");
 					} else {
@@ -689,6 +731,7 @@ public class XSLGenerator {
 					}
 					sb.append(this.input(col, false, tab.getAttribute("name")));
 					sb.appendL(this._html.tdE());
+					this.cond(sb, col, false);
 				}
 				sb.appendL(this._html.trE());
 				sb.appendL("</xsl:for-each>");
@@ -702,8 +745,10 @@ public class XSLGenerator {
 					sb.appendL(this._html.tr());
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
+						this.cond(sb, col, true);
 						sb.append(this.td(col, "th"));
 						sb.appendL(col.getAttribute("label") + this._html.thE());
+						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -717,7 +762,7 @@ public class XSLGenerator {
 					sb.appendL(this._html.tr());
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
-
+						this.cond(sb, col, true);
 						sb.append(this.td(col, "td"));
 						if(x == 0 && i == 0) {
 							this._expr = this._xpath.compile("column[@type = 'hidden']");
@@ -731,6 +776,7 @@ public class XSLGenerator {
 						}
 						sb.append(this.input(col, false, tab.getAttribute("name")));
 						sb.appendL(this._html.tdE());
+						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -743,6 +789,7 @@ public class XSLGenerator {
 				}
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
+					this.cond(sb, row, true);
 					if(row.hasAttribute("height")) {
 						sb.append(this._html.trS() + " style=\"height:" + row.getAttribute("height") + ";\">");
 					} else {
@@ -752,6 +799,7 @@ public class XSLGenerator {
 					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
 					for(int x = 0; x < cols.getLength(); x++) {
 						Element col = (Element)cols.item(x);
+						this.cond(sb, col, true);
 						sb.appendL(this._html.thG(col.getAttribute("name")));
 						if(!col.hasAttribute("islabel") || !col.getAttribute("islabel").equals("false")) {
 							if(col.hasAttribute("labelWidth")) {
@@ -789,8 +837,10 @@ public class XSLGenerator {
 						}
 						sb.append(this._html.tdE());
 						sb.appendL(this._html.tdGE());
+						this.cond(sb, col, false);
 					}
 					sb.append(this._html.trE());
+					this.cond(sb, row, false);
 				}
 				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
 					sb.append("</xsl:for-each>");
@@ -1145,6 +1195,7 @@ public class XSLGenerator {
 						continue;
 					}
 				}
+				this.cond(sb, link, true);
 				if(!link.hasAttribute("full") || !link.getAttribute("full").equals("true")) {
 					String name = "";
 					if(link.hasAttribute("name") && !link.getAttribute("name").equals("")) {
@@ -1227,6 +1278,7 @@ public class XSLGenerator {
 						sb.append("<input type=\"submit\" value=\"" + link.getAttribute("label") + "\" form=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "_submit\" />");
 					}
 				}
+				this.cond(sb, link, false);
 			}
 			
 			this._expr = this._xpath.compile("search");
@@ -1238,6 +1290,7 @@ public class XSLGenerator {
 						continue;
 					}
 				}
+				this.cond(sb, search, true);
 				String name = "";
 				if(search.hasAttribute("name") && !search.getAttribute("name").equals("")) {
 					name = " name=\"" + search.getAttribute("name") + "\" class=\"" + search.getAttribute("name") + "\"";
@@ -1313,6 +1366,7 @@ public class XSLGenerator {
 					sb.append("<input type=\"submit\" value=\"" + search.getAttribute("label") + "\" />");
 				}
 				sb.append("</form>");
+				this.cond(sb, search, false);
 			}
 		}
 		return sb;
