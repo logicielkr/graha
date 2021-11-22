@@ -201,7 +201,10 @@ public final class DB {
  * @return 문자열로 변환된 Java 자료형
  */
 	private static String getJavaDataType(int dataType, String typeName) {
-		if(dataType == java.sql.Types.VARCHAR) {
+		if(
+			dataType == java.sql.Types.VARCHAR ||
+			dataType == java.sql.Types.CHAR
+		) {
 			return "String";
 		} else if(dataType == java.sql.Types.INTEGER) {
 			return "Integer";
@@ -229,6 +232,7 @@ public final class DB {
  * Double -> pstmt.setDouble
  * java.sql.Date -> pstmt.setDate
  * java.sql.Timestamp -> pstmt.setTimestamp
+ * java.sql.Array -> pstmt.setArray
  * 위에 해당하지 않는 경우 -> pstmt.setObject
  * @param pstmt PreparedStatement 객체
  * @param index 바인딩할 위치
@@ -249,6 +253,8 @@ public final class DB {
 			pstmt.setDate(index, (java.sql.Date)param);
 		} else if(param instanceof java.sql.Timestamp) {
 			pstmt.setTimestamp(index, (java.sql.Timestamp)param);
+		} else if(param instanceof java.sql.Array) {
+			pstmt.setArray(index, (java.sql.Array)param);
 		} else {
 			pstmt.setObject(index, param);
 		}
@@ -568,7 +574,10 @@ public final class DB {
  * @param columnIndex 컬럼 순서
  */
 	private static void put(ResultSet rs, ResultSetMetaData rsmd, HashMap data, int columnIndex) throws SQLException {
-		if(rsmd.getColumnType(columnIndex) == java.sql.Types.VARCHAR) {
+		if(
+			rsmd.getColumnType(columnIndex) == java.sql.Types.VARCHAR ||
+			rsmd.getColumnType(columnIndex) == java.sql.Types.CHAR
+		) {
 			data.put(rsmd.getColumnName(columnIndex), rs.getString(columnIndex));
 		} else if(rsmd.getColumnType(columnIndex) == java.sql.Types.INTEGER) {
 			data.put(rsmd.getColumnName(columnIndex), rs.getInt(columnIndex));
@@ -598,7 +607,10 @@ public final class DB {
  */
 	private static void put(ResultSet rs, ResultSetMetaData rsmd, Object data, int columnIndex, Class c) throws SQLException {
 		try {
-			if(rsmd.getColumnType(columnIndex) == java.sql.Types.VARCHAR) {
+			if(
+				rsmd.getColumnType(columnIndex) == java.sql.Types.VARCHAR ||
+				rsmd.getColumnType(columnIndex) == java.sql.Types.CHAR
+			) {
 				Method m = c.getMethod("set" + DB.getClassOrMethodName(rsmd.getColumnName(columnIndex)), new Class[]{String.class});
 				if(m != null) {
 					m.invoke(data, new Object[]{rs.getString(columnIndex)});
