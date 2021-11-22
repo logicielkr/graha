@@ -67,12 +67,22 @@ import java.sql.ResultSetMetaData;
 
 public class PropAdapter {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
+	
+	public static final int Before_Connection = 1;
+	public static final int Before_Before_Processor = 2;
+	public static final int After_Before_Processor = 3;
+	public static final int Before_After_Processor = 4;
+	public static final int After_After_Processor = 5;
+	
+	
+	
+	
 	protected PropAdapter() {
 		LOG.setLogLevel(logger);
 	}
-	protected void execute(HttpServletRequest request, File config, Element query, Record params) {
+	protected void execute(HttpServletRequest request, File config, Element query, Record params, int mode) {
 		try {
-			this.execute(request, config, query, params, null, null);
+			this.execute(request, config, query, params, null, null, mode);
 		} catch (SQLException | NoSuchProviderException e) {
 			if(logger.isLoggable(Level.SEVERE)) {
 				logger.severe(LOG.toString(e));
@@ -85,7 +95,8 @@ public class PropAdapter {
 			Element query, 
 			Record params, 
 			Connection con, 
-			XMLGenerator g
+			XMLGenerator g,
+			int mode
 		) 
 		throws SQLException,
 			NoSuchProviderException
@@ -140,6 +151,18 @@ public class PropAdapter {
 								continue;
 							}
 						}
+						if(!node.hasAttribute("time") && mode >= PropAdapter.After_Before_Processor) {
+							continue;
+						}
+						if(node.hasAttribute("time")) {
+							int time = getMode((String)node.getAttribute("time"));
+							if(time == 0 && mode >= PropAdapter.After_Before_Processor) {
+								continue;
+							}
+							if(time > 0 && mode != time) {
+								continue;
+							}
+						}
 						if(!node.hasAttribute("cond") || AuthParser.auth(node.getAttribute("cond"), params)) {
 							if(node.hasAttribute("value")) {
 								Record result = FileHelper.parse(node.getAttribute("value"), params);
@@ -150,7 +173,7 @@ public class PropAdapter {
 									}
 								}
 							} else if(con != null && g != null) {
-								execute(params, node, xpath, con, g);
+								execute(params, node, xpath, con, g, mode);
 							}
 						}
 					}
@@ -162,12 +185,30 @@ public class PropAdapter {
 			}
 		}
 	}
+	private int getMode(String time) {
+		if(time == null) {
+			return 0;
+		} else if(time.equals("first")) {
+			return PropAdapter.Before_Connection;
+		} else if(time.equals("before")) {
+			return PropAdapter.Before_Before_Processor;
+		} else if(time.equals("after-before")) {
+			return PropAdapter.After_Before_Processor;
+		} else if(time.equals("before-after")) {
+			return PropAdapter.Before_After_Processor;
+		} else if(time.equals("after")) {
+			return PropAdapter.After_After_Processor;
+		} else {
+			return 0;
+		}
+	}
 	protected void execute(
 			Record params, 
 			Element node, 
 			XPath xpath, 
 			Connection con, 
-			XMLGenerator g
+			XMLGenerator g,
+			int mode
 		) 
 		throws XPathExpressionException, 
 			SQLException,
@@ -208,9 +249,11 @@ public class PropAdapter {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			if(rs.next()) {
 				for(int x = 1; x <= rsmd.getColumnCount(); x++) {
-					params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x), rs.getString(x));
-					if(node.hasAttribute("public") && node.getAttribute("public") != null && node.getAttribute("public").equals("true")) {
-						params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x) + ".public", "true");
+					if(rs.getString(x) != null) {
+						params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x), rs.getString(x));
+						if(node.hasAttribute("public") && node.getAttribute("public") != null && node.getAttribute("public").equals("true")) {
+							params.puts("prop." + node.getAttribute("name") + "." + rsmd.getColumnName(x) + ".public", "true");
+						}
 					}
 				}
 			}

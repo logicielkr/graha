@@ -150,7 +150,7 @@ public class GeneratorServlet extends HttpServlet {
 		if(System.getProperties().containsKey("catalina.home")) {
 			new UserRoleAdapter().execute(request, params);
 		}
-		new PropAdapter().execute(request, config, query, params);
+		new PropAdapter().execute(request, config, query, params, PropAdapter.Before_Connection);
 		try {
 			ServletConfig c = this.getServletConfig();
 			if(c.getInitParameter("UserServletAdapter") != null) {
@@ -335,8 +335,9 @@ public class GeneratorServlet extends HttpServlet {
 					con.setAutoCommit(false);
 					g.setConnection(con);
 				}
-				new PropAdapter().execute(request, config, query, params, con, g);
+				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.Before_Before_Processor);
 				g.processor(true);
+				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.After_Before_Processor);
 				sb.append(g.execute());
 				
 				if(fields != null) {
@@ -374,8 +375,9 @@ public class GeneratorServlet extends HttpServlet {
 						return;
 					}
 				}
-
+				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.Before_After_Processor);
 				g.processor(false);
+				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.After_After_Processor);
 				if(query.getAttribute("funcType") != null && query.getAttribute("funcType").equals("user")) {
 					StreamSource style = new StreamSource(new File(request.getServletContext().getRealPath("/WEB-INF/graha/" + query.getAttribute("xsl"))));
 					TransformerFactory factory = TransformerFactory.newInstance();
