@@ -73,13 +73,13 @@ public class XMLTag {
 		}
 		if(tagName != null && tagName.equals("row")) {
 			if(isRDF) {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:default']/RDF:li/RDF:item";
 				} else {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:" + name + "']/RDF:li/RDF:item";
 				}
 			} else {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/document/rows/row";
 				} else {
 					return "/document/rows[@id='" + name + "']/row";
@@ -88,13 +88,13 @@ public class XMLTag {
 		}
 		if(tagName != null && tagName.equals("file")) {
 			if(isRDF) {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:files']/RDF:li/RDF:item";
 				} else {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:files:" + name + "']/RDF:li/RDF:item";
 				}
 			} else {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/document/files/file";
 				} else {
 					return "/document/files[@id='" + name + "']/file";
@@ -103,13 +103,13 @@ public class XMLTag {
 		}
 		if(tagName != null && tagName.equals("page")) {
 			if(isRDF) {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:pages']/RDF:li/RDF:item";
 				} else {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:pages:" + name + "']/RDF:li/RDF:item";
 				}
 			} else {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/document/pages/page";
 				} else {
 					return "/document/pages[@id='" + name + "']/page";
@@ -119,13 +119,13 @@ public class XMLTag {
 		
 		if(tagName != null && tagName.equals("fileparam")) {
 			if(isRDF) {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/RDF:RDF/RDF:Description[@uc:for='urn:root:files']/uc:params/uc:param";
 				} else {
 					return "/RDF:RDF/RDF:Description[@uc:for='urn:root:files:" + name + "']/uc:params/uc:param";
 				}
 			} else {
-				if(name == null) {
+				if(name == null || name.equals("")) {
 					return "/document/params[@for='files']/param";
 				} else {
 					return "/document/params[@for='files." + name + "']/param";
@@ -146,7 +146,12 @@ public class XMLTag {
 		if(upperName != null && upperName.equals("row")) {
 			if(isRDF) {
 				if(isFull) {
-					return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/uc:" + tagName;
+//					return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/uc:" + tagName;
+					if(name == null || name.equals("")) {
+						return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:default']/RDF:li/RDF:item/uc:" + tagName;
+					} else {
+						return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:" + name + "']/RDF:li/RDF:item/uc:" + tagName;
+					}
 				} else {
 					if(tagName != null && tagName.equals("position()")) {
 						return tagName;
@@ -156,7 +161,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isFull) {
-					if(name != null) {
+					if(name != null && !name.equals("")) {
 						return "/document/rows[@id = '" + name + "']/row/" + tagName;
 					} else {
 						return "/document/rows/row/" + tagName;
@@ -221,13 +226,13 @@ public class XMLTag {
 		if(upperName != null && upperName.equals("fileparam")) {
 			if(isFull) {
 				if(isRDF) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/RDF:Description/uc:params/uc:param/uc:" + tagName;
 					} else {
 						return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:files:" + name + "']/RDF:li/RDF:item/RDF:Description/uc:params/uc:param/uc:" + tagName;
 					}
 				} else {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "/document/files/file/params/param/" + tagName;
 					} else {
 						return "/document/files[@id='" + name + "']/file/params/param/" + tagName;
@@ -323,7 +328,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("fileparams")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:Description uc:for=\"urn:root:files\"><uc:params>";
 					} else {
 						return "<RDF:Description uc:for=\"urn:root:files:" + name + "\"><uc:params>";
@@ -333,7 +338,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<params for=\"files\">";
 					} else {
 						return "<params for=\"files." + name + "\">";
@@ -406,7 +411,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("rows")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:Seq RDF:about=\"urn:root:data\">";
 					} else {
 						return "<RDF:Seq RDF:about=\"urn:root:data:" + name + "\">";
@@ -416,7 +421,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<rows>";
 					} else {
 						return "<rows id=\"" + name + "\">";
@@ -429,7 +434,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("pages")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:Seq RDF:about=\"urn:root:pages\">";
 					} else {
 						return "<RDF:Seq RDF:about=\"urn:root:pages:" + name + "\">";
@@ -439,7 +444,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<pages>";
 					} else {
 						return "<pages name=\"" + name + "\">";
@@ -452,7 +457,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("code")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:Seq RDF:about=\"urn:root:code\">";
 					} else {
 						return "<RDF:Seq RDF:about=\"urn:root:code:" + name + "\">";
@@ -462,7 +467,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<code>";
 					} else {
 						return "<code name=\"" + name + "\">";
@@ -476,7 +481,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("files")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:Seq RDF:about=\"urn:root:files\">";
 					} else {
 						return "<RDF:Seq RDF:about=\"urn:root:files:" + name + "\">";
@@ -486,7 +491,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<files>";
 					} else {
 						return "<files id=\"" + name + "\">";
@@ -499,7 +504,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("row")) {
 			if(isRDF) {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<RDF:li><RDF:item>";
 					} else {
 						
@@ -510,7 +515,7 @@ public class XMLTag {
 				}
 			} else {
 				if(isStart) {
-					if(name == null) {
+					if(name == null || name.equals("")) {
 						return "<row>";
 					} else {
 						return "<row name=\"" + name + "\">";
@@ -558,6 +563,7 @@ public class XMLTag {
 			&& (
 				upperName.equals("param")
 				|| upperName.equals("result")
+				|| upperName.equals("error")
 				|| upperName.equals("prop")
 				|| upperName.equals("page") 
 				|| upperName.equals("file") 
