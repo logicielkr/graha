@@ -51,29 +51,63 @@ public class UploadAdapter {
 	protected UploadAdapter() {
 		LOG.setLogLevel(logger);
 	}
+	protected void saveFile(String path, int idx, FileItem fileItem, Record params) throws Exception {
+		File f = new File(path + File.separator);
+		
+		if(!f.exists()) {
+			f.mkdirs();
+		}
+		int index = 0;
+		String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
+		while(true) {
+			if(index == 0) {
+				f = new File(path + java.io.File.separator + fileName);
+			} else {
+				if(fileName.lastIndexOf(".") > 0) {
+					f = new File(path + java.io.File.separator + fileName.substring(0, fileName.lastIndexOf("."))  + "-" + index + "." + fileName.substring(fileName.lastIndexOf(".") + 1));
+				} else {
+					f = new File(path + java.io.File.separator + fileName + "-" + index);
+				}
+			}
+			if(!f.exists()) {
+				break;
+			}
+			index++;
+		}
+		fileItem.write(f);
+		params.put("uploaded.file.path." + idx, f.getPath());
+	}
 	protected void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
 		Iterator<FileItem> it = fields.iterator();
 		while (it.hasNext()) {
 			FileItem fileItem = it.next();
 			boolean isFormField = fileItem.isFormField();
 			if(isFormField) {
-				if(logger.isLoggable(Level.FINE)) {
-					logger.fine(fileItem.getFieldName());
-				}
+				if(logger.isLoggable(Level.FINE)) { logger.fine(fileItem.getFieldName()); }
 				if(fileItem.getFieldName().startsWith("_deletefile_.")) {
 					Record result = FileHelper.getFilePath2(fileItem.getFieldName().substring("_deletefile_.".length()), params, query);
 					if(result == null) {
 						continue;
 					}
-					String path = result.getString("_system.filepath");
-					
-					if(path == null) {
-						continue;
-					}
-
-					File f = new File(path + java.io.File.separator + fileItem.getString(request.getCharacterEncoding()));
-					if(f.exists()) {
-						f.delete();
+					if(result.isArray("_system.filepath")) {
+						List paths = result.getArray("_system.filepath");
+						for(Object path : paths) {
+							if(path != null && path instanceof String) {
+								File f = new File(path + java.io.File.separator + fileItem.getString(request.getCharacterEncoding()));
+								if(f.exists()) {
+									f.delete();
+								}
+							}
+						}
+					} else {
+						String path = result.getString("_system.filepath");
+						if(path == null) {
+							continue;
+						}
+						File f = new File(path + java.io.File.separator + fileItem.getString(request.getCharacterEncoding()));
+						if(f.exists()) {
+							f.delete();
+						}
 					}
 				}
 			}
@@ -85,54 +119,33 @@ public class UploadAdapter {
 			FileItem fileItem = it.next();
 			boolean isFormField = fileItem.isFormField();
 			if(!isFormField) {
-				if(logger.isLoggable(Level.FINE)) {
-					logger.fine(fileItem.getFieldName());
-				}
+				if(logger.isLoggable(Level.FINE)) { logger.fine(fileItem.getFieldName()); }
 				if(fileItem.getSize() == 0) {
 					continue;
 				}
 				Record result = FileHelper.getFilePath2(fileItem.getFieldName(), params, query);
 				if(result == null) {
-					if(logger.isLoggable(Level.WARNING)) {
-						logger.warning("result is null");
-					}
+					if(logger.isLoggable(Level.WARNING)) { logger.warning("result is null"); }
 					continue;
 				}
-				String path = result.getString("_system.filepath");
-				
-				if(path == null) {
-					if(logger.isLoggable(Level.WARNING)) {
-						logger.warning("path is null");
-					}
-					continue;
-				}
-				
-				File f = new File(path + File.separator);
-				
-				if(!f.exists()) {
-					f.mkdirs();
-				}
-				int index = 0;
-				String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
-				while(true) {
-					if(index == 0) {
-						f = new File(path + java.io.File.separator + fileName);
-					} else {
-						if(fileName.lastIndexOf(".") > 0) {
-							f = new File(path + java.io.File.separator + fileName.substring(0, fileName.lastIndexOf("."))  + "-" + index + "." + fileName.substring(fileName.lastIndexOf(".") + 1));
-						} else {
-							f = new File(path + java.io.File.separator + fileName + "-" + index);
+				if(result.isArray("_system.filepath")) {
+					List paths = result.getArray("_system.filepath");
+					for(Object path : paths) {
+						if(path != null && path instanceof String) {
+							saveFile((String)path, idx, fileItem, params);
 						}
 					}
-					if(!f.exists()) {
-						break;
+				} else {
+					String path = result.getString("_system.filepath");
+					if(path == null) {
+						if(logger.isLoggable(Level.WARNING)) { logger.warning("path is null"); }
+						continue;
 					}
-					index++;
+					saveFile(path, idx, fileItem, params);
 				}
-				fileItem.write(f);
-				params.put("uploaded.file.path." + idx, f.getPath());
 				idx++;
 			}
 		}
 	}
+	
 }
