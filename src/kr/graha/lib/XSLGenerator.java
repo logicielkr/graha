@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -242,6 +243,8 @@ public class XSLGenerator {
 						sb.append("<xsl:value-of select=\"" + this._tag.path("param", p.getAttribute("value"), null, true) + "\"/>");
 					} else if(p.getAttribute("type").equals("prop")) {
 						sb.append("<xsl:value-of select=\"" + this._tag.path("prop", p.getAttribute("value"), null, true) + "\"/>");
+					} else if(p.getAttribute("type").equals("result")) {
+						sb.append("<xsl:value-of select=\"" + this._tag.path("result", p.getAttribute("value"), null, true) + "\"/>");
 					} else if(p.getAttribute("type").equals("default") || p.getAttribute("type").equals("const")) {
 						sb.append(p.getAttribute("value"));
 					}
@@ -262,10 +265,27 @@ public class XSLGenerator {
 		boolean isFull, 
 		String tableName
 	) throws XPathExpressionException {
+		String name = column.getAttribute("name");
+		String upperName = "row";
+		if(name.startsWith("param.")) {
+			name = name.substring(6);
+			upperName = "param";
+			isFull = true;
+		} else if(name.startsWith("prop.")) {
+			name = name.substring(5);
+			upperName = "prop";
+			isFull = true;
+		} else if(name.startsWith("result.")) {
+			name = name.substring(7);
+			upperName = "result";
+			isFull = true;
+		} else if(name.startsWith("query.")) {
+			name = name.substring(6);
+		}
 		Buffer sb = new Buffer();
 		if(column.hasAttribute("code") && column.getAttribute("code").equals("true")) {
 			if(column.hasAttribute("for") && column.getAttribute("for") != null && !column.getAttribute("for").equals("")) {
-				sb.appendL("<xsl:variable name=\"" + column.getAttribute("name") + "\" select=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + "\" />");
+				sb.appendL("<xsl:variable name=\"" + column.getAttribute("name") + "\" select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 				sb.appendL("<xsl:value-of select=\"" + this._tag.path("code", "option", column.getAttribute("for"), isFull) + "[@" + this._tag.path("code", "value", null, isFull) + " = $" + column.getAttribute("name") + "]/@" + this._tag.path("code", "label", null, isFull) + "\" />");
 			} else {
 				this._expr = this._xpath.compile("option");
@@ -274,30 +294,30 @@ public class XSLGenerator {
 					sb.appendL("<xsl:choose>");
 					for(int x = 0; x < param.getLength(); x++) {
 						Element p = (Element)param.item(x);
-						sb.appendL("<xsl:when test=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + " = '" + p.getAttribute("value") + "'\">");
+						sb.appendL("<xsl:when test=\"" + this._tag.path(upperName, name, tableName, isFull) + " = '" + p.getAttribute("value") + "'\">");
 						sb.appendL(p.getAttribute("label"));
 						sb.appendL("</xsl:when>");
 					}
 					sb.appendL("<xsl:otherwise>");
-					sb.appendL("<xsl:value-of select=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + "\" />");
+					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 					sb.appendL("</xsl:otherwise>");
 					sb.appendL("</xsl:choose>");
 				} else {
-					sb.appendL("<xsl:value-of select=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + "\" />");
+					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 				}
 			}
 		} else {
 			if(column.hasAttribute("fmt")) {
 				sb.appendL("<xsl:choose>");
-				sb.appendL("<xsl:when test=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + " != ''\">");
-				sb.appendL("<xsl:value-of select=\"format-number(" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + ", '" + column.getAttribute("fmt") + "')\" />");
+				sb.appendL("<xsl:when test=\"" + this._tag.path(upperName, name, tableName, isFull) + " != ''\">");
+				sb.appendL("<xsl:value-of select=\"format-number(" + this._tag.path(upperName, name, tableName, isFull) + ", '" + column.getAttribute("fmt") + "')\" />");
 				sb.appendL("</xsl:when>");
 				sb.appendL("<xsl:otherwise>");
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + "\" />");
+				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 				sb.appendL("</xsl:otherwise>");
 				sb.appendL("</xsl:choose>");
 			} else {
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path("row", column.getAttribute("name"), tableName, isFull) + "\" />");
+				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 			}
 		}
 		return sb;
@@ -724,9 +744,7 @@ public class XSLGenerator {
 						NodeList hidden = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
 						for(int q = 0;q < hidden.getLength(); q++) {
 							Element h = (Element)hidden.item(q);
-
 							sb.append("<input type=\"hidden\" class=\"" + h.getAttribute("name") + "\" name=\"" + h.getAttribute("name") + ".{position()}\" value=\"{" + "" + this._tag.path("row", h.getAttribute("value"), tab.getAttribute("name"), false) + "}\" />");
-							
 						}
 					}
 					sb.append(this.input(col, false, tab.getAttribute("name")));
@@ -769,9 +787,7 @@ public class XSLGenerator {
 							NodeList hidden = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
 							for(int q = 0;q < hidden.getLength(); q++) {
 								Element h = (Element)hidden.item(q);
-								
 								sb.append("<input type=\"hidden\" class=\"" + h.getAttribute("name") + "\" name=\"" + h.getAttribute("name") + ".{position()}\" value=\"{" + "" + this._tag.path("row", h.getAttribute("value"), tab.getAttribute("name"), false) + "}\" />");
-								
 							}
 						}
 						sb.append(this.input(col, false, tab.getAttribute("name")));
@@ -902,6 +918,10 @@ public class XSLGenerator {
 		} else if(value.startsWith("prop.")) {
 			value = value.substring(5);
 			upperName = "prop";
+			isFull = true;
+		} else if(value.startsWith("result.")) {
+			value = value.substring(7);
+			upperName = "result";
 			isFull = true;
 		} else if(value.startsWith("query.")) {
 			value = value.substring(6);
@@ -1397,14 +1417,33 @@ public class XSLGenerator {
 			sb.append("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>");
 			sb.append("</xsl:if>");
 		}
-		sb.append("<html>");
-		sb.append("<head>");
-		sb.append("<meta charset=\"UTF-8\" />");
-		sb.append("<title></title>");
-		sb.append("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
-		sb.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
-		sb.append("</head>");
-		sb.append("<body>");
+		sb.appendL("<html>");
+		sb.appendL("<head>");
+		sb.appendL("<meta charset=\"UTF-8\" />");
+		sb.appendL("<title></title>");
+		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
+		sb.appendL("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
+		sb.appendL("<style type=\"text/css\">");
+		sb.appendL("body {");
+		sb.appendL("	height:100%;");
+		sb.appendL("	text-align:center;");
+		sb.appendL("}");
+		sb.appendL("form {");
+		sb.appendL("	position: absolute;");
+		sb.appendL("	top: 50%;");
+		sb.appendL("	transform: translateY(-50%);");
+		sb.appendL("	width:100%;");
+		sb.appendL("}");
+		sb.appendL("form div.msg {");
+		sb.appendL("	margin-bottom:10px;");
+		sb.appendL("}");
+		sb.appendL("noscript {");
+		sb.appendL("	width:100%;");
+		sb.appendL("	display:block;");
+		sb.appendL("}");
+		sb.appendL("</style>");
+		sb.appendL("</head>");
+		sb.appendL("<body>");
 		/*
 		sb.append("<form method=\"get\" action=\"" + this.getPath(redirect.getAttribute("path")) + "\" style=\"display:inline;\" id=\"_post\">");
 		this._expr = this._xpath.compile("param");
@@ -1420,7 +1459,7 @@ public class XSLGenerator {
 			}
 		}
 		*/
-		sb.append("<xsl:choose>");
+		sb.appendL("<xsl:choose>");
 		for(int y = 0; y < list.getLength(); y++) {
 			Element n = (Element)list.item(y);
 			String test = null;
@@ -1440,6 +1479,8 @@ public class XSLGenerator {
 						left = this._tag.path("result", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else if(info.left.startsWith("prop.")) {
 						left = this._tag.path("prop", info.left.substring(info.left.indexOf(".") + 1), null, true);
+					} else if(info.left.startsWith("error.")) {
+						left = this._tag.path("error", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else if(info.left.startsWith("query.")) {
 						left = this._tag.path("row", info.left.substring(info.left.indexOf(".") + 1), null, true);
 					} else {
@@ -1477,12 +1518,12 @@ public class XSLGenerator {
 					}
 				}
 			}
-			sb.append("<xsl:when test=\"" + test + "\">");
-			sb.append("<form>");
-			sb.append("<xsl:attribute name=\"method\">get</xsl:attribute>");
-			sb.append("<xsl:attribute name=\"style\">display:inline;</xsl:attribute>");
-			sb.append("<xsl:attribute name=\"id\">_post</xsl:attribute>");
-			sb.append("<xsl:attribute name=\"action\">" + this.getPath(n.getAttribute("path")) + "</xsl:attribute>");
+			sb.appendL("<xsl:when test=\"" + test + "\">");
+			sb.appendL("<form>");
+			sb.appendL("<xsl:attribute name=\"method\">get</xsl:attribute>");
+//			sb.appendL("<xsl:attribute name=\"style\">display:inline;</xsl:attribute>");
+			sb.appendL("<xsl:attribute name=\"id\">_post</xsl:attribute>");
+			sb.appendL("<xsl:attribute name=\"action\">" + this.getPath(n.getAttribute("path")) + "</xsl:attribute>");
 			this._expr = this._xpath.compile("param");
 			NodeList param = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
 			for(int x = 0; x < param.getLength(); x++) {
@@ -1498,6 +1539,8 @@ public class XSLGenerator {
 					}
 				} else if(p.getAttribute("type").equals("result")) {
 					value = this._tag.path("result", p.getAttribute("value"), null, true);
+				} else if(p.getAttribute("type").equals("error")) {
+					value = this._tag.path("error", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("prop")) {
 					value = this._tag.path("prop", p.getAttribute("value"), null, true);
 				} else if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
@@ -1506,30 +1549,56 @@ public class XSLGenerator {
 					throw new ParsingException();
 				}
 				if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
-					sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
+					sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
 				} else {
-					sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+					sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
 				}
 			}
-			sb.append("<input type=\"submit\" value=\"확인\" />");
-			sb.append("</form>");
-			sb.append("</xsl:when>");
-		/*
+			if(!this._params.equals(n, "autoredirect", "false")) {
+				sb.appendL("<noscript>웹브라우저에서 Javascript 가 동작하지 않도록 설정되어 있습니다.  다음으로 이동하려면 확인 버튼을 클릭하시기 바랍니다.</noscript>");
+			}
+			this._expr = this._xpath.compile("msg");
+			NodeList msgs = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
+			for(int x = 0; x < msgs.getLength(); x++) {
+				Element p = (Element)msgs.item(x);
+				if(p.hasAttribute("value")) {
+					sb.appendL("<div class=\"msg\">" + p.getAttribute("value") + "</div>");
+				} else {
+					sb.appendL("<div class=\"msg\">" + p.getFirstChild().getNodeValue() + "</div>");
+				}
+			}
+			sb.appendL("<input type=\"submit\" value=\"확인\" />");
+			sb.appendL("</form>");
+			sb.appendL("</xsl:when>");
+/*
 			if(!n.hasAttribute("cond") || AuthParser.auth(n.getAttribute("cond"), this._params)) {
 				
 				redirect = n;
 				break;
 			}
-			*/
+*/
 		}
-		sb.append("</xsl:choose>");
-		sb.append("<script>");
-		sb.append("if(document.getElementById(\"_post\")) document.getElementById(\"_post\").submit();");
-		sb.append("</script>");
-		sb.append("</body>");
-		sb.append("</html>");
-		sb.append("</xsl:template>");
-		sb.append("</xsl:stylesheet>");
+		sb.appendL("</xsl:choose>");
+		sb.appendL("<script>");
+		sb.appendL("if(document.getElementsByClassName(\"msg\")) {");
+		sb.appendL("	for(var i = 0; i &lt; document.getElementsByClassName(\"msg\").length; i++) {");
+		sb.appendL("		if(document.getElementsByClassName(\"msg\")[i].innerText) {");
+		sb.appendL("			alert(document.getElementsByClassName(\"msg\")[i].innerText);");
+		sb.appendL("		} else {");
+		sb.appendL("			var msg = \"\";");
+		sb.appendL("			for(var x = 0; x &lt; document.getElementsByClassName(\"msg\")[i].childNodes.length; i++) {");
+		sb.appendL("				msg += document.getElementsByClassName(\"msg\")[i].childNodes[x].nodeValue;");
+		sb.appendL("			}");
+		sb.appendL("			alert(msg);");
+		sb.appendL("		}");
+		sb.appendL("	}");
+		sb.appendL("}");
+		sb.appendL("if(document.getElementById(\"_post\") &amp;&amp; document.getElementById(\"_post\").getElementsByTagName(\"noscript\")) document.getElementById(\"_post\").submit();");
+		sb.appendL("</script>");
+		sb.appendL("</body>");
+		sb.appendL("</html>");
+		sb.appendL("</xsl:template>");
+		sb.appendL("</xsl:stylesheet>");
 		return sb;
 		
 	}
@@ -1548,31 +1617,43 @@ public class XSLGenerator {
 			sb.append("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>");
 			sb.append("</xsl:if>");
 		}
-		sb.append("<html>");
-		sb.append("<head>");
-		sb.append("<meta charset=\"UTF-8\" />");
-		sb.append("<title></title>");
-		sb.append("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
-		sb.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
+		sb.appendL("<html>");
+		sb.appendL("<head>");
+		sb.appendL("<meta charset=\"UTF-8\" />");
+		sb.appendL("<title></title>");
+		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
+		sb.appendL("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
 		sb.appendL("<script>");
 		sb.appendL("function back() {");
 		sb.appendL("history.back();");
 		sb.appendL("}");
 		sb.appendL("</script>");
-		sb.append("</head>");
-		sb.append("<body>");
-		
-		sb.append("<ul>");
-		sb.append("<xsl:for-each select=\"" + this._tag.path("error", null) + "\">");
-		sb.append("<li><xsl:value-of select=\".\" /></li>");
-		sb.append("</xsl:for-each>");
-		sb.append("</ul>");
-		sb.append("<input type=\"button\" value=\"돌아가기\" onclick=\"back()\" />");
-		
-		sb.append("</body>");
-		sb.append("</html>");
-		sb.append("</xsl:template>");
-		sb.append("</xsl:stylesheet>");
+		sb.appendL("<style type=\"text/css\">");
+		sb.appendL("body {");
+		sb.appendL("	height:100%;");
+		sb.appendL("	text-align:center;");
+		sb.appendL("}");
+		sb.appendL("div {");
+		sb.appendL("	position: absolute;");
+		sb.appendL("	top: 50%;");
+		sb.appendL("	transform: translateY(-50%);");
+		sb.appendL("	width:100%;");
+		sb.appendL("}");
+		sb.appendL("</style>");
+		sb.appendL("</head>");
+		sb.appendL("<body>");
+		sb.appendL("<div>");
+		sb.appendL("<ul>");
+		sb.appendL("<xsl:for-each select=\"" + this._tag.path("error", null) + "\">");
+		sb.appendL("<li><xsl:value-of select=\".\" /></li>");
+		sb.appendL("</xsl:for-each>");
+		sb.appendL("</ul>");
+		sb.appendL("<input type=\"button\" value=\"돌아가기\" onclick=\"back()\" />");
+		sb.appendL("</div>");
+		sb.appendL("</body>");
+		sb.appendL("</html>");
+		sb.appendL("</xsl:template>");
+		sb.appendL("</xsl:stylesheet>");
 		return sb;
 		
 	}
@@ -1618,7 +1699,7 @@ public class XSLGenerator {
 				}
 			}
 		} catch (XPathExpressionException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		if(sb.length() == 0 && this._query.hasAttribute("label") || this._query.hasAttribute("xLabel")) {
 			if(this._tag.isRDF && this._query.hasAttribute("xLabel")) {
@@ -1785,7 +1866,7 @@ public class XSLGenerator {
 			}
 			
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		try {
 			this._expr = this._xpath.compile("calculator/param");
@@ -1989,7 +2070,7 @@ public class XSLGenerator {
 			}
 			
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		if(title.length() > 0) {
 			sb.append("<h2 class=\"title\">");
@@ -2054,7 +2135,7 @@ public class XSLGenerator {
 				}
 			}
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 /*
 		sb.append("Version:");
@@ -2092,7 +2173,7 @@ public class XSLGenerator {
 			}
 		}
 		} catch (XPathExpressionException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 
 		sb.appendL("</xsl:stylesheet>");
