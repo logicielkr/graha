@@ -29,6 +29,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.DOMException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.net.URI;
@@ -107,7 +108,12 @@ public final class FileHelper {
 				XPathExpression expr = xpath.compile("files/file[@name = '" + path + "']");
 				Element file = (Element)expr.evaluate(query, XPathConstants.NODE);
 				if(file != null && file.hasAttribute("path")) {
-					return FileHelper.getFilePath(file.getAttribute("path"), p);
+//					return FileHelper.getFilePath(file.getAttribute("path"), p);
+					if(file.hasAttribute("backup")) {
+						return parse(p, file.getAttribute("path"), file.getAttribute("backup"));
+					} else {
+						return parse(p, file.getAttribute("path"));
+					}
 				}
 			} catch (XPathExpressionException e) {
 				e.printStackTrace();
@@ -119,10 +125,17 @@ public final class FileHelper {
 	protected static Record getFilePath(String text, Record p) {
 		return parse(text, p);
 	}
-	public static Record parse(String text, Record p) {
+	private static Record parse(Record p, String... strs) {
+		Record result = new Record();
+		for(String text : strs) {
+			parse(text, p, result);
+		}
+		return result;
+	}
+	private static void parse(String text, Record p, Record result) {
 		String path = new String(text);
 		Buffer sb = new Buffer();
-		Record result = new Record();
+//		Record result = new Record();
 		while(true) {
 			if(path.indexOf("${") >= 0) {
 				sb.append(path.substring(0, path.indexOf("${")));
@@ -136,7 +149,7 @@ public final class FileHelper {
 						sb.append(p.getString(val));
 						result.put(val, p.getString(val));
 					} else {
-						return null;
+//						return null;
 					}
 					path = path.substring(path.indexOf("}") + 1);
 				} else {
@@ -148,7 +161,12 @@ public final class FileHelper {
 				break;
 			}
 		}
-		result.put("_system.filepath", sb.toString());
+		result.puts("_system.filepath", sb.toString());
+//		return result;
+	}
+	public static Record parse(String text, Record p) {
+		Record result = new Record();
+		parse(text, p, result);
 		return result;
 	}
 	public static boolean isAllow(Element query, Record p) {
@@ -167,7 +185,7 @@ public final class FileHelper {
 				}
 			}
 		} catch (XPathExpressionException | DOMException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			
 		}
 		return result;
@@ -183,7 +201,15 @@ public final class FileHelper {
 			if(node == null) {
 				result = false;
 			} else {
-				result = true;
+				if(
+					node.hasAttribute("require_connection") &&
+					node.getAttribute("require_connection") != null &&
+					node.getAttribute("require_connection").equals("false")
+				) {
+					result = false;
+				} else {
+					result = true;
+				}
 			}
 		} catch (XPathExpressionException | DOMException e) {
 			e.printStackTrace();
