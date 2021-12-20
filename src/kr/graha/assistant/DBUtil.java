@@ -118,9 +118,7 @@ public class DBUtil {
 				try {
 					this.sqlTypes.put(Integer.valueOf(field.getInt(null)), field.getName());
 				} catch (IllegalAccessException e) {
-					if(logger.isLoggable(Level.WARNING)) {
-						logger.warning(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 				}
 			}
 		}
@@ -165,11 +163,11 @@ public class DBUtil {
 			if(this.prop.containsKey(this.sqlTypes.get(Integer.valueOf(dataType)))) {
 				return this.prop.getProperty(this.sqlTypes.get(Integer.valueOf(dataType)));
 			} else {
-				logger.severe(this.sqlTypes.get(Integer.valueOf(dataType)) + " is not defined");
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(this.sqlTypes.get(Integer.valueOf(dataType)) + " is not defined"); }
 				return this.prop.getProperty("default");
 			}
 		} else {
-			logger.severe(dataType + " is not defined");
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(dataType + " is not defined"); }
 			return this.prop.getProperty("default");
 		}
 	}
@@ -196,9 +194,7 @@ public class DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -225,9 +221,7 @@ public class DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -279,9 +273,7 @@ public class DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -306,9 +298,7 @@ public class DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -355,9 +345,7 @@ public class DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
