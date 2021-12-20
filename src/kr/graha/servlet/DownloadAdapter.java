@@ -78,14 +78,10 @@ public class DownloadAdapter {
 		}
 		Record result = FileHelper.getFilePath2(filePath.substring(0, filePath.indexOf("/")) + ".0", params, query);
 		if(result != null) {
-			if(logger.isLoggable(Level.FINE)) {
-				logger.fine(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
-			}
+			if(logger.isLoggable(Level.FINE)) { logger.fine(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
 			File f = new File(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
 			if(f.exists()) {
-				if(logger.isLoggable(Level.CONFIG)) {
-					logger.config("File Path = " + f.getPath());
-				}
+				if(logger.isLoggable(Level.CONFIG)) { logger.config("File Path = " + f.getPath()); }
 				response.setContentLength((int)f.length());
 				response.setDateHeader("Last-Modified", f.lastModified());
 				response.setHeader("Accept-Ranges", "bytes");
@@ -105,40 +101,30 @@ public class DownloadAdapter {
 					fis.close();
 					fis = null;
 				} catch(IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					throw e;
 				} finally {
 					if(out != null) {
 						try {
 							out.close();
 						} catch (IOException e) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LOG.toString(e));
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						}
 					}
 					if(fis != null) {
 						try {
 							fis.close();
 						} catch (IOException e) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LOG.toString(e));
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						}
 					}
 				}
 			} else {
-				if(logger.isLoggable(Level.CONFIG)) {
-					logger.config("[SC_NOT_FOUND]File Path = " + f.getPath());
-				}
+				if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_NOT_FOUND]File Path = " + f.getPath()); }
 				response.sendError(404);
 			}
 		} else {
-			if(logger.isLoggable(Level.CONFIG)) {
-				logger.config("[SC_INTERNAL_SERVER_ERROR]File Path = " + filePath);
-			}
+			if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_INTERNAL_SERVER_ERROR]File Path = " + filePath); }
 			response.sendError(500);
 		}
 	}

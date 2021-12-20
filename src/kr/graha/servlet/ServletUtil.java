@@ -77,7 +77,7 @@ public class ServletUtil {
 			}
 			query = (Element)expr.evaluate(doc, XPathConstants.NODE);
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		return query;
 	}

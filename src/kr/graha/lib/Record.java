@@ -60,7 +60,7 @@ public class Record extends HashMap {
 	}
 	public void puts(String key, Object value) {
 		if(super.containsKey(key)) {
-			logger.fine("key exists!!! : " + key);
+			if(logger.isLoggable(Level.FINE)) { logger.fine("key exists!!! : " + key); }
 			List l = null;
 			if(super.get(key) instanceof List) {
 				l = (List)super.get(key);
@@ -205,9 +205,7 @@ public class Record extends HashMap {
 				*/
 				return Integer.valueOf(value);
 			} catch (NumberFormatException e) {
-				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 		return null;
@@ -256,9 +254,7 @@ public class Record extends HashMap {
 				*/
 				return Float.valueOf(value);
 			} catch (NumberFormatException e) {
-				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 		return null;
@@ -307,9 +303,7 @@ public class Record extends HashMap {
 				*/
 				return Double.valueOf(value);
 			} catch (NumberFormatException e) {
-				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 		return null;
@@ -358,9 +352,7 @@ public class Record extends HashMap {
 				*/
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
-				if(logger.isLoggable(Level.WARNING)) {
-					logger.warning(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 		return null;
@@ -425,9 +417,7 @@ public class Record extends HashMap {
 		try {
 			result = new Date(df.parse(value).getTime());
 		} catch (ParseException e) {
-			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		}
 		return result;
 	}
@@ -492,9 +482,7 @@ public class Record extends HashMap {
 		try {
 			result = new Timestamp(df.parse(value).getTime());
 		} catch (ParseException e) {
-			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		}
 		return result;
 	}
@@ -817,18 +805,14 @@ public class Record extends HashMap {
 				String key = (String)it.next();
 				if(this.get(key) instanceof String[]) {
 					for(int i = 0; i < ((String[])this.get(key)).length; i++) {
-						if(logger.isLoggable(level)) {
-							logger.log(level, key + "." + i + "(SA)=" + ((String[])this.get(key))[i]);
-						}
+						if(logger.isLoggable(level)) { logger.log(level, key + "." + i + "(SA)=" + ((String[])this.get(key))[i]); }
 					}
 				} else if(this.isArray(key)) {
 					for (Object v : (List)this.get(key)) {
-						logger.log(level, key + "(A)=" + v);
+						if(logger.isLoggable(level)) { logger.log(level, key + "(A)=" + v); }
 					}
 				} else {
-					if(logger.isLoggable(level)) {
-						logger.log(level, key + "(NA)=" + this.get(key));
-					}
+					if(logger.isLoggable(level)) { logger.log(level, key + "(NA)=" + this.get(key)); }
 				}
 			}
 		}

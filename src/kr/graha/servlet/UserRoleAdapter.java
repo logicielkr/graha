@@ -24,6 +24,7 @@ package kr.graha.servlet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import kr.graha.lib.Record;
 import kr.graha.helper.LOG;
@@ -55,7 +56,7 @@ public class UserRoleAdapter {
 			params.put("header.remote_user_roles", roles.toArray(new String[]{}));
 		} else {
 			if(request.getUserPrincipal() != null) {
-				logger.fine(request.getUserPrincipal().getClass().getName());
+				if(logger.isLoggable(Level.FINE)) { logger.fine(request.getUserPrincipal().getClass().getName()); }
 			}
 		}
 	}

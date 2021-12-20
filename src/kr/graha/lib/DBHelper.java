@@ -156,9 +156,7 @@ public final class DBHelper {
 				Class.forName(info.getString("driverClassName"));
 				con = DriverManager.getConnection(info.getString("url"), info.getString("username"), info.getString("password"));
 			} catch (ClassNotFoundException | SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return con;
@@ -185,9 +183,7 @@ public final class DBHelper {
 			rs.close();
 			rs = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 			if(rs != null) {
@@ -195,9 +191,7 @@ public final class DBHelper {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -222,9 +216,7 @@ public final class DBHelper {
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 /*
@@ -244,9 +236,7 @@ public final class DBHelper {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}

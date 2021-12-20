@@ -43,57 +43,39 @@ abstract class DataBinderImpl implements DataBinder {
 		LOG.setLogLevel(logger);
 	}
 	protected void setString(PreparedStatement stmt, int index, String value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setString(index, value);
 	}
 	protected void setBoolean(PreparedStatement stmt, int index, boolean value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setBoolean(index, value);
 	}
 	protected void setInt(PreparedStatement stmt, int index, int value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setInt(index, value);
 	}
 	protected void setFloat(PreparedStatement stmt, int index, float value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setFloat(index, value);
 	}
 	protected void setLong(PreparedStatement stmt, int index, Long value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setLong(index, value);
 	}
 	protected void setDouble(PreparedStatement stmt, int index, double value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setDouble(index, value);
 	}
 	protected void setDate(PreparedStatement stmt, int index, java.sql.Date value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setDate(index, value);
 	}
 	protected void setTimestamp(PreparedStatement stmt, int index, java.sql.Timestamp value) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setTimestamp(index, value);
 	}
 	protected void setNull(PreparedStatement stmt, int index, int type) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(index + " = null");
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = null"); }
 		stmt.setNull(index, type);
 	}
 	public abstract void bind(

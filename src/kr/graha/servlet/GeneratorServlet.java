@@ -80,9 +80,7 @@ public class GeneratorServlet extends HttpServlet {
 		String pathInfo = request.getPathInfo().trim();
 		if(pathInfo != null && (pathInfo.equals("") || (!pathInfo.endsWith(".xml") && !pathInfo.endsWith(".xsl") && !pathInfo.endsWith(".html")))) {
 			if(pathInfo.indexOf(".xml/download/") == -1 && pathInfo.indexOf(".html/download/") == -1) {
-				if(logger.isLoggable(Level.INFO)) {
-					logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo);
-				}
+				if(logger.isLoggable(Level.INFO)) { logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo); }
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
@@ -92,9 +90,7 @@ public class GeneratorServlet extends HttpServlet {
 			id = id.substring(1);
 		}
 		if(id.indexOf("/") < 1) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo);
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -107,17 +103,13 @@ public class GeneratorServlet extends HttpServlet {
 		}
 		
 		if(id != null && (id.substring(0, id.indexOf("/")).equals("") || id.substring(id.indexOf("/") + 1).equals(""))) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo);
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info("[SC_NOT_FOUND]pathInfo = " + pathInfo); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 		File config = new File(request.getServletContext().getRealPath("/WEB-INF/graha/" + id.substring(0, id.indexOf("/")) + ".xml"));
 		if(!config.exists()) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info("[SC_NOT_FOUND]config file = " + config.getPath());
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info("[SC_NOT_FOUND]config file = " + config.getPath()); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -125,9 +117,7 @@ public class GeneratorServlet extends HttpServlet {
 		Element query = util.getQuery(config, id);
 		
 		if(query == null) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("[SC_NOT_FOUND]query is null, Request Path = " + id);
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_NOT_FOUND]query is null, Request Path = " + id); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -161,15 +151,11 @@ public class GeneratorServlet extends HttpServlet {
 				adapter.execute(request, params);
 			}
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		if(query.hasAttribute("auth") && query.getAttribute("auth") != null && !query.getAttribute("auth").trim().equals("")) {
 			if(!AuthParser.auth(query.getAttribute("auth"), params)) {
-				if(logger.isLoggable(Level.CONFIG)) {
-					logger.config("[SC_FORBIDDEN]auth = " + query.getAttribute("auth"));
-				}
+				if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_FORBIDDEN]auth = " + query.getAttribute("auth")); }
 				
 				response.sendError(403);
 				return;
@@ -184,24 +170,18 @@ public class GeneratorServlet extends HttpServlet {
 					try {
 						Record info = DBHelper.getConnectionInfo(query, config);
 						if(info == null) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe("[SC_INTERNAL_SERVER_ERROR]Not exists database connection info");
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]Not exists database connection info"); }
 							throw new ServletException();
 						}
 						con = DBHelper.getConnection(info);
 						if(con == null) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null");
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 							throw new ServletException();
 						}
 						XMLGenerator g = new XMLGenerator(query, params, con, config, request, response, info);
 						isDownloadable = g.isDownloadable("files/auth");
 					} catch (Exception e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						response.sendError(500);
 					} finally {
 						try {
@@ -210,9 +190,7 @@ public class GeneratorServlet extends HttpServlet {
 								con = null;
 							}
 						} catch (SQLException e) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LOG.toString(e));
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						}
 					}
 				}
@@ -223,9 +201,7 @@ public class GeneratorServlet extends HttpServlet {
 				new DownloadAdapter().execute(request, response, query, params);
 				return;
 			} else {
-				if(logger.isLoggable(Level.FINE)) {
-					logger.fine("isDownloadable is false");
-				}
+				if(logger.isLoggable(Level.FINE)) { logger.fine("isDownloadable is false"); }
 				response.sendError(403);
 				return;
 			}
@@ -249,17 +225,13 @@ public class GeneratorServlet extends HttpServlet {
 			if(request.getPathInfo().endsWith(".xml") || request.getPathInfo().endsWith(".html")) {
 				Record info = DBHelper.getConnectionInfo(query, config);
 				if(info == null) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe("[SC_INTERNAL_SERVER_ERROR]Not exists database connection info");
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]Not exists database connection info"); }
 					throw new ServletException();
 				}
 				if(FileHelper.isRequireConnection(query, "validation/command")) {
 					con = DBHelper.getConnection(info);
 					if(con == null) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null");
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 						throw new ServletException();
 					}
 					con.setAutoCommit(false);
@@ -301,17 +273,13 @@ public class GeneratorServlet extends HttpServlet {
 							gzip.close();
 							gzip = null;
 						} catch (IOException e) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LOG.toString(e));
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						} finally {
 							if(gzip != null) {
 								try {
 									gzip.close();
 								} catch (IOException e) {
-									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LOG.toString(e));
-									}
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 								}
 							}
 						}
@@ -327,9 +295,7 @@ public class GeneratorServlet extends HttpServlet {
 				if(con == null) {
 					con = DBHelper.getConnection(info);
 					if(con == null) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null");
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 						throw new ServletException();
 					}
 					con.setAutoCommit(false);
@@ -421,17 +387,13 @@ public class GeneratorServlet extends HttpServlet {
 							gzip.close();
 							gzip = null;
 						} catch (IOException e) {
-							if(logger.isLoggable(Level.SEVERE)) {
-								logger.severe(LOG.toString(e));
-							}
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						} finally {
 							if(gzip != null) {
 								try {
 									gzip.close();
 								} catch (IOException e) {
-									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LOG.toString(e));
-									}
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 								}
 							}
 						}
@@ -459,17 +421,13 @@ public class GeneratorServlet extends HttpServlet {
 						gzip.close();
 						gzip = null;
 					} catch (IOException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					} finally {
 						if(gzip != null) {
 							try {
 								gzip.close();
 							} catch (IOException e) {
-								if(logger.isLoggable(Level.SEVERE)) {
-									logger.severe(LOG.toString(e));
-								}
+								if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 							}
 						}
 					}
@@ -480,19 +438,15 @@ public class GeneratorServlet extends HttpServlet {
 				sb.clear();
 				sb = null;
 			}
-			params.dump(logger, Level.FINEST);
+			if(logger.isLoggable(Level.FINEST)) { params.dump(logger, Level.FINEST); }
 		} catch (Exception e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			try {
 				if(con != null) {
 					con.rollback();
 				}
 			} catch (SQLException error) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(error));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(error)); }
 			}
 			response.sendError(500);
 		} finally {
@@ -503,9 +457,7 @@ public class GeneratorServlet extends HttpServlet {
 					con = null;
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 	}

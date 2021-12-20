@@ -84,9 +84,7 @@ public class PropAdapter {
 		try {
 			this.execute(request, config, query, params, null, null, mode);
 		} catch (SQLException | NoSuchProviderException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 	}
 	protected void execute(
@@ -180,9 +178,7 @@ public class PropAdapter {
 				}
 			}
 		} catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException | IOException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 	}
 	private int getMode(String time) {
@@ -260,9 +256,7 @@ public class PropAdapter {
 			DB.close(rs);
 			DB.close(stmt);
 		} catch (SQLException | NoSuchProviderException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			DB.close(rs);
 			DB.close(stmt);

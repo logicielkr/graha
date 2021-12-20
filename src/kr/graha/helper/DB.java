@@ -74,9 +74,7 @@ public final class DB {
 			javax.sql.DataSource ds = (javax.sql.DataSource)cxt.lookup(source);
 			con = ds.getConnection();
 		} catch (SQLException | NamingException e2) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e2));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e2)); 	}
 		}
 		return con;
 	}
@@ -92,7 +90,7 @@ public final class DB {
 					con = null;
 				}
 			} catch (SQLException e) {
-				logger.warning(LOG.toString(e));
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 	}
@@ -106,7 +104,7 @@ public final class DB {
 				pstmt.close();
 				pstmt = null;
 			} catch (SQLException e) {
-				logger.warning(LOG.toString(e));
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 	}
@@ -120,7 +118,7 @@ public final class DB {
 				stmt.close();
 				stmt = null;
 			} catch (SQLException e) {
-				logger.warning(LOG.toString(e));
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 	}
@@ -134,7 +132,7 @@ public final class DB {
 				rs.close();
 				rs = null;
 			} catch (SQLException e) {
-				logger.warning(LOG.toString(e));
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
 		}
 	}
@@ -293,7 +291,7 @@ public final class DB {
 			rs.close();
 			rs = null;
 		} catch (SQLException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			throw e;
 		} finally {
 			close(rs);
@@ -342,10 +340,10 @@ public final class DB {
 			baos.close();
 			baos = null;
 		} catch (SQLException e) {	
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			throw e;
 		} catch (IOException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} finally {
 			if(out != null) {
 				out.close();
@@ -355,7 +353,9 @@ public final class DB {
 				try {
 					baos.close();
 					baos = null;
-				} catch (IOException e) {logger.warning(LOG.toString(e));}
+				} catch (IOException e) {
+					if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+				}
 			}
 		}
 		return result;
@@ -385,7 +385,7 @@ public final class DB {
 			}
 			close(rs);
 		} catch (SQLException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			throw e;
 		} finally {
 			close(rs);
@@ -432,10 +432,10 @@ public final class DB {
 			baos.close();
 			baos = null;
 		} catch (SQLException e) {	
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			throw e;
 		} catch (IOException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} finally {
 			if(out != null) {
 				out.close();
@@ -445,7 +445,9 @@ public final class DB {
 				try {
 					baos.close();
 					baos = null;
-				} catch (IOException e) {logger.warning(LOG.toString(e));}
+				} catch (IOException e) {
+					if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+				}
 			}
 		}
 		return result;
@@ -536,7 +538,7 @@ public final class DB {
 							paramSize++;
 						}
 					} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-						logger.warning(LOG.toString(e));
+						if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 					}
 				}
 				if(paramSize > 0) {
@@ -557,7 +559,7 @@ public final class DB {
 								index++;
 							}
 						} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-							logger.warning(LOG.toString(e));
+							if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 						}
 					}
 				}
@@ -592,7 +594,7 @@ public final class DB {
 		} else if(rsmd.getColumnType(columnIndex) == java.sql.Types.TIMESTAMP) {
 			data.put(rsmd.getColumnName(columnIndex), rs.getTimestamp(columnIndex));
 		} else {
-			logger.warning("not support (rsmd.getColumnType = " + Integer.toString(rsmd.getColumnType(columnIndex)) + ")");
+			if(logger.isLoggable(Level.WARNING)) { logger.warning("not support (rsmd.getColumnType = " + Integer.toString(rsmd.getColumnType(columnIndex)) + ")"); }
 			data.put(rsmd.getColumnName(columnIndex), rs.getObject(columnIndex));
 		}
 	}
@@ -652,7 +654,7 @@ public final class DB {
 				}
 			}
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		}
 	}
 /**
@@ -733,9 +735,9 @@ public final class DB {
 			}
 			DB.close(pstmt);
 		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} catch (SQLException e) {
-			logger.warning(LOG.toString(e));
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			throw e;
 		} finally {
 			DB.close(rs);
@@ -796,7 +798,7 @@ public final class DB {
 						paramSize++;
 					}
 				} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-					logger.warning(LOG.toString(e));
+					if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 				}
 			}
 			if(paramSize > 0) {
@@ -826,7 +828,7 @@ public final class DB {
 							index++;
 						}
 					} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-						logger.warning(LOG.toString(e));
+						if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 					}
 				}
 				sql += ") values (" + valueCause + ")";
