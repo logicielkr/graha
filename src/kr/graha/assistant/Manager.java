@@ -98,9 +98,7 @@ public class Manager extends HttpServlet {
 			&& !path.equals("/xsl")
 			&& !path.equals("/query")
 		) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found path : " + path);
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found path : " + path); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -127,9 +125,7 @@ public class Manager extends HttpServlet {
 			&& !path.equals("/table")
 			&& !path.equals("/query")
 		) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found path : " + path);
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found path : " + path); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -153,9 +149,7 @@ public class Manager extends HttpServlet {
 		try {
 			in = this.getClass().getResourceAsStream("/kr/graha/assistant/xsl/" + value(request.getParameter("xsl")) + ".xsl");
 			if(in == null) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe("not found xsl file : " + value(request.getParameter("xsl")));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found xsl file : " + value(request.getParameter("xsl"))); }
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
@@ -175,9 +169,7 @@ public class Manager extends HttpServlet {
 		Connection con = null;
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -212,17 +204,13 @@ public class Manager extends HttpServlet {
 			con = null;
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -238,9 +226,7 @@ public class Manager extends HttpServlet {
 		StringBuffer sb = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -307,17 +293,13 @@ public class Manager extends HttpServlet {
 			con = null;
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -345,9 +327,7 @@ public class Manager extends HttpServlet {
 		StringBuffer sb = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -451,17 +431,13 @@ public class Manager extends HttpServlet {
 			con = null;
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -478,9 +454,7 @@ public class Manager extends HttpServlet {
 		
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -523,9 +497,7 @@ public class Manager extends HttpServlet {
 							); 
 						}
 					} else {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe("parameter is not allow");
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe("parameter is not allow"); }
 						
 					}
 				}
@@ -534,18 +506,14 @@ public class Manager extends HttpServlet {
 			con = null;
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			
 		} finally {
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -567,10 +535,7 @@ public class Manager extends HttpServlet {
 		while (e.hasMoreElements()) {
 			String key = e.nextElement();
 			if(key != null && key.startsWith("check.") && value(request.getParameter(key)) != null && value(request.getParameter(key)).equals("on")) {
-				if(logger.isLoggable(Level.FINEST)) {
-					logger.finest("" + key + " : " + value(request.getParameter(key)));
-					logger.finest("" + key.substring(6) + " : " + value(request.getParameter(key)));
-				}
+				if(logger.isLoggable(Level.FINEST)) { logger.finest("" + key + " : " + value(request.getParameter(key))); logger.finest("" + key.substring(6) + " : " + value(request.getParameter(key))); }
 				sb.append("<table name=\"" + key.substring(6) + "\" />");
 			}
 		}
@@ -591,9 +556,7 @@ public class Manager extends HttpServlet {
 			try {
 				return new String(value.getBytes("iso-8859-1"), "UTF-8");
 			} catch (java.io.UnsupportedEncodingException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return null;
@@ -611,16 +574,12 @@ public class Manager extends HttpServlet {
 		
 		String[] tables = request.getParameterValues("tables");
 		if(tableName == null || tableName.trim().equals("")) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("table name is null or blank");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("table name is null or blank"); }
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -648,9 +607,7 @@ public class Manager extends HttpServlet {
 		if(!f.exists()) {
 			f.mkdir();
 		}
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(filePath);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(filePath); }
 		String xmlName = null;
 		while(true) {
 			if(index == 0) {
@@ -1152,27 +1109,21 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			con = null;
 		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			try {
 				if(con != null) {
 					con.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(bw != null) {
 					bw.close();
 				}
 			} catch (IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			
 		}
@@ -1201,9 +1152,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		StringBuffer sb = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -1308,35 +1257,27 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			con = null;
 		} catch (SQLException | NamingException e) {
 			sb.setLength(0);
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -1416,9 +1357,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 		StringBuffer bw = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe("not found jndi config");
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
@@ -1511,9 +1450,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			con.close();
 			con = null;
 		} catch (NamingException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			sb.setLength(0);
 		} catch (java.sql.SQLSyntaxErrorException e) {
 			if(isAppendRows) {
@@ -1528,9 +1465,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			sb.append("</error></errors>");
 			sb.append("</document>");
 			
-			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} catch (SQLException e) {
 			if(isAppendRows) {
 				sb.append("</rows>");
@@ -1550,35 +1485,27 @@ for(Throwable t: e){
 }
 */
 			
-			if(logger.isLoggable(Level.WARNING)) {
-				logger.warning(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(con != null) {
 				try {
 					con.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}

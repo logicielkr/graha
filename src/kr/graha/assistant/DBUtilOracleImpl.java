@@ -87,18 +87,14 @@ public class DBUtilOracleImpl extends DBUtil {
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
@@ -106,9 +102,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -131,9 +125,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -194,9 +186,7 @@ select * from user_views c where a.table_name = c.view_name
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
@@ -204,9 +194,7 @@ select * from user_views c where a.table_name = c.view_name
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -273,18 +261,14 @@ where a.table_name = b.table_name
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -310,9 +294,7 @@ where a.table_name = b.table_name
 						rs.close();
 						rs = null;
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					}
 				}
 			}

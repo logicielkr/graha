@@ -93,18 +93,14 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
@@ -112,9 +108,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -184,9 +178,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -228,18 +220,14 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) {
-				logger.info(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 			if(pstmt != null) {
@@ -247,9 +235,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -312,9 +298,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
