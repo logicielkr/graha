@@ -220,7 +220,7 @@ function parse_xml_document(result) {
 		if(root[i].nodeName == "document") {
 			for(var x = 0; x &lt; root[i].childNodes.length; x++) {
 				if(root[i].childNodes[x].nodeType == 1) {
-					if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results") {
+					if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results" || root[i].childNodes[x].nodeName == "props" || root[i].childNodes[x].nodeName == "errors") {
 						obj[root[i].childNodes[x].nodeName] = new Object();
 					} else  if(root[i].childNodes[x].nodeName == "code") {
 						if(!obj[root[i].childNodes[x].nodeName]) {
@@ -234,7 +234,7 @@ function parse_xml_document(result) {
 					}
 					for(var y = 0; y &lt; root[i].childNodes[x].childNodes.length; y++) {
 						if(root[i].childNodes[x].childNodes[y].nodeType == 1) {
-							if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results") {
+							if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results" || root[i].childNodes[x].nodeName == "props" || root[i].childNodes[x].nodeName == "errors") {
 								obj[root[i].childNodes[x].nodeName][root[i].childNodes[x].childNodes[y].nodeName] = root[i].childNodes[x].childNodes[y].firstChild.nodeValue;
 							} else if(root[i].childNodes[x].nodeName == "code") {
 								var row = new Object();
@@ -272,7 +272,7 @@ function parse_graha_xml_document(result) {
 			for(var x = 0; x &lt; root[i].childNodes.length; x++) {
 				if(root[i].childNodes[x].nodeType == 1) {
 //					console.log(root[i].childNodes[x].nodeName);
-					if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results") {
+					if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results" || root[i].childNodes[x].nodeName == "props" || root[i].childNodes[x].nodeName == "errors") {
 						obj[root[i].childNodes[x].nodeName] = new Object();
 					} else  if(root[i].childNodes[x].nodeName == "code") {
 						if(!obj[root[i].childNodes[x].nodeName]) {
@@ -291,7 +291,7 @@ function parse_graha_xml_document(result) {
 					}
 					for(var y = 0; y &lt; root[i].childNodes[x].childNodes.length; y++) {
 						if(root[i].childNodes[x].childNodes[y].nodeType == 1) {
-							if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results") {
+							if(root[i].childNodes[x].nodeName == "params" || root[i].childNodes[x].nodeName == "results" || root[i].childNodes[x].nodeName == "props" || root[i].childNodes[x].nodeName == "errors") {
 								obj[root[i].childNodes[x].nodeName][root[i].childNodes[x].childNodes[y].nodeName] = root[i].childNodes[x].childNodes[y].firstChild.nodeValue;
 							} else if(root[i].childNodes[x].nodeName == "code") {
 								var row = new Object();
