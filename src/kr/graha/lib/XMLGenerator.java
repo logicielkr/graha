@@ -167,21 +167,27 @@ public class XMLGenerator {
 			&& this._params.hasKey("header.method") 
 			&& (this._params.getString("header.method")).equals("POST")
 		) {
-			sb.append(this.query());
+			Buffer sb_tmp = new Buffer();
+			sb_tmp.append(this.query());
+			if(this.isError()) {
+				sb.init();
+				sb.append(this.before());
+				sb.append(sb_tmp);
+			} else {
+				sb.append(sb_tmp);
+			}
+			sb_tmp.clear();
+			sb_tmp = null;
 		}
 		sb.append(this.after());
 		return sb;
 	}
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(sql);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(sql); }
 		return this._con.prepareStatement(sql);
 	}
 	private CallableStatement prepareCall(String sql) throws SQLException {
-		if(logger.isLoggable(Level.FINEST)) {
-			logger.finest(sql);
-		}
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(sql); }
 		return this._con.prepareCall(sql);
 	}
 	public void processor(boolean before) throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
@@ -251,9 +257,7 @@ public class XMLGenerator {
 							cstmt = null;
 						}
 				} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					throw e;
 				} finally {
 					try {
@@ -261,18 +265,14 @@ public class XMLGenerator {
 							stmt.close();
 						}
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					}
 					try {
 						if(cstmt != null) {
 							cstmt.close();
 						}
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					}
 				}
 			}
@@ -348,9 +348,7 @@ public class XMLGenerator {
 					}
 					totalUpdateCount += result;
 				} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					throw e;
 				} finally {
 					try {
@@ -358,25 +356,23 @@ public class XMLGenerator {
 							stmt.close();
 						}
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					}
 					try {
 						if(cstmt != null) {
 							cstmt.close();
 						}
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe(LOG.toString(e));
-						}
+						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					}
 				}
 			}
 		}
 		this._params.put("query.row.total_affected_count", totalUpdateCount);
 		sb.append(this._tag.tag("rows", null, false));
-		
+		if(this._params.containsKey("error.error")) {
+			this.isError = true;
+		}
 		return sb;
 	}
 	
@@ -628,9 +624,7 @@ public class XMLGenerator {
 									stream.close();
 									stream = null;
 								} catch(IOException ex) {
-									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LOG.toString(ex));
-									}
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
 									throw ex;
 								} finally {
 									if(stream != null) {
@@ -672,9 +666,7 @@ public class XMLGenerator {
 				}
 			}
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException | IOException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 			try {
@@ -682,36 +674,28 @@ public class XMLGenerator {
 					rs.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(rsCount != null) {
 					rsCount.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmtCount != null) {
 					stmtCount.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -826,9 +810,7 @@ public class XMLGenerator {
 				}
 			}
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 			try {
@@ -836,18 +818,14 @@ public class XMLGenerator {
 					rs.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -1127,9 +1105,7 @@ public class XMLGenerator {
 									stream.close();
 									stream = null;
 								} catch(IOException ex) {
-									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LOG.toString(ex));
-									}
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
 									throw ex;
 								} finally {
 									if(stream != null) {
@@ -1183,9 +1159,7 @@ public class XMLGenerator {
 			}
 			
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException | IOException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 			try {
@@ -1193,18 +1167,14 @@ public class XMLGenerator {
 					rs.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -1444,9 +1414,7 @@ public class XMLGenerator {
 								if(cc.getLength() > 0) {
 									for(int xx = 0; xx < cc.getLength(); xx++) {
 										Element e = (Element)cc.item(xx);
-										if(logger.isLoggable(Level.FINE)) {
-											logger.fine(e.getAttribute("name"));
-										}
+										if(logger.isLoggable(Level.FINE)) { logger.fine(e.getAttribute("name")); }
 										if(
 											e.hasAttribute("type") && 
 											(
@@ -1741,9 +1709,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			}
 			this._params.put("query.row.total_update_count", totalUpdateCount);
 		} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
 			try {
@@ -1751,45 +1717,35 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					rs.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmtInsert != null) {
 					stmtInsert.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmtUpdate != null) {
 					stmtUpdate.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmtDelete != null) {
 					stmtDelete.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -1800,9 +1756,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		int index, 
 		int value
 	) throws SQLException {
-		if(logger.isLoggable(Level.FINE)) {
-			logger.fine(index + " = " + value);
-		}
+		if(logger.isLoggable(Level.FINE)) { logger.fine(index + " = " + value); }
 		stmt.setInt(index, value);
 	}
 	
@@ -1869,9 +1823,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				this._expr = this._xpath.compile("layout");
 				layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
 			} catch (XPathExpressionException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			if(
 				(
@@ -1912,9 +1864,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 										sb.append("" + key.substring(6) + "=" + java.net.URLEncoder.encode(item, "UTF-8") + "");
 									} catch (UnsupportedEncodingException e) {
 										sb.append("" + key.substring(6) + "=" + item + "");
-										if(logger.isLoggable(Level.SEVERE)) {
-											logger.severe(LOG.toString(e));
-										}
+										if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 									}
 									index++;
 								}
@@ -1928,9 +1878,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 									sb.append("" + key.substring(6) + "=" + java.net.URLEncoder.encode(this._params.getString(key), "UTF-8") + "");
 								} catch (UnsupportedEncodingException e) {
 									sb.append("" + key.substring(6) + "=" + this._params.getString(key) + "");
-									if(logger.isLoggable(Level.SEVERE)) {
-										logger.severe(LOG.toString(e));
-									}
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 								}
 								index++;
 							}
@@ -2024,9 +1972,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					}
 				}
 			} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -2090,14 +2036,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				sb.appendL(this._tag.tag("code", null, false));
 			}
 		} catch (SQLException | NoSuchProviderException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} catch (XPathExpressionException | DOMException e) {
-			if(logger.isLoggable(Level.SEVERE)) {
-				logger.severe(LOG.toString(e));
-			}
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			return null;
 		} finally {
 			try {
@@ -2105,18 +2047,14 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					rs.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			try {
 				if(stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return sb;
@@ -2124,8 +2062,9 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 	private Buffer after() {
 		Buffer sb = new Buffer();
 		if(this._params != null && !this._params.isEmpty()) {
-			boolean isResult = false;
-			boolean isProp = false;
+			boolean existsResult = false;
+			boolean existsProp = false;
+			boolean existsError = false;
 			Iterator<String> it = this._params.keySet().iterator();
 			sb.appendL(this._tag.tag("params", null, true));
 			while(it.hasNext()) {
@@ -2133,13 +2072,26 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				if(key.startsWith("param.")) {
 					BufferHelper.addRecord(key, this._params, sb, this._tag);
 				} else if(key.startsWith("result.")) {
-					isResult = true;
+					existsResult = true;
+				} else if(key.startsWith("error.")) {
+					existsError = true;
 				} else if(key.startsWith("prop.") && key.endsWith(".public")) {
-					isProp = true;
+					existsProp = true;
 				}
 			}
 			sb.appendL(this._tag.tag("params", null, false));
-			if(isResult) {
+			if(existsError) {
+				it = this._params.keySet().iterator();
+				sb.appendL(this._tag.tag("errors", null, true));
+				while(it.hasNext()) {
+					String key = (String)it.next();
+					if(key.startsWith("error.")) {
+						BufferHelper.addRecord(key, this._params, sb, this._tag);
+					}
+				}
+				sb.appendL(this._tag.tag("errors", null, false));
+			}
+			if(existsResult) {
 				it = this._params.keySet().iterator();
 				sb.appendL(this._tag.tag("results", null, true));
 				while(it.hasNext()) {
@@ -2150,7 +2102,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 				sb.appendL(this._tag.tag("results", null, false));
 			}
-			if(isProp) {
+			if(existsProp) {
 				it = this._params.keySet().iterator();
 				sb.appendL(this._tag.tag("props", null, true));
 				while(it.hasNext()) {
@@ -2226,8 +2178,20 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						}
 					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
 						Element e = (Element)n;
-						if(!this.checkFromSQL(e)) {
-							msgs.add((String)e.getAttribute("msg"));
+						if(this._params.equals(e, "type", "native") && e.hasAttribute("class")) {
+							try {
+								Validator validator = (Validator)Class.forName(e.getAttribute("class")).getConstructor().newInstance();
+								String msg = validator.execute(this._params, this._con);
+								if(msg != null) {
+									msgs.add(msg);
+								}
+							} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
+								if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
+							}
+						} else {
+							if(!this.checkFromSQL(e)) {
+								msgs.add((String)e.getAttribute("msg"));
+							}
 						}
 					}
 				}
@@ -2237,7 +2201,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					Buffer sb = new Buffer();
 					this.isError = true;
 					sb.append(before());
-					
+					for(int i = 0; i < msgs.size(); i++) {
+						this._params.puts("error.error", msgs.get(i));
+					}
+					/*
 					sb.appendL(this._tag.tag("errors", null, true));
 					for(int i = 0; i < msgs.size(); i++) {
 						sb.append(this._tag.tag("error", null, true));
@@ -2247,7 +2214,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						sb.appendL(this._tag.tag("error", null, false));
 					}
 					sb.appendL(this._tag.tag("errors", null, false));
-
+					*/
 					sb.append(after());
 					msgs.clear();
 					msgs = null;
@@ -2278,7 +2245,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			if(command.hasAttribute("check")) {
 				check = command.getAttribute("check");
 			}
-			logger.fine("check : " + check);
+			if(logger.isLoggable(Level.FINE)) { logger.fine("check : " + check); }
 			if(check != null && check.equals("exists")) {
 				check = "${result} exists";
 			} else if(check != null && check.equals("0")) {
@@ -2317,9 +2284,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				stmt = null;
 				result = AuthParser.auth(check, record);
 			} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				throw e;
 			} finally {
 				try {
@@ -2327,18 +2292,14 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						rs.close();
 					}
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 				try {
 					if(stmt != null) {
 						stmt.close();
 					}
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				}
 			}
 		}
@@ -2355,9 +2316,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				encryptor.put("true", (Encryptor) Class.forName(node.getAttribute("encrypt")).getConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		this._expr = this._xpath.compile("encrypt");
@@ -2371,9 +2330,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				encryptor.put(encrypt.getAttribute("key"), (Encryptor) Class.forName(encrypt.getAttribute("name")).getConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
-				if(logger.isLoggable(Level.SEVERE)) {
-					logger.severe(LOG.toString(e));
-				}
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
 		return encryptor;
