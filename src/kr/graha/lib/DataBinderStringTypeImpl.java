@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 
 /**
  * Graha(그라하) 데이타바인딩 문자열(char, varchar) 구현 클레스
@@ -74,7 +75,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 				}
 			}
 			if(column != null && sb != null) {
-				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0])).replace("]]>", "]]]]><![CDATA[>") + "]]></" + tag.tag("row", column, null, false) + ">");
+				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0])) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
 			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
@@ -91,11 +92,11 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 				}
 			}
 			if(column != null && sb != null) {
-				if(params.getString(value[0]) == null) {
-					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0] + "." + idx)) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else {
-					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + (params.getString(value[0]).replace("]]>", "]]]]><![CDATA[>") + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
-				}
+//				if(params.getString(value[0]) == null) {
+					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0] + "." + idx)) + "]]></" + tag.tag("row", column, null, false) + ">");
+//				} else {
+//					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0]) + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
+//				}
 			}
 			return;
 		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {

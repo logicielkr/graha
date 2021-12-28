@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -1221,7 +1222,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					ResultSetMetaData rsmd = rs.getMetaData();
 					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 						sb.append("<" + rsmd.getColumnName(x) + "><![CDATA[");
-						sb.append(rs.getString(x));
+						sb.append(XML.fix(rs.getString(x)));
 						sb.append("]]></" + rsmd.getColumnName(x) + ">\n");
 					}
 					sb.append("</row>");
@@ -1384,7 +1385,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			}
 			sb.append("<params><param>");
 			if(sql != null && !sql.trim().equals("")) {
-				sb.append("<sql><![CDATA[" + sql + "]]></sql>");
+				sb.append("<sql><![CDATA[" + XML.fix(sql) + "]]></sql>");
 			}
 			sb.append("<name>" + m.getDatabaseProductName() + "</name>");
 			sb.append("<version>" + m.getDatabaseProductVersion() + "</version>");
@@ -1409,7 +1410,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 					sb.append("<row>");
 					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 						sb.append("<c" + x + "><![CDATA[");
-						sb.append(rsmd.getColumnName(x));
+						sb.append(XML.fix(rsmd.getColumnName(x)));
 						sb.append("]]></c" + x + ">\n");
 					}
 					sb.append("</row>");
@@ -1421,7 +1422,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 						sb.append("<row>");
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 							sb.append("<c" + x + "><![CDATA[");
-							sb.append(rs.getString(x));
+							sb.append(XML.fix(rs.getString(x)));
 							sb.append("]]></c" + x + ">\n");
 						}
 						sb.append("</row>");
@@ -1442,7 +1443,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			}
 			if(bw.length() > 0) {
 				sb.append("<rows id=\"gen\"><row>");
-				sb.append("<gen><![CDATA[" + bw.toString() + "]]></gen>");
+				sb.append("<gen><![CDATA[" + XML.fix(bw.toString()) + "]]></gen>");
 				sb.append("</row></rows>");
 			}
 			sb.append("</document>");
@@ -1459,7 +1460,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				sb.append("<document>");
 			}
 			sb.append("<errors><error>");
-			sb.append("<message><![CDATA[" + e.getMessage( ) + "]]></message>");
+			sb.append("<message><![CDATA[" + XML.fix(e.getMessage()) + "]]></message>");
 			sb.append("<error_code>" + e.getErrorCode( ) + "</error_code>");
 			sb.append("<sql_state>" + e.getSQLState( ) + "</sql_state>");
 			sb.append("</error></errors>");
@@ -1473,7 +1474,7 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 				sb.append("<document>");
 			}
 			sb.append("<errors><error>");
-			sb.append("<message><![CDATA[" + e.getMessage( ) + "]]></message>");
+			sb.append("<message><![CDATA[" + XML.fix(e.getMessage()) + "]]></message>");
 			sb.append("<error_code>" + e.getErrorCode( ) + "</error_code>");
 			sb.append("<sql_state>" + e.getSQLState( ) + "</sql_state>");
 			sb.append("</error></errors>");

@@ -63,6 +63,7 @@ import java.nio.file.Path;
 import java.nio.file.DirectoryStream;
 
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 
 /**
  * Graha(그라하) XML 생성기
@@ -506,12 +507,16 @@ public class XMLGenerator {
 							}
 							if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
 								try {
-									sb.append((encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value)).replace("]]>", "]]]]><![CDATA[>"));
+									sb.append(XML.fix(encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value)));
 								} catch (NoSuchProviderException e) {
-									sb.append((value).replace("]]>", "]]]]><![CDATA[>"));
+									sb.append(XML.fix(value));
 								}
 							} else {
-								sb.append(value.replace("]]>", "]]]]><![CDATA[>"));
+								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+									sb.append(XML.fix(value));
+								} else {
+									sb.append(value);
+								}
 							}
 							if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
 								sb.append("]]></");
@@ -1010,10 +1015,10 @@ public class XMLGenerator {
 										try {
 											String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
 											if(tmp != null) {
-												sb.append((tmp).replace("]]>", "]]]]><![CDATA[>"));
+												sb.append(XML.fix(tmp));
 											}
 										} catch (NoSuchProviderException e) {
-											sb.append((value).replace("]]>", "]]]]><![CDATA[>"));
+											sb.append(XML.fix(value));
 										}
 									} else {
 										this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
@@ -1031,7 +1036,11 @@ public class XMLGenerator {
 												sb.append(value);
 											}
 										} else {
-											sb.append(value.replace("]]>", "]]]]><![CDATA[>"));
+											if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+												sb.append(XML.fix(value));
+											} else {
+												sb.append(value);
+											}
 										}
 									}
 								}

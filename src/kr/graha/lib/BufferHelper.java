@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import org.xml.sax.SAXException;
 import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
+import kr.graha.helper.XML;
 
 /**
  * Graha(그라하) (XML 출력관 관련된) Buffer 관련 유틸리티
@@ -60,7 +61,7 @@ public final class BufferHelper {
 				sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
 				sb.append("<![CDATA[");
 				if(item instanceof String) {
-					sb.append(item.replace("]]>", "]]]]><![CDATA[>"));
+					sb.append(XML.fix(item));
 				} else {
 					sb.append(item);
 				}
@@ -71,7 +72,7 @@ public final class BufferHelper {
 			sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
 			sb.append("<![CDATA[");
 			if(params.get(key) instanceof String) {
-				sb.append(((String)params.get(key)).replace("]]>", "]]]]><![CDATA[>"));
+				sb.append(XML.fix((String)params.get(key)));
 			} else {
 				sb.append(params.get(key));
 			}
