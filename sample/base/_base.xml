@@ -143,6 +143,18 @@ select, input[type='text'], input[type='submit'], input[type='button'], button {
 	}
 }
 		]]></style>
+		<script name="get_message"><![CDATA[
+function _getMessage(msg) {
+	if(typeof(_messages) != "undefined" &amp;&amp; msg.indexOf("message.") == 0) {
+		for(var i = 0; i &lt; _messages.length; i++) {
+			if("message." + _messages[i].name == msg) {
+				return _messages[i].label;
+			}
+		}
+	}
+	return msg;
+}
+		]]></script>
 		<script name="check_submit"><![CDATA[
 function check_submit(form, msg) {
 	if(typeof(_check) == "function" &amp;&amp; !_check(form)) {

@@ -1580,14 +1580,24 @@ public class XSLGenerator {
 		}
 		sb.appendL("</xsl:choose>");
 		sb.appendL("<script>");
+		sb.appendL("function _getMessage(msg) {");
+		sb.appendL("	if(typeof(_messages) != \"undefined\" &amp;&amp; msg.indexOf(\"message.\") == 0) {");
+		sb.appendL("		for(var i = 0; i &lt; _messages.length; i++) {");
+		sb.appendL("			if(\"message.\" + _messages[i].name == msg) {");
+		sb.appendL("				return _messages[i].label;");
+		sb.appendL("			}");
+		sb.appendL("		}");
+		sb.appendL("	}");
+		sb.appendL("	return msg;");
+		sb.appendL("}");
 		sb.appendL("if(document.getElementsByClassName(\"msg\")) {");
 		sb.appendL("	for(var i = 0; i &lt; document.getElementsByClassName(\"msg\").length; i++) {");
 		sb.appendL("		if(document.getElementsByClassName(\"msg\")[i].innerText) {");
-		sb.appendL("			alert(document.getElementsByClassName(\"msg\")[i].innerText);");
+		sb.appendL("			alert(_getMessage(document.getElementsByClassName(\"msg\")[i].innerText));");
 		sb.appendL("		} else {");
 		sb.appendL("			var msg = \"\";");
 		sb.appendL("			for(var x = 0; x &lt; document.getElementsByClassName(\"msg\")[i].childNodes.length; i++) {");
-		sb.appendL("				msg += document.getElementsByClassName(\"msg\")[i].childNodes[x].nodeValue;");
+		sb.appendL("				msg += _getMessage(document.getElementsByClassName(\"msg\")[i].childNodes[x].nodeValue);");
 		sb.appendL("			}");
 		sb.appendL("			alert(msg);");
 		sb.appendL("		}");
@@ -1647,6 +1657,8 @@ public class XSLGenerator {
 		sb.appendL("<xsl:for-each select=\"" + this._tag.path("error", null) + "\">");
 		sb.appendL("<li><xsl:value-of select=\".\" /></li>");
 		sb.appendL("</xsl:for-each>");
+		sb.appendL("<li>이 메시지를 보고 있다면, 이전 화면의 Javascript 실행 과정에서 에러가 발생했거나 웹브라우저에서 Javascript를 사용하지 않도록 설정한 것입니다.</li>");
+		sb.appendL("<li>만약 웹브라우저에서 Javascript를 사용하지 않도록 설정했다면, 웹브라우저의 뒤로가기 기능을 클릭하여 이전화면으로 돌아갑니다.</li>");
 		sb.appendL("</ul>");
 		sb.appendL("<input type=\"button\" value=\"돌아가기\" onclick=\"back()\" />");
 		sb.appendL("</div>");
@@ -1734,7 +1746,17 @@ public class XSLGenerator {
 		sb.append("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />");
 		sb.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
 		Document doc = null;
-		
+		sb.appendL("<xsl:if test=\"" + this._tag.path("message", null) + "\">");
+		sb.appendL("<script>");
+		sb.appendL("var _messages = new Array();");
+		sb.append("<xsl:for-each select=\"" + this._tag.path("message", null) + "\">");
+		sb.append("_messages.push({");
+		sb.append("	name:\"<xsl:value-of select=\"" + this._tag.path("message", "name", null, false) + "\" />\",");
+		sb.append("	label:\"<xsl:value-of select=\"" + this._tag.path("message", "label", null, false) + "\" />\"");
+		sb.append("});");
+		sb.append("</xsl:for-each>");
+		sb.appendL("</script>");
+		sb.appendL("</xsl:if>");
 		try {
 			this._expr = this._xpath.compile("header");
 			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
@@ -1933,7 +1955,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", not_null:true});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
@@ -1945,7 +1967,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", max_length:" + (String)e.getAttribute("max-length") + "});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
@@ -1957,7 +1979,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", min_length:" + (String)e.getAttribute("min-length") + "});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
@@ -1969,7 +1991,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", number_format:\"" + (String)e.getAttribute("number-format") + "\"});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
@@ -1982,7 +2004,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", date_format:\"" + (String)e.getAttribute("date-format") + "\"});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");
@@ -1994,7 +2016,7 @@ public class XSLGenerator {
 							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", format:\"" + (String)e.getAttribute("format") + "\"});");
 							sb.appendL("	result = false;");
 							sb.appendL("} else {");
-							sb.appendL("	alert(\"" + (String)e.getAttribute("msg") + "\");");
+							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
 							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
 							sb.appendL("	return false;");
 							sb.appendL("}");

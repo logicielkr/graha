@@ -58,26 +58,38 @@ public final class BufferHelper {
 		if(params.isArray(key)) {
 			java.util.List<String> items = params.getArray(key);
 			for(String item : items){
+				if(item != null) {
+					sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
+					sb.append("<![CDATA[");
+					if(key.startsWith("error.") && item.startsWith("message.") && params.hasKey(item)) {
+						sb.append(params.get(item));
+					} else {
+						if(item instanceof String) {
+							sb.append(XML.fix(item));
+						} else {
+							sb.append(item);
+						}
+					}
+					sb.append("]]>");
+					sb.appendL(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, false));
+				}
+			}
+		} else {
+			if(params.get(key) != null) {
 				sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
 				sb.append("<![CDATA[");
-				if(item instanceof String) {
-					sb.append(XML.fix(item));
+				if(key.startsWith("error.") && ((String)params.get(key)).startsWith("message.") && params.hasKey((String)params.get(key))) {
+					sb.append(params.get((String)params.get(key)));
 				} else {
-					sb.append(item);
+					if(params.get(key) instanceof String) {
+						sb.append(XML.fix((String)params.get(key)));
+					} else {
+						sb.append(params.get(key));
+					}
 				}
 				sb.append("]]>");
 				sb.appendL(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, false));
 			}
-		} else {
-			sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
-			sb.append("<![CDATA[");
-			if(params.get(key) instanceof String) {
-				sb.append(XML.fix((String)params.get(key)));
-			} else {
-				sb.append(params.get(key));
-			}
-			sb.append("]]>");
-			sb.appendL(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, false));
 		}
 	}
 	

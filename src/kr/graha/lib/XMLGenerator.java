@@ -1899,24 +1899,79 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			}
 		}
 		sb.appendL(this._tag.tag("document", null, true));
-		if(this._params.hasKey("header.method") && !this._params.getString("header.method").equals("POST") && !this.isError) {
-			try {
-				this._expr = this._xpath.compile("header");
-				Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-				Document doc = null;
-				if(header.hasAttribute("extends")) {
-						File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-						dbf.setNamespaceAware(true);
-						dbf.setXIncludeAware(true);
-						doc = dbf.newDocumentBuilder().parse(parent);
-						doc.getDocumentElement().normalize();
-						
-//						this._expr = this._xpath.compile("header/codes/code");
-//						code = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+		try {
+			this._expr = this._xpath.compile("header");
+			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
+			Document doc = null;
+			if(header.hasAttribute("extends")) {
+					File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
+					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+					dbf.setNamespaceAware(true);
+					dbf.setXIncludeAware(true);
+					doc = dbf.newDocumentBuilder().parse(parent);
+					doc.getDocumentElement().normalize();
+			}
+			Buffer sb_message = new Buffer();
+			this._expr = this._xpath.compile("header/messages/message");
+			NodeList messages = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+			for(int i = 0; i < messages.getLength(); i++) {
+				Element node = (Element)messages.item(i);
+				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
 				}
+				this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+				NodeList p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+				if(p.getLength() > 0) {
+					continue;
+				}
+				if(doc != null) {
+					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+					NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+					if(b.getLength() > 0) {
+						continue;
+					}
+				}
+				sb_message.append(message(node));
+			}
+			this._expr = this._xpath.compile("header/messages/message");
+			messages = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+			for(int i = 0; i < messages.getLength(); i++) {
+				Element node = (Element)messages.item(i);
+				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
+				}
+				if(doc != null) {
+					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
+					NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+					if(b.getLength() > 0) {
+						continue;
+					}
+				}
+				sb_message.append(message(node));
+			}
+			this._expr = this._xpath.compile("header/messages/message");
+			messages = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+			for(int i = 0; i < messages.getLength(); i++) {
+				Element node = (Element)messages.item(i);
+				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
+				}
+				sb_message.append(message(node));
+			}
+			if(sb_message.length() > 0) {
+				sb.appendL(this._tag.tag("messages", null, true));
+				sb.appendL(sb_message);
+				sb.appendL(this._tag.tag("messages", null, false));
+				sb_message.clear();
+				sb_message = null;
+			}
+			if(
+				this._params.hasKey("header.method") && 
+				!this._params.getString("header.method").equals("POST") && 
+				!this.isError
+			) {
 				this._expr = this._xpath.compile("header/codes/code");
-				NodeList codes = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+				NodeList codes = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 				
 				for(int i = 0; i < codes.getLength(); i++) {
 					Element node = (Element)codes.item(i);
@@ -1929,7 +1984,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						}
 					}
 					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-					NodeList p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+					NodeList p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
 					if(p.getLength() > 0) {
 						continue;
 					}
@@ -1943,7 +1998,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					sb.append(code(node));
 				}
 				this._expr = this._xpath.compile("header/codes/code");
-				codes = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+				codes = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
 				
 				for(int i = 0; i < codes.getLength(); i++) {
 					Element node = (Element)codes.item(i);
@@ -1980,8 +2035,44 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						sb.append(code(node));
 					}
 				}
-			} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+			}
+		} catch (XPathExpressionException | DOMException | NoSuchProviderException | ParserConfigurationException | SAXException | IOException e) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		}
+		return sb;
+	}
+	private Buffer message(Element node) {
+		Buffer sb = new Buffer();
+		String tmp = node.getTextContent();
+		String label = "";
+		if(label != null) {
+			java.util.StringTokenizer st = new java.util.StringTokenizer(tmp, "\t\n\r ");
+			int index = 0;
+			while(st.hasMoreTokens()) {
+				if(index > 0) {
+					label += " ";
+				}
+				label += st.nextToken();
+				index++;
+			}
+			this._params.put("message." + node.getAttribute("name"), label);
+		}
+		if(this._params.equals(node, "public", "true")) {
+			if(
+				this._params.hasKey("header.method") && 
+				!this._params.getString("header.method").equals("POST") && 
+				!this.isError
+			) {
+				if(tmp != null) {
+					sb.append(this._tag.tag("message", null, true));
+					sb.append(this._tag.tag("message", "name", null, true));
+					sb.append(node.getAttribute("name"));
+					sb.append(this._tag.tag("message", "name", null, false));
+					sb.append(this._tag.tag("message", "label", null, true));
+					sb.append(label);
+					sb.append(this._tag.tag("message", "label", null, false));
+					sb.appendL(this._tag.tag("message", null, false));
+				}
 			}
 		}
 		return sb;

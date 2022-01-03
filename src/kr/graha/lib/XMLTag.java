@@ -116,6 +116,13 @@ public class XMLTag {
 				}
 			}
 		}
+		if(tagName != null && tagName.equals("message")) {
+			if(isRDF) {
+				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:messages']/RDF:li/RDF:item";
+			} else {
+				return "/document/messages/message";
+			}
+		}
 		
 		if(tagName != null && tagName.equals("fileparam")) {
 			if(isRDF) {
@@ -216,7 +223,7 @@ public class XMLTag {
 				}
 			}
 		}
-		if(upperName != null && (upperName.equals("page") || upperName.equals("file"))) {
+		if(upperName != null && (upperName.equals("page") || upperName.equals("file") || upperName.equals("message"))) {
 			if(isRDF) {
 				return "uc:" + tagName;
 			} else {
@@ -454,6 +461,21 @@ public class XMLTag {
 				}
 			}
 		}
+		if(tagName != null && tagName.equals("messages")) {
+			if(isRDF) {
+				if(isStart) {
+					return "<RDF:Seq RDF:about=\"urn:root:messages\">";
+				} else {
+					return "</RDF:Seq>";
+				}
+			} else {
+				if(isStart) {
+					return "<messages>";
+				} else {
+					return "</messages>";
+				}
+			}
+		}
 		if(tagName != null && tagName.equals("code")) {
 			if(isRDF) {
 				if(isStart) {
@@ -555,6 +577,21 @@ public class XMLTag {
 				}
 			}
 		}
+		if(tagName != null && tagName.equals("message")) {
+			if(isRDF) {
+				if(isStart) {
+					return "<RDF:li><RDF:item>";
+				} else {
+					return "</RDF:item></RDF:li>";
+				}
+			} else {
+				if(isStart) {
+					return "<message>";
+				} else {
+					return "</message>";
+				}
+			}
+		}
 		return "";
 	}
 	
@@ -565,7 +602,8 @@ public class XMLTag {
 				|| upperName.equals("result")
 				|| upperName.equals("error")
 				|| upperName.equals("prop")
-				|| upperName.equals("page") 
+				|| upperName.equals("page")
+				|| upperName.equals("message")
 				|| upperName.equals("file") 
 				|| upperName.equals("files")
 				|| (upperName.equals("row") && tagName.equals("rowcount"))
