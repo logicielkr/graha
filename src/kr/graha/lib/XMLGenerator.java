@@ -1900,71 +1900,8 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		sb.appendL(this._tag.tag("document", null, true));
 		try {
-			this._expr = this._xpath.compile("header");
-			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-			Document doc = null;
-			if(header.hasAttribute("extends")) {
-					File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-					dbf.setNamespaceAware(true);
-					dbf.setXIncludeAware(true);
-					doc = dbf.newDocumentBuilder().parse(parent);
-					doc.getDocumentElement().normalize();
-			}
-			Buffer sb_message = new Buffer();
-			this._expr = this._xpath.compile("header/messages/message");
-			NodeList messages = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			for(int i = 0; i < messages.getLength(); i++) {
-				Element node = (Element)messages.item(i);
-				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-						continue;
-				}
-				this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-				NodeList p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-				if(p.getLength() > 0) {
-					continue;
-				}
-				if(doc != null) {
-					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-					NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-					if(b.getLength() > 0) {
-						continue;
-					}
-				}
-				sb_message.append(message(node));
-			}
-			this._expr = this._xpath.compile("header/messages/message");
-			messages = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			for(int i = 0; i < messages.getLength(); i++) {
-				Element node = (Element)messages.item(i);
-				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-						continue;
-				}
-				if(doc != null) {
-					this._expr = this._xpath.compile("header/codes/code[@name='" + node.getAttribute("name") + "']");
-					NodeList b = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-					if(b.getLength() > 0) {
-						continue;
-					}
-				}
-				sb_message.append(message(node));
-			}
-			this._expr = this._xpath.compile("header/messages/message");
-			messages = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-			for(int i = 0; i < messages.getLength(); i++) {
-				Element node = (Element)messages.item(i);
-				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
-						continue;
-				}
-				sb_message.append(message(node));
-			}
-			if(sb_message.length() > 0) {
-				sb.appendL(this._tag.tag("messages", null, true));
-				sb.appendL(sb_message);
-				sb.appendL(this._tag.tag("messages", null, false));
-				sb_message.clear();
-				sb_message = null;
-			}
+			Document doc = this.getExtendsDocument();
+			parseMessage(sb, doc);
 			if(
 				this._params.hasKey("header.method") && 
 				!this._params.getString("header.method").equals("POST") && 
@@ -2041,29 +1978,150 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		return sb;
 	}
-	private Buffer message(Element node) {
-		Buffer sb = new Buffer();
-		String tmp = node.getTextContent();
-		String label = "";
-		if(label != null) {
-			java.util.StringTokenizer st = new java.util.StringTokenizer(tmp, "\t\n\r ");
-			int index = 0;
-			while(st.hasMoreTokens()) {
-				if(index > 0) {
-					label += " ";
-				}
-				label += st.nextToken();
-				index++;
-			}
-			this._params.put("message." + node.getAttribute("name"), label);
+	private Document getExtendsDocument() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+		this._expr = this._xpath.compile("header");
+		Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
+		Document doc = null;
+		if(header.hasAttribute("extends")) {
+			File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(true);
+			dbf.setXIncludeAware(true);
+			doc = dbf.newDocumentBuilder().parse(parent);
+			doc.getDocumentElement().normalize();
 		}
-		if(this._params.equals(node, "public", "true")) {
+		return doc;
+	}
+	private void parseMessage(Buffer sb, Document doc) throws XPathExpressionException {
+		Buffer sb_message = null;
+		if(sb != null) {
+			sb_message = new Buffer();
+		}
+		NodeList messages;
+		if(doc != null) {
+			this._expr = this._xpath.compile("header/messages/message");
+			messages = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
+			for(int i = 0; i < messages.getLength(); i++) {
+				Element node = (Element)messages.item(i);
+				if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+						continue;
+				}
+				this._expr = this._xpath.compile("header/messages/message[@name='" + node.getAttribute("name") + "']");
+				NodeList p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+				if(p.getLength() > 0) {
+					continue;
+				}
+				this._expr = this._xpath.compile("header/messages/message[@name='" + node.getAttribute("name") + "']");
+				p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+				if(p.getLength() > 0) {
+					continue;
+				}
+				if(sb == null) {
+					message(node, false);
+				} else {
+					sb_message.append(message(node, true));
+				}
+			}
+		}
+		this._expr = this._xpath.compile("header/messages/message");
+		messages = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
+		for(int i = 0; i < messages.getLength(); i++) {
+			Element node = (Element)messages.item(i);
+			if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+					continue;
+			}
+			this._expr = this._xpath.compile("header/messages/message[@name='" + node.getAttribute("name") + "']");
+			NodeList b = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+			if(b.getLength() > 0) {
+				continue;
+			}
+			if(sb == null) {
+				message(node, false);
+			} else {
+				sb_message.append(message(node, true));
+			}
+		}
+		this._expr = this._xpath.compile("header/messages/message");
+		messages = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+		for(int i = 0; i < messages.getLength(); i++) {
+			Element node = (Element)messages.item(i);
+			if(!node.hasAttribute("name") || node.getAttribute("name") == null || node.getAttribute("name").equals("")) {
+					continue;
+			}
+			if(sb == null) {
+				message(node, false);
+			} else {
+				sb_message.append(message(node, true));
+			}
+		}
+		if(sb != null && sb_message.length() > 0) {
+			sb.appendL(this._tag.tag("messages", null, true));
+			sb.appendL(sb_message);
+			sb.appendL(this._tag.tag("messages", null, false));
+			sb_message.clear();
+			sb_message = null;
+		}
+	}
+	private Buffer message(Element node, boolean isBuffer) {
+		Buffer sb = new Buffer();
+		String tmp = null;
+		String label = null;
+		if(node.hasAttribute("ref") && this._params.hasKey("message." + node.getAttribute("ref"))) {
+			tmp = this._params.getString("message." + node.getAttribute("ref"));
+			if(tmp != null) {
+				if(
+					this._params.hasKey("messages.code." + node.getAttribute("ref")) &&
+					tmp.startsWith("[") &&
+					tmp.indexOf("]") > 0
+				) {
+					if(this._params.equals(node, "code", "exclude")) {
+						label = tmp.substring(tmp.indexOf("]") + 1);
+					} else {
+						label = "[" + node.getAttribute("name") + "]" + tmp.substring(tmp.indexOf("]") + 1);
+						this._params.put("messages.code." + node.getAttribute("name"), true);
+					}
+				} else {
+					if(this._params.equals(node, "code", "include")) {
+						label = "[" + node.getAttribute("name") + "]" + tmp;
+						this._params.put("messages.code." + node.getAttribute("name"), true);
+					} else {
+						label = tmp;
+					}
+				}
+				this._params.put("message." + node.getAttribute("name"), label);
+			}
+		}
+		if(label == null) {
+			tmp = node.getTextContent();
+			label = "";
+			if(tmp != null) {
+				java.util.StringTokenizer st = new java.util.StringTokenizer(tmp, "\t\n\r ");
+				int index = 0;
+				while(st.hasMoreTokens()) {
+					if(index > 0) {
+						label += " ";
+					}
+					label += st.nextToken();
+					index++;
+				}
+				if(index == 0) {
+					label = null;
+				} else {
+					if(this._params.equals(node, "code", "include")) {
+						label = "[" + node.getAttribute("name") + "]" + label;
+						this._params.put("messages.code." + node.getAttribute("name"), true);
+					}
+					this._params.put("message." + node.getAttribute("name"), label);
+				}
+			}
+		}
+		if(isBuffer && this._params.equals(node, "public", "true")) {
 			if(
 				this._params.hasKey("header.method") && 
 				!this._params.getString("header.method").equals("POST") && 
 				!this.isError
 			) {
-				if(tmp != null) {
+				if(label != null) {
 					sb.append(this._tag.tag("message", null, true));
 					sb.append(this._tag.tag("message", "name", null, true));
 					sb.append(node.getAttribute("name"));
