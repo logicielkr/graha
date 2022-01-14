@@ -283,10 +283,14 @@ public class XSLGenerator {
 			name = name.substring(6);
 		}
 		Buffer sb = new Buffer();
+		String escape = "";
+		if(this._params.equals(column, "escape", "false") || this._params.equals(column, "escape", "no")) {
+			escape = " disable-output-escaping=\"yes\"";
+		}
 		if(column.hasAttribute("code") && column.getAttribute("code").equals("true")) {
 			if(column.hasAttribute("for") && column.getAttribute("for") != null && !column.getAttribute("for").equals("")) {
 				sb.appendL("<xsl:variable name=\"" + column.getAttribute("name") + "\" select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path("code", "option", column.getAttribute("for"), isFull) + "[@" + this._tag.path("code", "value", null, isFull) + " = $" + column.getAttribute("name") + "]/@" + this._tag.path("code", "label", null, isFull) + "\" />");
+				sb.appendL("<xsl:value-of select=\"" + this._tag.path("code", "option", column.getAttribute("for"), isFull) + "[@" + this._tag.path("code", "value", null, isFull) + " = $" + column.getAttribute("name") + "]/@" + this._tag.path("code", "label", null, isFull) + "\"" + escape + " />");
 			} else {
 				this._expr = this._xpath.compile("option");
 				NodeList param = (NodeList)this._expr.evaluate(column, XPathConstants.NODESET);
@@ -299,11 +303,11 @@ public class XSLGenerator {
 						sb.appendL("</xsl:when>");
 					}
 					sb.appendL("<xsl:otherwise>");
-					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
+					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\"" + escape + " />");
 					sb.appendL("</xsl:otherwise>");
 					sb.appendL("</xsl:choose>");
 				} else {
-					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
+					sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\"" + escape + " />");
 				}
 			}
 		} else {
