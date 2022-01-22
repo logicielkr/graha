@@ -107,6 +107,8 @@ public final class FileHelper {
 				XPath xpath = factory.newXPath();
 				XPathExpression expr = xpath.compile("files/file[@name = '" + path + "']");
 				Element file = (Element)expr.evaluate(query, XPathConstants.NODE);
+				return getFilePath(p, file);
+				/*
 				if(file != null && file.hasAttribute("path")) {
 //					return FileHelper.getFilePath(file.getAttribute("path"), p);
 					if(file.hasAttribute("backup")) {
@@ -115,6 +117,7 @@ public final class FileHelper {
 						return parse(p, file.getAttribute("path"));
 					}
 				}
+				*/
 			} catch (XPathExpressionException e) {
 				e.printStackTrace();
 				return null;
@@ -122,8 +125,19 @@ public final class FileHelper {
 		}
 		return null;
 	}
-	protected static Record getFilePath(String text, Record p) {
-		return parse(text, p);
+	protected static Record getFilePath(Record p, Element file) {
+		if(file != null && file.hasAttribute("path")) {
+			if(file.hasAttribute("backup")) {
+				return parse(p, file.getAttribute("path"), file.getAttribute("backup"));
+			} else {
+				return parse(p, file.getAttribute("path"));
+			}
+		}
+		return null;
+	}
+//	protected static Record getFilePath(Record p, String text) {
+	protected static Record getFilePath(Record p, String... strs) {
+		return parse(p, strs);
 	}
 	private static Record parse(Record p, String... strs) {
 		Record result = new Record();

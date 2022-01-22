@@ -65,6 +65,8 @@ import java.nio.file.DirectoryStream;
 import kr.graha.helper.LOG;
 import kr.graha.helper.XML;
 
+import java.util.List;
+
 /**
  * Graha(그라하) XML 생성기
 
@@ -607,7 +609,7 @@ public class XMLGenerator {
 					} else {
 						sb.append(this._tag.tag("files", null, true));
 					}
-					Record result = FileHelper.getFilePath(file.getAttribute("path"), this._params);
+					Record result = FileHelper.getFilePath(this._params, file.getAttribute("path"));
 					if(result != null && !result.isEmpty()) {
 						
 						String filePath = result.getString("_system.filepath");
@@ -792,21 +794,43 @@ public class XMLGenerator {
 						sb.append(this._tag.tag("files", null, true));
 					}
 					int index = 0;
-					Record result = FileHelper.getFilePath(file.getAttribute("path"), this._params);
-					
+//					Record result = FileHelper.getFilePath(this._params, file.getAttribute("path"));
+					Record result = FileHelper.getFilePath(this._params, file);
 					if(result != null && !result.isEmpty()) {
-						String filePath = result.getString("_system.filepath");
-						if(filePath != null) {
-							File dir = new File(filePath);
-							if(dir.exists() && dir.isDirectory()) {
-								File[] ff = dir.listFiles();
-								if(ff != null) {
-									for (File f : ff) {
-										f.delete();
-										index++;
+						if(result.isArray("_system.filepath")) {
+							List paths = result.getArray("_system.filepath");
+							for(int x = 0; x < paths.size(); x++) {
+								Object path = paths.get(x);
+								if(path != null && path instanceof String) {
+									File dir = new File((String)path);
+									if(dir.exists() && dir.isDirectory()) {
+										File[] ff = dir.listFiles();
+										if(ff != null) {
+											for (File f : ff) {
+												f.delete();
+												if(x == 0) {
+													index++;
+												}
+											}
+										}
+										dir.delete();
 									}
 								}
-								dir.delete();
+							}
+						} else {
+							String filePath = result.getString("_system.filepath");
+							if(filePath != null) {
+								File dir = new File(filePath);
+								if(dir.exists() && dir.isDirectory()) {
+									File[] ff = dir.listFiles();
+									if(ff != null) {
+										for (File f : ff) {
+											f.delete();
+											index++;
+										}
+									}
+									dir.delete();
+								}
 							}
 						}
 					}
@@ -1092,7 +1116,7 @@ public class XMLGenerator {
 						sb.appendL(this._tag.tag("files", null, true));
 					}
 					index = 0;
-					Record result = FileHelper.getFilePath(file.getAttribute("path"), this._params);
+					Record result = FileHelper.getFilePath(this._params, file.getAttribute("path"));
 					if(result != null && !result.isEmpty()) {
 						String filePath = result.getString("_system.filepath");
 						if(filePath != null) {

@@ -293,7 +293,7 @@ public final class DBHelper {
 		if(info != null && info.hasKey("sql_list_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
-			Record result = FileHelper.getFilePath(info.getString("sql_list_template"), p);
+			Record result = FileHelper.getFilePath(p, info.getString("sql_list_template"));
 			if(result != null && !result.isEmpty()) {
 				String n = result.getString("_system.filepath");
 				if(n != null) {
@@ -316,7 +316,7 @@ public final class DBHelper {
 		if(info != null && info.hasKey("sql_cnt_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
-			Record result = FileHelper.getFilePath(info.getString("sql_cnt_template"), p);
+			Record result = FileHelper.getFilePath(p, info.getString("sql_cnt_template"));
 			if(result != null && !result.isEmpty()) {
 				String n = result.getString("_system.filepath");
 				if(n != null) {
@@ -334,7 +334,7 @@ public final class DBHelper {
 		if(info != null && info.hasKey("sql_sequence_template")) {
 			Record p = new Record();
 			p.put("name", name);
-			Record result = FileHelper.getFilePath(info.getString("sql_sequence_template"), p);
+			Record result = FileHelper.getFilePath(p, info.getString("sql_sequence_template"));
 			if(result != null && !result.isEmpty()) {
 				String n = result.getString("_system.filepath");
 				if(n != null) {
