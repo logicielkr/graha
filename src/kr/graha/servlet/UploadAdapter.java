@@ -37,6 +37,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FilenameUtils;
 */
 import org.w3c.dom.Element;
+import java.nio.file.Files;
 
 
 /**
@@ -51,7 +52,7 @@ public class UploadAdapter {
 	protected UploadAdapter() {
 		LOG.setLogLevel(logger);
 	}
-	protected void saveFile(String path, int idx, FileItem fileItem, Record params) throws Exception {
+	protected File saveFile(String path, int idx, FileItem fileItem, File firstFile, Record params) throws Exception {
 		File f = new File(path + File.separator);
 		
 		if(!f.exists()) {
@@ -74,8 +75,13 @@ public class UploadAdapter {
 			}
 			index++;
 		}
-		fileItem.write(f);
+		if(firstFile != null) {
+			Files.copy(firstFile.toPath(), f.toPath());
+		} else {
+			fileItem.write(f);
+		}
 		params.put("uploaded.file.path." + idx, f.getPath());
+		return f;
 	}
 	protected void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
 		Iterator<FileItem> it = fields.iterator();
@@ -130,9 +136,17 @@ public class UploadAdapter {
 				}
 				if(result.isArray("_system.filepath")) {
 					List paths = result.getArray("_system.filepath");
-					for(Object path : paths) {
-						if(path != null && path instanceof String) {
-							saveFile((String)path, idx, fileItem, params);
+					if(paths != null) {
+						File firstFile = null;
+						for(int i = 0; i < paths.size(); i++) {
+							String path = (String)paths.get(i);
+							if(path != null && path instanceof String) {
+								if(i == 0) {
+									firstFile = saveFile((String)path, idx, fileItem, firstFile, params);
+								} else {
+									saveFile((String)path, idx, fileItem, firstFile, params);
+								}
+							}
 						}
 					}
 				} else {
@@ -141,7 +155,7 @@ public class UploadAdapter {
 						if(logger.isLoggable(Level.WARNING)) { logger.warning("path is null"); }
 						continue;
 					}
-					saveFile(path, idx, fileItem, params);
+					saveFile(path, idx, fileItem, null, params);
 				}
 				idx++;
 			}

@@ -799,21 +799,23 @@ public class XMLGenerator {
 					if(result != null && !result.isEmpty()) {
 						if(result.isArray("_system.filepath")) {
 							List paths = result.getArray("_system.filepath");
-							for(int x = 0; x < paths.size(); x++) {
-								Object path = paths.get(x);
-								if(path != null && path instanceof String) {
-									File dir = new File((String)path);
-									if(dir.exists() && dir.isDirectory()) {
-										File[] ff = dir.listFiles();
-										if(ff != null) {
-											for (File f : ff) {
-												f.delete();
-												if(x == 0) {
-													index++;
+							if(paths != null) {
+								for(int x = 0; x < paths.size(); x++) {
+									Object path = paths.get(x);
+									if(path != null && path instanceof String) {
+										File dir = new File((String)path);
+										if(dir.exists() && dir.isDirectory()) {
+											File[] ff = dir.listFiles();
+											if(ff != null) {
+												for (File f : ff) {
+													f.delete();
+													if(x == 0) {
+														index++;
+													}
 												}
 											}
+											dir.delete();
 										}
-										dir.delete();
 									}
 								}
 							}
