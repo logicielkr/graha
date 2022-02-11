@@ -23,6 +23,7 @@ package kr.graha.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -36,6 +37,7 @@ import kr.graha.lib.XMLGenerator;
 import kr.graha.helper.LOG;
 import kr.graha.lib.FileHelper;
 import org.w3c.dom.Element;
+
 
 /**
  * Graha(그라하) 파일 다운로드 처리기
@@ -76,10 +78,28 @@ public class DownloadAdapter {
 		) {
 			filePath = new String(filePath.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 		}
+		
 		Record result = FileHelper.getFilePath2(filePath.substring(0, filePath.indexOf("/")) + ".0", params, query);
-		if(result != null) {
-			if(logger.isLoggable(Level.FINE)) { logger.fine(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
-			File f = new File(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
+		if(result != null && !result.isEmpty()) {
+			String basePath = null;
+			if(result.isArray("_system.filepath")) {
+				List paths = result.getArray("_system.filepath");
+				if(paths != null) {
+					for(int x = 0; x < paths.size(); x++) {
+						Object path = paths.get(x);
+						if(path != null && path instanceof String) {
+							basePath = (String)path;
+							break;
+						}
+					}
+				}
+			} else {
+				basePath = result.getString("_system.filepath");
+			}
+//			if(logger.isLoggable(Level.FINE)) { logger.fine(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
+//			File f = new File(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
+			if(logger.isLoggable(Level.FINE)) { logger.fine(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
+			File f = new File(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
 			if(f.exists()) {
 				if(logger.isLoggable(Level.CONFIG)) { logger.config("File Path = " + f.getPath()); }
 				response.setContentLength((int)f.length());
