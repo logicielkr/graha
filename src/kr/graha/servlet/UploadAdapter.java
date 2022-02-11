@@ -79,8 +79,8 @@ public class UploadAdapter {
 			Files.copy(firstFile.toPath(), f.toPath());
 		} else {
 			fileItem.write(f);
+			params.put("uploaded.file.path." + idx, f.getPath());
 		}
-		params.put("uploaded.file.path." + idx, f.getPath());
 		return f;
 	}
 	protected void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
