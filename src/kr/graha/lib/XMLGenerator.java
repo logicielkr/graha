@@ -809,15 +809,23 @@ public class XMLGenerator {
 											if(ff != null) {
 												for (File f : ff) {
 													f.delete();
+													if(logger.isLoggable(Level.FINE)) { logger.fine("delete file (" + f.getPath() + ")"); }
 													if(x == 0) {
 														index++;
 													}
 												}
 											}
 											dir.delete();
+											if(logger.isLoggable(Level.FINE)) { logger.fine("delete directory (" + dir.getPath() + ")"); }
+										} else {
+											if(logger.isLoggable(Level.WARNING)) { logger.warning("file paths is not exists (path = " + path + "), (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 										}
+									} else {
+										if(logger.isLoggable(Level.WARNING)) { logger.warning("file paths is not string (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 									}
 								}
+							} else {
+								if(logger.isLoggable(Level.WARNING)) { logger.warning("file paths is null (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 							}
 						} else {
 							String filePath = result.getString("_system.filepath");
@@ -828,13 +836,21 @@ public class XMLGenerator {
 									if(ff != null) {
 										for (File f : ff) {
 											f.delete();
+											if(logger.isLoggable(Level.FINE)) { logger.fine("delete file (" + f.getPath() + ")"); }
 											index++;
 										}
 									}
 									dir.delete();
+									if(logger.isLoggable(Level.FINE)) { logger.fine("delete directory (" + dir.getPath() + ")"); }
+								} else {
+									if(logger.isLoggable(Level.WARNING)) { logger.warning("file path is not exists (path = " + filePath + "), (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 								}
+							} else {
+								if(logger.isLoggable(Level.WARNING)) { logger.warning("file path is null (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 							}
 						}
+					} else {
+						if(logger.isLoggable(Level.WARNING)) { logger.warning("fail file directory parsing (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 					}
 					sb.append(this._tag.tag("files", "rowcount", null, true) + index + this._tag.tag("files", "rowcount", null, false));
 					sb.append(this._tag.tag("files", null, false));
