@@ -153,7 +153,6 @@ public class XMLTag {
 		if(upperName != null && upperName.equals("row")) {
 			if(isRDF) {
 				if(isFull) {
-//					return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/uc:" + tagName;
 					if(name == null || name.equals("")) {
 						return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:default']/RDF:li/RDF:item/uc:" + tagName;
 					} else {

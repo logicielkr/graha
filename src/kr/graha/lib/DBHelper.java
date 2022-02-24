@@ -162,15 +162,6 @@ public final class DBHelper {
 		return con;
 	}
 	public static int getNextSequenceValue(PreparedStatement pstmt) throws SQLException {
-		/*
-		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-		if(trace != null) {
-			for(int i = 0; i < trace.length; i++) {
-				logger.info(trace[i].toString());
-				
-			}
-		}
-		*/
 		ResultSet rs = null;
 		int result = 0;
 		try {
@@ -202,7 +193,6 @@ public final class DBHelper {
 	}
 	protected static int getNextSequenceValue(Connection con, String value, Record info, DatabaseMetaData dmd) throws SQLException {
 		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
 		String name = null;
 		int result = 0;
 		if(value.startsWith("sequence.")) {
@@ -219,18 +209,6 @@ public final class DBHelper {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
-/*
-			if(rs != null) {
-				try {
-					rs.close();
-					rs = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) {
-						logger.severe(LOG.toString(e));
-					}
-				}
-			}
-*/
 			if(pstmt != null) {
 				try {
 					pstmt.close();
@@ -304,7 +282,6 @@ public final class DBHelper {
 		if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || dmd.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
 			return "select * from (select a$.*, rownum as rnum$ from (" + sql + ")  a$ where rownum <= ?) where rnum$ >= ?";
 		} else if(dmd.getDatabaseProductName().equalsIgnoreCase("Apache Derby")) {
-//			return "select * from (select a_.*, ROW_NUMBER() OVER() as rnum_ from (" + sql + ")  as a_) as a__ where rnum_ <= ? and rnum_ >= ?";
 			return (sql + " { limit ? offset ? }");
 			
 		} else {

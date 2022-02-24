@@ -93,7 +93,6 @@ public class ParameterAdapter {
 			
 			upload.setHeaderEncoding(request.getCharacterEncoding());
 			try {
-//				fields = upload.parseRequest(request);
 				fields = parseRequest(upload, src);
 			} catch (FileUploadException e1) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e1)); 	}

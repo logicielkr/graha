@@ -144,9 +144,6 @@ public class GeneratorServlet extends HttpServlet {
 		try {
 			ServletConfig c = this.getServletConfig();
 			if(c.getInitParameter("UserServletAdapter") != null) {
-				/*
-				ServletAdapter adapter = (ServletAdapter)Class.forName(c.getInitParameter("UserServletAdapter")).newInstance();
-				*/
 				ServletAdapter adapter = (ServletAdapter)Class.forName(c.getInitParameter("UserServletAdapter")).getConstructor().newInstance();
 				adapter.execute(request, params);
 			}

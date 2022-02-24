@@ -92,11 +92,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 				}
 			}
 			if(column != null && sb != null) {
-//				if(params.getString(value[0]) == null) {
-					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0] + "." + idx)) + "]]></" + tag.tag("row", column, null, false) + ">");
-//				} else {
-//					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0]) + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
-//				}
+				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0] + "." + idx)) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
 			return;
 		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {

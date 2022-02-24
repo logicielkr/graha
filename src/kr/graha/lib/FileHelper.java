@@ -61,18 +61,6 @@ public final class FileHelper {
 			return uri.toString().substring(uri.toString().lastIndexOf("/")+1);
 		}
 	}
-	/*
-	protected static String escapeFileName(String fileName) {
-		return decodeFileName(fileName).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
-	}
-	protected static String decodeFileName(String fileName) {
-		if(Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
-			return fileName;
-		} else {
-			return new String(fileName.getBytes(Charset.defaultCharset()), StandardCharsets.UTF_8);
-		}
-	}
-*/
 	public static Record getFileInfo(Element query) {
 		Record info = new Record();
 		try {
@@ -108,16 +96,6 @@ public final class FileHelper {
 				XPathExpression expr = xpath.compile("files/file[@name = '" + path + "']");
 				Element file = (Element)expr.evaluate(query, XPathConstants.NODE);
 				return getFilePath(p, file);
-				/*
-				if(file != null && file.hasAttribute("path")) {
-//					return FileHelper.getFilePath(file.getAttribute("path"), p);
-					if(file.hasAttribute("backup")) {
-						return parse(p, file.getAttribute("path"), file.getAttribute("backup"));
-					} else {
-						return parse(p, file.getAttribute("path"));
-					}
-				}
-				*/
 			} catch (XPathExpressionException e) {
 				e.printStackTrace();
 				return null;
@@ -135,7 +113,6 @@ public final class FileHelper {
 		}
 		return null;
 	}
-//	protected static Record getFilePath(Record p, String text) {
 	protected static Record getFilePath(Record p, String... strs) {
 		return parse(p, strs);
 	}
@@ -149,7 +126,6 @@ public final class FileHelper {
 	private static void parse(String text, Record p, Record result) {
 		String path = new String(text);
 		Buffer sb = new Buffer();
-//		Record result = new Record();
 		while(true) {
 			if(path.indexOf("${") >= 0) {
 				sb.append(path.substring(0, path.indexOf("${")));
@@ -163,7 +139,6 @@ public final class FileHelper {
 						sb.append(p.getString(val));
 						result.put(val, p.getString(val));
 					} else {
-//						return null;
 					}
 					path = path.substring(path.indexOf("}") + 1);
 				} else {
@@ -176,7 +151,6 @@ public final class FileHelper {
 			}
 		}
 		result.puts("_system.filepath", sb.toString());
-//		return result;
 	}
 	public static Record parse(String text, Record p) {
 		Record result = new Record();

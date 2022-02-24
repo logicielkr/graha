@@ -215,9 +215,6 @@ public class XMLGenerator {
 			}
 			
 			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
-				/*
-				Processor processor = (Processor) Class.forName(command.getAttribute("class")).newInstance();
-				*/
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).getConstructor().newInstance();
 				processor.execute(request, response, this._params, this._con);
 			} else if(command.hasAttribute("type") && command.getAttribute("type") != null && (command.getAttribute("type").equals("query") || command.getAttribute("type").equals("plsql"))) {
@@ -297,9 +294,6 @@ public class XMLGenerator {
 				}
 			}
 			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
-				/*
-				Processor processor = (Processor) Class.forName(command.getAttribute("class")).newInstance();
-				*/
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).getConstructor().newInstance();
 				processor.execute(request, response, this._params, this._con);
 			} else {
@@ -794,7 +788,6 @@ public class XMLGenerator {
 						sb.append(this._tag.tag("files", null, true));
 					}
 					int index = 0;
-//					Record result = FileHelper.getFilePath(this._params, file.getAttribute("path"));
 					Record result = FileHelper.getFilePath(this._params, file);
 					if(result != null && !result.isEmpty()) {
 						if(result.isArray("_system.filepath")) {
@@ -1481,10 +1474,6 @@ public class XMLGenerator {
 										}
 									}
 								} else {
-									/*
-									this._expr = this._xpath.compile("column");
-									coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-									*/
 									for(int x = 0; x < ddd.getLength(); x++) {
 										Element c = (Element)ddd.item(x);
 										if(c.hasAttribute("primary") && c.getAttribute("primary").equals("true")) {
@@ -2404,17 +2393,6 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					for(int i = 0; i < msgs.size(); i++) {
 						this._params.puts("error.error", msgs.get(i));
 					}
-					/*
-					sb.appendL(this._tag.tag("errors", null, true));
-					for(int i = 0; i < msgs.size(); i++) {
-						sb.append(this._tag.tag("error", null, true));
-						sb.append("<![CDATA[");
-						sb.append(msgs.get(i));
-						sb.append("]]>");
-						sb.appendL(this._tag.tag("error", null, false));
-					}
-					sb.appendL(this._tag.tag("errors", null, false));
-					*/
 					sb.append(after());
 					msgs.clear();
 					msgs = null;
@@ -2510,9 +2488,6 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		java.util.Map<String, Encryptor> encryptor = new java.util.Hashtable();
 		if(node.hasAttribute("encrypt") && node.getAttribute("encrypt") != null && !node.getAttribute("encrypt").equals("")) {
 			try {
-				/*
-				encryptor.put("true", (Encryptor) Class.forName(node.getAttribute("encrypt")).newInstance());
-				*/
 				encryptor.put("true", (Encryptor) Class.forName(node.getAttribute("encrypt")).getConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;
@@ -2524,9 +2499,6 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		for(int a = 0; a < encryptList.getLength(); a++) {
 			Element encrypt = (Element)encryptList.item(a);
 			try {
-				/*
-				encryptor.put(encrypt.getAttribute("key"), (Encryptor) Class.forName(encrypt.getAttribute("name")).newInstance());
-				*/
 				encryptor.put(encrypt.getAttribute("key"), (Encryptor) Class.forName(encrypt.getAttribute("name")).getConstructor().newInstance());
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				encryptor = null;

@@ -57,7 +57,6 @@ public class DownloadAdapter {
 		while (p.hasMoreElements()) {
 			String key = p.nextElement();
 			params.puts(key + ".0", params.getString("param." + key));
-//			params.puts(key + ".0", request.getParameter(key));
 		}
 
 		String filePath = null;
@@ -96,8 +95,6 @@ public class DownloadAdapter {
 			} else {
 				basePath = result.getString("_system.filepath");
 			}
-//			if(logger.isLoggable(Level.FINE)) { logger.fine(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
-//			File f = new File(result.getString("_system.filepath") + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
 			if(logger.isLoggable(Level.FINE)) { logger.fine(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
 			File f = new File(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
 			if(f.exists()) {

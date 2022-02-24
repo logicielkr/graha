@@ -411,7 +411,6 @@ public class XSLGenerator {
 						this.cond(sb, col, true);
 						sb.append(this.td(col, "td"));
 						sb.append(this.column(col, false, tab.getAttribute("name")));
-//						sb.append(this.code(col, false, tab.getAttribute("name")));
 						sb.appendL(this._html.tdE());
 						this.cond(sb, col, false);
 						
@@ -464,10 +463,8 @@ public class XSLGenerator {
 						}
 						sb.append(this.td(col, "td"));
 						if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
-//							sb.append(this.code(col, false, tab.getAttribute("name")));
 							sb.append(this.column(col, false, tab.getAttribute("name")));
 						} else {
-//							sb.append(this.code(col, true, tab.getAttribute("name")));
 							sb.append(this.column(col, true, tab.getAttribute("name")));
 						}
 						sb.appendL(this._html.tdE());
@@ -1400,15 +1397,6 @@ public class XSLGenerator {
 		Element redirect = null;
 		this._expr = this._xpath.compile("redirect");
 		NodeList list = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-		/*
-		for(int y = 0; y < list.getLength(); y++) {
-			Element n = (Element)list.item(y);
-			if(!n.hasAttribute("cond") || AuthParser.auth(n.getAttribute("cond"), this._params)) {
-				redirect = n;
-				break;
-			}
-		}
-		*/
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append(this._tag.path("stylesheet", null));
 		
@@ -1448,21 +1436,6 @@ public class XSLGenerator {
 		sb.appendL("</style>");
 		sb.appendL("</head>");
 		sb.appendL("<body>");
-		/*
-		sb.append("<form method=\"get\" action=\"" + this.getPath(redirect.getAttribute("path")) + "\" style=\"display:inline;\" id=\"_post\">");
-		this._expr = this._xpath.compile("param");
-		NodeList param = (NodeList)this._expr.evaluate(redirect, XPathConstants.NODESET);
-		for(int x = 0; x < param.getLength(); x++) {
-			Element p = (Element)param.item(x);
-			if(p.getAttribute("type").equals("param")) {
-				sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + this._tag.path("param", p.getAttribute("value"), null, true) + "}\" />");
-			} else if(p.getAttribute("type").equals("query")) {
-				sb.append("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + this._tag.path("row", p.getAttribute("value"), null, true) + "}\" />");
-			} else {
-				throw new ParsingException();
-			}
-		}
-		*/
 		sb.appendL("<xsl:choose>");
 		for(int y = 0; y < list.getLength(); y++) {
 			Element n = (Element)list.item(y);
@@ -1525,7 +1498,6 @@ public class XSLGenerator {
 			sb.appendL("<xsl:when test=\"" + test + "\">");
 			sb.appendL("<form>");
 			sb.appendL("<xsl:attribute name=\"method\">get</xsl:attribute>");
-//			sb.appendL("<xsl:attribute name=\"style\">display:inline;</xsl:attribute>");
 			sb.appendL("<xsl:attribute name=\"id\">_post</xsl:attribute>");
 			sb.appendL("<xsl:attribute name=\"action\">" + this.getPath(n.getAttribute("path")) + "</xsl:attribute>");
 			this._expr = this._xpath.compile("param");
@@ -1574,13 +1546,6 @@ public class XSLGenerator {
 			sb.appendL("<input type=\"submit\" value=\"확인\" />");
 			sb.appendL("</form>");
 			sb.appendL("</xsl:when>");
-/*
-			if(!n.hasAttribute("cond") || AuthParser.auth(n.getAttribute("cond"), this._params)) {
-				
-				redirect = n;
-				break;
-			}
-*/
 		}
 		sb.appendL("</xsl:choose>");
 		sb.appendL("<script>");
@@ -2026,6 +1991,22 @@ public class XSLGenerator {
 							sb.appendL("}");
 							sb.appendL("}");
 						}
+					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
+						Element e = (Element)n;
+						if(this._params.equals(e, "type", "native") && e.hasAttribute("func")) {
+							String key = (String)e.getAttribute("name");
+							sb.appendL("var _msg = " + e.getAttribute("func") + "(form, \"" + key + "\");");
+							sb.appendL("if(_msg != null) {");
+							sb.appendL("if(arguments.length > 1) {");
+							sb.appendL("	out.push({param:\"" + key + "\", msg:_msg, not_null:true});");
+							sb.appendL("	result = false;");
+							sb.appendL("} else {");
+							sb.appendL("	alert(_getMessage(_msg));");
+							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
+							sb.appendL("	return false;");
+							sb.appendL("}");
+							sb.appendL("}");
+						}
 					}
 				}
 				if(list.getLength() > 0) {
@@ -2067,7 +2048,6 @@ public class XSLGenerator {
 				nodes[2] = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
 			}
 			
-//			for(int x = 0; x < nodes.length; x++) {
 			for(int x = nodes.length - 1; x >= 0 ; x--) {
 				if(nodes[x] == null || nodes[x].getLength() == 0) {
 					continue;
@@ -2134,7 +2114,6 @@ public class XSLGenerator {
 			}
 			
 			for(int x = nodes.length - 1; x >= 0 ; x--) {
-//			for(int x = 0; x < nodes.length; x++) {
 				if(nodes[x] == null || nodes[x].getLength() == 0) {
 					continue;
 				}
