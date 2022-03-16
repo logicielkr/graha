@@ -57,8 +57,11 @@ public final class LOG {
 			sw = new StringWriter();
 			pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
-			pw.close();
-			pw = null;
+			if(sw != null) {
+				return sw.toString();
+			} else {
+				return null;
+			}
 		} catch(Exception e1) {
 			e1.printStackTrace();
 			return null;
@@ -73,11 +76,6 @@ public final class LOG {
 			if(pw != null) {
 				pw.close();
 			}
-		}
-		if(sw != null) {
-			return sw.toString();
-		} else {
-			return null;
 		}
 	}
 /**
