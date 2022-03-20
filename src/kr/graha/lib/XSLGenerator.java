@@ -317,11 +317,11 @@ public class XSLGenerator {
 				sb.appendL("<xsl:value-of select=\"format-number(" + this._tag.path(upperName, name, tableName, isFull) + ", '" + column.getAttribute("fmt") + "')\" />");
 				sb.appendL("</xsl:when>");
 				sb.appendL("<xsl:otherwise>");
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
+				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\"" + escape + " />");
 				sb.appendL("</xsl:otherwise>");
 				sb.appendL("</xsl:choose>");
 			} else {
-				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
+				sb.appendL("<xsl:value-of select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\"" + escape + " />");
 			}
 		}
 		return sb;
