@@ -748,8 +748,11 @@ public final class DB {
 /**
  * 데이타를 데이타베이스에 추가한다.
  * 지원하는 데이타 유형의 범위와 방식에 대해서는 getJavaDataType 메소드의 설명을 참조하라.
- * obj 객체로부터 바인딩할 파라미터를 조합하는데 bind 메소드를 참조한다.  null 은 허용되지 않는다.
- * obj 객체는 java.util.HashMap 이거나 generateClassSource 만들어진 것이 좋지만, 그렇지 않을 경우 Reference type 중 Class Type 으로만 구성되어야 하는데, Primitive type 은 null 값을 가질 수 없기 때문이다.
+ * obj 객체로부터 바인딩할 파라미터를 조합하는데, bind 메소드를 참조한다.
+ * HashMap 의 경우 내부의 null 값은 허용되지 않는다(Data Type 을 판정하기 어렵기 때문).
+ * obj 객체는 java.util.HashMap 이거나 generateClassSource 만들어진 것이 좋지만, 
+ * 그렇지 않을 경우 Reference type 중 Class Type 으로만 구성되어야 하는데, 
+ * Primitive type 은 null 값을 가질 수 없기 때문이다.
  * @param con 데이타베이스 연결(Connection) 객체
  * @param obj 바인딩할 파라미터. java.util.HashMap 나, generateClassSource 로 만들어진 Java 클레스로부터 생성된 객체.
  * @param table_name 테이블 이름.  ("_" 로 구분된) 형식으로 전달한다.  obj 파라미터가 java.util.HashMap 인 경우 반드시 입력해야 하고, 그렇지 않은 경우 class 이름을 사용한다. 
@@ -768,7 +771,7 @@ public final class DB {
 			while(it.hasNext()) {
 				String key = (String)it.next();
 				if(((HashMap)obj).get(key) == null) {
-					throw new SQLException("if obj parameter type java.util.HashMap then null not allowed");
+					throw new SQLException("if obj parameter type is java.util.HashMap then null is not allowed");
 				}
 				if(index > 0) {
 					sql += ", ";
@@ -841,8 +844,11 @@ public final class DB {
 /**
  * 데이타를 데이타베이스에 추가한다.
  * 지원하는 데이타 유형의 범위와 방식에 대해서는 getJavaDataType 메소드의 설명을 참조하라.
- * obj 객체로부터 바인딩할 파라미터를 조합하는데 bind 메소드를 참조한다.  null 은 허용되지 않는다.
- * obj 객체는 generateClassSource 만들어진 것이 좋지만, 그렇지 않을 경우 Reference type 중 Class Type 으로만 구성되어야 하는데, Primitive type 은 null 값을 가질 수 없기 때문이다.
+ * obj 객체로부터 바인딩할 파라미터를 조합하는데, bind 메소드를 참조한다.
+ * HashMap 의 경우 내부의 null 값은 허용되지 않는다(Data Type 을 판정하기 어렵기 때문).
+ * obj 객체는 java.util.HashMap 이거나 generateClassSource 만들어진 것이 좋지만, 
+ * 그렇지 않을 경우 Reference type 중 Class Type 으로만 구성되어야 하는데, 
+ * Primitive type 은 null 값을 가질 수 없기 때문이다.
  * @param con 데이타베이스 연결(Connection) 객체
  * @param obj 바인딩할 파라미터. generateClassSource 로 만들어진 Java 클레스로부터 생성된 객체.
  * @return 갱신된 카운트(PreparedStatement.getUpdateCount)를 반환한다.
