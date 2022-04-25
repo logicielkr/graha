@@ -676,26 +676,26 @@ public class Manager extends HttpServlet {
 			} else {
 				bw.write("					select count(*) from " + tableName + "\n");
 			}
-if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
-			bw.write("/*\n");
-			bw.write("					SELECT n_live_tup\n");
-			bw.write("					FROM pg_stat_all_tables\n");
-			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
-				bw.write("					WHERE relname = '" + tableName + "' and schemaname = '" + schemaName + "'\n");
-			} else {
-				bw.write("					WHERE relname = '" + tableName + "'\n");
+			if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
+				bw.write("/*\n");
+				bw.write("					SELECT n_live_tup\n");
+				bw.write("					FROM pg_stat_all_tables\n");
+				if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+					bw.write("					WHERE relname = '" + tableName + "' and schemaname = '" + schemaName + "'\n");
+				} else {
+					bw.write("					WHERE relname = '" + tableName + "'\n");
+				}
+				bw.write("*/\n");
+				bw.write("/*\n");
+				bw.write("					SELECT reltuples\n");
+				bw.write("					FROM pg_class\n");
+				if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
+					bw.write("					WHERE relname = '" + tableName + "' and relnamespace::regnamespace::text = '" + schemaName + "'\n");
+				} else {
+					bw.write("					WHERE relname = '" + tableName + "'\n");
+				}
+				bw.write("*/\n");
 			}
-			bw.write("*/\n");
-			bw.write("/*\n");
-			bw.write("					SELECT reltuples\n");
-			bw.write("					FROM pg_class\n");
-			if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
-				bw.write("					WHERE relname = '" + tableName + "' and relnamespace::regnamespace::text = '" + schemaName + "'\n");
-			} else {
-				bw.write("					WHERE relname = '" + tableName + "'\n");
-			}
-			bw.write("*/\n");
-}
 			bw.write("				</sql_cnt>\n");
 			bw.write("			</command>\n");
 			bw.write("		</commands>\n");
@@ -1480,10 +1480,10 @@ if(m.getDatabaseProductName().equalsIgnoreCase("PostgreSQL")) {
 			sb.append("</error></errors>");
 			sb.append("</document>");
 /*
-for(Throwable t: e){
-	System.out.println(t.getMessage());
-
-}
+			for(Throwable t: e){
+				System.out.println(t.getMessage());
+			
+			}
 */
 			
 			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
