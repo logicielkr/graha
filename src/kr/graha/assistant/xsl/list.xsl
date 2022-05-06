@@ -145,7 +145,7 @@ function gen() {
 			<th style="width:100px;padding:10px;">Table Name</th>
 			<th style="width:100px;padding:10px;">Type</th>
 			<th style="padding:8px;">Comments</th>
-			<th style="padding:8px;" />
+			<th style="padding:8px;" colspan="2" />
 		</tr>
 	</thead>
 	<tbody>
@@ -188,50 +188,16 @@ function gen() {
 				</input>
 			</td>
 			<td style="text-align:center;padding:10px;">
-				<form action="table" style="display:inline-block">
-					<input>
-						<xsl:attribute name="type">hidden</xsl:attribute>
-						<xsl:attribute name="name">table</xsl:attribute>
-						<xsl:choose>
-						<xsl:when test="table_schem">
-						<xsl:attribute name="value"><xsl:value-of select="table_schem" />.<xsl:value-of select="table_name" /></xsl:attribute>
-						</xsl:when>
-						<xsl:otherwise>
-						<xsl:attribute name="value"><xsl:value-of select="table_name" /></xsl:attribute>
-						</xsl:otherwise>
-						</xsl:choose>
-					</input>
-					<xsl:if test="/document/params/param/jndi">
-						<input>
-							<xsl:attribute name="name">jndi</xsl:attribute>
-							<xsl:attribute name="type">hidden</xsl:attribute>
-							<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
-						</input>
-					</xsl:if>
-					<input type="submit" value="Table Info" />
-				</form>
-				<form action="data" style="display:inline-block">
-					<input>
-						<xsl:attribute name="type">hidden</xsl:attribute>
-						<xsl:attribute name="name">table</xsl:attribute>
-						<xsl:choose>
-						<xsl:when test="table_schem">
-						<xsl:attribute name="value"><xsl:value-of select="table_schem" />.<xsl:value-of select="table_name" /></xsl:attribute>
-						</xsl:when>
-						<xsl:otherwise>
-						<xsl:attribute name="value"><xsl:value-of select="table_name" /></xsl:attribute>
-						</xsl:otherwise>
-						</xsl:choose>
-					</input>
-					<xsl:if test="/document/params/param/jndi">
-						<input>
-							<xsl:attribute name="name">jndi</xsl:attribute>
-							<xsl:attribute name="type">hidden</xsl:attribute>
-							<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
-						</input>
-					</xsl:if>
-					<input type="submit" value="View Data" />
-				</form>
+				<a>
+					<xsl:attribute name="href">table?table=<xsl:if test="table_schem"><xsl:value-of select="table_schem" />.</xsl:if><xsl:value-of select="table_name" /><xsl:if test="/document/params/param/jndi">&amp;jndi=<xsl:value-of select="/document/params/param/jndi" /></xsl:if></xsl:attribute>
+					Table Info
+				</a>
+			</td>
+			<td style="text-align:center;padding:10px;">
+				<a>
+					<xsl:attribute name="href">data?table=<xsl:if test="table_schem"><xsl:value-of select="table_schem" />.</xsl:if><xsl:value-of select="table_name" /><xsl:if test="/document/params/param/jndi">&amp;jndi=<xsl:value-of select="/document/params/param/jndi" /></xsl:if></xsl:attribute>
+					View Data
+				</a>
 			</td>
 		</tr>
 		</xsl:for-each>
@@ -246,8 +212,6 @@ function gen() {
 	<li>DriverName : <xsl:value-of select="/document/params/param/driver" /></li>
 	<li>DriverVersion : <xsl:value-of select="/document/params/param/driver_version" /></li>
 </ul>
-
-
 </body>
 </html>
 </xsl:template>
