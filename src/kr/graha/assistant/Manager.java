@@ -147,8 +147,17 @@ public class Manager extends HttpServlet {
 		response.setContentType("text/xml; charset=UTF-8");
 		java.io.InputStream in = null;
 		ServletOutputStream out = null;
+		
+		String xslPath = this.getServletConfig().getInitParameter("xsl_path");
 		try {
-			in = this.getClass().getResourceAsStream("/kr/graha/assistant/xsl/" + value(request.getParameter("xsl")) + ".xsl");
+			if(xslPath != null && !xslPath.equals("")) {
+				if(!xslPath.endsWith("/") && !xslPath.endsWith(java.io.File.separator)) {
+					xslPath = xslPath + java.io.File.separator;
+				}
+				in = new java.io.FileInputStream(xslPath + value(request.getParameter("xsl")) + ".xsl");
+			} else {
+				in = this.getClass().getResourceAsStream("/kr/graha/assistant/xsl/" + value(request.getParameter("xsl")) + ".xsl");
+			}
 			if(in == null) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found xsl file : " + value(request.getParameter("xsl"))); }
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -528,22 +537,102 @@ public class Manager extends HttpServlet {
 	private void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
-		java.util.Enumeration<String> e = request.getParameterNames();
 		StringBuffer sb = new StringBuffer();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=select\" ?>");
-		sb.append("<document><params>");
-		while (e.hasMoreElements()) {
-			String key = e.nextElement();
-			if(key != null && key.startsWith("check.") && value(request.getParameter(key)) != null && value(request.getParameter(key)).equals("on")) {
-				if(logger.isLoggable(Level.FINEST)) { logger.finest("" + key + " : " + value(request.getParameter(key))); logger.finest("" + key.substring(6) + " : " + value(request.getParameter(key))); }
-				sb.append("<table name=\"" + key.substring(6) + "\" />");
+		CManager cm = new CManager(this.getServletConfig(), request);
+		if(!cm.valid()) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		Connection con = null;
+		try {
+			con = cm.getConnection();
+			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
+			java.util.List<Column> cols = null;
+			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=select\" ?>");
+			sb.append("<document><params>");
+			java.util.Enumeration<String> e = request.getParameterNames();
+			java.util.List<Table> tables = new java.util.ArrayList<Table>();
+			while (e.hasMoreElements()) {
+				String key = value(e.nextElement());
+				if(key != null && key.startsWith("check.") && value(request.getParameter(key)) != null && value(request.getParameter(key)).equals("on")) {
+					if(logger.isLoggable(Level.FINEST)) { logger.finest("" + key + " : " + value(request.getParameter(key))); logger.finest("" + key.substring(6) + " : " + value(request.getParameter(key))); }
+					String tab = key.substring(6);
+					String schemaName = null;
+					String tableName = null;
+					if(tab.indexOf(".") > 0) {
+						schemaName = tab.substring(0, tab.indexOf("."));
+						tableName = tab.substring(tab.indexOf(".") + 1);
+					} else {
+						tableName = tab;
+					}
+					tables.add(new Table(schemaName, tableName));
+				}
+			}
+			tables = db.getTablesWithColumns(con, tables);
+			
+			for(Table table: tables) {
+				for(Table tab: tables) {
+					if(tab.compareWithSchemaAndName(table.schema, table.name)) {
+						continue;
+					}
+					int fkColumnCount = 0;
+					int pkColumnCount = 0;
+					for(Column col : table.cols) {
+						if(col.isPk()) {
+							continue;
+						}
+						pkColumnCount = 0;
+						for(Column c : tab.cols) {
+							if(c.isPk()) {
+								if(c.name.equals(col.name)) {
+									col.isFk = true;
+									fkColumnCount++;
+								}
+								pkColumnCount++;
+							}
+						}
+					}
+					if(pkColumnCount > 0 && pkColumnCount == fkColumnCount) {
+						table.isMaster = false;
+						table.masterTableSchema = tab.schema;
+						table.masterTableName = tab.name;
+					}
+				}
+			}
+			for(Table table: tables) {
+				sb.append("<table name=\"" + table.getNameWithSchema() + "\" master=\"" + table.isMaster + "\">");
+				for(Column col : table.cols) {
+					sb.append("<column name=\"" + col.getLowerName() + "\" graha_data_type=\"" + db.getGrahaDataType(col.dataType) + "\" data_type_name=\"" + col.typeName + "\" def=\"" + db.isDef(col.getLowerName()) + "\" pk=\"" + col.isPk() + "\" fk=\"" + col.isFk() + "\">");
+					if(col.remarks != null) {
+						sb.append("<![CDATA[" + col.remarks + "]]>");
+					}
+					sb.append("</column>");
+				}
+				sb.append("</table>");
+			}
+			
+			if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
+				sb.append("<param><jndi>" + request.getParameter("jndi") + "</jndi></param>");
+			}
+			String ownerColumnByDef = db.getOwnerColumnByDef();
+			if(ownerColumnByDef != null && !ownerColumnByDef.equals("")) {
+				sb.append("<prop><owner_column>" + ownerColumnByDef + "</owner_column></prop>");
+			}
+			sb.append("</params></document>");
+		} catch (SQLException | NamingException e) {
+			sb.setLength(0);
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		} finally {
+			try {
+				if(con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 		}
-		if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
-			sb.append("<param><jndi>" + request.getParameter("jndi") + "</jndi></param>");
-		}
-		sb.append("</params></document>");
 		if(sb.length() > 0) {
 			response.setContentType("text/xml; charset=UTF-8");
 			response.getWriter().append(sb);
@@ -615,7 +704,6 @@ public class Manager extends HttpServlet {
 		BufferedWriter bw = null;
 		Connection con = null;
 
-		String tableComments = null;
 		try {
 			con = cm.getConnection();
 			bw = new BufferedWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(f, true), java.nio.charset.StandardCharsets.UTF_8));
@@ -628,6 +716,7 @@ public class Manager extends HttpServlet {
 				tables,
 				messges,
 				con,
+				request,
 				getServletContext().getMajorVersion(),
 				getServletContext().getMinorVersion()
 			);

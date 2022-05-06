@@ -312,8 +312,33 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 	}
 	
 	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
-		List<Table> tabs = super.getTables(con, schemaName, tableName);
-		Hashtable<String, String> comment = getTableComments(con, schemaName, tableName);
+		return getTables(con, new Table(schemaName, tableName));
+	}
+	protected List<Table> getTables(Connection con, Table table) throws SQLException {
+		List<Table> tables = new ArrayList<Table>();
+		if(table != null && table.name != null) {
+			tables.add(table);
+		}
+		return getTables(con, tables);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, false);
+	}
+	protected List<Table> getTablesWithColumns(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, true);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables, boolean columns) throws SQLException {
+		List<Table> tabs = super.getTables(con, tables, columns);
+		Table table = null;
+		if(tables != null && tables.size() == 1) {
+			table = tables.get(0);
+		}
+		Hashtable<String, String> comment = null;
+		if(table == null) {
+			getTableComments(con, null, null);
+		} else {
+			getTableComments(con, table.schema, table.name);
+		}
 
 		for(Table tab : tabs){
 			if(comment != null || !comment.isEmpty()) {

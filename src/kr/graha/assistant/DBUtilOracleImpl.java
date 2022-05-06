@@ -143,6 +143,22 @@ public class DBUtilOracleImpl extends DBUtil {
 		return getTables(con, null, null);
 	}
 	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
+		return getTables(con, new Table(schemaName, tableName));
+	}
+	protected List<Table> getTables(Connection con, Table table) throws SQLException {
+		List<Table> tables = new ArrayList<Table>();
+		if(table != null && table.name != null) {
+			tables.add(table);
+		}
+		return getTables(con, tables);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, false);
+	}
+	protected List<Table> getTablesWithColumns(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, true);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables, boolean columns) throws SQLException {
 /*
 select * from user_tab_comments a  where exists (
 select * from user_tables b where a.table_name = b.table_name
@@ -150,28 +166,44 @@ select * from user_tables b where a.table_name = b.table_name
 select * from user_views c where a.table_name = c.view_name
 )
 */
+		Table table = null;
+		if(tables != null && tables.size() == 1) {
+			table = tables.get(0);
+		}
 		List<Table> l = new ArrayList<Table>();
 		DatabaseMetaData m = con.getMetaData();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = "";
-		if(tableName == null) {
+		if(table == null || table.name == null) {
 			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where exists (select * from user_tables b where a.table_name = b.table_name) or exists (select * from user_views c where a.table_name = c.view_name)";
 		} else {
 			sql = "select TABLE_NAME, TABLE_TYPE, comments as REMARKS from user_tab_comments a where a.table_name = ? and (exists (select * from user_tables b where a.table_name = b.table_name) or exists (select * from user_views c where a.table_name = c.view_name))";
 		}
 		try {
 			pstmt = con.prepareStatement(sql);
-			if(tableName != null) {
-				pstmt.setString(1, tableName.toUpperCase());
+			if(table == null || table.name == null) {
+				pstmt.setString(1, table.name.toUpperCase());
 			} 
 			rs = pstmt.executeQuery();
 			while(rs.next()) {
-				Table t = new Table();
-				t.schema = m.getUserName();
-				t.name = rs.getString(1);
+				if(tables != null && tables.size() > 1) {
+					boolean exists = false;
+					for(Table tab : tables) {
+						if(tab.compareWithSchemaAndName(m.getUserName(), rs.getString(1))) {
+							exists = true;
+						}
+					}
+					if(!exists) {
+						continue;
+					}
+				}
+				Table t = new Table(m.getUserName(), rs.getString(1));
 				t.type = rs.getString(2);
 				t.remarks = rs.getString(3);
+				if(columns) {
+					t.cols = this.getColumns(con, t.schema, t.name);
+				}
 				l.add(t);
 			}
 			rs.close();

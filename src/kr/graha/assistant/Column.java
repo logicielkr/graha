@@ -36,6 +36,7 @@ public class Column {
 	protected String isNullable;
 	protected String isAutoincrement;
 	protected String remarks;
+	protected boolean isFk = false;
 	protected String getLowerName() {
 		return name.toLowerCase();
 	}
@@ -55,5 +56,8 @@ public class Column {
 	}
 	protected boolean isPk() {
 		return Boolean.parseBoolean(this.isPk);
+	}
+	protected boolean isFk() {
+		return this.isFk;
 	}
 }

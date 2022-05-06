@@ -126,6 +126,23 @@ public class DBUtil {
 	private String getToday() {
 		return "now()";
 	}
+	protected String getOwnerColumnByDef() {
+		java.util.Enumeration e = this.def.propertyNames();
+		while(e.hasMoreElements()) {
+			String key = (String)e.nextElement();
+			String value = this.def.getProperty(key);
+			if(
+				key.endsWith(".value") &&
+				((value.equals("prop.logined_user") || value.equals("header.remote_user")))
+			) {
+				String only = this.def.getProperty(key.substring(0, key.length() - 6) + ".only");
+				if(only != null && only.equals("insert")) {
+					return key.substring(0, key.length() - 6);
+				}
+			}
+		}
+		return null;
+	}
 	protected String getDef(String columnName, String prefix) {
 		if(this.def.containsKey(columnName + ".value")) {
 			if(this.def.getProperty(columnName + ".value").equals("sql.today")) {
@@ -246,21 +263,53 @@ public class DBUtil {
 		return getTables(con, null, null);
 	}
 	protected List<Table> getTables(Connection con, String schemaName, String tableName) throws SQLException {
+		return getTables(con, new Table(schemaName, tableName));
+	}
+	protected List<Table> getTables(Connection con, Table table) throws SQLException {
+		List<Table> tables = new ArrayList<Table>();
+		if(table != null && table.name != null) {
+			tables.add(table);
+		}
+		return getTables(con, tables);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, false);
+	}
+	protected List<Table> getTablesWithColumns(Connection con, List<Table> tables) throws SQLException {
+		return getTables(con, tables, true);
+	}
+	protected List<Table> getTables(Connection con, List<Table> tables, boolean columns) throws SQLException {
+		Table table = null;
+		if(tables != null && tables.size() == 1) {
+			table = tables.get(0);
+		}
 		List<Table> l = new ArrayList<Table>();
 		DatabaseMetaData m = con.getMetaData();
 		ResultSet rs = null;
 		try {
-			if(tableName == null) {
+			if(table == null || table.name == null) {
 				rs = m.getTables(con.getCatalog(), null, "%", TYPES);
 			} else {
-				rs = m.getTables(con.getCatalog(), schemaName, tableName, TYPES);
+				rs = m.getTables(con.getCatalog(), table.schema, table.name, TYPES);
 			}
 			while(rs.next()) {
-				Table t = new Table();
-				t.schema = rs.getString("TABLE_SCHEM");
-				t.name = rs.getString("TABLE_NAME");
+				if(tables != null && tables.size() > 1) {
+					boolean exists = false;
+					for(Table tab : tables) {
+						if(tab.compareWithSchemaAndName(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"))) {
+							exists = true;
+						}
+					}
+					if(!exists) {
+						continue;
+					}
+				}
+				Table t = new Table(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
 				t.type = rs.getString("TABLE_TYPE");
 				t.remarks = rs.getString("REMARKS");
+				if(columns) {
+					t.cols = this.getColumns(con, t.schema, t.name);
+				}
 				l.add(t);
 			}
 			rs.close();
@@ -352,3 +401,4 @@ public class DBUtil {
 		return l;
 	}
 }
+

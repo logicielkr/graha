@@ -34,6 +34,43 @@ public class Table {
 	protected String remarks;
 	protected String type;
 	protected String schema;
+	protected java.util.List<Column> cols;
+	protected boolean isMaster = true;
+	protected String masterTableSchema;
+	protected String masterTableName;
+	
+	protected Table(String schema, String name) {
+		this.schema = schema;
+		this.name = name;
+	}
+	protected boolean compareWithSchemaAndName(String schema, String name) {
+		if(this.schema == null || schema == null || this.name == null || name == null) {
+			return false;
+		} else if(
+			(
+				(schema == null && this.schema == null) ||
+				schema.equals(this.schema)
+			) &&
+			name.equals(this.name)
+		) {
+			return true;
+		}
+		return false;
+	}
+	protected String getNameWithSchema() {
+		if(this.schema == null) {
+			return this.name;
+		} else {
+			return this.schema + "." + this.name;
+		}
+	}
+	protected String getMasterTableNameWithSchema() {
+		if(this.masterTableSchema == null) {
+			return this.masterTableName;
+		} else {
+			return this.masterTableSchema + "." + this.masterTableName;
+		}
+	}
 	protected String getLowerName() {
 		return name.toLowerCase();
 	}
