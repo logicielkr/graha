@@ -54,7 +54,7 @@
 		<jar destfile="${package.dir}/${app.name}.${app.version}.jar">
 			<fileset dir="${build.dir}" includes="kr/**/*.class"/>
 			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
-			<fileset dir="${src.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties"/>
+			<fileset dir="${src.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties, kr/**/*.js, kr/**/*.css, kr/**/file.lst"/>
 		</jar>
 	</target>
 	<target name="generate-tomcat10" depends="compile">
@@ -73,7 +73,7 @@
 		<jar destfile="${package.dir}/${app.name}.${app.version}-tomcat10.jar">
 			<fileset dir="${tomcat10.dir}" includes="kr/**/*.class"/>
 			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
-			<fileset dir="${tomcat10.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties"/>
+			<fileset dir="${tomcat10.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties, kr/**/*.js, kr/**/*.css, kr/**/file.lst"/>
 		</jar>
 	</target>
 	<target name="package-all" depends="package, package-tomcat10">
