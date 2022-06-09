@@ -184,8 +184,19 @@ table tbody td a {
 		</xsl:for-each>
 	</tbody>
 </table>
-<input type="hidden" name="table" value="{/document/params/param/table_schem}.{/document/params/param/table}" />
-<input type="submit" value="Save Comments"  style="display:inline-block;" />
+<input>
+	<xsl:attribute name="type">hidden</xsl:attribute>
+	<xsl:attribute name="name">table</xsl:attribute>
+	<xsl:choose>
+		<xsl:when test="/document/params/param/table_schem">
+			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/table_schem" />.<xsl:value-of select="/document/params/param/table" /></xsl:attribute>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/table" /></xsl:attribute>
+		</xsl:otherwise>
+	</xsl:choose>
+</input>
+<input type="submit" value="Save Comments" style="display:inline-block;" />
 </form>
 <ul>
 	<li>DatabaseProductName : <xsl:value-of select="/document/params/param/name" /></li>
