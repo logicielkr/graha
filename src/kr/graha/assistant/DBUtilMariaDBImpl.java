@@ -51,6 +51,18 @@ public class DBUtilMariaDBImpl extends DBUtil {
 	protected DBUtilMariaDBImpl() throws IOException {
 		LOG.setLogLevel(logger);
 	}
+	protected String dateFormat(String columnName, String format) {
+/*
+select DATE_FORMAT(now(), '%Y-%m-%d')
+*/
+		if(format.equals("date")) {
+			return "DATE_FORMAT(" + columnName + ", '%Y-%m-%d') as " + columnName;
+		} else if(format.equals("datetime")) {
+			return "DATE_FORMAT(" + columnName + ", '%Y-%m-%d %T') as " + columnName;
+		} else {
+			return columnName;
+		}
+	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
@@ -340,14 +352,14 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 		}
 		Hashtable<String, String> comment = null;
 		if(table == null) {
-			getTableComments(con, null, null);
+			comment = getTableComments(con, null, null);
 		} else {
-			getTableComments(con, table.schema, table.name);
+			comment = getTableComments(con, table.schema, table.name);
 		}
 		
 		for(Table tab : tabs){
 			tab.schema = con.getCatalog();
-			if(comment != null || !comment.isEmpty()) {
+			if(comment != null && !comment.isEmpty()) {
 				if(comment.containsKey(tab.schema + "." + tab.name)) {
 					tab.remarks = comment.get(tab.schema + "." + tab.name);
 				}

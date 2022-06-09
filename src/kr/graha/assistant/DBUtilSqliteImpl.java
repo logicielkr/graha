@@ -53,6 +53,22 @@ public class DBUtilSqliteImpl extends DBUtil {
 	protected String getToday() {
 		return "current_timestamp";
 	}
+/*
+	%Y-%m-%d %H:%M:%S
+	
+	
+	select datetime(current_timestamp, 'localtime') as now
+	select date(current_timestamp, 'localtime') as now
+*/
+	protected String dateFormat(String columnName, String format) {
+		if(format.equals("date")) {
+			return "date(" + columnName + ", 'localtime') as " + columnName;
+		} else if(format.equals("datetime")) {
+			return "datetime(" + columnName + ", 'localtime') as " + columnName;
+		} else {
+			return columnName;
+		}
+	}
 	protected String getNextval(String tableName, String columnName, String schemaName, String defaultSchema) {
 		return null;
 	}
@@ -280,12 +296,12 @@ public class DBUtilSqliteImpl extends DBUtil {
 		}
 		Hashtable<String, String> comment = null;
 		if(table == null) {
-			getTableComments(con, null, null);
+			comment = getTableComments(con, null, null);
 		} else {
-			getTableComments(con, table.schema, table.name);
+			comment = getTableComments(con, table.schema, table.name);
 		}
 		for(Table tab : tabs){
-			if(comment != null || !comment.isEmpty()) {
+			if(comment != null && !comment.isEmpty()) {
 				if(comment.containsKey(tab.name)) {
 					tab.remarks = comment.get(tab.name);
 				}

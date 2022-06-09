@@ -56,6 +56,15 @@ FROM INFORMATION_SCHEMA.SEQUENCES
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
 			prefix = schemaName + ".";
 		}
-		return "NEXT VALUE FOR " + prefix + tableName + "$" + columnName + "";
+		String sequence = getSequence(con, tableName + "$" + columnName);
+		if(sequence == null) {
+			return "NEXT VALUE FOR &quot;" + prefix + tableName + "$" + columnName + "&quot;";
+		} else {
+			return "NEXT VALUE FOR &quot;" + prefix + sequence + "&quot;";
+		}
+	}
+	protected String getSequence(Connection con, String sequenceName) {
+		String sql = "select SEQUENCE_NAME from INFORMATION_SCHEMA.SEQUENCES where lower(SEQUENCE_NAME) = lower(?)";
+		return super.getSequence(con, sql, sequenceName);
 	}
 }

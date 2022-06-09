@@ -51,7 +51,13 @@ public class DBUtilDerbyImpl extends DBUtil {
 		LOG.setLogLevel(logger);
 	}
 	protected String getToday() {
+/*
+		select current_timestamp from SYSIBM.SYSDUMMY1
+*/
 		return "current_timestamp";
+	}
+	protected boolean supportBultinDateFormatFunction() {
+		return false;
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
@@ -61,52 +67,16 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
 			prefix = schemaName + ".";
 		}
-		String sequence = getSequence(con, null, tableName + "$" + columnName);
+		String sequence = getSequence(con, tableName + "$" + columnName);
 		if(sequence == null) {
 			return "NEXT VALUE FOR &quot;" + prefix + tableName + "$" + columnName + "&quot;";
 		} else {
 			return "NEXT VALUE FOR &quot;" + prefix + sequence + "&quot;";
 		}
 	}
-	private String getSequence(Connection con, String schemaName, String sequenceName) {
-		String sequence = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+	protected String getSequence(Connection con, String sequenceName) {
 		String sql = "select SEQUENCENAME from sys.SYSSEQUENCES where lower(SEQUENCENAME) = lower(?)";
-
-		try {
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, sequenceName);
-
-			rs = pstmt.executeQuery();
-			if(rs.next()) {
-				sequence = rs.getString(1);
-			}
-			rs.close();
-			rs = null;
-			pstmt.close();
-			pstmt = null;
-		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
-		} finally {
-			if(rs != null) {
-				try {
-					rs.close();
-					rs = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-			if(pstmt != null) {
-				try {
-					pstmt.close();
-					pstmt = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-		}
-		return sequence;
+		return super.getSequence(con, sql, sequenceName);
 	}
 	private boolean existCommentTable(Connection con, boolean table) throws SQLException {
 		if(table && this.existsTableCommentTable) {
@@ -335,13 +305,13 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 		}
 		Hashtable<String, String> comment = null;
 		if(table == null) {
-			getTableComments(con, null, null);
+			comment = getTableComments(con, null, null);
 		} else {
-			getTableComments(con, table.schema, table.name);
+			comment = getTableComments(con, table.schema, table.name);
 		}
 
 		for(Table tab : tabs){
-			if(comment != null || !comment.isEmpty()) {
+			if(comment != null && !comment.isEmpty()) {
 				if(comment.containsKey(tab.schema + "." + tab.name)) {
 					tab.remarks = comment.get(tab.schema + "." + tab.name);
 

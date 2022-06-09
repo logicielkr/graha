@@ -32,6 +32,7 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Graha(그라하) Manager Connection Manager
@@ -51,18 +52,24 @@ public class CManager {
 	private String rjndi = null;
 	private String sjndi = null;
 	private String resource = null;
+	private String grahaCommonCodeTableName = null;
 	private List<String> jndis = null;
+	private int majorVersion;
+	private int minorVersion;
 	protected CManager(ServletConfig c, HttpServletRequest request) {
 		this.c = c;
 		this.request = request;
 		this.parse();
 	}
 	private void parse() {
+		this.majorVersion = this.c.getServletContext().getMajorVersion();
+		this.minorVersion = this.c.getServletContext().getMinorVersion();
 		this.def = this.c.getInitParameter("def");
 		this.mapping = this.c.getInitParameter("mapping");
 		this.jndi = this.c.getInitParameter("jndi");
 		this.resource = this.c.getInitParameter("resource");
 		this.rjndi = this.request.getParameter("jndi");
+		this.grahaCommonCodeTableName = this.c.getInitParameter("graha_common_code_table_name");
 		if(this.rjndi != null) {
 			this.rjndi = this.rjndi.trim();
 		}
@@ -111,6 +118,12 @@ public class CManager {
 	protected String getMapping() {
 		return this.mapping;
 	}
+	protected String getGrahaCommonCodeTableName() {
+		if(this.grahaCommonCodeTableName == null || this.grahaCommonCodeTableName.trim().equals("")) {
+			return null;
+		}
+		return this.grahaCommonCodeTableName;
+	}
 	protected boolean valid() {
 		if(this.jndi == null || this.jndis == null || this.jndis.size() == 0 || this.sjndi == null) {
 			return false;
@@ -135,5 +148,54 @@ public class CManager {
 			Connection con = ds.getConnection();
 			return con;
 		}
+	}
+	protected String value(String value) {
+		if(value == null) {
+			return "";
+		} else if(
+			this.majorVersion < 3
+			|| (
+				this.majorVersion == 3
+				&& this.minorVersion == 0
+			)
+		) {
+			return new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+		} else {
+			return value;
+		}
+	}
+	protected List getGrahaAppRootPath() {
+		List grahaAppRootPath = new ArrayList();
+		java.util.Map map = this.request.getServletContext().getServletRegistrations();
+		java.util.Iterator<String> keys = map.keySet().iterator();
+		while(keys.hasNext()) {
+			String key = (String)keys.next();
+			javax.servlet.ServletRegistration sr = (javax.servlet.ServletRegistration)map.get(key);
+			if(sr.getClassName().equals("kr.graha.servlet.GeneratorServlet")) {
+				java.util.Iterator it = sr.getMappings().iterator();
+				while(it.hasNext()) {
+					String path = (String)it.next();
+					if(path.endsWith("/*")) {
+						grahaAppRootPath.add(this.request.getContextPath() + path.substring(0, path.lastIndexOf("/*") + 1));
+					}
+				}
+			}
+		}
+		return grahaAppRootPath;
+	}
+	protected String param(String key) {
+		return this.value(this.request.getParameter(key));
+	}
+	protected java.util.Enumeration<java.lang.String> getParameterNames() {
+		return this.request.getParameterNames();
+	}
+	protected String[] getParameterValues(String key) {
+		return this.request.getParameterValues(key);
+	}
+	protected String getParameter(String key) {
+		return this.request.getParameter(key);
+	}
+	protected String getRealPath(String path) {
+		return this.c.getServletContext().getRealPath(path);
 	}
 }

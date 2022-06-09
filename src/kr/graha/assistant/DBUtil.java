@@ -85,6 +85,9 @@ public class DBUtil {
 		DatabaseMetaData m = con.getMetaData();
 		return "";
 	}
+	protected String getNextval(Connection con, Table table, String columnName, String defaultSchema) {
+		return getNextval(con, table.name, columnName, table.schema, defaultSchema);
+	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 /*
 		select sequencename from pg_sequences
@@ -94,6 +97,64 @@ public class DBUtil {
 			prefix = schemaName + ".";
 		}
 		return "nextval('" + prefix + tableName + "$" + columnName + "')";
+	}
+	protected String getSequence(Connection con, String sequenceName) {
+		String sql = "select SEQUENCE_NAME from INFORMATION_SCHEMA.SEQUENCES where lower(SEQUENCE_NAME) = lower(?)";
+		return getSequence(con, sql, sequenceName);
+	}
+	protected String getSequence(Connection con, String sql, String sequenceName) {
+		String sequence = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, sequenceName);
+
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				sequence = rs.getString(1);
+			}
+			rs.close();
+			rs = null;
+			pstmt.close();
+			pstmt = null;
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+					rs = null;
+				} catch (SQLException e) {
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+					pstmt = null;
+				} catch (SQLException e) {
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				}
+			}
+		}
+		return sequence;
+	}
+	protected boolean supportBultinDateFormatFunction() {
+		return true;
+	}
+	protected String dateFormat(String columnName, String format) {
+/*
+select to_char(now(), 'yyyy-mm-dd') as now
+*/
+		if(format.equals("date")) {
+			return "to_char(" + columnName + ", 'yyyy-mm-dd') as " + columnName;
+		} else if(format.equals("datetime")) {
+			return "to_char(" + columnName + ", 'YYYY-MM-DD HH24:MI:SS') as " + columnName;
+		} else {
+			return columnName;
+		}
 	}
 	protected void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
 		if(this.prop == null) {
@@ -123,7 +184,7 @@ public class DBUtil {
 			}
 		}
 	}
-	private String getToday() {
+	protected String getToday() {
 		return "now()";
 	}
 	protected String getOwnerColumnByDef() {
@@ -296,7 +357,7 @@ public class DBUtil {
 				if(tables != null && tables.size() > 1) {
 					boolean exists = false;
 					for(Table tab : tables) {
-						if(tab.compareWithSchemaAndName(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"))) {
+						if(tab.compareWithSchemaAndTableName(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"))) {
 							exists = true;
 						}
 					}
@@ -353,6 +414,9 @@ public class DBUtil {
 		}
 		return pk;
 	}
+	protected boolean containsKey(Connection con, Table table, String columnName) throws SQLException {
+		return containsKey(con, table.schema, table.name, columnName);
+	}
 	protected boolean containsKey(Connection con, String schemaName, String tableName, String columnName) throws SQLException {
 		if(this.pk == null) {
 			this.pk = new Hashtable<String, Hashtable>();
@@ -371,7 +435,23 @@ public class DBUtil {
 			while(rs.next()) {
 				Column c = new Column();
 				c.name = rs.getString("COLUMN_NAME");
+/*
+for postgresql
+*/
 				if(rs.getInt("DATA_TYPE") == java.sql.Types.BIT && rs.getString("TYPE_NAME").equals("bool")) {
+					c.dataType = java.sql.Types.BOOLEAN;
+/*
+for sqlite
+*/
+				} else if(rs.getInt("DATA_TYPE") == java.sql.Types.VARCHAR && rs.getString("TYPE_NAME").equals("DATETIME")) {
+					c.dataType = java.sql.Types.TIMESTAMP;
+				} else if(rs.getInt("DATA_TYPE") == java.sql.Types.VARCHAR && rs.getString("TYPE_NAME").equals("DATE")) {
+					c.dataType = java.sql.Types.DATE;
+				} else if(rs.getInt("DATA_TYPE") == java.sql.Types.INTEGER && rs.getString("TYPE_NAME").equals("BIGINT")) {
+					c.dataType = java.sql.Types.BIGINT;
+				} else if(rs.getInt("DATA_TYPE") == java.sql.Types.FLOAT && rs.getString("TYPE_NAME").equals("DOUBLE")) {
+					c.dataType = java.sql.Types.DOUBLE;
+				} else if(rs.getInt("DATA_TYPE") == java.sql.Types.INTEGER && rs.getString("TYPE_NAME").equals("BOOLEAN")) {
 					c.dataType = java.sql.Types.BOOLEAN;
 				} else {
 					c.dataType = rs.getInt("DATA_TYPE");

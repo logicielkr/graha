@@ -56,6 +56,18 @@ public class DBUtilOracleImpl extends DBUtil {
 	protected String getToday() {
 		return "sysdate";
 	}
+	/*
+	select to_char(sysdate, 'yyyy-mm-dd') as now from dual
+	
+	select to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') as now,
+sysdate,
+systimestamp,
+CURRENT_TIMESTAMP,
+CURRENT_DATE
+from dual
+
+select dbtimezone from dual
+	*/
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 		String prefix = "";
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
@@ -183,6 +195,7 @@ select * from user_views c where a.table_name = c.view_name
 		try {
 			pstmt = con.prepareStatement(sql);
 			if(table == null || table.name == null) {
+			} else {
 				pstmt.setString(1, table.name.toUpperCase());
 			} 
 			rs = pstmt.executeQuery();
@@ -190,7 +203,7 @@ select * from user_views c where a.table_name = c.view_name
 				if(tables != null && tables.size() > 1) {
 					boolean exists = false;
 					for(Table tab : tables) {
-						if(tab.compareWithSchemaAndName(m.getUserName(), rs.getString(1))) {
+						if(tab.compareWithSchemaAndTableName(m.getUserName(), rs.getString(1))) {
 							exists = true;
 						}
 					}

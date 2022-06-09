@@ -30,7 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Hashtable;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -545,6 +545,7 @@ public class Manager extends HttpServlet {
 			return;
 		}
 		Connection con = null;
+		java.util.List codes = null;
 		try {
 			con = cm.getConnection();
 			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
@@ -555,26 +556,18 @@ public class Manager extends HttpServlet {
 			java.util.Enumeration<String> e = request.getParameterNames();
 			java.util.List<Table> tables = new java.util.ArrayList<Table>();
 			while (e.hasMoreElements()) {
-				String key = value(e.nextElement());
-				if(key != null && key.startsWith("check.") && value(request.getParameter(key)) != null && value(request.getParameter(key)).equals("on")) {
-					if(logger.isLoggable(Level.FINEST)) { logger.finest("" + key + " : " + value(request.getParameter(key))); logger.finest("" + key.substring(6) + " : " + value(request.getParameter(key))); }
-					String tab = key.substring(6);
-					String schemaName = null;
-					String tableName = null;
-					if(tab.indexOf(".") > 0) {
-						schemaName = tab.substring(0, tab.indexOf("."));
-						tableName = tab.substring(tab.indexOf(".") + 1);
-					} else {
-						tableName = tab;
-					}
-					tables.add(new Table(schemaName, tableName));
+				String key = cm.value(e.nextElement());
+				if(key != null && key.startsWith("check.") && cm.value(request.getParameter(key)) != null && cm.value(request.getParameter(key)).equals("on")) {
+					if(logger.isLoggable(Level.FINEST)) { logger.finest("" + key + " : " + cm.value(request.getParameter(key))); logger.finest("" + key.substring(6) + " : " + cm.value(request.getParameter(key))); }
+					String schemaAndTableName = key.substring(6);
+					tables.add(new Table(schemaAndTableName));
 				}
 			}
 			tables = db.getTablesWithColumns(con, tables);
 			
 			for(Table table: tables) {
 				for(Table tab: tables) {
-					if(tab.compareWithSchemaAndName(table.schema, table.name)) {
+					if(tab.compareWithSchemaAndTableName(table)) {
 						continue;
 					}
 					int fkColumnCount = 0;
@@ -602,9 +595,9 @@ public class Manager extends HttpServlet {
 				}
 			}
 			for(Table table: tables) {
-				sb.append("<table name=\"" + table.getNameWithSchema() + "\" master=\"" + table.isMaster + "\">");
+				sb.append("<table name=\"" + table.getNameWithSchema() + "\" master=\"" + table.isMaster + "\" table_name=\"" + table.getLowerName() + "\" schema_name=\"" + table.getSchemaName() + "\" xml_file_name=\"" + XMLConfigGenerator.getXMLFileName(XMLConfigGenerator.getXMLFile(this.getServletContext().getRealPath("/WEB-INF/graha/"), table.name, false)) + "\">");
 				for(Column col : table.cols) {
-					sb.append("<column name=\"" + col.getLowerName() + "\" graha_data_type=\"" + db.getGrahaDataType(col.dataType) + "\" data_type_name=\"" + col.typeName + "\" def=\"" + db.isDef(col.getLowerName()) + "\" pk=\"" + col.isPk() + "\" fk=\"" + col.isFk() + "\">");
+					sb.append("<column lower_name=\"" + col.getLowerName() + "\" name=\"" + col.name + "\" graha_data_type=\"" + db.getGrahaDataType(col.dataType) + "\" data_type_name=\"" + col.typeName + "\" def=\"" + db.isDef(col.getLowerName()) + "\" pk=\"" + col.isPk() + "\" fk=\"" + col.isFk() + "\">");
 					if(col.remarks != null) {
 						sb.append("<![CDATA[" + col.remarks + "]]>");
 					}
@@ -612,7 +605,22 @@ public class Manager extends HttpServlet {
 				}
 				sb.append("</table>");
 			}
-			
+			if(cm.getGrahaCommonCodeTableName() != null) {
+				try {
+					codes = kr.graha.helper.DB.fetch(con, java.util.HashMap.class, "select value, label from common.graha_common_code where parent_id is null", null);
+				} catch (SQLException e1) {
+					codes = null;
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e1)); }
+				}
+			}
+			if(codes != null && codes.size() > 0) {
+				sb.append("<codes>");
+				for(int i = 0; i < codes.size(); i++) {
+					java.util.HashMap data = (java.util.HashMap)codes.get(i);
+					sb.append("<code value=\"" + data.get("value") + "\" label=\"" + data.get("label") + "\" />");
+				}
+				sb.append("</codes>");
+			}
 			if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
 				sb.append("<param><jndi>" + request.getParameter("jndi") + "</jndi></param>");
 			}
@@ -640,19 +648,14 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
+	
 	private void _gen(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String tab = value(request.getParameter("table"));
-		String schemaName = null;
-		String tableName = null;
-		if(tab.indexOf(".") > 0) {
-			schemaName = tab.substring(0, tab.indexOf("."));
-			tableName = tab.substring(tab.indexOf(".") + 1);
-		} else {
-			tableName = tab;
+		String schemaAndTableName = value(request.getParameter("table"));
+		Table masterTable = null;
+		if(schemaAndTableName != null) {
+			masterTable = new Table(schemaAndTableName);
 		}
-		
-		String[] tables = request.getParameterValues("tables");
-		if(tableName == null || tableName.trim().equals("")) {
+		if(masterTable == null) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe("table name is null or blank"); }
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
@@ -662,70 +665,39 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		Properties messges = new Properties();
-		if(cm.getResource() == null) {
-			messges.load(getClass().getResourceAsStream("resource/ko.properties"));
-		} else {
-			messges.load(getClass().getResourceAsStream(cm.getResource()));
-		}
-		StringBuffer sb = new StringBuffer();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=redirect\" ?>");
-		sb.append("<document>");
-		sb.append("<params><param type=\"s\"><path>list</path></param>");
-		if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
-			sb.append("<param type=\"r\"><jndi>" + request.getParameter("jndi") + "</jndi></param>");
-		}
-		sb.append("</params>");
-		sb.append("</document>");
-		
-		java.io.File f = null;
-		int index = 0;
-		String filePath = this.getServletContext().getRealPath("/WEB-INF/graha/");
-		f = new java.io.File(filePath);
-		if(!f.exists()) {
-			f.mkdir();
-		}
-		if(logger.isLoggable(Level.FINEST)) { logger.finest(filePath); }
-		String xmlName = null;
-		while(true) {
-			if(index == 0) {
-				f = new java.io.File(filePath + java.io.File.separator + tableName.toLowerCase() + ".xml");
-				xmlName = tableName.toLowerCase();
-			} else {
-				f = new java.io.File(filePath + java.io.File.separator + tableName.toLowerCase() + "-" + index + ".xml");
-				xmlName = tableName.toLowerCase() + "-" + index;
-			}
-			if(!f.exists()) {
-				break;
-			}
-			index++;
-		}
-		BufferedWriter bw = null;
 		Connection con = null;
-
+		StringBuffer sb = new StringBuffer();
 		try {
 			con = cm.getConnection();
-			bw = new BufferedWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(f, true), java.nio.charset.StandardCharsets.UTF_8));
 			XMLConfigGenerator gen = new XMLConfigGenerator(
-				bw,
+				masterTable,
 				cm,
-				schemaName,
-				tableName,
-				xmlName,
-				tables,
-				messges,
-				con,
-				request,
-				getServletContext().getMajorVersion(),
-				getServletContext().getMinorVersion()
+				con
 			);
-			gen.execute();
-			bw.flush();
-			bw.close();
-			bw = null;
+			String xmlName = gen.execute();
 			con.close();
 			con = null;
+			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=redirect\" ?>");
+			sb.append("<document>");
+			sb.append("<params><param type=\"s\"><path>list</path><auto_redirect>false</auto_redirect></param>");
+			java.util.List grahaAppRootPath = cm.getGrahaAppRootPath();
+			if(grahaAppRootPath != null && grahaAppRootPath.size() > 0) {
+				for(int i = 0; i < grahaAppRootPath.size(); i++) {
+					sb.append("<param type=\"a\"><path>" + grahaAppRootPath.get(i) + xmlName + "/list.xml" + "</path><auto_redirect>false</auto_redirect></param>");
+				}
+			}
+			java.util.List files = gen.getFiles();
+			if(files != null && files.size() > 0) {
+				for(int i = 0; i < files.size(); i++) {
+					sb.append("<param type=\"f\"><path>" + files.get(i) + "</path></param>");
+				}
+			}
+			if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
+				sb.append("<param type=\"r\"><jndi>" + request.getParameter("jndi") + "</jndi></param>");
+			}
+			sb.append("</params>");
+			sb.append("</document>");
 		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
@@ -735,13 +707,6 @@ public class Manager extends HttpServlet {
 					con.close();
 				}
 			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(bw != null) {
-					bw.close();
-				}
-			} catch (IOException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
 			
@@ -907,9 +872,9 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private StringBuffer getGrahaConfig(String sql, ResultSetMetaData rsmd, int fetchCount) throws SQLException {
+	private StringBuffer getGrahaConfig(String sql, java.util.List<String> columns, int fetchCount) throws SQLException {
 		StringBuffer bw = new StringBuffer();
-		if(rsmd != null) {
+		if(columns != null) {
 			if(fetchCount == 1) {
 				bw.append("	<query id=\"input query id!!!\" funcType=\"detail\" label=\"input label!!!\">\n");
 			} else {
@@ -931,7 +896,7 @@ public class Manager extends HttpServlet {
 		bw.append("				</params-->\n");
 		bw.append("			</command>\n");
 		bw.append("		</commands>\n");
-		if(rsmd != null) {
+		if(columns != null) {
 			bw.append("		<layout>\n");
 			bw.append("			<top>\n");
 			bw.append("				<left />\n");
@@ -940,13 +905,13 @@ public class Manager extends HttpServlet {
 			bw.append("			</top>\n");
 			bw.append("			<middle>\n");
 			bw.append("				<tab name=\"default\" label=\"input label!!!\">\n");
-			for(int x = 1; x <= rsmd.getColumnCount(); x++) {
+			for(int x = 0; x < columns.size(); x++) {
 				if(fetchCount == 1) {
 					bw.append("					<row>\n");
-					bw.append("						<column label=\"" + rsmd.getColumnName(x) + "\" name=\"" + rsmd.getColumnName(x) + "\" />\n");
+					bw.append("						<column label=\"" + columns.get(x) + "\" name=\"" + columns.get(x) + "\" />\n");
 					bw.append("					</row>\n");
 				} else {
-					bw.append("						<column label=\"" + rsmd.getColumnName(x) + "\" name=\"" + rsmd.getColumnName(x) + "\" />\n");
+					bw.append("						<column label=\"" + columns.get(x) + "\" name=\"" + columns.get(x) + "\" />\n");
 				}
 			}
 			bw.append("				</tab>\n");
@@ -1012,7 +977,6 @@ public class Manager extends HttpServlet {
 			}
 			sb.append("<jdbcmajorversion>" + m.getJDBCMajorVersion() + "</jdbcmajorversion>"); 
 			sb.append("<jdbcminorversion>" + m.getJDBCMinorVersion() + "</jdbcminorversion>"); 
-//			sb.append("<schema>" + con.getSchema() + "</schema>");
 			sb.append("<driver>" + m.getDriverName() + "</driver>");
 			sb.append("<driver_version>" + m.getDriverVersion() + "</driver_version>");
 			if(request.getParameter("jndi") != null && !request.getParameter("jndi").equals("")) {
@@ -1036,18 +1000,23 @@ public class Manager extends HttpServlet {
 					sb.append("<rows id=\"data\">");
 					isAppendRows = true;
 					int index = 0;
+					java.util.List<String> columns = new java.util.ArrayList<String>();
+					
 					while(rs.next()) {
 						sb.append("<row>");
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 							sb.append("<c" + x + "><![CDATA[");
 							sb.append(XML.fix(rs.getString(x)));
 							sb.append("]]></c" + x + ">\n");
+							if(index == 0) {
+									columns.add(rsmd.getColumnName(x));
+							}
 						}
 						sb.append("</row>");
 						index++;
 					}
 					sb.append("</rows>");
-					bw = getGrahaConfig(sql, rsmd, index);
+					bw = getGrahaConfig(sql, columns, index);
 					rs.close();
 					rs = null;
 				} else {

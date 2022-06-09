@@ -43,8 +43,20 @@ public class Table {
 		this.schema = schema;
 		this.name = name;
 	}
-	protected boolean compareWithSchemaAndName(String schema, String name) {
-		if(this.schema == null || schema == null || this.name == null || name == null) {
+	protected Table(String schemaAndTableName) {
+		if(schemaAndTableName.indexOf(".") > 0) {
+			this.schema = schemaAndTableName.substring(0, schemaAndTableName.indexOf("."));
+			this.name = schemaAndTableName.substring(schemaAndTableName.indexOf(".") + 1);
+		} else {
+			this.schema = null;
+			this.name = schemaAndTableName;
+		}
+	}
+	protected boolean compareWithSchemaAndTableName(Table other) {
+		return this.compareWithSchemaAndTableName(other.schema, other.name);
+	}
+	protected boolean compareWithSchemaAndTableName(String schema, String name) {
+		if(this.name == null || name == null) {
 			return false;
 		} else if(
 			(
@@ -57,11 +69,25 @@ public class Table {
 		}
 		return false;
 	}
-	protected String getNameWithSchema() {
+	protected String getSchemaName() {
 		if(this.schema == null) {
+			return "";
+		} else {
+			return this.schema;
+		}
+	}
+	protected String getNameWithSchema() {
+		if(this.schema == null || this.schema.equals("")) {
 			return this.name;
 		} else {
 			return this.schema + "." + this.name;
+		}
+	}
+	protected static String getNameWithSchema(String schema, String name) {
+		if(schema == null || schema.equals("")) {
+			return name;
+		} else {
+			return schema + "." + name;
 		}
 	}
 	protected String getMasterTableNameWithSchema() {
