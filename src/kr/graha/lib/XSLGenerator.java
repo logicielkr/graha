@@ -1627,7 +1627,7 @@ public class XSLGenerator {
 		sb.appendL("<li><xsl:value-of select=\".\" /></li>");
 		sb.appendL("</xsl:for-each>");
 		sb.appendL("<li>이 메시지를 보고 있다면, 이전 화면의 Javascript 실행 과정에서 에러가 발생했거나 웹브라우저에서 Javascript를 사용하지 않도록 설정한 것입니다.</li>");
-		sb.appendL("<li>만약 웹브라우저에서 Javascript를 사용하지 않도록 설정했다면, 웹브라우저의 뒤로가기 기능을 클릭하여 이전화면으로 돌아갑니다.</li>");
+		sb.appendL("<li>만약 웹브라우저에서 Javascript를 사용하지 않도록 설정했다면, 웹브라우저의 뒤로가기 기능을 이용하여 이전화면으로 돌아갑니다.</li>");
 		sb.appendL("</ul>");
 		sb.appendL("<input type=\"button\" value=\"돌아가기\" onclick=\"back()\" />");
 		sb.appendL("</div>");
@@ -1912,6 +1912,7 @@ public class XSLGenerator {
 					sb.appendL("<script>");
 					sb.appendL("function _check(form, out) {");
 					sb.appendL("var result = true;");
+					sb.appendL("var index;");
 				}
 				for(int x = 0; x < list.getLength(); x++) {
 					org.w3c.dom.Node n = (org.w3c.dom.Node)list.item(x);
@@ -1919,77 +1920,28 @@ public class XSLGenerator {
 						Element e = (Element)n;
 						String key = (String)e.getAttribute("name");
 						if(e.hasAttribute("not-null") && e.getAttribute("not-null") != null && (((String)e.getAttribute("not-null")).equalsIgnoreCase("true") || ((String)e.getAttribute("not-null")).equalsIgnoreCase("y"))) {
-							sb.appendL("if(!_notNull(form, \"" + key + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", not_null:true});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
+							this.validate(e, key, "not-null", sb);
 						}
 						if(e.hasAttribute("max-length") && e.getAttribute("max-length") != null) {
-							sb.appendL("if(!_maxLength(form, \"" + key + "\", \"" + (String)e.getAttribute("max-length") + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", max_length:" + (String)e.getAttribute("max-length") + "});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
+							this.validate(e, key, "max-length", sb);
 						}
 						if(e.hasAttribute("min-length") && e.getAttribute("min-length") != null) {
-							sb.appendL("if(!_minLength(form, \"" + key + "\", \"" + (String)e.getAttribute("min-length") + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", min_length:" + (String)e.getAttribute("min-length") + "});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
+							this.validate(e, key, "min-length", sb);
 						}
 						if(e.hasAttribute("number-format") && e.getAttribute("number-format") != null) {
-							sb.appendL("if(!_numberFormat(form, \"" + key + "\", \"" + (String)e.getAttribute("number-format") + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", number_format:\"" + (String)e.getAttribute("number-format") + "\"});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
-							
+							this.validate(e, key, "number-format", sb);
+						}
+						if(e.hasAttribute("min-value") && e.getAttribute("min-value") != null) {
+							this.validate(e, key, "min-value", sb);
+						}
+						if(e.hasAttribute("max-value") && e.getAttribute("max-value") != null) {
+							this.validate(e, key, "max-value", sb);
 						}
 						if(e.hasAttribute("date-format") && e.getAttribute("date-format") != null) {
-							sb.appendL("if(!_dateFormat(form, \"" + key + "\", \"" + (String)e.getAttribute("date-format") + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", date_format:\"" + (String)e.getAttribute("date-format") + "\"});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
+							this.validate(e, key, "date-format", sb);
 						}
 						if(e.hasAttribute("format") && e.getAttribute("format") != null) {
-							sb.appendL("if(!_format(form, \"" + key + "\", \"" + (String)e.getAttribute("format") + "\")) {");
-							sb.appendL("if(arguments.length > 1) {");
-							sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", format:\"" + (String)e.getAttribute("format") + "\"});");
-							sb.appendL("	result = false;");
-							sb.appendL("} else {");
-							sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
-							sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
-							sb.appendL("	return false;");
-							sb.appendL("}");
-							sb.appendL("}");
+							this.validate(e, key, "format", sb);
 						}
 					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
 						Element e = (Element)n;
@@ -2084,6 +2036,85 @@ public class XSLGenerator {
 			sb.append("</h2>");
 		}
 		return sb;
+	}
+	private void validate(Element e, String key, String type, Buffer sb) {
+		if(e.hasAttribute("multi") && this._params.equals(e, "multi", "true")) {
+			sb.appendL("index = 1;");
+			sb.appendL("while(true) {");
+			sb.appendL("	if(form[\"" + key + "\" + \".\" + index]) {");
+			if(type.equals("format")) {
+				sb.appendL("if(!_format(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("date-format")) {
+				sb.appendL("if(!_dateFormat(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("not-null")) {
+				sb.appendL("		if(!_notNull(form, \"" + key + "\" + \".\" + index)) {");
+			} else if(type.equals("max-length")) {
+				sb.appendL("if(!_maxLength(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("min-length")) {
+				sb.appendL("if(!_minLength(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+				
+			} else if(type.equals("max-value")) {
+				sb.appendL("if(!_maxValue(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("min-value")) {
+				sb.appendL("if(!_minValue(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+				
+			} else if(type.equals("number-format")) {
+				sb.appendL("if(!_numberFormat(form, \"" + key + "\" + \".\" + index, \"" + (String)e.getAttribute(type) + "\")) {");
+			}
+			sb.appendL("if(arguments.length > 1) {");
+			if(type.equals("not-null")) {
+				sb.appendL("				out.push({param:\"" + key + "\" + \".\" + index, msg:\"" + (String)e.getAttribute("msg") + "\", " + type.replace("-", "_") + ":true});");
+			} else {
+				sb.appendL("	out.push({param:\"" + key + "\" + \".\" + index, msg:\"" + (String)e.getAttribute("msg") + "\", " + type.replace("-", "_") + ":\"" + (String)e.getAttribute(type) + "\"});");
+			}
+			
+			
+			sb.appendL("	result = false;");
+			sb.appendL("} else {");
+			sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
+			sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\" + \".\" + index);}");
+			sb.appendL("	return false;");
+			sb.appendL("}");
+			sb.appendL("}");
+			sb.appendL("		index++;");
+			sb.appendL("	} else {");
+			sb.appendL("		break;");
+			sb.appendL("	}");
+			sb.appendL("}");
+		} else {
+			if(type.equals("format")) {
+				sb.appendL("if(!_format(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("date-format")) {
+				sb.appendL("if(!_dateFormat(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("not-null")) {
+				sb.appendL("if(!_notNull(form, \"" + key + "\")) {");
+			} else if(type.equals("max-length")) {
+				sb.appendL("if(!_maxLength(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("min-length")) {
+				sb.appendL("if(!_minLength(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+				
+			} else if(type.equals("max-value")) {
+				sb.appendL("if(!_maxValue(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+			} else if(type.equals("min-value")) {
+				sb.appendL("if(!_minValue(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+				
+			} else if(type.equals("number-format")) {
+				sb.appendL("if(!_numberFormat(form, \"" + key + "\", \"" + (String)e.getAttribute(type) + "\")) {");
+			}
+			sb.appendL("if(arguments.length > 1) {");
+			if(type.equals("not-null")) {
+				sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", " + type.replace("-", "_") + ":true});");
+			} else {
+				sb.appendL("	out.push({param:\"" + key + "\", msg:\"" + (String)e.getAttribute("msg") + "\", " + type.replace("-", "_") + ":\"" + (String)e.getAttribute(type) + "\"});");
+			}
+			sb.appendL("	result = false;");
+			sb.appendL("} else {");
+			sb.appendL("	alert(_getMessage(\"" + (String)e.getAttribute("msg") + "\"));");
+			sb.appendL("	if(typeof(_focus) == \"function\") {_focus(form, \"" + key + "\");}");
+			sb.appendL("	return false;");
+			sb.appendL("}");
+			sb.appendL("}");
+		}
 	}
 	private Buffer after() {
 		Buffer sb = new Buffer();
