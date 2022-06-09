@@ -693,6 +693,44 @@ public class Record extends HashMap {
 		}
 		return result;
 	}
+	public boolean maxValue(String key, String value) {
+		boolean result = false;
+		if(this.isempty(key)) {
+			result = true;
+		} else if(this.getString(key) == null) {
+			result = true;
+		} else {
+			if(this.getString(key).indexOf(".") >= 0 || value.indexOf(".") >= 0) {
+				if(this.getDouble(key) <= Double.valueOf(value)) {
+					result = true;
+				}
+			} else {
+				if(this.getLong(key) <= Long.valueOf(value)) {
+					result = true;
+				}
+			}
+		}
+		return result;
+	}
+	public boolean minValue(String key, String value) {
+		boolean result = false;
+		if(this.isempty(key)) {
+			result = false;
+		} else if(this.getString(key) == null) {
+			result = false;
+		} else {
+			if(this.getString(key).indexOf(".") >= 0 || value.indexOf(".") >= 0) {
+				if(this.getDouble(key) >= Double.valueOf(value)) {
+					result = true;
+				}
+			} else {
+				if(this.getLong(key) >= Long.valueOf(value)) {
+					result = true;
+				}
+			}
+		}
+		return result;
+	}
 	public boolean numberFormat(String key, String type) {
 		if(this.isempty(key)) {
 			return true;
@@ -701,6 +739,13 @@ public class Record extends HashMap {
 				return true;
 			}
 			String value = (String)super.get(key);
+			if(value == null || value.trim().equals("")) {
+				return true;
+			}
+			if(value != null) {
+				value = value.replace(" ", "");
+				value = value.replace(",", "");
+			}
 			
 			if(type != null && type.equals("int")) {
 				try {
