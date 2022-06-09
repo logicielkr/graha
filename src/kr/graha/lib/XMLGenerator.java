@@ -166,12 +166,22 @@ public class XMLGenerator {
 		) {
 			sb.append(this.insert());
 		} else if(
-			this._query.getAttribute("funcType").equals("query") 
+			(
+				this._query.getAttribute("funcType").equals("query") ||
+				this._query.getAttribute("funcType").equals("report")
+			)
 			&& this._params.hasKey("header.method") 
 			&& (this._params.getString("header.method")).equals("POST")
 		) {
 			Buffer sb_tmp = new Buffer();
-			sb_tmp.append(this.query());
+			if(this._query.getAttribute("funcType").equals("query")) {
+				sb_tmp.append(this.query());
+			} else if(this._query.getAttribute("funcType").equals("report")) {
+				sb_tmp.append(sb);
+				sb.append(this.list());
+				sb.append(this.after());
+				sb_tmp.append(this.report(sb));
+			}
 			if(this.isError()) {
 				sb.init();
 				sb.append(this.before());
@@ -277,6 +287,15 @@ public class XMLGenerator {
 				}
 			}
 		}
+	}
+	private Buffer report(Buffer xml) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		Buffer sb = new Buffer();
+		Reporter reporter = (Reporter) Class.forName(this._query.getAttribute("class")).getConstructor().newInstance();
+		reporter.execute(request, response, this._params, xml, this._con);
+		if(this._params.containsKey("error.error")) {
+			this.isError = true;
+		}
+		return sb;
 	}
 	private Buffer query() throws XPathExpressionException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, NoSuchProviderException, NoSuchMethodException, InvocationTargetException {
 		Buffer sb = new Buffer();
@@ -389,7 +408,12 @@ public class XMLGenerator {
 			}
 			
 			for(int y = 0; y < commands.getLength(); y++) {
-				if(y > 0 && !this._query.getAttribute("funcType").equals("detail") && !this._query.getAttribute("funcType").equals("user")) {
+				if(
+					y > 0 && 
+					!this._query.getAttribute("funcType").equals("detail") && 
+					!this._query.getAttribute("funcType").equals("report") &&
+					!this._query.getAttribute("funcType").equals("user")
+				) {
 					break;
 				}
 				Element command = (Element)commands.item(y);
@@ -434,8 +458,6 @@ public class XMLGenerator {
 				
 				if(this._query.getAttribute("funcType").equals("list")) {
 					stmt = this.prepareStatement(DBHelper.getListSql(s, this._info, this.dmd));
-				} else if((this._query.getAttribute("funcType").equals("detail")) && (!command.hasAttribute("multi") || !command.getAttribute("multi").equals("true"))) {
-					stmt = this.prepareStatement(s);
 				} else {
 					stmt = this.prepareStatement(s);
 				}
@@ -471,6 +493,16 @@ public class XMLGenerator {
 					}
 				}
 				
+				this._expr = this._xpath.compile("pattern/column");
+				NodeList patternColumn = (NodeList)this._expr.evaluate(command, XPathConstants.NODESET);
+				
+				java.util.Map<String, String> pattern = new java.util.Hashtable();
+				if(patternColumn != null && patternColumn.getLength() > 0) {
+					for(int i = 0; i < patternColumn.getLength(); i++) {
+						pattern.put(((Element)patternColumn.item(i)).getAttribute("name").toLowerCase(), ((Element)patternColumn.item(i)).getAttribute("pattern"));
+					}
+				}
+				
 				sb.appendL(this._tag.tag("rows", command.getAttribute("name"), true));
 				index = 0;
 				while(rs.next()) {
@@ -482,9 +514,29 @@ public class XMLGenerator {
 						) {
 							continue;
 						}
-						String value = rs.getString(x);
+						String value = null;
+						if(
+							rsmd.getColumnType(x) == java.sql.Types.DATE &&
+							rs.getDate(x) != null &&
+							pattern != null &&
+							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+						) {
+							value = this._params.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+						} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP &&
+							rs.getTimestamp(x) != null &&
+							pattern != null &&
+							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+						) {
+							value = this._params.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+						} else {
+							value = rs.getString(x);
+						}
 						if(value != null) {
-							if(this._query.getAttribute("funcType").equals("detail") || this._query.getAttribute("funcType").equals("user")) {
+							if(
+								this._query.getAttribute("funcType").equals("detail") ||
+								this._query.getAttribute("funcType").equals("report") ||
+								this._query.getAttribute("funcType").equals("user")
+							) {
 								if(command.hasAttribute("name") && !command.getAttribute("name").equals("")) {
 									if(command.hasAttribute("multi") && command.getAttribute("multi").equals("true")) {
 										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
@@ -1013,7 +1065,26 @@ public class XMLGenerator {
 						sb.appendL(this._tag.tag("row", p.getAttribute("name"), true));
 						
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
-							String value = rs.getString(x);
+							String value = null;
+							if(rsmd.getColumnType(x) == java.sql.Types.DATE && rs.getDate(x) != null) {
+								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
+								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
+								if(qqq != null && qqq.hasAttribute("pattern")) {
+									value = this._params.formatDate(rs.getDate(x), qqq.getAttribute("pattern"));
+								} else {
+									value = rs.getDate(x).toString();
+								}
+							} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP && rs.getTimestamp(x) != null) {
+								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
+								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
+								if(qqq != null && qqq.hasAttribute("pattern")) {
+									value = this._params.formatDate(rs.getTimestamp(x), qqq.getAttribute("pattern"));
+								} else {
+									value = rs.getTimestamp(x).toString();
+								}
+							} else {
+								value = rs.getString(x);
+							}
 							if(value != null) {
 								if(p.hasAttribute("name") && !p.getAttribute("name").equals("")) {
 									if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
@@ -1029,55 +1100,41 @@ public class XMLGenerator {
 								} else {
 									sb.append(">");
 								}
-								if(rsmd.getColumnType(x) == java.sql.Types.DATE) {
-									this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-									Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-									if(qqq != null && qqq.hasAttribute("pattern")) {
-										sb.append(this._params.formatDate(rs.getDate(x), qqq.getAttribute("pattern")));
-									} else {
-										sb.append(rs.getDate(x).toString());
-									}
-								} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP) {
-									this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-									Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-									if(qqq != null && qqq.hasAttribute("pattern")) {
-										sb.append(this._params.formatDate(rs.getTimestamp(x), qqq.getAttribute("pattern")));
-									} else {
-										sb.append(rs.getTimestamp(x).toString());
+								if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
+									try {
+										String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
+										if(tmp != null) {
+											sb.append(XML.fix(tmp));
+										}
+									} catch (NoSuchProviderException e) {
+										sb.append(XML.fix(value));
 									}
 								} else {
-									if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
-										try {
-											String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
-											if(tmp != null) {
-												sb.append(XML.fix(tmp));
-											}
-										} catch (NoSuchProviderException e) {
-											sb.append(XML.fix(value));
+									/*
+									this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
+									Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
+									if(qqq != null && qqq.hasAttribute("dfmt")) {
+										if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("int")) { 
+											sb.append(this._params.formatNumber(rs.getInt(x), qqq.getAttribute("dfmt")));
+										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("float")) { 
+											sb.append(this._params.formatNumber(rs.getFloat(x), qqq.getAttribute("dfmt")));
+										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("double")) { 
+											sb.append(this._params.formatNumber(rs.getDouble(x), qqq.getAttribute("dfmt")));
+										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("long")) { 
+											sb.append(this._params.formatNumber(rs.getLong(x), qqq.getAttribute("dfmt")));
+										} else {
+											sb.append(value);
 										}
 									} else {
-										this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-										Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-										if(qqq != null && qqq.hasAttribute("dfmt")) {
-											if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("int")) { 
-												sb.append(this._params.formatNumber(rs.getInt(x), qqq.getAttribute("dfmt")));
-											} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("float")) { 
-												sb.append(this._params.formatNumber(rs.getFloat(x), qqq.getAttribute("dfmt")));
-											} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("double")) { 
-												sb.append(this._params.formatNumber(rs.getDouble(x), qqq.getAttribute("dfmt")));
-											} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("long")) { 
-												sb.append(this._params.formatNumber(rs.getLong(x), qqq.getAttribute("dfmt")));
-											} else {
-												sb.append(value);
-											}
+									*/
+										if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+											sb.append(XML.fix(value));
 										} else {
-											if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-												sb.append(XML.fix(value));
-											} else {
-												sb.append(value);
-											}
+											sb.append(value);
 										}
+										/*
 									}
+									*/
 								}
 								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
 									sb.append("]]></");
@@ -2308,6 +2365,55 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		sb.append(this._tag.tag("document", null, false));
 		return sb;
 	}
+	private void validate(Element e, String key, java.util.ArrayList msgs) {
+		if(
+			e.hasAttribute("not-null") && 
+			e.getAttribute("not-null") != null && 
+			(
+				((String)e.getAttribute("not-null")).equalsIgnoreCase("true") || 
+				((String)e.getAttribute("not-null")).equalsIgnoreCase("y")
+			)
+		) {
+			if(!this._params.notNull("param." + key)) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("max-length") && e.getAttribute("max-length") != null) {
+			if(!this._params.maxLength("param." + key, (String)e.getAttribute("max-length"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("min-length") && e.getAttribute("min-length") != null) {
+			if(!this._params.minLength("param." + key, (String)e.getAttribute("min-length"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("number-format") && e.getAttribute("number-format") != null) {
+			if(!this._params.numberFormat("param." + key, (String)e.getAttribute("number-format"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("max-value") && e.getAttribute("max-value") != null) {
+			if(!this._params.maxValue("param." + key, (String)e.getAttribute("max-value"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("min-value") && e.getAttribute("min-value") != null) {
+			if(!this._params.minValue("param." + key, (String)e.getAttribute("min-value"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("date-format") && e.getAttribute("date-format") != null) {
+			if(!this._params.dateFormat("param." + key, (String)e.getAttribute("date-format"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+		if(e.hasAttribute("format") && e.getAttribute("format") != null) {
+			if(!this._params.format("param." + key, (String)e.getAttribute("format"))) {
+				msgs.add((String)e.getAttribute("msg"));
+			}
+		}
+	}
 	public Buffer validate() throws SQLException, NoSuchProviderException {
 		try {
 			this._expr = this._xpath.compile("validation");
@@ -2328,42 +2434,18 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("param")) {
 						Element e = (Element)n;
 						String key = (String)e.getAttribute("name");
-						if(
-							e.hasAttribute("not-null") && 
-							e.getAttribute("not-null") != null && 
-							(
-								((String)e.getAttribute("not-null")).equalsIgnoreCase("true") || 
-								((String)e.getAttribute("not-null")).equalsIgnoreCase("y")
-							)
-						) {
-							if(!this._params.notNull("param." + key)) {
-								msgs.add((String)e.getAttribute("msg"));
+						if(e.hasAttribute("multi") && this._params.equals(e, "multi", "true")) {
+							int index = 1;
+							while(true) {
+								if(this._params.containsKey("param." + key + "." + index)) {
+									this.validate(e, key + "." + index, msgs);
+									index++;
+								} else {
+									break;
+								}
 							}
-						}
-						if(e.hasAttribute("max-length") && e.getAttribute("max-length") != null) {
-							if(!this._params.maxLength("param." + key, (String)e.getAttribute("max-length"))) {
-								msgs.add((String)e.getAttribute("msg"));
-							}
-						}
-						if(e.hasAttribute("min-length") && e.getAttribute("min-length") != null) {
-							if(!this._params.minLength("param." + key, (String)e.getAttribute("min-length"))) {
-								msgs.add((String)e.getAttribute("msg"));
-							}
-						}
-						if(e.hasAttribute("number-format") && e.getAttribute("number-format") != null) {
-							if(!this._params.numberFormat("param." + key, (String)e.getAttribute("number-format"))) {
-								msgs.add((String)e.getAttribute("msg"));
-							}
-						}
-						if(e.hasAttribute("date-format") && e.getAttribute("date-format") != null) {
-							if(!this._params.dateFormat("param." + key, (String)e.getAttribute("date-format"))) {
-								msgs.add((String)e.getAttribute("msg"));
-							}
-						}
-						if(e.hasAttribute("format") && e.getAttribute("format") != null) {
-							if(!this._params.format("param." + key, (String)e.getAttribute("format"))) {
-								msgs.add((String)e.getAttribute("msg"));
-							}
+						} else {
+							this.validate(e, key, msgs);
 						}
 					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
 						Element e = (Element)n;
