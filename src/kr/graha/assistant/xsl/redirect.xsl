@@ -60,9 +60,6 @@ div.wrapper div.link form {
 		</form>
 		<xsl:for-each select="/document/params/param[@type='a']/path">
 			<form method="get" action="{.}">
-				<xsl:for-each select="/document/params/param[@type='r']/*">
-					<input type="hidden" name="{name()}" value="{.}" />
-				</xsl:for-each>
 				<input>
 					<xsl:attribute name="type">submit</xsl:attribute>
 					<xsl:attribute name="value">Go App</xsl:attribute>
