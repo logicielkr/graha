@@ -84,17 +84,21 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 			return "NEXT VALUE FOR " + prefix + sequence;
 		}
 	}
+	protected String getSequence(Connection con, String catalogName, String sequenceName) {
+		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE' and TABLE_SCHEMA = ? and lower(table_name) = lower(?)";
+		return super.getSequence(con, sql, catalogName, sequenceName);
+	}
+	/*
 	private String getSequence(Connection con, String catalogName, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE' and lower(table_name) = lower(?) and TABLE_SCHEMA = ?";
+		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE' and TABLE_SCHEMA = ? and lower(table_name) = lower(?)";
 
 		try {
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, sequenceName);
-			pstmt.setString(2, catalogName);
-			
+			pstmt.setString(1, catalogName);
+			pstmt.setString(2, sequenceName);
 
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
@@ -126,7 +130,7 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 		}
 		return sequence;
 	}
-
+	*/
 	private boolean existCommentTable(Connection con, boolean table) throws SQLException {
 		if(table && this.existsTableCommentTable) {
 			return true;

@@ -80,6 +80,11 @@ select dbtimezone from dual
 			return "&quot;" + prefix + sequence + "&quot;.nextval";
 		}
 	}
+	protected String getSequence(Connection con, String sequenceName) {
+		String sql = "SELECT SEQUENCE_NAME FROM user_sequences where lower(SEQUENCE_NAME) = lower(?)";
+		return super.getSequence(con, sql, sequenceName);
+	}
+	/*
 	private String getSequence(Connection con, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
@@ -120,6 +125,7 @@ select dbtimezone from dual
 		}
 		return sequence;
 	}
+	*/
 	protected void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = null;

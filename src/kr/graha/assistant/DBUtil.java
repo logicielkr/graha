@@ -103,13 +103,21 @@ public class DBUtil {
 		return getSequence(con, sql, sequenceName);
 	}
 	protected String getSequence(Connection con, String sql, String sequenceName) {
+		return getSequence(con, sql, null, sequenceName);
+	}
+	protected String getSequence(Connection con, String sql, String schemaName, String sequenceName) {
 		String sequence = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
 		try {
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, sequenceName);
+			if(schemaName == null) {
+				pstmt.setString(1, sequenceName);
+			} else {
+				pstmt.setString(1, schemaName);
+				pstmt.setString(2, sequenceName);
+			}
 
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
