@@ -127,7 +127,9 @@ public class GeneratorServlet extends HttpServlet {
 		params.put("system.prefix", request.getContextPath() + request.getServletPath());
 		params.put("system.config.file.name", File.separator + id.substring(0, id.indexOf("/")) + File.separator);
 		params.put("system.suffix", ".xml");
+		params.put("system.context.root.realpath", request.getServletContext().getRealPath("/"));
 		params.put("system.context.root.path", request.getServletContext().getRealPath("/"));
+		params.put("system.context.path", request.getContextPath());
 
 		if(request.getPathInfo().endsWith(".html")) {
 			params.put("system.suffix", ".html");
