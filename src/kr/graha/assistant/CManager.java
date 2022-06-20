@@ -23,6 +23,7 @@ package kr.graha.assistant;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRegistration;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -53,6 +54,7 @@ public class CManager {
 	private String sjndi = null;
 	private String resource = null;
 	private String grahaCommonCodeTableName = null;
+//	private String grahaMenuTableName = null;
 	private List<String> jndis = null;
 	private int majorVersion;
 	private int minorVersion;
@@ -70,6 +72,8 @@ public class CManager {
 		this.resource = this.c.getInitParameter("resource");
 		this.rjndi = this.request.getParameter("jndi");
 		this.grahaCommonCodeTableName = this.c.getInitParameter("graha_common_code_table_name");
+//		this.grahaMenuTableName = this.c.getInitParameter("graha_menu_table_name");
+//		
 		if(this.rjndi != null) {
 			this.rjndi = this.rjndi.trim();
 		}
@@ -124,6 +128,12 @@ public class CManager {
 		}
 		return this.grahaCommonCodeTableName;
 	}
+//	protected String getGrahaMenuTableName() {
+//		if(this.grahaMenuTableName == null || this.grahaMenuTableName.trim().equals("")) {
+//			return null;
+//		}
+//		return this.grahaMenuTableName;
+//	}
 	protected boolean valid() {
 		if(this.jndi == null || this.jndis == null || this.jndis.size() == 0 || this.sjndi == null) {
 			return false;
@@ -170,7 +180,7 @@ public class CManager {
 		java.util.Iterator<String> keys = map.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = (String)keys.next();
-			javax.servlet.ServletRegistration sr = (javax.servlet.ServletRegistration)map.get(key);
+			ServletRegistration sr = (ServletRegistration)map.get(key);
 			if(sr.getClassName().equals("kr.graha.servlet.GeneratorServlet")) {
 				java.util.Iterator it = sr.getMappings().iterator();
 				while(it.hasNext()) {
