@@ -457,6 +457,7 @@ function clickListView(obj) {
 		
 		if(relation != null &amp;&amp; !relation.disabled &amp;&amp; relation.value == "many") {
 			changeDisable(getList("input", "detail_width_column"), !obj.checked, {name:"detail_width_column_" + tableAndColumnName});
+			changeDisable(getList("input", "detail_hide_mobile_column"), !obj.checked, {name:"detail_hide_mobile_column_" + tableAndColumnName});
 			changeDisable(getList("select", "detail_align"), !obj.checked, {name:"detail_align_" + tableAndColumnName});
 		}
 	} else if(obj.className == "insert_view_column") {
