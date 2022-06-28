@@ -59,6 +59,17 @@ public class Record extends HashMap {
 		this.puts(key, (Object)value);
 	}
 	public void puts(String key, Object value) {
+		/*
+		if(key.startsWith("prop.")) {
+			logger.fine("" + key);
+			StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+			if(trace != null) {
+				for(int i = 0; i < trace.length; i++) {
+					logger.finest(trace[i].toString());
+				}
+			}
+		}
+		*/
 		if(super.containsKey(key)) {
 			if(logger.isLoggable(Level.FINE)) { logger.fine("key exists!!! : " + key); }
 			List l = null;
