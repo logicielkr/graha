@@ -966,7 +966,18 @@ public class XMLGenerator {
 					index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if(c.getAttribute("value").startsWith("param.")) {
+						if(
+							c.getAttribute("value").startsWith("param.") || 
+							(
+								c.hasAttribute("select") && 
+								(
+									c.getAttribute("select").equalsIgnoreCase("true") ||
+									c.getAttribute("select").equalsIgnoreCase("yes") ||
+									c.getAttribute("select").equalsIgnoreCase("t") ||
+									c.getAttribute("select").equalsIgnoreCase("y")
+								)
+							)
+						) {
 							if(index > 0) {
 								sql += ", ";
 							}
