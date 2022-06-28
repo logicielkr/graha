@@ -163,6 +163,9 @@ public class PropAdapter {
 						}
 						if(!node.hasAttribute("cond") || AuthParser.auth(node.getAttribute("cond"), params)) {
 							if(node.hasAttribute("value")) {
+								if(!node.hasAttribute("time") && mode >= PropAdapter.Before_Before_Processor) {
+									continue;
+								}
 								Record result = FileHelper.parse(node.getAttribute("value"), params);
 								if(result != null && result.get("_system.filepath") != null) {
 									params.puts("prop." + node.getAttribute("name"), result.get("_system.filepath"));
