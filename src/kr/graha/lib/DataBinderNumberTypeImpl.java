@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하) 데이타바인딩 숫자형(int, float, double, long) 구현 클레스
@@ -66,96 +67,96 @@ public class DataBinderNumberTypeImpl extends DataBinderImpl {
 		DatabaseMetaData dmd
 	) throws SQLException, java.security.NoSuchProviderException {
 		if(params.hasKey(value[0])) {
-			if(params.compare(datatype, "int")) {
+			if(STR.compare(datatype, "int")) {
 				setInt(stmt, index, params.getInt(value[0]));
-			} else if(params.compare(datatype, "float")) {
+			} else if(STR.compare(datatype, "float")) {
 				setFloat(stmt, index, params.getFloat(value[0]));
-			} else if(params.compare(datatype, "double")) {
+			} else if(STR.compare(datatype, "double")) {
 				setDouble(stmt, index, params.getDouble(value[0]));
-			} else if(params.compare(datatype, "long")) {
+			} else if(STR.compare(datatype, "long")) {
 				setLong(stmt, index, params.getLong(value[0]));
 			}
 			if(table != null && column != null) {
 				if(idx >= 0) {
-					if(params.compare(datatype, "int")) {
+					if(STR.compare(datatype, "int")) {
 						params.put("query." + table + "." + column + "." + idx, params.getInt(value[0]));
-					} else if(params.compare(datatype, "float")) {
+					} else if(STR.compare(datatype, "float")) {
 						params.put("query." + table + "." + column + "." + idx, params.getFloat(value[0]));
-					} else if(params.compare(datatype, "double")) {
+					} else if(STR.compare(datatype, "double")) {
 						params.put("query." + table + "." + column + "." + idx, params.getDouble(value[0]));
-					} else if(params.compare(datatype, "long")) {
+					} else if(STR.compare(datatype, "long")) {
 						params.put("query." + table + "." + column + "." + idx, params.getLong(value[0]));
 					}
 				} else {
-					if(params.compare(datatype, "int")) {
+					if(STR.compare(datatype, "int")) {
 						params.put("query." + table + "." + column, params.getInt(value[0]));
-					} else if(params.compare(datatype, "float")) {
+					} else if(STR.compare(datatype, "float")) {
 						params.put("query." + table + "." + column, params.getFloat(value[0]));
-					} else if(params.compare(datatype, "double")) {
+					} else if(STR.compare(datatype, "double")) {
 						params.put("query." + table + "." + column, params.getDouble(value[0]));
-					} else if(params.compare(datatype, "long")) {
+					} else if(STR.compare(datatype, "long")) {
 						params.put("query." + table + "." + column, params.getLong(value[0]));
 					}
 				}
 			}
 			if(column != null && sb != null) {
-				if(params.compare(datatype, "int")) {
+				if(STR.compare(datatype, "int")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getInt(value[0]) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "float")) {
+				} else if(STR.compare(datatype, "float")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getFloat(value[0]) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "double")) {
+				} else if(STR.compare(datatype, "double")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDouble(value[0]) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "long")) {
+				} else if(STR.compare(datatype, "long")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getLong(value[0]) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
 			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
-			if(params.compare(datatype, "int")) {
+			if(STR.compare(datatype, "int")) {
 				setInt(stmt, index, params.getInt(value[0] + "." + idx));
-			} else if(params.compare(datatype, "float")) {
+			} else if(STR.compare(datatype, "float")) {
 				setFloat(stmt, index, params.getFloat(value[0] + "." + idx));
-			} else if(params.compare(datatype, "double")) {
+			} else if(STR.compare(datatype, "double")) {
 				setDouble(stmt, index, params.getDouble(value[0] + "." + idx));
-			} else if(params.compare(datatype, "long")) {
+			} else if(STR.compare(datatype, "long")) {
 				setLong(stmt, index, params.getLong(value[0] + "." + idx));
 			}
 			if(table != null && column != null) {
 				if(idx >= 0) {
-					if(params.compare(datatype, "int")) {
+					if(STR.compare(datatype, "int")) {
 						params.put("query." + table + "." + column + "." + idx, params.getInt(value[0] + "." + idx));
-					} else if(params.compare(datatype, "float")) {
+					} else if(STR.compare(datatype, "float")) {
 						params.put("query." + table + "." + column + "." + idx, params.getFloat(value[0] + "." + idx));
-					} else if(params.compare(datatype, "double")) {
+					} else if(STR.compare(datatype, "double")) {
 						params.put("query." + table + "." + column + "." + idx, params.getDouble(value[0] + "." + idx));
-					} else if(params.compare(datatype, "long")) {
+					} else if(STR.compare(datatype, "long")) {
 						params.put("query." + table + "." + column + "." + idx, params.getLong(value[0] + "." + idx));
 					}
 				} else {
-					if(params.compare(datatype, "int")) {
+					if(STR.compare(datatype, "int")) {
 						params.put("query." + table + "." + column, params.getInt(value[0] + "." + idx));
-					} else if(params.compare(datatype, "float")) {
+					} else if(STR.compare(datatype, "float")) {
 						params.put("query." + table + "." + column, params.getFloat(value[0] + "." + idx));
-					} else if(params.compare(datatype, "double")) {
+					} else if(STR.compare(datatype, "double")) {
 						params.put("query." + table + "." + column, params.getDouble(value[0] + "." + idx));
-					} else if(params.compare(datatype, "long")) {
+					} else if(STR.compare(datatype, "long")) {
 						params.put("query." + table + "." + column, params.getLong(value[0] + "." + idx));
 					}
 				}
 			}
 			if(column != null && sb != null) {
-				if(params.compare(datatype, "int")) {
+				if(STR.compare(datatype, "int")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getInt(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "float")) {
+				} else if(STR.compare(datatype, "float")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getFloat(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "double")) {
+				} else if(STR.compare(datatype, "double")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDouble(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
-				} else if(params.compare(datatype, "long")) {
+				} else if(STR.compare(datatype, "long")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getLong(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
 			return;
-		} else if(params.compare(datatype, "int") && isSequenceValue(value)) {
+		} else if(STR.compare(datatype, "int") && isSequenceValue(value)) {
 			int sequence = DBHelper.getNextSequenceValue(stmt.getConnection(), value[0], info, dmd);
 			setInt(stmt, index, sequence);
 			if(table != null && column != null) {
@@ -169,67 +170,67 @@ public class DataBinderNumberTypeImpl extends DataBinderImpl {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + sequence + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
 			return;
-		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
+		} else if(defaultValue != null && !STR.compare(defaultValue, "") && !STR.compare(defaultValue, "null")) {
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) { 
+			if(dValue != null && !STR.compare(dValue, "") && !STR.compare(dValue, "null")) { 
 				params.put(value[0], dValue);
-				if(params.compare(datatype, "int")) {
+				if(STR.compare(datatype, "int")) {
 					setInt(stmt, index, Integer.parseInt(dValue));
-				} else if(params.compare(datatype, "float")) {
+				} else if(STR.compare(datatype, "float")) {
 					setFloat(stmt, index, Float.parseFloat(dValue));
-				} else if(params.compare(datatype, "double")) {
+				} else if(STR.compare(datatype, "double")) {
 					setDouble(stmt, index, Double.parseDouble(dValue));
-				} else if(params.compare(datatype, "long")) {
+				} else if(STR.compare(datatype, "long")) {
 					setLong(stmt, index, Long.parseLong(dValue));
 				}
 	
 				if(table != null && column != null) {
 					if(idx >= 0) {
-						if(params.compare(datatype, "int")) {
+						if(STR.compare(datatype, "int")) {
 							params.put("query." + table + "." + column + "." + idx, Integer.parseInt(dValue));
-						} else if(params.compare(datatype, "float")) {
+						} else if(STR.compare(datatype, "float")) {
 							params.put("query." + table + "." + column + "." + idx, Float.parseFloat(dValue));
-						} else if(params.compare(datatype, "double")) {
+						} else if(STR.compare(datatype, "double")) {
 							params.put("query." + table + "." + column + "." + idx, Double.parseDouble(dValue));
-						} else if(params.compare(datatype, "long")) {
+						} else if(STR.compare(datatype, "long")) {
 							params.put("query." + table + "." + column + "." + idx, Long.parseLong(dValue));
 						}
 					} else {
-						if(params.compare(datatype, "int")) {
+						if(STR.compare(datatype, "int")) {
 							params.put("query." + table + "." + column, Integer.parseInt(dValue));
-						} else if(params.compare(datatype, "float")) {
+						} else if(STR.compare(datatype, "float")) {
 							params.put("query." + table + "." + column, Float.parseFloat(dValue));
-						} else if(params.compare(datatype, "double")) {
+						} else if(STR.compare(datatype, "double")) {
 							params.put("query." + table + "." + column, Double.parseDouble(dValue));
-						} else if(params.compare(datatype, "long")) {
+						} else if(STR.compare(datatype, "long")) {
 							params.put("query." + table + "." + column, Long.parseLong(dValue));
 						}
 					}
 				}
 				if(column != null && sb != null) {
-					if(params.compare(datatype, "int")) {
+					if(STR.compare(datatype, "int")) {
 						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + Integer.parseInt(dValue) + "]]></" + tag.tag("row", column, null, false) + ">");
-					} else if(params.compare(datatype, "float")) {
+					} else if(STR.compare(datatype, "float")) {
 						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + Float.parseFloat(dValue) + "]]></" + tag.tag("row", column, null, false) + ">");
-					} else if(params.compare(datatype, "double")) {
+					} else if(STR.compare(datatype, "double")) {
 						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + Double.parseDouble(dValue) + "]]></" + tag.tag("row", column, null, false) + ">");
-					} else if(params.compare(datatype, "long")) {
+					} else if(STR.compare(datatype, "long")) {
 						sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + Long.parseLong(dValue) + "]]></" + tag.tag("row", column, null, false) + ">");
 					}
 				}
 				return;
 			}
 		}
-		if(params.compare(datatype, "int")) {
+		if(STR.compare(datatype, "int")) {
 			setNull(stmt, index, java.sql.Types.INTEGER);
-		} else if(params.compare(datatype, "float")) {
+		} else if(STR.compare(datatype, "float")) {
 			setNull(stmt, index, java.sql.Types.FLOAT);
-		} else if(params.compare(datatype, "double")) {
+		} else if(STR.compare(datatype, "double")) {
 			setNull(stmt, index, java.sql.Types.DOUBLE);
-		} else if(params.compare(datatype, "long")) {
+		} else if(STR.compare(datatype, "long")) {
 			setNull(stmt, index, java.sql.Types.BIGINT);
 		}
 		if(table != null && column != null) {
