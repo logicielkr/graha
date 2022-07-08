@@ -27,6 +27,7 @@ import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import kr.graha.helper.LOG;
 import kr.graha.helper.XML;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하) 데이타바인딩 문자열(char, varchar) 구현 클레스
@@ -95,12 +96,12 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + XML.fix(params.getString(value[0] + "." + idx)) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
 			return;
-		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
+		} else if(STR.valid(defaultValue) && !STR.compareIgnoreCase(defaultValue, "null")) {
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) {
+			if(STR.valid(dValue) && !STR.compareIgnoreCase(dValue, "null")) {
 				if(defaultValue != null && defaultValue.equals("system.today.yyyy")) {
 					if(!params.hasKey("system.today.yyyy")) {
 						int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
@@ -151,7 +152,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 				return;
 			}
 		}
-		if(params.compare(datatype, "char")) {
+		if(STR.compareIgnoreCase(datatype, "char")) {
 			setNull(stmt, index, java.sql.Types.CHAR);
 			if(table != null && column != null) {
 				if(idx >= 0) {
@@ -160,7 +161,7 @@ public class DataBinderStringTypeImpl extends DataBinderImpl {
 					params.put("query." + table + "." + column, null);
 				}
 			}
-		} else if(params.compare(datatype, "varchar")) {
+		} else if(STR.compareIgnoreCase(datatype, "varchar")) {
 			setNull(stmt, index, java.sql.Types.VARCHAR);
 			if(table != null && column != null) {
 				if(idx >= 0) {
