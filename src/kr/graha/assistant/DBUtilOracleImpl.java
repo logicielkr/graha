@@ -84,48 +84,6 @@ select dbtimezone from dual
 		String sql = "SELECT SEQUENCE_NAME FROM user_sequences where lower(SEQUENCE_NAME) = lower(?)";
 		return super.getSequence(con, sql, sequenceName);
 	}
-	/*
-	private String getSequence(Connection con, String sequenceName) {
-		String sequence = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = "SELECT SEQUENCE_NAME FROM user_sequences where lower(SEQUENCE_NAME) = lower(?)";
-
-		try {
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, sequenceName);
-
-			rs = pstmt.executeQuery();
-			if(rs.next()) {
-				sequence = rs.getString(1);
-			}
-			rs.close();
-			rs = null;
-			pstmt.close();
-			pstmt = null;
-		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
-		} finally {
-			if(rs != null) {
-				try {
-					rs.close();
-					rs = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-			if(pstmt != null) {
-				try {
-					pstmt.close();
-					pstmt = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-		}
-		return sequence;
-	}
-	*/
 	protected void updateTableRemarks(Connection con, String schemaName, String tableName, String remarks) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = null;
