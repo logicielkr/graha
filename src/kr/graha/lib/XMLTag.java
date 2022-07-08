@@ -192,6 +192,13 @@ public class XMLTag {
 			}
 		}
 		if(upperName != null && upperName.equals("query")) {
+			if(
+				(name == null || name.equals("")) &&
+				tagName.indexOf(".") > 0
+			) {
+				name = tagName.substring(0, tagName.indexOf("."));
+				tagName = tagName.substring(tagName.indexOf(".") + 1);
+			}
 			if(isRDF) {
 				if(name == null || name.equals("")) {
 					return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:default']/RDF:li/RDF:item/uc:" + tagName;
@@ -645,5 +652,76 @@ public class XMLTag {
 		} else {
 			return "<" + tagName + " value=\"" + value + "\" label=\"" + label + "\" />";
 		}
+	}
+	protected String testExpr(String cond, Record params) {
+		return testExpr(AuthParser.parse(cond), params);
+	}
+	protected boolean testInServer(AuthInfo info, Record params) {
+		if(info == null) {
+			return false;
+		} else if(info.left == null) {
+			return false;
+		} else {
+			if(params.hasKey(info.left)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	protected String testExpr(AuthInfo info, Record params) {
+		String test = null;
+		String left = null;
+		if(info == null) {
+			test = "1";
+		} else if(info.left == null) {
+			test = "1";
+		} else {
+			if(info.left.startsWith("param.")) {
+				left = this.path("param", info.left.substring(info.left.indexOf(".") + 1), null, true);
+			} else if(info.left.startsWith("result.")) {
+				left = this.path("result", info.left.substring(info.left.indexOf(".") + 1), null, true);
+			} else if(info.left.startsWith("prop.")) {
+				left = this.path("prop", info.left.substring(info.left.indexOf(".") + 1), null, true);
+			} else if(info.left.startsWith("error.")) {
+				left = this.path("error", info.left.substring(info.left.indexOf(".") + 1), null, true);
+			} else if(info.left.startsWith("query.")) {
+				left = this.path("row", info.left.substring(info.left.indexOf(".") + 1), null, true);
+			} else if(info.left.startsWith("code.")) {
+				throw new ParsingException();
+			} else {
+				if(AuthParser.auth(info, params)) {
+					test = "1";
+				} else {
+					test = "0";
+				}
+			}
+			if(test == null) {
+				if(info.op == AuthParser.IsEmpty) {
+					test = "not(" + left + ") or " + left + " = ''"; 
+				} else if(info.op == AuthParser.IsNotEmpty) {
+					test = "" + left + " and " + left + " != ''"; 
+				} else {
+					if(info.right == null) {
+						test = "0";
+					}
+				}
+				if(info.op == AuthParser.In || info.op == AuthParser.NotIn) {
+					throw new ParsingException();
+				} else if(info.op == AuthParser.Equals) {
+					test = "" + left + " = '" + info.right + "'";
+				} else if(info.op == AuthParser.NotEquals) {
+					test = "" + left + " != '" + info.right + "'";
+				} else if(info.op == AuthParser.GreaterThan) {
+					test = "" + left + " > " + info.right + "";
+				} else if(info.op == AuthParser.GreaterThanOrEqualTo) {
+					test = "" + left + " >= " + info.right + "";
+				} else if(info.op == AuthParser.LessThan) {
+					test = "" + left + " < " + info.right + "";
+				} else if(info.op == AuthParser.LessThanOrEqualTo) {
+					test = "" + left + " <= " + info.right + "";
+				}
+			}
+		}
+		return test;
 	}
 }
