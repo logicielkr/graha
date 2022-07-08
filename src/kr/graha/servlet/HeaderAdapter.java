@@ -44,12 +44,13 @@ public class HeaderAdapter {
 		while (e.hasMoreElements()) {
 			String key = e.nextElement();
 			if(key == null) {continue;}
-			if(key != null && (key.equals("method") || key.equals("remote_user") || key.equals("remote_addr") || key.equals("remote_host") || key.equals("remote_user_roles"))) {continue;}
+			if(key != null && (key.equals("method") || key.equals("remote_user") || key.equals("remote_addr") || key.equals("remote_host") || key.equals("remote_user_roles") || key.equals("scheme"))) {continue;}
 			params.puts("header." + key, request.getHeader(key));
 		}
 		params.put("header.method", request.getMethod());
 		params.put("header.remote_user", request.getRemoteUser());
 		params.put("header.remote_addr", request.getRemoteAddr());
 		params.put("header.remote_host", request.getRemoteHost());
+		params.put("header.scheme", request.getScheme());
 	}
 }
