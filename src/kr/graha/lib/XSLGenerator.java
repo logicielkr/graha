@@ -45,6 +45,7 @@ import org.xml.sax.SAXException;
 import javax.servlet.http.HttpServletRequest;
 
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 
 
 /**
@@ -95,9 +96,9 @@ public class XSLGenerator {
 	}
 	public Buffer execute() throws Exception {
 		Buffer sb = new Buffer();
-		if(this._params.hasKey("header.method") && (this._params.getString("header.method")).equals("ERROR")) {
+		if(this._params.equals("header.method", "ERROR")) {
 			sb.append(this.error());
-		} else if(this._query.getAttribute("funcType").equals("list") || this._query.getAttribute("funcType").equals("listAll")) {
+		} else if(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll"})) {
 			this._expr = this._xpath.compile("commands/command");
 			NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 			if(commands.getLength() > 0) { 
@@ -107,7 +108,7 @@ public class XSLGenerator {
 			sb.append(this.list());
 			sb.append(this.after());
 			
-		} else if(this._query.getAttribute("funcType").equals("detail")) {
+		} else if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "detail")) {
 			this._expr = this._xpath.compile("commands/command");
 			NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 			if(commands.getLength() > 0) { 
@@ -117,9 +118,8 @@ public class XSLGenerator {
 			sb.append(this.detail());
 			sb.append(this.after());
 		} else if(
-			this._query.getAttribute("funcType").equals("insert") 
-			&& this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("GET")
+			XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "insert")
+			&& this._params.equals("header.method", "GET")
 		) {
 			this._expr = this._xpath.compile("tables/table");
 			NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
@@ -130,8 +130,7 @@ public class XSLGenerator {
 			sb.append(this.insert());
 			sb.append(this.after());
 		} else if(
-			this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("POST")
+			this._params.equals("header.method", "POST")
 		) {
 			sb.append(this.post());
 		}
@@ -146,7 +145,7 @@ public class XSLGenerator {
 			this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/layout");
 			layout = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
 		}
-		if(layout.hasAttribute("template") && layout.getAttribute("template").equals("native")) {
+		if(XML.equalsIgnoreCaseAttrValue(layout, "template", "native")) {
 			sb.append(layout.getTextContent());
 			return sb;
 		}
@@ -284,10 +283,10 @@ public class XSLGenerator {
 		}
 		Buffer sb = new Buffer();
 		String escape = "";
-		if(this._params.equals(column, "escape", "false") || this._params.equals(column, "escape", "no")) {
+		if(XML.falseAttrValue(column, "escape")) {
 			escape = " disable-output-escaping=\"yes\"";
 		}
-		if(column.hasAttribute("code") && column.getAttribute("code").equals("true")) {
+		if(XML.trueAttrValue(column, "code")) {
 			if(column.hasAttribute("for") && column.getAttribute("for") != null && !column.getAttribute("for").equals("")) {
 				sb.appendL("<xsl:variable name=\"" + column.getAttribute("name") + "\" select=\"" + this._tag.path(upperName, name, tableName, isFull) + "\" />");
 				sb.appendL("<xsl:value-of select=\"" + this._tag.path("code", "option", column.getAttribute("for"), isFull) + "[@" + this._tag.path("code", "value", null, isFull) + " = $" + column.getAttribute("name") + "]/@" + this._tag.path("code", "label", null, isFull) + "\"" + escape + " />");
@@ -381,7 +380,10 @@ public class XSLGenerator {
 			}
 			this._expr = this._xpath.compile("row");
 			NodeList rows = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
-			if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() == 1) {
+			if(
+				XML.trueAttrValue(table, "multi") &&
+				rows.getLength() == 1
+			) {
 				sb.appendL(this._html.thead());
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
@@ -420,7 +422,7 @@ public class XSLGenerator {
 				sb.appendL("</xsl:for-each>");
 				sb.appendL(this._html.tbodyE());
 			} else {
-				if(tab.hasAttribute("single") && tab.getAttribute("single").equals("true")) {
+				if(XML.trueAttrValue(tab, "single")) {
 					sb.appendL(this._html.thead());
 					for(int i = 0; i < rows.getLength(); i++) {
 						Element row = (Element)rows.item(i);
@@ -439,7 +441,10 @@ public class XSLGenerator {
 					sb.appendL(this._html.theadE());
 				}
 				sb.appendL(this._html.tbody());
-				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+				if(
+					XML.trueAttrValue(table, "multi") &&
+					rows.getLength() > 1
+				) {
 					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				}
 				for(int i = 0; i < rows.getLength(); i++) {
@@ -452,8 +457,8 @@ public class XSLGenerator {
 						Element col = (Element)cols.item(x);
 						this.cond(sb, col, true);
 						sb.appendL(this._html.thG(col.getAttribute("name")));
-						if(!tab.hasAttribute("single") || !tab.getAttribute("single").equals("true")) {
-							if(!col.hasAttribute("islabel") || !col.getAttribute("islabel").equals("false")) {
+						if(!XML.trueAttrValue(tab, "single")) {
+							if(XML.emptyAttrValue(col, "islabel") || !XML.falseAttrValue(col, "islabel")) {
 								if(col.hasAttribute("labelWidth")) {
 									sb.appendL(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
 								} else {
@@ -462,7 +467,10 @@ public class XSLGenerator {
 							}
 						}
 						sb.append(this.td(col, "td"));
-						if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+						if(
+							XML.trueAttrValue(table, "multi") &&
+							rows.getLength() > 1
+						) {
 							sb.append(this.column(col, false, tab.getAttribute("name")));
 						} else {
 							sb.append(this.column(col, true, tab.getAttribute("name")));
@@ -474,7 +482,10 @@ public class XSLGenerator {
 					sb.appendL(this._html.trE());
 					this.cond(sb, row, false);
 				}
-				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+				if(
+					XML.trueAttrValue(table, "multi") &&
+					rows.getLength() > 1
+				) {
 					sb.appendL("</xsl:for-each>");
 				}
 				sb.appendL(this._html.tbodyE());
@@ -711,7 +722,10 @@ public class XSLGenerator {
 			Element table = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
 			this._expr = this._xpath.compile("row");
 			NodeList rows = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
-			if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() == 1) {
+			if(
+				XML.trueAttrValue(table, "multi") &&
+				rows.getLength() == 1
+			) {
 				Element row = (Element)rows.item(0);
 				this._expr = this._xpath.compile("column");
 				NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
@@ -755,7 +769,7 @@ public class XSLGenerator {
 				sb.appendL(this._html.trE());
 				sb.appendL("</xsl:for-each>");
 				sb.appendL(this._html.tbodyE());
-			} else if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && tab.hasAttribute("single") && tab.getAttribute("single").equals("true")) {
+			} else if(XML.trueAttrValue(table, "multi") && XML.trueAttrValue(tab, "single")) {
 				sb.appendL(this._html.thead());
 				for(int i = 0; i < rows.getLength(); i++) {
 					Element row = (Element)rows.item(i);
@@ -801,7 +815,10 @@ public class XSLGenerator {
 				sb.appendL(this._html.tbodyE());
 			} else {
 				sb.appendL(this._html.tbody());
-				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+				if(
+					XML.trueAttrValue(table, "multi") &&
+					rows.getLength() > 1
+				) {
 					sb.append("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				}
 				for(int i = 0; i < rows.getLength(); i++) {
@@ -827,7 +844,10 @@ public class XSLGenerator {
 						}
 						sb.append(this.td(col, "td"));
 						
-						if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+						if(
+							XML.trueAttrValue(table, "multi") &&
+							rows.getLength() > 1
+						) {
 							if(i == 0 && x == 0) {
 								this._expr = this._xpath.compile("column[@type = 'hidden']");
 								NodeList hidden = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
@@ -859,7 +879,10 @@ public class XSLGenerator {
 					sb.append(this._html.trE());
 					this.cond(sb, row, false);
 				}
-				if(table != null && table.hasAttribute("multi") && table.getAttribute("multi").equals("true") && rows.getLength() > 1) {
+				if(
+					XML.trueAttrValue(table, "multi") &&
+					rows.getLength() > 1
+				) {
 					sb.append("</xsl:for-each>");
 				}
 				sb.append(this._html.tbodyE());
@@ -927,18 +950,8 @@ public class XSLGenerator {
 		} else if(value.startsWith("query.")) {
 			value = value.substring(6);
 		}
-		String readonly = "";
-		String readonlyClass = "";
-		if(this._params.in(col, "readonly", new String[]{"readonly", "true"})) {
-			readonly = " readonly=\"readonly\"";
-			readonlyClass = " readonly";
-		}
-		String expr = "";
-		String follow = "";
-		String datatype = "";
-		String constraint = "";
-		String autocomplete = "";
-		String disabled = "";
+		boolean isReadonly = false;
+		boolean isDisabled = false;
 		String valueExpr = null;
 		String valueExpr2 = null;
 		if(value == null || value.trim().equals("")) {
@@ -950,196 +963,216 @@ public class XSLGenerator {
 		}
 		this._expr = this._xpath.compile("tables/table[@name = '" + tableName + "']/column[@name = '" + value + "']");
 		Element e = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
-		if(e != null) {
-			datatype = " datatype = \"" + e.getAttribute("datatype") + "\"";
-			if(e.hasAttribute("expr")) {
-				expr = " expr = \"" + e.getAttribute("expr") + "\"";
-			}
-			if(e.hasAttribute("follow")) {
-				follow = " follow = \"" + e.getAttribute("follow") + "\"";
-			}
-			if(e.hasAttribute("constraint")) {
-				constraint = " constraint = \"" + e.getAttribute("constraint") + "\"";
-			}
-		}
-		if(col.hasAttribute("autocomplete")) {
-			autocomplete = " autocomplete = \"" + col.getAttribute("autocomplete") + "\"";
-		}
-		if(col.hasAttribute("disabled")) {
-			disabled = " disabled = \"" + col.getAttribute("disabled") + "\"";
-		}
-		if(!col.hasAttribute("type") || this._params.in(col, "type", new String[]{"text", "password", "checkbox", "button"})) {
-			if(this._params.equals(col, "type", "button") && this._params.isNotEmpty(col, "icon")) {
-				sb.append("<button>");
+		if(col.getAttribute("type").equals("radio")) {
+			if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
+				sb.appendL("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
+				sb.appendL("	<input>");
+				sb.appendL("		<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
+				sb.appendL("		<xsl:attribute name=\"type\">radio</xsl:attribute>");
+				sb.append("		<xsl:attribute name=\"value\">");
+				sb.append("<xsl:value-of select=\"@" + this._tag.path("code", "value", null, isFull) + "\" />");
+				sb.appendL("</xsl:attribute>");
+				sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
+				sb.appendL("			<xsl:attribute name=\"checked\">true</xsl:attribute>");
+				sb.appendL("		</xsl:if>");
+				sb.appendL("	</input>");
+				sb.appendL("	<label><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></label>");
+				sb.appendL("</xsl:for-each>");
 			} else {
-				sb.append("<input>");
+				this._expr = this._xpath.compile("option");
+				NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
+				for(int q = 0; q < options.getLength(); q++) {
+					Element option = (Element)options.item(q);
+					sb.appendL("<input>");
+					sb.appendL("	<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
+					sb.appendL("	<xsl:attribute name=\"type\">radio</xsl:attribute>");
+					sb.appendL("	<xsl:attribute name=\"value\">" + option.getAttribute("value") + "</xsl:attribute>");
+					sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+					sb.appendL("		<xsl:attribute name=\"checked\">true</xsl:attribute>");
+					sb.appendL("	</xsl:if>");
+					sb.appendL("</input>");
+					sb.appendL("<label>" + option.getAttribute("label") + "</label>");
+				}
 			}
-			sb.append("	<xsl:attribute name=\"class\">" + name + readonlyClass + "</xsl:attribute>");
-			if(!col.hasAttribute("type")) {
-				sb.append("	<xsl:attribute name=\"type\">text</xsl:attribute>");
+		} else {
+			if(col.getAttribute("type").equals("textarea")) {
+				sb.appendL("<textarea>");
+			} else if(col.getAttribute("type").equals("select")) {
+				sb.appendL("<select>");
+			} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && XML.validAttrValue(col, "icon")) {
+				sb.appendL("<button>");
 			} else {
-				sb.append("	<xsl:attribute name=\"type\">" + col.getAttribute("type") + "</xsl:attribute>");
+				sb.appendL("<input>");
+			}
+			sb.append("	<xsl:attribute name=\"class\">");
+			sb.append(name);
+			if(XML.trueAttrValue(col, "readonly") || XML.equalsIgnoreCaseAttrValue(col, "readonly", "readonly")) {
+				sb.append(" readonly");
+			}
+			sb.appendL("</xsl:attribute>");
+			if(col.getAttribute("type").equals("textarea") || col.getAttribute("type").equals("select")) {
+			} else {
+				if(!col.hasAttribute("type") || col.getAttribute("type").equals("datalist")) {
+					sb.appendL("	<xsl:attribute name=\"type\">text</xsl:attribute>");
+				} else {
+					sb.appendL("	<xsl:attribute name=\"type\">" + col.getAttribute("type") + "</xsl:attribute>");
+				}
 			}
 			if(!isFull) {
-				sb.append("<xsl:attribute name=\"name\">" + name + ".<xsl:value-of select=\"position()\"/></xsl:attribute>");
+				sb.appendL("<xsl:attribute name=\"name\">" + name + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
 			} else {
-				sb.append("<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
+				sb.appendL("<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
 			}
-			if(valueExpr != null && !valueExpr.equals("")) {
-				if(this._params.equals(col, "type", "checkbox")) {
-					if(col.getAttribute("val") != null && !col.getAttribute("val").equals("")) {
-						sb.append("<xsl:if test=\"" + valueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:if>");
-					}
-					sb.append("	<xsl:attribute name=\"value\">" + col.getAttribute("val") + "</xsl:attribute>");
-				} else if(this._params.equals(col, "type", "button") && !this._params.isNotEmpty(col, "icon")) {
-					sb.append("	<xsl:attribute name=\"value\">" + value + "</xsl:attribute>");
-				} else if(col.hasAttribute("fmt")) {
-					sb.append("<xsl:choose>");
-					sb.append("<xsl:when test=\"" + valueExpr + " != ''\">");
-					sb.append("	<xsl:attribute name=\"value\"><xsl:value-of select=\"format-number(" + valueExpr + ", '" + col.getAttribute("fmt") + "')\"/></xsl:attribute>");
-					sb.append("</xsl:when>");
-					sb.append("<xsl:otherwise>");
-					sb.append("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
-					sb.append("</xsl:otherwise>");
-					sb.append("</xsl:choose>");
-				} else {
-						sb.append("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
+			if(XML.trueAttrValue(col, "readonly") || XML.equalsIgnoreCaseAttrValue(col, "readonly", "readonly")) {
+				AuthInfo authInfo = null;
+				if(XML.validAttrValue(col, "rcond")) {
+					authInfo = AuthParser.parse(col.getAttribute("rcond"));
 				}
-			}
-			if(this._params.in(col, "readonly", new String[]{"readonly", "true"})) {
-				sb.append("	<xsl:attribute name=\"readonly\">readonly</xsl:attribute>");
+				if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+					if(AuthParser.auth(authInfo, this._params)) {
+						sb.appendL("	<xsl:attribute name=\"readonly\">readonly</xsl:attribute>");
+					}
+				} else {
+					if(authInfo != null) {
+						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+					}
+					sb.appendL("	<xsl:attribute name=\"readonly\">readonly</xsl:attribute>");
+					if(authInfo != null) {
+						sb.appendL("</xsl:if>");
+					}
+				}
 			}
 			if(e != null && e.hasAttribute("expr")) {
-				sb.append("	<xsl:attribute name=\"expr\">" + e.getAttribute("expr") + "</xsl:attribute>");
+				sb.appendL("	<xsl:attribute name=\"expr\">" + e.getAttribute("expr") + "</xsl:attribute>");
 			}
 			if(e != null && e.hasAttribute("follow")) {
-				sb.append("	<xsl:attribute name=\"follow\">" + e.getAttribute("follow") + "</xsl:attribute>");
+				sb.appendL("	<xsl:attribute name=\"follow\">" + e.getAttribute("follow") + "</xsl:attribute>");
 			}
 			if(e != null && e.hasAttribute("datatype")) {
-				sb.append("	<xsl:attribute name=\"datatype\">" + e.getAttribute("datatype") + "</xsl:attribute>");
+				sb.appendL("	<xsl:attribute name=\"datatype\">" + e.getAttribute("datatype") + "</xsl:attribute>");
 			}
 			if(e != null && e.hasAttribute("constraint")) {
-				sb.append("	<xsl:attribute name=\"constraint\">" + e.getAttribute("constraint") + "</xsl:attribute>");
+				sb.appendL("	<xsl:attribute name=\"constraint\">" + e.getAttribute("constraint") + "</xsl:attribute>");
 			}
 			if(col.hasAttribute("autocomplete")) {
-				sb.append("	<xsl:attribute name=\"autocomplete\">" + col.getAttribute("autocomplete") + "</xsl:attribute>");
+				sb.appendL("	<xsl:attribute name=\"autocomplete\">" + col.getAttribute("autocomplete") + "</xsl:attribute>");
 			}
 			if(col.hasAttribute("disabled")) {
-				sb.append("	<xsl:attribute name=\"disabled\">" + col.getAttribute("disabled") + "</xsl:attribute>");
-			}
-			if(this._params.equals(col, "type", "button") && this._params.isNotEmpty(col, "icon")) {
-				if(this._params.isNotEmpty(col, "class")) {
-					sb.append("<i class=\"" + col.getAttribute("class") + "\">" + col.getAttribute("icon") + "</i>");
-				} else {
-					sb.append("<i>" + col.getAttribute("icon") + "</i>");
+				AuthInfo authInfo = null;
+				if(XML.validAttrValue(col, "dcond")) {
+					authInfo = AuthParser.parse(col.getAttribute("dcond"));
 				}
-				sb.append("<span>" + value + "</span>");
+				if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+					if(AuthParser.auth(authInfo, this._params)) {
+						sb.appendL("	<xsl:attribute name=\"disabled\">" + col.getAttribute("disabled") + "</xsl:attribute>");
+					}
+				} else {
+					if(authInfo != null) {
+						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+					}
+					sb.appendL("	<xsl:attribute name=\"disabled\">" + col.getAttribute("disabled") + "</xsl:attribute>");
+					if(authInfo != null) {
+						sb.appendL("</xsl:if>");
+					}
+				}
+			}
+			if(col.getAttribute("type").equals("textarea")) {
+				sb.append("<xsl:value-of select=\"" + valueExpr + "\" />");
+			} else {
+				if(valueExpr != null && !valueExpr.equals("")) {
+					if(XML.equalsIgnoreCaseAttrValue(col, "type", "checkbox")) {
+						if(col.getAttribute("val") != null && !col.getAttribute("val").equals("")) {
+							sb.appendL("<xsl:if test=\"" + valueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:if>");
+						}
+						sb.appendL("	<xsl:attribute name=\"value\">" + col.getAttribute("val") + "</xsl:attribute>");
+					} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && !XML.validAttrValue(col, "icon")) {
+						sb.appendL("	<xsl:attribute name=\"value\">" + value + "</xsl:attribute>");
+					} else if(col.hasAttribute("fmt")) {
+						sb.appendL("<xsl:choose>");
+						sb.appendL("<xsl:when test=\"" + valueExpr + " != ''\">");
+						sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"format-number(" + valueExpr + ", '" + col.getAttribute("fmt") + "')\"/></xsl:attribute>");
+						sb.appendL("</xsl:when>");
+						sb.appendL("<xsl:otherwise>");
+						sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
+						sb.appendL("</xsl:otherwise>");
+						sb.appendL("</xsl:choose>");
+					} else {
+							sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
+					}
+				}
+			}
+			if(col.getAttribute("type").equals("select")) {
+				if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
+					sb.appendL("<xsl:variable name=\"selected\"><xsl:value-of select=\"" + valueExpr + "\" /></xsl:variable>");
+					sb.appendL("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
+					sb.appendL("	<option>");
+					sb.appendL("		<xsl:attribute name=\"value\"><xsl:value-of select=\"@" + this._tag.path("code", "value", null, isFull) + "\"/></xsl:attribute>");
+					sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = $selected\">");
+					sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+					sb.appendL("		</xsl:if>");
+					sb.appendL("		<xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" />");
+					sb.appendL("	</option>");
+					sb.appendL("</xsl:for-each>");
+				} else {
+					this._expr = this._xpath.compile("option");
+					NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
+					for(int q = 0; q < options.getLength(); q++) {
+						Element option = (Element)options.item(q);
+						sb.appendL("<option>");
+						sb.appendL("	<xsl:attribute name=\"value\">" + option.getAttribute("value") + "</xsl:attribute>");
+						sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+						sb.appendL("		<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+						sb.appendL("	</xsl:if>");
+						sb.appendL(option.getAttribute("label"));
+						sb.appendL("</option>");
+					}
+				}
+			}
+			if(col.getAttribute("type").equals("datalist")) {
+				if(!isFull) {
+					sb.append("<xsl:attribute name=\"list\">" + name + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
+				} else {
+					sb.append("<xsl:attribute name=\"list\">" + name + "</xsl:attribute>");
+				}
+			}
+			if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && XML.validAttrValue(col, "icon")) {
+				if(XML.validAttrValue(col, "class")) {
+					sb.appendL("<i class=\"" + col.getAttribute("class") + "\">" + col.getAttribute("icon") + "</i>");
+				} else {
+					sb.appendL("<i>" + col.getAttribute("icon") + "</i>");
+				}
+				sb.appendL("<span>" + value + "</span>");
+			}
+			
+			if(col.getAttribute("type").equals("textarea")) {
+				sb.appendL("</textarea>");
+			} else if(col.getAttribute("type").equals("select")) {
+				sb.appendL("</select>");
+			} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && XML.validAttrValue(col, "icon")) {
 				sb.append("</button>");
 			} else {
 				sb.append("</input>");
 			}
-		} else if(col.getAttribute("type").equals("textarea")) {
-			if(!isFull) {
-				sb.append("\n				<textarea class=\"" + name + " " + readonlyClass + "\" name=\"" + name + ".{position()}\" " + readonly + "><xsl:value-of select=\"" + valueExpr + "\" /></textarea>");
-			} else {
-				sb.append("\n				<textarea class=\"" + name + " " + readonlyClass + "\" name=\"" + name + "\" " + readonly + "><xsl:value-of select=\"" + valueExpr + "\" /></textarea>");
-			}
-		} else if(col.getAttribute("type").equals("radio")) {
-			if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
-				sb.append("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
-				sb.append("	<xsl:choose>");
-				sb.append("	<xsl:when test=\"@" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
-				sb.append("		<input type=\"radio\" value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\" checked=\"true\" />");
-				sb.append("		<label><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></label>");
-				sb.append("	</xsl:when>");
-				sb.append("	<xsl:otherwise>");
-				sb.append("		<input type=\"radio\" value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\" />");
-				sb.append("		<label><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></label>");
-				sb.append("	</xsl:otherwise>");
-				sb.append("	</xsl:choose>");
-				sb.append("</xsl:for-each>");
-				
-			} else {
-				this._expr = this._xpath.compile("option");
-				NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
-				for(int q = 0; q < options.getLength(); q++) {
-					Element option = (Element)options.item(q);
-					sb.append("<xsl:choose>");
-					sb.append("<xsl:when test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
-					sb.append("		<input type=\"radio\" value=\"" + option.getAttribute("value") + "\" checked=\"true\" />");
-					sb.append("		<label>" + option.getAttribute("label") + "</label>");
-					sb.append("</xsl:when>");
-					sb.append("<xsl:otherwise>");
-					sb.append("		<input type=\"radio\" value=\"" + option.getAttribute("value") + "\" />");
-					sb.append("		<label>" + option.getAttribute("label") + "</label>");
-					sb.append("</xsl:otherwise>");
-					sb.append("</xsl:choose>");
+			if(col.getAttribute("type").equals("datalist")) {
+				if(!isFull) {
+					sb.append("<datalist  id=\"" + name + ".{position()}\">");
+				} else {
+					sb.append("<datalist id=\"" + name + "\">");
 				}
-			}
-		} else if(col.getAttribute("type").equals("select")) {
-			if(!isFull) {
-				sb.append("<select class=\"" + name + " " + readonlyClass + "\" name=\"" + name + ".{position()}\" value=\"" + valueExpr2 + "\"" + readonly + expr + follow + datatype + constraint + disabled + ">");
-			} else {
-				sb.append("<select class=\"" + name + " " + readonlyClass + "\" name=\"" + name + "\" value=\"" + valueExpr2 + "\"" + readonly + expr + follow + datatype + constraint + disabled + ">");
-			}
-			if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
-				sb.append("<xsl:variable name=\"selected\"><xsl:value-of select=\"" + valueExpr + "\" /></xsl:variable>");
-				sb.append("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
-				sb.append("	<xsl:choose>");
-				sb.append("	<xsl:when test=\"@" + this._tag.path("code", "value", null, isFull) + " = $selected\">");
-				sb.append("		<option value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></option>");
-				sb.append("	</xsl:when>");
-				sb.append("	<xsl:otherwise>");
-				sb.append("		<option value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\"><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></option>");
-				sb.append("	</xsl:otherwise>");
-				sb.append("	</xsl:choose>");
-				sb.append("</xsl:for-each>");
-				
-			} else {
-				this._expr = this._xpath.compile("option");
-				NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
-				for(int q = 0; q < options.getLength(); q++) {
-					Element option = (Element)options.item(q);
-					sb.append("<xsl:choose>");
-					sb.append("<xsl:when test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
-					sb.append("<option value=\"" + option.getAttribute("value") + "\" selected=\"selected\">" + option.getAttribute("label") + "</option>");
-					sb.append("</xsl:when>");
-					sb.append("<xsl:otherwise>");
-					sb.append("<option value=\"" + option.getAttribute("value") + "\">" + option.getAttribute("label") + "</option>");
-					sb.append("</xsl:otherwise>");
-					sb.append("</xsl:choose>");
+				if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
+					sb.append("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
+					sb.append("		<option value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\"><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></option>");
+					sb.append("</xsl:for-each>");
+				} else {
+					this._expr = this._xpath.compile("option");
+					NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
+					for(int q = 0; q < options.getLength(); q++) {
+						Element option = (Element)options.item(q);
+						sb.append("<option value=\"" + option.getAttribute("value") + "\">" + option.getAttribute("label") + "</option>");
+					}
 				}
+				sb.append("</datalist>");
 			}
-			sb.append("</select>");
-		} else if(col.getAttribute("type").equals("datalist")) {
-			if(!isFull) {
-				sb.append("<input class=\"" + name + " datalist " + readonlyClass + "\" type=\"text\" name=\"" + name + ".{position()}\" value=\"" + valueExpr2 + "\" list=\"" + name + ".{position()}\"" + readonly + expr + follow + datatype + constraint + autocomplete + disabled + " />");
-				sb.append("<datalist  id=\"" + name + ".{position()}\">");
-			} else {
-				sb.append("<input class=\"" + name + " datalist " + readonlyClass + "\" type=\"text\" name=\"" + name + "\" value=\"" + valueExpr2 + "\" list=\"" + name + "\"" + readonly + expr + follow + datatype + constraint + autocomplete + disabled + " />");
-				sb.append("<datalist id=\"" + name + "\">");
-			}
-			if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
-				sb.append("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
-				sb.append("		<option value=\"{@" + this._tag.path("code", "value", null, isFull) + "}\"><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></option>");
-				sb.append("</xsl:for-each>");
-			} else {
-				this._expr = this._xpath.compile("option");
-				NodeList options = (NodeList)this._expr.evaluate(col, XPathConstants.NODESET);
-				for(int q = 0; q < options.getLength(); q++) {
-					Element option = (Element)options.item(q);
-					sb.append("<option value=\"" + option.getAttribute("value") + "\">" + option.getAttribute("label") + "</option>");
-				}
-			}
-			sb.append("</datalist>");
-		} else if(col.getAttribute("type").equals("hidden")) {
-			if(!isFull) {
-				sb.append("<input type=\"hidden\" class=\"" + name + "\" name=\"" + name + ".{position()}\" value=\"" + valueExpr2 + "\" />");
-			} else {
-				sb.append("<input type=\"hidden\" class=\"" + name + "\" name=\"" + name + "\" value=\"" + valueExpr2 + "\" />");
-			}
-		} else {
-			throw new ParsingException();
 		}
 		return sb;
 	}
@@ -1217,7 +1250,7 @@ public class XSLGenerator {
 					}
 				}
 				this.cond(sb, link, true);
-				if(!link.hasAttribute("full") || !link.getAttribute("full").equals("true")) {
+				if(XML.emptyAttrValue(link, "full") || !XML.trueAttrValue(link, "full")) {
 					String name = "";
 					if(link.hasAttribute("name") && !link.getAttribute("name").equals("")) {
 						name = " name=\"" + link.getAttribute("name") + "\" class=\"" + link.getAttribute("name") + "\"";
@@ -1227,8 +1260,6 @@ public class XSLGenerator {
 					} else {
 						sb.append("<form action=\"" + this.getPath(link.getAttribute("path")) + "\"" + name + ">");
 					}
-				}
-				if(!link.hasAttribute("full") || !link.getAttribute("full").equals("true")) {
 					this._expr = this._xpath.compile("params/param");
 					NodeList inputs = (NodeList)this._expr.evaluate(link, XPathConstants.NODESET);
 					for(int x = 0; x < inputs.getLength(); x++) {
@@ -1249,11 +1280,9 @@ public class XSLGenerator {
 						}
 						sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"" + value + "\" />");
 					}
-				}
-				if(!link.hasAttribute("full") || !link.getAttribute("full").equals("true")) {
-					if(this._params.isNotEmpty(link, "icon")) {
+					if(XML.validAttrValue(link, "icon")) {
 						sb.append("<button type=\"submit\">");
-						if(this._params.isNotEmpty(link, "class")) {
+						if(XML.validAttrValue(link, "class")) {
 							sb.append("<i class=\"" + link.getAttribute("class") + "\">" + link.getAttribute("icon") + "</i>");
 						} else {
 							sb.append("<i>" + link.getAttribute("icon") + "</i>");
@@ -1286,9 +1315,9 @@ public class XSLGenerator {
 					if(!this._params.equals("system.suffix", ".html")) {
 						sb.append("</xsl:if>");
 					}
-					if(this._params.isNotEmpty(link, "icon")) {
+					if(XML.validAttrValue(link, "icon")) {
 						sb.append("<button type=\"submit\" form=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "_submit\">");
-						if(this._params.isNotEmpty(link, "class")) {
+						if(XML.validAttrValue(link, "class")) {
 							sb.append("<i class=\"" + link.getAttribute("class") + "\">" + link.getAttribute("icon") + "</i>");
 						} else {
 							sb.append("<i>" + link.getAttribute("icon") + "</i>");
@@ -1325,7 +1354,7 @@ public class XSLGenerator {
 				NodeList inputs = (NodeList)this._expr.evaluate(search, XPathConstants.NODESET);
 				for(int x = 0; x < inputs.getLength(); x++) {
 					Element input = (Element)inputs.item(x);
-					if(input.hasAttribute("hidden") && input.getAttribute("hidden").equals("true")) {
+					if(XML.trueAttrValue(input, "hidden")) {
 						String type = input.getAttribute("type");
 						String value = "";
 						if(type == null || type.equals("")) {
@@ -1374,9 +1403,9 @@ public class XSLGenerator {
 						sb.append("<input type=\"text\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"{" + this._tag.path("param", input.getAttribute("value"), null, true) + "}\" />");
 					}
 				}
-				if(this._params.isNotEmpty(search, "icon")) {
+				if(XML.validAttrValue(search, "icon")) {
 					sb.append("<button type=\"submit\">");
-					if(this._params.isNotEmpty(search, "class")) {
+					if(XML.validAttrValue(search, "class")) {
 						sb.append("<i class=\"" + search.getAttribute("class") + "\">" + search.getAttribute("icon") + "</i>");
 					} else {
 						sb.append("<i>" + search.getAttribute("icon") + "</i>");
@@ -1391,6 +1420,57 @@ public class XSLGenerator {
 			}
 		}
 		return sb;
+	}
+	private void postRedirectForm(Element n, Buffer sb) throws XPathExpressionException {
+		sb.appendL("<form>");
+		sb.appendL("<xsl:attribute name=\"method\">get</xsl:attribute>");
+		sb.appendL("<xsl:attribute name=\"id\">_post</xsl:attribute>");
+		sb.appendL("<xsl:attribute name=\"action\">" + this.getPath(n.getAttribute("path")) + "</xsl:attribute>");
+		this._expr = this._xpath.compile("param");
+		NodeList param = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
+		for(int x = 0; x < param.getLength(); x++) {
+			Element p = (Element)param.item(x);
+			String value = null;
+			if(p.getAttribute("type").equals("param")) {
+				value = this._tag.path("param", p.getAttribute("value"), null, true);
+			} else if(p.getAttribute("type").equals("query")) {
+				if(p.hasAttribute("ref") && p.getAttribute("ref") != null && !p.getAttribute("ref").equals("")) {
+					value = this._tag.path("query", p.getAttribute("value"), p.getAttribute("ref"), true);
+				} else {
+					value = this._tag.path("query", p.getAttribute("value"), null, true);
+				}
+			} else if(p.getAttribute("type").equals("result")) {
+				value = this._tag.path("result", p.getAttribute("value"), null, true);
+			} else if(p.getAttribute("type").equals("error")) {
+				value = this._tag.path("error", p.getAttribute("value"), null, true);
+			} else if(p.getAttribute("type").equals("prop")) {
+				value = this._tag.path("prop", p.getAttribute("value"), null, true);
+			} else if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
+				
+			} else {
+				throw new ParsingException();
+			}
+			if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
+				sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
+			} else {
+				sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+			}
+		}
+		if(!XML.falseAttrValue(n, "autoredirect")) {
+			sb.appendL("<noscript>웹브라우저에서 Javascript 가 동작하지 않도록 설정되어 있습니다.  다음으로 이동하려면 확인 버튼을 클릭하시기 바랍니다.</noscript>");
+		}
+		this._expr = this._xpath.compile("msg");
+		NodeList msgs = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
+		for(int x = 0; x < msgs.getLength(); x++) {
+			Element p = (Element)msgs.item(x);
+			if(p.hasAttribute("value")) {
+				sb.appendL("<div class=\"msg\">" + p.getAttribute("value") + "</div>");
+			} else {
+				sb.appendL("<div class=\"msg\">" + p.getFirstChild().getNodeValue() + "</div>");
+			}
+		}
+		sb.appendL("<input type=\"submit\" value=\"확인\" />");
+		sb.appendL("</form>");
 	}
 	private Buffer post() throws XPathExpressionException {
 		Buffer sb = new Buffer();
@@ -1439,113 +1519,26 @@ public class XSLGenerator {
 		sb.appendL("<xsl:choose>");
 		for(int y = 0; y < list.getLength(); y++) {
 			Element n = (Element)list.item(y);
-			String test = null;
-			if(!n.hasAttribute("cond")) {
-				test = "1";
+			
+			AuthInfo authInfo = null;
+			if(XML.validAttrValue(n, "cond")) {
+				authInfo = AuthParser.parse(n.getAttribute("cond"));
+			}
+			if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+				if(AuthParser.auth(authInfo, this._params)) {
+					sb.appendL("<xsl:when test=\"1\">");
+					this.postRedirectForm(n, sb);
+					sb.appendL("</xsl:when>");
+				}
 			} else {
-				AuthInfo info = AuthParser.parse(n.getAttribute("cond"));
-				String left = null;
-				if(info == null) {
-					test = "1";
-				} else if(info.left == null) {
-					test = "1";
+				if(authInfo != null) {
+					sb.appendL("<xsl:when test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 				} else {
-					if(info.left.startsWith("param.")) {
-						left = this._tag.path("param", info.left.substring(info.left.indexOf(".") + 1), null, true);
-					} else if(info.left.startsWith("result.")) {
-						left = this._tag.path("result", info.left.substring(info.left.indexOf(".") + 1), null, true);
-					} else if(info.left.startsWith("prop.")) {
-						left = this._tag.path("prop", info.left.substring(info.left.indexOf(".") + 1), null, true);
-					} else if(info.left.startsWith("error.")) {
-						left = this._tag.path("error", info.left.substring(info.left.indexOf(".") + 1), null, true);
-					} else if(info.left.startsWith("query.")) {
-						left = this._tag.path("row", info.left.substring(info.left.indexOf(".") + 1), null, true);
-					} else {
-						if(AuthParser.auth(info, this._params)) {
-							test = "1";
-						} else {
-							test = "0";
-						}
-					}
-					if(test == null) {
-						if(info.op == AuthParser.IsEmpty) {
-							test = "not(" + left + ") or " + left + " = ''"; 
-						} else if(info.op == AuthParser.IsNotEmpty) {
-							test = "" + left + " and " + left + " != ''"; 
-						} else {
-							if(info.right == null) {
-								test = "0";
-							}
-						}
-						if(info.op == AuthParser.In || info.op == AuthParser.NotIn) {
-							throw new ParsingException();
-						} else if(info.op == AuthParser.Equals) {
-							test = "" + left + " = '" + info.right + "'";
-						} else if(info.op == AuthParser.NotEquals) {
-							test = "" + left + " != '" + info.right + "'";
-						} else if(info.op == AuthParser.GreaterThan) {
-							test = "" + left + " > " + info.right + "";
-						} else if(info.op == AuthParser.GreaterThanOrEqualTo) {
-							test = "" + left + " >= " + info.right + "";
-						} else if(info.op == AuthParser.LessThan) {
-							test = "" + left + " < " + info.right + "";
-						} else if(info.op == AuthParser.LessThanOrEqualTo) {
-							test = "" + left + " <= " + info.right + "";
-						}
-					}
+					sb.appendL("<xsl:when test=\"1\">");
 				}
+				this.postRedirectForm(n, sb);
+				sb.appendL("</xsl:when>");
 			}
-			sb.appendL("<xsl:when test=\"" + test + "\">");
-			sb.appendL("<form>");
-			sb.appendL("<xsl:attribute name=\"method\">get</xsl:attribute>");
-			sb.appendL("<xsl:attribute name=\"id\">_post</xsl:attribute>");
-			sb.appendL("<xsl:attribute name=\"action\">" + this.getPath(n.getAttribute("path")) + "</xsl:attribute>");
-			this._expr = this._xpath.compile("param");
-			NodeList param = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
-			for(int x = 0; x < param.getLength(); x++) {
-				Element p = (Element)param.item(x);
-				String value = null;
-				if(p.getAttribute("type").equals("param")) {
-					value = this._tag.path("param", p.getAttribute("value"), null, true);
-				} else if(p.getAttribute("type").equals("query")) {
-					if(p.hasAttribute("ref") && p.getAttribute("ref") != null && !p.getAttribute("ref").equals("")) {
-						value = this._tag.path("query", p.getAttribute("value"), p.getAttribute("ref"), true);
-					} else {
-						value = this._tag.path("query", p.getAttribute("value"), null, true);
-					}
-				} else if(p.getAttribute("type").equals("result")) {
-					value = this._tag.path("result", p.getAttribute("value"), null, true);
-				} else if(p.getAttribute("type").equals("error")) {
-					value = this._tag.path("error", p.getAttribute("value"), null, true);
-				} else if(p.getAttribute("type").equals("prop")) {
-					value = this._tag.path("prop", p.getAttribute("value"), null, true);
-				} else if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
-					
-				} else {
-					throw new ParsingException();
-				}
-				if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
-					sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
-				} else {
-					sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
-				}
-			}
-			if(!this._params.equals(n, "autoredirect", "false")) {
-				sb.appendL("<noscript>웹브라우저에서 Javascript 가 동작하지 않도록 설정되어 있습니다.  다음으로 이동하려면 확인 버튼을 클릭하시기 바랍니다.</noscript>");
-			}
-			this._expr = this._xpath.compile("msg");
-			NodeList msgs = (NodeList)this._expr.evaluate(n, XPathConstants.NODESET);
-			for(int x = 0; x < msgs.getLength(); x++) {
-				Element p = (Element)msgs.item(x);
-				if(p.hasAttribute("value")) {
-					sb.appendL("<div class=\"msg\">" + p.getAttribute("value") + "</div>");
-				} else {
-					sb.appendL("<div class=\"msg\">" + p.getFirstChild().getNodeValue() + "</div>");
-				}
-			}
-			sb.appendL("<input type=\"submit\" value=\"확인\" />");
-			sb.appendL("</form>");
-			sb.appendL("</xsl:when>");
 		}
 		sb.appendL("</xsl:choose>");
 		sb.appendL("<script>");
@@ -1919,33 +1912,33 @@ public class XSLGenerator {
 					if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("param")) {
 						Element e = (Element)n;
 						String key = (String)e.getAttribute("name");
-						if(e.hasAttribute("not-null") && e.getAttribute("not-null") != null && (((String)e.getAttribute("not-null")).equalsIgnoreCase("true") || ((String)e.getAttribute("not-null")).equalsIgnoreCase("y"))) {
+						if(XML.trueAttrValue(e, "not-null")) {
 							this.validate(e, key, "not-null", sb);
 						}
-						if(e.hasAttribute("max-length") && e.getAttribute("max-length") != null) {
+						if(XML.validAttrValue(e, "max-length")) {
 							this.validate(e, key, "max-length", sb);
 						}
-						if(e.hasAttribute("min-length") && e.getAttribute("min-length") != null) {
+						if(XML.validAttrValue(e, "min-length")) {
 							this.validate(e, key, "min-length", sb);
 						}
-						if(e.hasAttribute("number-format") && e.getAttribute("number-format") != null) {
+						if(XML.validAttrValue(e, "number-format")) {
 							this.validate(e, key, "number-format", sb);
 						}
-						if(e.hasAttribute("min-value") && e.getAttribute("min-value") != null) {
+						if(XML.validAttrValue(e, "min-value")) {
 							this.validate(e, key, "min-value", sb);
 						}
-						if(e.hasAttribute("max-value") && e.getAttribute("max-value") != null) {
+						if(XML.validAttrValue(e, "max-value")) {
 							this.validate(e, key, "max-value", sb);
 						}
-						if(e.hasAttribute("date-format") && e.getAttribute("date-format") != null) {
+						if(XML.validAttrValue(e, "date-format")) {
 							this.validate(e, key, "date-format", sb);
 						}
-						if(e.hasAttribute("format") && e.getAttribute("format") != null) {
+						if(XML.validAttrValue(e, "format")) {
 							this.validate(e, key, "format", sb);
 						}
 					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
 						Element e = (Element)n;
-						if(this._params.equals(e, "type", "native") && e.hasAttribute("func")) {
+						if(XML.equalsIgnoreCaseAttrValue(e, "type", "native") && e.hasAttribute("func")) {
 							String key = (String)e.getAttribute("name");
 							sb.appendL("var _msg = " + e.getAttribute("func") + "(form, \"" + key + "\");");
 							sb.appendL("if(_msg != null) {");
@@ -2038,7 +2031,10 @@ public class XSLGenerator {
 		return sb;
 	}
 	private void validate(Element e, String key, String type, Buffer sb) {
-		if(e.hasAttribute("multi") && this._params.equals(e, "multi", "true")) {
+		if(XML.validAttrValue(e, "cond")) {
+			sb.appendL("<xsl:if test=\"" + this._tag.testExpr(e.getAttribute("cond"), this._params) + "\">");
+		}
+		if(XML.trueAttrValue(e, "multi")) {
 			sb.appendL("index = 1;");
 			sb.appendL("while(true) {");
 			sb.appendL("	if(form[\"" + key + "\" + \".\" + index]) {");
@@ -2114,6 +2110,9 @@ public class XSLGenerator {
 			sb.appendL("	return false;");
 			sb.appendL("}");
 			sb.appendL("}");
+		}
+		if(XML.validAttrValue(e, "cond")) {
+			sb.appendL("</xsl:if>");
 		}
 	}
 	private Buffer after() {
