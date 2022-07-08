@@ -48,6 +48,7 @@ import javax.xml.transform.OutputKeys;
 import kr.graha.lib.AuthParser;
 import kr.graha.lib.Buffer;
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 import kr.graha.lib.Record;
 import kr.graha.lib.XMLGenerator;
 import kr.graha.lib.XSLGenerator;
@@ -319,12 +320,12 @@ public class GeneratorServlet extends HttpServlet {
 				if(
 					params.hasKey("query.row.total_fetch_count") &&
 					params.getInt("query.row.total_fetch_count") == 0 &&
-					!params.in(query, "allowblank", new String[]{"yes", "true"})
+					!XML.trueAttrValue(query, "allowblank")
 				) {
 					if(
-						params.in(query, "funcType", new String[]{"detail", "insert"}) || 
+						XML.existsIgnoreCaseAttrValue(query, "funcType", new String[]{"detail", "insert"}) ||
 						(
-							params.equals(query, "funcType", "list") && 
+							XML.equalsIgnoreCaseAttrValue(query, "funcType", "list") && 
 							params.getInt("param.page") > 1
 						)
 					) {
