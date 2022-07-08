@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하) 데이타바인딩 날짜형(Date 및 Timestamp) 구현 클레스
@@ -60,20 +61,20 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 		DatabaseMetaData dmd
 	) throws SQLException, java.security.NoSuchProviderException {
 		if(params.hasKey(value[0])) {
-			if(params.compare(datatype, "date")) {
+			if(STR.compareIgnoreCase(datatype, "date")) {
 				setDate(stmt, index, params.getDate(value[0], pattern));
 			} else {
 				setTimestamp(stmt, index, params.getTimestamp(value[0], pattern));
 			}
 			if(table != null && column != null) {
 				if(idx >= 0) {
-					if(params.compare(datatype, "date")) {
+					if(STR.compareIgnoreCase(datatype, "date")) {
 						params.put("query." + table + "." + column + "." + idx, params.getDate(value[0], pattern));
 					} else {
 						params.put("query." + table + "." + column + "." + idx, params.getTimestamp(value[0], pattern));
 					}
 				} else {
-					if(params.compare(datatype, "date")) {
+					if(STR.compareIgnoreCase(datatype, "date")) {
 						params.put("query." + table + "." + column, params.getDate(value[0], pattern));
 					} else {
 						params.put("query." + table + "." + column, params.getTimestamp(value[0], pattern));
@@ -81,7 +82,7 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 				}
 			}
 			if(column != null && sb != null) {
-				if(params.compare(datatype, "date")) {
+				if(STR.compareIgnoreCase(datatype, "date")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDate(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 				} else {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
@@ -89,20 +90,20 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 			}
 			return;
 		} else if(idx >= 0 && params.hasKey(value[0] + "." + idx)) {
-			if(params.compare(datatype, "date")) {
+			if(STR.compareIgnoreCase(datatype, "date")) {
 				setDate(stmt, index, params.getDate(value[0] + "." + idx, pattern));
 			} else {
 				setTimestamp(stmt, index, params.getTimestamp(value[0] + "." + idx, pattern));
 			}
 			if(table != null && column != null) {
 				if(idx >= 0) {
-					if(params.compare(datatype, "date")) {
+					if(STR.compareIgnoreCase(datatype, "date")) {
 						params.put("query." + table + "." + column + "." + idx, params.getDate(value[0] + "." + idx, pattern));
 					} else {
 						params.put("query." + table + "." + column + "." + idx, params.getTimestamp(value[0] + "." + idx, pattern));
 					}
 				} else {
-					if(params.compare(datatype, "date")) {
+					if(STR.compareIgnoreCase(datatype, "date")) {
 						params.put("query." + table + "." + column, params.getDate(value[0] + "." + idx, pattern));
 					} else {
 						params.put("query." + table + "." + column, params.getTimestamp(value[0] + "." + idx, pattern));
@@ -110,33 +111,32 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 				}
 			}
 			if(column != null && sb != null) {
-				if(params.compare(datatype, "date")) {
+				if(STR.compareIgnoreCase(datatype, "date")) {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDate(value[0] + "." + idx, pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 				} else {
 					sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0] + "." + idx, pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 				}
 			}
 			return;
-		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
-			
+		} else if(STR.valid(defaultValue) && !STR.compareIgnoreCase(defaultValue, "null")) {
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) { 
+			if(STR.valid(dValue) && !STR.compareIgnoreCase(dValue, "null")) {
 				params.put(value[0], dValue);
 				long today = new java.util.Date().getTime();
-				if(params.compare(datatype, "date")) {
-					if(params.compare(defaultValue, "system.today")) {
+				if(STR.compareIgnoreCase(datatype, "date")) {
+					if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 						setDate(stmt, index, new java.sql.Date(today));
-						params.put(value[0], params.formatDate(new java.sql.Date(today), pattern));
+						params.put(value[0], STR.formatDate(new java.sql.Date(today), pattern));
 					} else {
 						setDate(stmt, index, params.getDate(value[0], pattern));
 					}
 				} else {
-					if(params.compare(defaultValue, "system.today")) {
+					if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 						setTimestamp(stmt, index, new java.sql.Timestamp(today));
-						params.put(value[0], params.formatDate(new java.sql.Timestamp(today), pattern));
+						params.put(value[0], STR.formatDate(new java.sql.Timestamp(today), pattern));
 					} else {
 						setTimestamp(stmt, index, params.getTimestamp(value[0], pattern));
 					}
@@ -144,28 +144,28 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 								
 				if(table != null && column != null) {
 					if(idx >= 0) {
-						if(params.compare(datatype, "date")) {
-							if(params.compare(defaultValue, "system.today")) {
+						if(STR.compareIgnoreCase(datatype, "date")) {
+							if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 								params.put("query." + table + "." + column + "." + idx, new java.sql.Date(today));
 							} else {
 								params.put("query." + table + "." + column + "." + idx, params.getDate(value[0], pattern));
 							}
 						} else {
-							if(params.compare(defaultValue, "system.today")) {
+							if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 								params.put("query." + table + "." + column + "." + idx, new java.sql.Timestamp(today));
 							} else {
 								params.put("query." + table + "." + column + "." + idx, params.getTimestamp(value[0], pattern));
 							}
 						}
 					} else {
-						if(params.compare(datatype, "date")) {
-							if(params.compare(defaultValue, "system.today")) {
+						if(STR.compareIgnoreCase(datatype, "date")) {
+							if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 								params.put("query." + table + "." + column, new java.sql.Date(new java.util.Date().getTime()));
 							} else {
 								params.put("query." + table + "." + column, params.getDate(value[0], pattern));
 							}
 						} else {
-							if(params.compare(defaultValue, "system.today")) {
+							if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 								params.put("query." + table + "." + column, new java.sql.Timestamp(new java.util.Date().getTime()));
 							} else {
 								params.put("query." + table + "." + column, params.getTimestamp(value[0], pattern));
@@ -174,14 +174,14 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 					}
 				}
 				if(column != null && sb != null) {
-					if(params.compare(datatype, "date")) {
-						if(params.compare(defaultValue, "system.today")) {
+					if(STR.compareIgnoreCase(datatype, "date")) {
+						if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Date(today) + "]]></" + tag.tag("row", column, null, false) + ">");
 						} else {
 							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getDate(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
 						}
 					} else {
-						if(params.compare(defaultValue, "system.today")) {
+						if(STR.compareIgnoreCase(defaultValue, "system.today")) {
 							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + new java.sql.Timestamp(today) + "]]></" + tag.tag("row", column, null, false) + ">");
 						} else {
 							sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getTimestamp(value[0], pattern) + "]]></" + tag.tag("row", column, null, false) + ">");
@@ -192,7 +192,7 @@ public class DataBinderDateTypeImpl extends DataBinderImpl {
 				return;
 			}
 		}
-		if(params.compare(datatype, "date")) {
+		if(STR.compareIgnoreCase(datatype, "date")) {
 			setNull(stmt, index, java.sql.Types.DATE);
 		} else {
 			setNull(stmt, index, java.sql.Types.TIMESTAMP);
