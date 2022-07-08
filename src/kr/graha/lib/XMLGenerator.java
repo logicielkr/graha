@@ -64,6 +64,7 @@ import java.nio.file.DirectoryStream;
 
 import kr.graha.helper.LOG;
 import kr.graha.helper.XML;
+import kr.graha.helper.STR;
 
 import java.util.List;
 
@@ -140,38 +141,26 @@ public class XMLGenerator {
 	public Buffer execute() throws Exception {
 		Buffer sb = new Buffer();
 		sb.append(this.before());
-		if(
-			this._query.getAttribute("funcType").equals("list") 
-			|| this._query.getAttribute("funcType").equals("listAll") 
-			|| this._query.getAttribute("funcType").equals("detail") 
-			|| this._query.getAttribute("funcType").equals("user")
-		) {
+		if(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll", "detail", "user"})) {
 			sb.append(this.list());
 		} else if(
-			this._query.getAttribute("funcType").equals("delete") 
-			&& this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("POST")
+			XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "delete")
+			&& this._params.equals("header.method", "POST")
 		) {
 			sb.append(this.delete());
 		} else if(
-			this._query.getAttribute("funcType").equals("insert") 
-			&& this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("GET")
+			XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "insert")
+			&& this._params.equals("header.method", "GET")
 		) {
 			sb.append(this.update());
 		} else if(
-			this._query.getAttribute("funcType").equals("insert") 
-			&& this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("POST")
+			XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "insert")
+			&& this._params.equals("header.method", "POST")
 		) {
 			sb.append(this.insert());
 		} else if(
-			(
-				this._query.getAttribute("funcType").equals("query") ||
-				this._query.getAttribute("funcType").equals("report")
-			)
-			&& this._params.hasKey("header.method") 
-			&& (this._params.getString("header.method")).equals("POST")
+			XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"})
+			&& this._params.equals("header.method", "POST")
 		) {
 			Buffer sb_tmp = new Buffer();
 			if(this._query.getAttribute("funcType").equals("query")) {
@@ -218,7 +207,7 @@ public class XMLGenerator {
 					continue;
 				}
 			}
-			if(command.hasAttribute("cond") && command.getAttribute("cond") != null) {
+			if(XML.validAttrValue(command, "cond")) {
 				if(!(AuthParser.auth(command.getAttribute("cond"), this._params))) {
 					continue;
 				}
@@ -307,7 +296,7 @@ public class XMLGenerator {
 		sb.append(this._tag.tag("rows", null, true));
 		for(int q = 0; q < commands.getLength(); q++) {
 			Element command = (Element)commands.item(q);
-			if(command.hasAttribute("cond") && command.getAttribute("cond") != null) {
+			if(XML.validAttrValue(command, "cond")) {
 				if(!(AuthParser.auth(command.getAttribute("cond"), this._params))) {
 					continue;
 				}
@@ -356,7 +345,7 @@ public class XMLGenerator {
 						stmt.close();
 						stmt = null;
 					}
-					if(this._params.isNotEmpty(command, "name")) {
+					if(XML.validAttrValue(command, "name")) {
 						sb.append(this._tag.tag("row", command.getAttribute("name"), true));
 						sb.append(this._tag.tag("row", "rowcount", null, true) + result + this._tag.tag("row", "rowcount", null, false));
 						sb.append(this._tag.tag("row", command.getAttribute("name"), false));
@@ -521,13 +510,13 @@ public class XMLGenerator {
 							pattern != null &&
 							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
 						) {
-							value = this._params.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+							value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
 						} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP &&
 							rs.getTimestamp(x) != null &&
 							pattern != null &&
 							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
 						) {
-							value = this._params.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+							value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
 						} else {
 							value = rs.getString(x);
 						}
@@ -538,7 +527,7 @@ public class XMLGenerator {
 								this._query.getAttribute("funcType").equals("user")
 							) {
 								if(command.hasAttribute("name") && !command.getAttribute("name").equals("")) {
-									if(command.hasAttribute("multi") && command.getAttribute("multi").equals("true")) {
+									if(XML.trueAttrValue(command, "multi")) {
 										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
 									} else {
 										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
@@ -579,7 +568,7 @@ public class XMLGenerator {
 					index++;
 				}
 				totalFetchCount += index;
-				if(this._params.isNotEmpty(command, "name")) {
+				if(XML.validAttrValue(command, "name")) {
 					this._params.put("query.row." + command.getAttribute("name") + ".count", index);
 				}
 				rs.close();
@@ -820,7 +809,7 @@ public class XMLGenerator {
 				totalUpdateCount += result;
 				stmt.close();
 				stmt = null;
-				if(this._params.isNotEmpty(p, "name")) {
+				if(XML.validAttrValue(p, "name")) {
 					sb.append(this._tag.tag("row", p.getAttribute("tableName"), true));
 					sb.append(this._tag.tag("row", "rowcount", null, true) + result + this._tag.tag("row", "rowcount", null, false));
 					sb.append(this._tag.tag("row", p.getAttribute("tableName"), false));
@@ -966,18 +955,7 @@ public class XMLGenerator {
 					index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if(
-							c.getAttribute("value").startsWith("param.") || 
-							(
-								c.hasAttribute("select") && 
-								(
-									c.getAttribute("select").equalsIgnoreCase("true") ||
-									c.getAttribute("select").equalsIgnoreCase("yes") ||
-									c.getAttribute("select").equalsIgnoreCase("t") ||
-									c.getAttribute("select").equalsIgnoreCase("y")
-								)
-							)
-						) {
+						if(c.getAttribute("value").startsWith("param.") || XML.trueAttrValue(c, "select")) {
 							if(index > 0) {
 								sql += ", ";
 							}
@@ -1073,7 +1051,7 @@ public class XMLGenerator {
 					ResultSetMetaData rsmd = rs.getMetaData();
 					index = 0;
 					while(rs.next()) {
-						sb.appendL(this._tag.tag("row", p.getAttribute("name"), true));
+						sb.appendL(this._tag.tag("row", null, true));
 						
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 							String value = null;
@@ -1081,7 +1059,7 @@ public class XMLGenerator {
 								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
 								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
 								if(qqq != null && qqq.hasAttribute("pattern")) {
-									value = this._params.formatDate(rs.getDate(x), qqq.getAttribute("pattern"));
+									value = STR.formatDate(rs.getDate(x), qqq.getAttribute("pattern"));
 								} else {
 									value = rs.getDate(x).toString();
 								}
@@ -1089,7 +1067,7 @@ public class XMLGenerator {
 								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
 								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
 								if(qqq != null && qqq.hasAttribute("pattern")) {
-									value = this._params.formatDate(rs.getTimestamp(x), qqq.getAttribute("pattern"));
+									value = STR.formatDate(rs.getTimestamp(x), qqq.getAttribute("pattern"));
 								} else {
 									value = rs.getTimestamp(x).toString();
 								}
@@ -1098,7 +1076,7 @@ public class XMLGenerator {
 							}
 							if(value != null) {
 								if(p.hasAttribute("name") && !p.getAttribute("name").equals("")) {
-									if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+									if(XML.trueAttrValue(p, "multi")) {
 										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
 									} else {
 										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
@@ -1121,31 +1099,11 @@ public class XMLGenerator {
 										sb.append(XML.fix(value));
 									}
 								} else {
-									/*
-									this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-									Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-									if(qqq != null && qqq.hasAttribute("dfmt")) {
-										if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("int")) { 
-											sb.append(this._params.formatNumber(rs.getInt(x), qqq.getAttribute("dfmt")));
-										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("float")) { 
-											sb.append(this._params.formatNumber(rs.getFloat(x), qqq.getAttribute("dfmt")));
-										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("double")) { 
-											sb.append(this._params.formatNumber(rs.getDouble(x), qqq.getAttribute("dfmt")));
-										} else if(qqq.hasAttribute("datatype") && qqq.getAttribute("datatype") != null && qqq.getAttribute("datatype").equals("long")) { 
-											sb.append(this._params.formatNumber(rs.getLong(x), qqq.getAttribute("dfmt")));
-										} else {
-											sb.append(value);
-										}
+									if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+										sb.append(XML.fix(value));
 									} else {
-									*/
-										if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-											sb.append(XML.fix(value));
-										} else {
-											sb.append(value);
-										}
-										/*
+										sb.append(value);
 									}
-									*/
 								}
 								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
 									sb.append("]]></");
@@ -1160,7 +1118,7 @@ public class XMLGenerator {
 						index++;
 					}
 					totalFetchCount += index;
-					if(this._params.isNotEmpty(p, "name")) {
+					if(XML.validAttrValue(p, "name")) {
 						this._params.put("query.row." + p.getAttribute("name") + ".count", index);
 					}
 					rs.close();
@@ -1334,7 +1292,10 @@ public class XMLGenerator {
 					int index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if(c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true") && c.hasAttribute("insert") && ((String)c.getAttribute("insert")).equals("generate")) {
+						if(
+							XML.trueAttrValue(c, "primary") &&
+							c.hasAttribute("insert") && ((String)c.getAttribute("insert")).equals("generate")
+						) {
 							continue;
 						}
 						if(index > 0) {
@@ -1348,7 +1309,12 @@ public class XMLGenerator {
 					index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if((((String)c.getAttribute("only")).equals("insert") || (c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true")))) {
+						if(
+							(
+								((String)c.getAttribute("only")).equals("insert") || 
+								XML.trueAttrValue(c, "primary")
+							)
+						) {
 							continue;
 						}
 						if(index > 0) {
@@ -1374,7 +1340,10 @@ public class XMLGenerator {
 					index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if(c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true") && c.hasAttribute("insert") && ((String)c.getAttribute("insert")).equals("generate")) {
+						if(
+							XML.trueAttrValue(c, "primary") &&
+							c.hasAttribute("insert") && ((String)c.getAttribute("insert")).equals("generate")
+						) {
 							continue;
 						}
 						if(index > 0) {
@@ -1399,7 +1368,7 @@ public class XMLGenerator {
 					index = 0;
 					for(int x = 0; x < column.getLength(); x++) {
 						Element c = (Element)column.item(x);
-						if(c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true")) {
+						if(XML.trueAttrValue(c, "primary")) {
 							if(index > 0) {
 								sqlUpdate += " and ";
 								sqlDelete += " and ";
@@ -1425,7 +1394,7 @@ public class XMLGenerator {
 					}
 					
 					boolean isNew = false;
-					if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+					if(XML.trueAttrValue(p, "multi")) {
 						stmtInsert = this.prepareStatement(sqlInsert);
 						stmtUpdate = this.prepareStatement(sqlUpdate);
 						stmtDelete = this.prepareStatement(sqlDelete);
@@ -1448,7 +1417,7 @@ public class XMLGenerator {
 					boolean iscontinue = true;
 					NodeList cc = null;
 					NodeList ddd = null;
-					if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+					if(XML.trueAttrValue(p, "multi")) {
 						this._expr = this._xpath.compile("layout/middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
 						cc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 						if(cc == null || cc.getLength() <= 0) {
@@ -1460,7 +1429,7 @@ public class XMLGenerator {
 					int idx = 1;
 					while(iscontinue) {
 						boolean isnext = false;
-						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+						if(XML.trueAttrValue(p, "multi")) {
 							iscontinue = false;
 							if(cc != null && cc.getLength() > 0) {
 								for(int xx = 0; xx < cc.getLength(); xx++) {
@@ -1485,10 +1454,10 @@ public class XMLGenerator {
 							} else {
 								for(int xx = 0; xx < ddd.getLength(); xx++) {
 									Element e = (Element)ddd.item(xx);
-									if(e.hasAttribute("primary") && e.getAttribute("primary").equals("true")) {
+									if(XML.trueAttrValue(e, "primary")) {
 										continue;
 									}
-									if(e.hasAttribute("foreign") && e.getAttribute("foreign").equals("true")) {
+									if(XML.trueAttrValue(e, "foreign")) {
 										continue;
 									}
 									if(!e.hasAttribute("value")) {
@@ -1510,7 +1479,7 @@ public class XMLGenerator {
 						}
 						index = 1;
 						boolean isDelete = false;
-						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+						if(XML.trueAttrValue(p, "multi")) {
 							isNew = false;
 							this._expr = this._xpath.compile("column[@primary='true']");
 							NodeList coln = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
@@ -1544,10 +1513,10 @@ public class XMLGenerator {
 								} else {
 									for(int x = 0; x < ddd.getLength(); x++) {
 										Element c = (Element)ddd.item(x);
-										if(c.hasAttribute("primary") && c.getAttribute("primary").equals("true")) {
+										if(XML.trueAttrValue(c, "primary")) {
 											continue;
 										}
-										if(c.hasAttribute("foreign") && c.getAttribute("foreign").equals("true")) {
+										if(XML.trueAttrValue(c, "foreign")) {
 											continue;
 										}
 										if(!c.hasAttribute("value")) {
@@ -1589,20 +1558,22 @@ public class XMLGenerator {
 								if(
 									!isNew 
 									&& (
-										((String)c.getAttribute("only")).equals("insert") 
-										|| (
-											c.hasAttribute("primary") 
-											&& ((String)c.getAttribute("primary")).equals("true")
-										)
+										((String)c.getAttribute("only")).equals("insert")
+										|| XML.trueAttrValue(c, "primary")
 									)
 								) {
 									continue;
 								}
-								if(isNew && c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true") && c.hasAttribute("insert") && ((String)c.getAttribute("insert")).equals("generate")) {
+								if(
+									isNew &&
+									XML.trueAttrValue(c, "primary") &&
+									c.hasAttribute("insert") && 
+									((String)c.getAttribute("insert")).equals("generate")
+								) {
 									continue;
 								}
 								if(c.hasAttribute("insert") && ((String)c.getAttribute("insert")).startsWith("sequence.")) {
-									if(this._params.compare(p.getAttribute("multi"), "true")) {
+									if(XML.trueAttrValue(p, "multi")) {
 										this._params.put((String)c.getAttribute("insert") + "." + idx, DBHelper.getNextSequenceValue(this._con, (String)c.getAttribute("insert"), this._info, this.dmd));
 										if(isNew) {
 											this.bind(stmtInsert, "int", index, new String[] {c.getAttribute("insert")}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
@@ -1619,7 +1590,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 									}
 									index++;
 									continue;
-								} else if(c.hasAttribute("foreign") && c.getAttribute("foreign").equals("true") && !this._params.hasKey(c.getAttribute("value"))) {
+								} else if(
+									XML.trueAttrValue(c, "foreign") &&
+									!this._params.hasKey(c.getAttribute("value"))
+								) {
 									this._expr = this._xpath.compile("tables/table/column[@name = '" + c.getAttribute("name") + "' and @primary = 'true']");
 									NodeList ccc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 									if(ccc.getLength() > 0) {
@@ -1629,7 +1603,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 											if(insert != null && insert.equals("generate")) {
 												insert = cccc.getAttribute("insert") + "." + cccc.getAttribute("name");
 											}
-											if(this._params.compare(p.getAttribute("multi"), "true")) {
+											if(XML.trueAttrValue(p, "multi")) {
 												if(isNew) {
 													this.bind(stmtInsert, "int", index, new String[] {insert}, idx, null, null, p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 												} else {
@@ -1656,7 +1630,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 										defaultValue = c.getAttribute("default");
 									}
 								}
-								if(this._params.compare(p.getAttribute("multi"), "true")) {
+								if(XML.trueAttrValue(p, "multi")) {
 									if(isNew) {
 										this.bind(stmtInsert, c.getAttribute("datatype"), index, new String[] {c.getAttribute("value")}, idx, defaultValue, c.getAttribute("pattern"), p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 									} else {
@@ -1671,7 +1645,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						if(!isNew) {
 							for(int x = 0; x < column.getLength(); x++) {
 								Element c = (Element)column.item(x);
-								if(c.hasAttribute("primary") && ((String)c.getAttribute("primary")).equals("true")) {
+								if(XML.trueAttrValue(c, "primary")) {
 									String defaultValue = null;
 									if(c.hasAttribute("default")) {
 										if(c.getAttribute("default").startsWith("param.")) {
@@ -1680,7 +1654,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 											defaultValue = c.getAttribute("default");
 										}
 									}
-									if(this._params.compare(p.getAttribute("multi"), "true")) {
+									if(XML.trueAttrValue(p, "multi")) {
 										if(isDelete) {
 											this.bind(stmtDelete, c.getAttribute("datatype"), index, new String[] {c.getAttribute("value")}, idx, defaultValue, c.getAttribute("pattern"), p.getAttribute("name"), c.getAttribute("name"), encryptor, c.getAttribute("encrypt"), sb);
 										} else {
@@ -1712,7 +1686,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 												defaultValue = pp.getAttribute("default");
 											}
 										}
-										if(this._params.compare(p.getAttribute("multi"), "true")) {
+										if(XML.trueAttrValue(p, "multi")) {
 											if(isDelete) {
 												if(!pp.hasAttribute("cond") || AuthParser.auth(pp.getAttribute("cond"), this._params)) {
 													this.bind(stmtDelete, pp.getAttribute("datatype"), index, new String[] {pp.getAttribute("value")}, -1, defaultValue, pp.getAttribute("pattern"), null, null, encryptor, pp.getAttribute("encrypt"), null);
@@ -1736,7 +1710,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 							}
 						}
 						int result = 0;
-						if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+						if(XML.trueAttrValue(p, "multi")) {
 							if(isNew) {
 								stmtInsert.executeUpdate();
 								result = stmtInsert.getUpdateCount();
@@ -1796,7 +1770,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 							this._params.put("query.row.count", result);
 							
 						}
-						if(!p.hasAttribute("multi") || !p.getAttribute("multi").equals("true")) {
+						if(!XML.trueAttrValue(p, "multi")) {
 							stmt.close();
 							stmt = null;
 							iscontinue = false;
@@ -1804,7 +1778,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 						}
 						idx++;
 					}
-					if(p.hasAttribute("multi") && p.getAttribute("multi").equals("true")) {
+					if(XML.trueAttrValue(p, "multi")) {
 						stmtInsert.close();
 						stmtInsert = null;
 						stmtUpdate.close();
@@ -1883,13 +1857,13 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		Buffer sb
 	) throws SQLException, NoSuchProviderException {
 		DataBinder binder = null;
-		if(this._params.in(datatype, new String[]{"varchar", "char"})) {
+		if(STR.existsIgnoreCase(datatype, new String[]{"varchar", "char"})) {
 			binder = new DataBinderStringTypeImpl();
-		} else if(this._params.in(datatype, new String[]{"boolean"})) {
+		} else if(STR.existsIgnoreCase(datatype, new String[]{"boolean"})) {
 			binder = new DataBinderBooleanTypeImpl();
-		} else if(this._params.in(datatype, new String[]{"int", "float", "double", "long"})) {
+		} else if(STR.existsIgnoreCase(datatype, new String[]{"int", "float", "double", "long"})) {
 			binder = new DataBinderNumberTypeImpl();
-		} else if(this._params.in(datatype, new String[] {"date", "timestamp"})) {
+		} else if(STR.existsIgnoreCase(datatype, new String[] {"date", "timestamp"})) {
 			binder = new DataBinderDateTypeImpl();
 		} else {
 			throw new ParsingException();
@@ -2173,14 +2147,14 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					tmp.startsWith("[") &&
 					tmp.indexOf("]") > 0
 				) {
-					if(this._params.equals(node, "code", "exclude")) {
+					if(XML.equalsIgnoreCaseAttrValue(node, "code", "exclude")) {
 						label = tmp.substring(tmp.indexOf("]") + 1);
 					} else {
 						label = "[" + node.getAttribute("name") + "]" + tmp.substring(tmp.indexOf("]") + 1);
 						this._params.put("messages.code." + node.getAttribute("name"), true);
 					}
 				} else {
-					if(this._params.equals(node, "code", "include")) {
+					if(XML.equalsIgnoreCaseAttrValue(node, "code", "include")) {
 						label = "[" + node.getAttribute("name") + "]" + tmp;
 						this._params.put("messages.code." + node.getAttribute("name"), true);
 					} else {
@@ -2206,7 +2180,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				if(index == 0) {
 					label = null;
 				} else {
-					if(this._params.equals(node, "code", "include")) {
+					if(XML.equalsIgnoreCaseAttrValue(node, "code", "include")) {
 						label = "[" + node.getAttribute("name") + "]" + label;
 						this._params.put("messages.code." + node.getAttribute("name"), true);
 					}
@@ -2214,7 +2188,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				}
 			}
 		}
-		if(isBuffer && this._params.equals(node, "public", "true")) {
+		if(isBuffer && XML.trueAttrValue(node, "public")) {
 			if(
 				this._params.hasKey("header.method") && 
 				!this._params.getString("header.method").equals("POST") && 
@@ -2442,37 +2416,45 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				java.util.ArrayList msgs = new java.util.ArrayList();
 				for(int x = 0; x < list.getLength(); x++) {
 					org.w3c.dom.Node n = (org.w3c.dom.Node)list.item(x);
-					if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("param")) {
-						Element e = (Element)n;
-						String key = (String)e.getAttribute("name");
-						if(e.hasAttribute("multi") && this._params.equals(e, "multi", "true")) {
-							int index = 1;
-							while(true) {
-								if(this._params.containsKey("param." + key + "." + index)) {
-									this.validate(e, key + "." + index, msgs);
-									index++;
-								} else {
-									break;
-								}
+					if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+						if(XML.validAttrValue((Element)n, "cond")) {
+							if(!(AuthParser.auth(((Element)n).getAttribute("cond"), this._params))) {
+								continue;
 							}
-						} else {
-							this.validate(e, key, msgs);
 						}
-					} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE && n.getNodeName().equals("command")) {
-						Element e = (Element)n;
-						if(this._params.equals(e, "type", "native") && e.hasAttribute("class")) {
-							try {
-								Validator validator = (Validator)Class.forName(e.getAttribute("class")).getConstructor().newInstance();
-								String msg = validator.execute(this._params, this._con);
-								if(msg != null) {
-									msgs.add(msg);
+					
+						if(n.getNodeName().equals("param")) {
+							Element e = (Element)n;
+							String key = (String)e.getAttribute("name");
+							if(XML.trueAttrValue(e, "multi")) {
+								int index = 1;
+								while(true) {
+									if(this._params.containsKey("param." + key + "." + index)) {
+										this.validate(e, key + "." + index, msgs);
+										index++;
+									} else {
+										break;
+									}
 								}
-							} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
-								if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
+							} else {
+								this.validate(e, key, msgs);
 							}
-						} else {
-							if(!this.checkFromSQL(e)) {
-								msgs.add((String)e.getAttribute("msg"));
+						} else if(n.getNodeName().equals("command")) {
+							Element e = (Element)n;
+							if(XML.equalsIgnoreCaseAttrValue(e, "type", "native") && e.hasAttribute("class")) {
+								try {
+									Validator validator = (Validator)Class.forName(e.getAttribute("class")).getConstructor().newInstance();
+									String msg = validator.execute(this._params, this._con);
+									if(msg != null) {
+										msgs.add(msg);
+									}
+								} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
+									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
+								}
+							} else {
+								if(!this.checkFromSQL(e)) {
+									msgs.add((String)e.getAttribute("msg"));
+								}
 							}
 						}
 					}
