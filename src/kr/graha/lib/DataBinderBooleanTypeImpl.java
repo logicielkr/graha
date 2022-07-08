@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.logging.Logger;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하) 데이타바인딩 Boolean Type 구현 클레스
@@ -85,13 +86,12 @@ public class DataBinderBooleanTypeImpl extends DataBinderImpl {
 				sb.append("<" + tag.tag("row", column, null, true) + "><![CDATA[" + params.getBoolean(value[0] + "." + idx) + "]]></" + tag.tag("row", column, null, false) + ">");
 			}
 			return;
-		} else if(defaultValue != null && !params.compare(defaultValue, "") && !params.compare(defaultValue, "null")) {
-			
+		} else if(STR.valid(defaultValue) && !STR.compareIgnoreCase(defaultValue, "null")) {
 			String dValue = defaultValue;
 			if(dValue != null && (dValue.startsWith("prop.") || dValue.startsWith("param.") || dValue.startsWith("code."))) {
 				dValue = params.getString(dValue);
 			}
-			if(dValue != null && !params.compare(dValue, "") && !params.compare(dValue, "null")) { 
+			if(STR.valid(dValue) && !STR.compareIgnoreCase(dValue, "null")) {
 				if(defaultValue != null && !defaultValue.equals("%")) {
 					params.put(value[0], dValue);
 				}
