@@ -88,49 +88,6 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE' and TABLE_SCHEMA = ? and lower(table_name) = lower(?)";
 		return super.getSequence(con, sql, catalogName, sequenceName);
 	}
-	/*
-	private String getSequence(Connection con, String catalogName, String sequenceName) {
-		String sequence = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE' and TABLE_SCHEMA = ? and lower(table_name) = lower(?)";
-
-		try {
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, catalogName);
-			pstmt.setString(2, sequenceName);
-
-			rs = pstmt.executeQuery();
-			if(rs.next()) {
-				sequence = rs.getString(1);
-			}
-			rs.close();
-			rs = null;
-			pstmt.close();
-			pstmt = null;
-		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
-		} finally {
-			if(rs != null) {
-				try {
-					rs.close();
-					rs = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-			if(pstmt != null) {
-				try {
-					pstmt.close();
-					pstmt = null;
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-			}
-		}
-		return sequence;
-	}
-	*/
 	private boolean existCommentTable(Connection con, boolean table) throws SQLException {
 		if(table && this.existsTableCommentTable) {
 			return true;
