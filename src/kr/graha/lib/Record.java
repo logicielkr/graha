@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Element;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하)에서 파라미터를 관리하기 위해 사용하는 라이브러리
@@ -482,30 +483,6 @@ public class Record extends HashMap {
 		}
 		return result;
 	}
-	public String formatDate(Timestamp d, String pattern) {
-		DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-		return df.format(d);
-	}
-	public String formatDate(Date d, String pattern) {
-		DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-		return df.format(d);
-	}
-	public String formatNumber(int d, String pattern) {
-		DecimalFormat df = new DecimalFormat(pattern);
-		return df.format(d);
-	}
-	public String formatNumber(long d, String pattern) {
-		DecimalFormat df = new DecimalFormat(pattern);
-		return df.format(d);
-	}
-	public String formatNumber(double d, String pattern) {
-		DecimalFormat df = new DecimalFormat(pattern);
-		return df.format(d);
-	}
-	public String formatNumber(float d, String pattern) {
-		DecimalFormat df = new DecimalFormat(pattern);
-		return df.format(d);
-	}
 /**
  * 키에 해당하는 값이 있는지 검사한다.
  * 이 메소드는 containsKey와 다르다.
@@ -538,44 +515,6 @@ public class Record extends HashMap {
 			}
 		}
 		return result;
-	}
-	public boolean isNotEmpty(Element col, String s1) {
-		if(col != null && col.hasAttribute(s1)) {
-			if(col.getAttribute(s1) != null && !(col.getAttribute(s1)).equals("")) {
-				return true;
-			}
-		}
-		return false;
-	}
-	public boolean in(Element col, String s1, String[] s2) {
-		if(col != null && col.hasAttribute(s1)) {
-			if(s2 != null) {
-				for (String s : s2) {
-					if(this.compare(col.getAttribute(s1), s)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-	public boolean equals(Element col, String s1, String s2) {
-		if(col != null && col.hasAttribute(s1)) {
-			if(this.compare(s2, col.getAttribute(s1))) {
-				return true;
-			}
-		}
-		return false;
-	}
-	public boolean in(String s1, String[] s2) {
-		if(s2 != null) {
-			for (String s : s2) {
-				if(this.compare(s1, s)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 	public boolean in(String key, String value) {
 		if(super.containsKey(key) && value != null && !value.trim().equals("")) {
@@ -655,21 +594,6 @@ public class Record extends HashMap {
 			}
 		}
 		return false;
-	}
-	public boolean compare(String s1, String s2) {
-		boolean result = false;
-		if(s1 == null) {
-			if(s2 == null) {
-				result = true;
-			} else {
-				result = false;
-			}
-		} else if(s2 == null) {
-			result = false;
-		} else {
-			result = s1.equals(s2);
-		}
-		return result;
 	}
 	public boolean notNull(String key) {
 		return !this.isempty(key);
