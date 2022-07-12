@@ -1493,7 +1493,7 @@ public class XSLGenerator {
 		sb.appendL("<head>");
 		sb.appendL("<meta charset=\"UTF-8\" />");
 		sb.appendL("<title></title>");
-		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
+//		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
 		sb.appendL("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
 		sb.appendL("<style type=\"text/css\">");
 		sb.appendL("body {");
@@ -1593,7 +1593,7 @@ public class XSLGenerator {
 		sb.appendL("<head>");
 		sb.appendL("<meta charset=\"UTF-8\" />");
 		sb.appendL("<title></title>");
-		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
+//		sb.appendL("<meta http-equiv=\"Content-Language\" content=\"Korean\" />");
 		sb.appendL("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
 		sb.appendL("<script>");
 		sb.appendL("function back() {");
