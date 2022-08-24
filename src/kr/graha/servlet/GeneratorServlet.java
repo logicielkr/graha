@@ -337,7 +337,13 @@ public class GeneratorServlet extends HttpServlet {
 							sb.clear();
 							sb = null;
 						}
-						response.sendError(404);
+						if(logger.isLoggable(Level.FINEST)) {
+							logger.severe("hasKey : " + params.hasKey("query.row.total_fetch_count"));
+							logger.severe("getInt : " + params.getInt("query.row.total_fetch_count"));
+							logger.severe("allowblank : " + XML.trueAttrValue(query, "allowblank"));
+						}
+						response.sendError(HttpServletResponse.SC_NOT_FOUND);
+//						response.sendError(404);
 						return;
 					}
 				}
