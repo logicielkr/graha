@@ -160,12 +160,15 @@ public class XMLGenerator {
 			sb.append(this.insert());
 		} else if(
 			XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"})
-			&& this._params.equals("header.method", "POST")
+			&& (
+				this._params.equals("header.method", "POST") ||
+				(XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") && this._params.equals("header.method", "GET"))
+			)
 		) {
 			Buffer sb_tmp = new Buffer();
-			if(this._query.getAttribute("funcType").equals("query")) {
+			if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "query")) {
 				sb_tmp.append(this.query());
-			} else if(this._query.getAttribute("funcType").equals("report")) {
+			} else if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "report")) {
 				sb_tmp.append(sb);
 				sb.append(this.list());
 				sb.append(this.after());
@@ -1897,7 +1900,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		sb.appendL("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		if(this.isError) {
 			sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=error\"?>");
-		} else if(this._params.hasKey("header.method") && this._params.getString("header.method").equals("POST")) {
+		} else if(
+			this._params.equals("header.method", "POST") ||
+			(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"}) && XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") && this._params.equals("header.method", "GET"))
+		) {
 			sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=post\"?>");
 		} else {
 			Element layout = null;
