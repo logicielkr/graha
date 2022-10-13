@@ -177,7 +177,6 @@ public class XSLGenerator {
 						continue;
 					}
 				}
-//				this.cond(sb, column, true);
 				if(authInfo != null) {
 					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 				}
@@ -189,7 +188,6 @@ public class XSLGenerator {
 				if(authInfo != null) {
 					sb.appendL("</xsl:if>");
 				}
-//				this.cond(sb, column, false);
 			}
 			sb.appendL(this._html.trE());
 			sb.appendL(this._html.theadE());
@@ -214,7 +212,6 @@ public class XSLGenerator {
 				if(authInfo != null) {
 					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 				}
-//				this.cond(sb, column, true);
 				sb.appendL(this._html.td(column.getAttribute("name")));
 				if(column.hasAttribute("align")) {
 					sb.append(" align=\"" + column.getAttribute("align") + "\"");
@@ -228,7 +225,6 @@ public class XSLGenerator {
 				if(authInfo != null) {
 					sb.appendL("</xsl:if>");
 				}
-//				this.cond(sb, column, false);
 			}
 			sb.appendL(this._html.trE());
 			sb.appendL("</xsl:for-each>");
@@ -250,9 +246,14 @@ public class XSLGenerator {
 			Element link = (Element)this._expr.evaluate(column, XPathConstants.NODE);
 			if(link != null) {
 				sb.append("<a>");
+				if(link.hasAttribute("type") && link.getAttribute("type").equals("query")) {
+					sb.append("<xsl:attribute name=\"link\">");
+					sb.append("<xsl:value-of select=\"" + this._tag.path("row", link.getAttribute("value"), tableName, isFull) + "\" />");
+					sb.append("</xsl:attribute>");
+				}
 				sb.append("<xsl:attribute name=\"href\">");
 				if(link.hasAttribute("type") && link.getAttribute("type").equals("query")) {
-					sb.append("<xsl:value-of select=\"" + this._tag.path("row", link.getAttribute("value"), tableName, isFull) + "\"/>");
+					sb.append("<xsl:value-of select=\"" + this._tag.path("row", link.getAttribute("value"), tableName, isFull) + "\" />");
 				} else if(link.hasAttribute("type") && link.getAttribute("type").equals("external")) {
 					sb.append(link.getAttribute("path"));
 				} else {
@@ -434,7 +435,6 @@ public class XSLGenerator {
 								continue;
 							}
 						}
-//						this.cond(sb, col, true);
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
@@ -443,7 +443,6 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -470,14 +469,12 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
-//						this.cond(sb, col, true);
 						sb.append(this.td(col, "td"));
 						sb.append(this.column(col, false, tab.getAttribute("name")));
 						sb.appendL(this._html.tdE());
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 						
 					}
 					sb.appendL(this._html.trE());
@@ -506,13 +503,11 @@ public class XSLGenerator {
 							if(authInfo != null) {
 								sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 							}
-//							this.cond(sb, col, true);
 							sb.append(this.td(col, "th"));
 							sb.appendL(col.getAttribute("label") + this._html.thE());
 							if(authInfo != null) {
 								sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 							}
-//							this.cond(sb, col, false);
 						}
 						sb.appendL(this._html.trE());
 					}
@@ -539,7 +534,6 @@ public class XSLGenerator {
 					if(rowAuthInfo != null) {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(rowAuthInfo, this._params) + "\">");
 					}
-//					this.cond(sb, row, true);
 					sb.appendL(this._html.tr());
 					this._expr = this._xpath.compile("column");
 					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
@@ -557,7 +551,6 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
-//						this.cond(sb, col, true);
 						sb.appendL(this._html.thG(col.getAttribute("name")));
 						if(!XML.trueAttrValue(tab, "single")) {
 							if(XML.emptyAttrValue(col, "islabel") || !XML.falseAttrValue(col, "islabel")) {
@@ -582,13 +575,11 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 					if(rowAuthInfo != null) {
 						sb.appendL("</xsl:if>");
 					}
-//					this.cond(sb, row, false);
 				}
 				if(
 					XML.trueAttrValue(table, "multi") &&
@@ -853,7 +844,6 @@ public class XSLGenerator {
 					if(authInfo != null) {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 					}
-//					this.cond(sb, col, true);
 					if(col.hasAttribute("width")) {
 						sb.appendL(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">" + col.getAttribute("label") + this._html.thE());
 					} else {
@@ -862,7 +852,6 @@ public class XSLGenerator {
 					if(authInfo != null) {
 						sb.appendL("</xsl:if>");
 					}
-//					this.cond(sb, col, false);
 				}
 				sb.appendL(this._html.trE());
 				sb.appendL(this._html.theadE());
@@ -883,7 +872,6 @@ public class XSLGenerator {
 					if(authInfo != null) {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 					}
-//					this.cond(sb, col, true);
 					if(col.hasAttribute("width")) {
 						sb.appendL(this._html.td(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">");
 					} else {
@@ -902,7 +890,6 @@ public class XSLGenerator {
 					if(authInfo != null) {
 						sb.appendL("</xsl:if>");
 					}
-//					this.cond(sb, col, false);
 				}
 				sb.appendL(this._html.trE());
 				sb.appendL("</xsl:for-each>");
@@ -928,13 +915,11 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
-//						this.cond(sb, col, true);
 						sb.append(this.td(col, "th"));
 						sb.appendL(col.getAttribute("label") + this._html.thE());
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -960,7 +945,6 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
-//						this.cond(sb, col, true);
 						sb.append(this.td(col, "td"));
 						if(x == 0 && i == 0) {
 							this._expr = this._xpath.compile("column[@type = 'hidden']");
@@ -975,7 +959,6 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 					}
 					sb.appendL(this._html.trE());
 				}
@@ -1003,7 +986,6 @@ public class XSLGenerator {
 					if(rowAuthInfo != null) {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(rowAuthInfo, this._params) + "\">");
 					}
-//					this.cond(sb, row, true);
 					if(row.hasAttribute("height")) {
 						sb.append(this._html.trS() + " style=\"height:" + row.getAttribute("height") + ";\">");
 					} else {
@@ -1025,7 +1007,6 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 						}
-//						this.cond(sb, col, true);
 						sb.appendL(this._html.thG(col.getAttribute("name")));
 						if(!col.hasAttribute("islabel") || !col.getAttribute("islabel").equals("false")) {
 							if(col.hasAttribute("labelWidth")) {
@@ -1069,13 +1050,11 @@ public class XSLGenerator {
 						if(authInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-//						this.cond(sb, col, false);
 					}
 					sb.append(this._html.trE());
 					if(rowAuthInfo != null) {
 						sb.appendL("</xsl:if>");
 					}
-//					this.cond(sb, row, false);
 				}
 				if(
 					XML.trueAttrValue(table, "multi") &&
@@ -1133,6 +1112,14 @@ public class XSLGenerator {
 		String name = col.getAttribute("name");
 		String value = col.getAttribute("value");
 		String upperName = "row";
+		
+		String defaultValue = null;
+		if(XML.validAttrValue(col, "default")) {
+			defaultValue = col.getAttribute("default");
+		}
+		String defaultUpperName = "row";
+		boolean isFullDefault = isFull;
+		
 		if(value.startsWith("param.")) {
 			value = value.substring(6);
 			upperName = "param";
@@ -1148,17 +1135,41 @@ public class XSLGenerator {
 		} else if(value.startsWith("query.")) {
 			value = value.substring(6);
 		}
+		if(defaultValue != null) {
+			if(defaultValue.startsWith("param.")) {
+				defaultValue = defaultValue.substring(6);
+				defaultUpperName = "param";
+				isFullDefault = true;
+			} else if(defaultValue.startsWith("prop.")) {
+				defaultValue = defaultValue.substring(5);
+				defaultUpperName = "prop";
+				isFullDefault = true;
+			} else if(defaultValue.startsWith("result.")) {
+				defaultValue = defaultValue.substring(7);
+				defaultUpperName = "result";
+				isFullDefault = true;
+			} else if(defaultValue.startsWith("query.")) {
+				defaultValue = defaultValue.substring(6);
+			}
+		}
 		boolean isReadonly = false;
 		boolean isDisabled = false;
 		String valueExpr = null;
-		String valueExpr2 = null;
+		
+		String defaultValueExpr = null;
+		
 		if(value == null || value.trim().equals("")) {
 			valueExpr = "";
-			valueExpr2 = "";
 		} else {
 			valueExpr = this._tag.path(upperName, value, tableName, isFull);
-			valueExpr2 = "{" + valueExpr + "}";
 		}
+		
+		if(defaultValue == null || defaultValue.trim().equals("")) {
+			defaultValueExpr = "";
+		} else {
+			defaultValueExpr = this._tag.path(defaultUpperName, defaultValue, tableName, isFullDefault);
+		}
+		
 		this._expr = this._xpath.compile("tables/table[@name = '" + tableName + "']/column[@name = '" + value + "']");
 		Element e = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
 		if(col.getAttribute("type").equals("radio")) {
@@ -1170,9 +1181,20 @@ public class XSLGenerator {
 				sb.append("		<xsl:attribute name=\"value\">");
 				sb.append("<xsl:value-of select=\"@" + this._tag.path("code", "value", null, isFull) + "\" />");
 				sb.appendL("</xsl:attribute>");
-				sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
-				sb.appendL("			<xsl:attribute name=\"checked\">true</xsl:attribute>");
-				sb.appendL("		</xsl:if>");
+				if(defaultValue != null) {
+					sb.appendL("		<xsl:choose>");
+					sb.appendL("			<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != '' and @" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
+					sb.appendL("				<xsl:attribute name=\"checked\">true</xsl:attribute>");
+					sb.appendL("			</xsl:when>");
+					sb.appendL("			<xsl:when test=\"(not(" + valueExpr + ") or " + valueExpr + " = '') and @" + this._tag.path("code", "value", null, isFull) + " = " + defaultValueExpr + "\">");
+					sb.appendL("				<xsl:attribute name=\"checked\">true</xsl:attribute>");
+					sb.appendL("			</xsl:when>");
+					sb.appendL("		</xsl:choose>");
+				} else {
+					sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
+					sb.appendL("			<xsl:attribute name=\"checked\">true</xsl:attribute>");
+					sb.appendL("		</xsl:if>");
+				}
 				sb.appendL("	</input>");
 				sb.appendL("	<label><xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" /></label>");
 				sb.appendL("</xsl:for-each>");
@@ -1185,9 +1207,20 @@ public class XSLGenerator {
 					sb.appendL("	<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
 					sb.appendL("	<xsl:attribute name=\"type\">radio</xsl:attribute>");
 					sb.appendL("	<xsl:attribute name=\"value\">" + option.getAttribute("value") + "</xsl:attribute>");
-					sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
-					sb.appendL("		<xsl:attribute name=\"checked\">true</xsl:attribute>");
-					sb.appendL("	</xsl:if>");
+					if(defaultValue != null) {
+						sb.appendL("	<xsl:choose>");
+						sb.appendL("		<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != '' and " + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+						sb.appendL("			<xsl:attribute name=\"checked\">true</xsl:attribute>");
+						sb.appendL("		</xsl:when>");
+						sb.appendL("		<xsl:when test=\"(not(" + valueExpr + ") or " + valueExpr + " = '') and " + defaultValueExpr + " = '" + option.getAttribute("value") + "'\">");
+						sb.appendL("			<xsl:attribute name=\"checked\">true</xsl:attribute>");
+						sb.appendL("		</xsl:when>");
+						sb.appendL("	</xsl:choose>");
+					} else {
+						sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+						sb.appendL("		<xsl:attribute name=\"checked\">true</xsl:attribute>");
+						sb.appendL("	</xsl:if>");
+					}
 					sb.appendL("</input>");
 					sb.appendL("<label>" + option.getAttribute("label") + "</label>");
 				}
@@ -1275,39 +1308,87 @@ public class XSLGenerator {
 				}
 			}
 			if(col.getAttribute("type").equals("textarea")) {
-				sb.append("<xsl:value-of select=\"" + valueExpr + "\" />");
+				if(defaultValue != null) {
+					sb.appendL("<xsl:choose>");
+					sb.appendL("<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != ''\">");
+					sb.appendL("<xsl:value-of select=\"" + valueExpr + "\" />");
+					sb.appendL("</xsl:when>");
+					sb.appendL("<xsl:otherwise>");
+					sb.appendL("<xsl:value-of select=\"" + defaultValueExpr + "\" />");
+					sb.appendL("</xsl:otherwise>");
+					sb.appendL("</xsl:choose>");
+				} else {
+					sb.append("<xsl:value-of select=\"" + valueExpr + "\" />");
+				}
 			} else {
 				if(valueExpr != null && !valueExpr.equals("")) {
 					if(XML.equalsIgnoreCaseAttrValue(col, "type", "checkbox")) {
 						if(col.getAttribute("val") != null && !col.getAttribute("val").equals("")) {
-							sb.appendL("<xsl:if test=\"" + valueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:if>");
+							if(defaultValue != null) {
+								sb.appendL("<xsl:choose>");
+								sb.appendL("<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != '' and " + valueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:when>");
+								sb.appendL("<xsl:when test=\"(not(" + valueExpr + ") or " + valueExpr + " = '') and " + defaultValueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:when>");
+								sb.appendL("</xsl:choose>");
+							} else {
+								sb.appendL("<xsl:if test=\"" + valueExpr + " = '" + col.getAttribute("val") + "'\"><xsl:attribute name=\"checked\">checked</xsl:attribute></xsl:if>");
+							}
 						}
 						sb.appendL("	<xsl:attribute name=\"value\">" + col.getAttribute("val") + "</xsl:attribute>");
 					} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && !XML.validAttrValue(col, "icon")) {
 						sb.appendL("	<xsl:attribute name=\"value\">" + value + "</xsl:attribute>");
 					} else if(col.hasAttribute("fmt")) {
 						sb.appendL("<xsl:choose>");
-						sb.appendL("<xsl:when test=\"" + valueExpr + " != ''\">");
+						sb.appendL("<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != ''\">");
 						sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"format-number(" + valueExpr + ", '" + col.getAttribute("fmt") + "')\"/></xsl:attribute>");
 						sb.appendL("</xsl:when>");
+						if(defaultValue != null) {
+							sb.appendL("<xsl:when test=\"" + defaultValueExpr + " and " + defaultValueExpr + " != ''\">");
+							sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"format-number(" + defaultValueExpr + ", '" + col.getAttribute("fmt") + "')\"/></xsl:attribute>");
+							sb.appendL("</xsl:when>");
+						}
 						sb.appendL("<xsl:otherwise>");
 						sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
 						sb.appendL("</xsl:otherwise>");
 						sb.appendL("</xsl:choose>");
 					} else {
+						if(defaultValue != null) {
+							sb.appendL("<xsl:choose>");
+							sb.appendL("<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != ''\">");
+							sb.appendL("<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
+							sb.appendL("</xsl:when>");
+							sb.appendL("<xsl:otherwise>");
+							sb.appendL("<xsl:attribute name=\"value\"><xsl:value-of select=\"" + defaultValueExpr + "\"/></xsl:attribute>");
+							sb.appendL("</xsl:otherwise>");
+							sb.appendL("</xsl:choose>");
+						} else {
 							sb.appendL("	<xsl:attribute name=\"value\"><xsl:value-of select=\"" + valueExpr + "\"/></xsl:attribute>");
+						}
 					}
 				}
 			}
 			if(col.getAttribute("type").equals("select")) {
 				if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
-					sb.appendL("<xsl:variable name=\"selected\"><xsl:value-of select=\"" + valueExpr + "\" /></xsl:variable>");
+					if(defaultValue != null) {
+					} else {
+						sb.appendL("<xsl:variable name=\"selected\"><xsl:value-of select=\"" + valueExpr + "\" /></xsl:variable>");
+					}
 					sb.appendL("<xsl:for-each select=\"" + this._tag.path("code", "option", col.getAttribute("for"), isFull) + "\">");
 					sb.appendL("	<option>");
 					sb.appendL("		<xsl:attribute name=\"value\"><xsl:value-of select=\"@" + this._tag.path("code", "value", null, isFull) + "\"/></xsl:attribute>");
-					sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = $selected\">");
-					sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
-					sb.appendL("		</xsl:if>");
+					if(defaultValue != null) {
+						sb.appendL("<xsl:choose>");
+							sb.appendL("		<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != '' and @" + this._tag.path("code", "value", null, isFull) + " = " + valueExpr + "\">");
+							sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+							sb.appendL("		</xsl:when>");
+							sb.appendL("		<xsl:when test=\"(not(" + valueExpr + ") or " + valueExpr + " = '') and @" + this._tag.path("code", "value", null, isFull) + " = " + defaultValueExpr + "\">");
+							sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+							sb.appendL("		</xsl:when>");
+						sb.appendL("</xsl:choose>");
+					} else {
+						sb.appendL("		<xsl:if test=\"@" + this._tag.path("code", "value", null, isFull) + " = $selected\">");
+						sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+						sb.appendL("		</xsl:if>");
+					}
 					sb.appendL("		<xsl:value-of select=\"@" + this._tag.path("code", "label", null, isFull) + "\" />");
 					sb.appendL("	</option>");
 					sb.appendL("</xsl:for-each>");
@@ -1318,9 +1399,20 @@ public class XSLGenerator {
 						Element option = (Element)options.item(q);
 						sb.appendL("<option>");
 						sb.appendL("	<xsl:attribute name=\"value\">" + option.getAttribute("value") + "</xsl:attribute>");
-						sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
-						sb.appendL("		<xsl:attribute name=\"selected\">selected</xsl:attribute>");
-						sb.appendL("	</xsl:if>");
+						if(defaultValue != null) {
+							sb.appendL("	<xsl:choose>");
+							sb.appendL("		<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != '' and " + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+							sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+							sb.appendL("		</xsl:when>");
+							sb.appendL("		<xsl:when test=\"(not(" + valueExpr + ") or " + valueExpr + " = '') and " + defaultValueExpr + " = '" + option.getAttribute("value") + "'\">");
+							sb.appendL("			<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+							sb.appendL("		</xsl:when>");
+							sb.appendL("	</xsl:choose>");
+						} else {
+							sb.appendL("	<xsl:if test=\"" + valueExpr + " = '" + option.getAttribute("value") + "'\">");
+							sb.appendL("		<xsl:attribute name=\"selected\">selected</xsl:attribute>");
+							sb.appendL("	</xsl:if>");
+						}
 						sb.appendL(option.getAttribute("label"));
 						sb.appendL("</option>");
 					}
@@ -1451,17 +1543,9 @@ public class XSLGenerator {
 						continue;
 					}
 				}
-				/*
-				if(link.hasAttribute("cond") && link.getAttribute("cond") != null) {
-					if(!(AuthParser.auth(link.getAttribute("cond"), this._params))) {
-						continue;
-					}
-				}
-				*/
 				if(authInfo != null) {
 					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 				}
-//				this.cond(sb, link, true);
 				if(XML.emptyAttrValue(link, "full") || !XML.trueAttrValue(link, "full")) {
 					String name = "";
 					if(link.hasAttribute("name") && !link.getAttribute("name").equals("")) {
@@ -1540,7 +1624,6 @@ public class XSLGenerator {
 						sb.append("<input type=\"submit\" value=\"" + link.getAttribute("label") + "\" form=\"" + this._query.getAttribute("id") + "\" id=\"" + this._query.getAttribute("id") + "_submit\" />");
 					}
 				}
-//				this.cond(sb, link, false);
 				if(authInfo != null) {
 					sb.appendL("</xsl:if>");
 				}
@@ -1562,14 +1645,6 @@ public class XSLGenerator {
 				if(authInfo != null) {
 					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 				}
-				/*
-				if(search.hasAttribute("cond") && search.getAttribute("cond") != null) {
-					if(!(AuthParser.auth(search.getAttribute("cond"), this._params))) {
-						continue;
-					}
-				}
-				this.cond(sb, search, true);
-				*/
 				String name = "";
 				if(search.hasAttribute("name") && !search.getAttribute("name").equals("")) {
 					name = " name=\"" + search.getAttribute("name") + "\" class=\"" + search.getAttribute("name") + "\"";
@@ -1648,7 +1723,6 @@ public class XSLGenerator {
 				if(authInfo != null) {
 					sb.appendL("</xsl:if>");
 				}
-//				this.cond(sb, search, false);
 			}
 		}
 		return sb;
