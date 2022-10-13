@@ -240,7 +240,7 @@ public class XSLGenerator {
 		String tableName
 	) throws XPathExpressionException {
 		Buffer sb = new Buffer();
-		this.cond(sb, column, true);
+//		this.cond(sb, column, true);
 		if(column.getChildNodes().getLength() > 0) {
 			this._expr = this._xpath.compile("link");
 			Element link = (Element)this._expr.evaluate(column, XPathConstants.NODE);
@@ -290,7 +290,7 @@ public class XSLGenerator {
 		} else {
 			sb.append(this.code(column, isFull, tableName));
 		}
-		this.cond(sb, column, false);
+//		this.cond(sb, column, false);
 		return sb;
 	}
 	private Buffer code(
@@ -597,6 +597,7 @@ public class XSLGenerator {
 		return sb;
 		
 	}
+	/*
 	private void cond(Buffer sb, Element element, boolean start) {
 		if(this._tag.isRDF) {
 			if(
@@ -624,6 +625,7 @@ public class XSLGenerator {
 			}
 		}
 	}
+	*/
 	private void fileLI(NodeList files, Buffer sb, String before, String after) {
 		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
 			for(int y = 0; y < files.getLength(); y++) {
