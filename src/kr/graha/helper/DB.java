@@ -677,6 +677,18 @@ public final class DB {
  * sql 구문을 실행한다.
  * 지원하는 데이타 유형의 범위와 방식에 대해서는 getJavaDataType 메소드의 설명을 참조하라.
  * params 파라미터를 바인딩 하는 것과 관련해서 bind 메소드를 참조한다.  null 은 허용되지 않는다.
+ * @param con 데이타베이스 연결(Connection) 객체
+ * @param sql 실행할 sql 구문
+ * @param params 바인딩할 파라미터
+ * @return 갱신된 카운트(PreparedStatement.getUpdateCount)를 반환한다.
+ */
+	public static int execute(Connection con, String sql, Object[] params) throws SQLException {
+		return execute(con, null, sql, params);
+	}
+/**
+ * sql 구문을 실행한다.
+ * 지원하는 데이타 유형의 범위와 방식에 대해서는 getJavaDataType 메소드의 설명을 참조하라.
+ * params 파라미터를 바인딩 하는 것과 관련해서 bind 메소드를 참조한다.  null 은 허용되지 않는다.
  * c 파라미터는 java.util.HashMap 이거나 generateClassSource 만들어진 것이 좋지만, 그렇지 않을 경우 Reference type 중 Class Type 으로만 구성되어야 하는데, Primitive type 은 null 값을 가질 수 없기 때문이다.
  * @param con 데이타베이스 연결(Connection) 객체
  * @param c 데이타를 반환한 class
@@ -711,6 +723,10 @@ public final class DB {
 				}
 			}
 			if(pstmt.execute()) {
+				if(c == null) {
+					DB.close(pstmt);
+					throw new RuntimeException("Parameter Class c is not allow null!!!");
+				}
 				rs = pstmt.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				while(rs.next()) {
