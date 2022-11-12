@@ -66,18 +66,39 @@ table tbody td a {
 <script>
 function gen() {
 	var list = document.querySelectorAll("input[type='checkbox']");
-	var isSubmit = false;
+	var isChecked = false;
+	var isError = false;
+	var checked = new Array();
 	if(list != null) {
 		for(var i = 0; i &lt; list.length; i++) {
 			if(list[i].checked) {
-				document.getElementById("list_frm").action = "select";
-				document.getElementById("list_frm").submit();
-				isSubmit = true;
+				isChecked = true;
+				var name = list[i].name;
+				if(name.indexOf(".") > 0) {
+					var schemaName;
+					var tableNamee
+					if(name.indexOf(".") == name.lastIndexOf(".")) {
+						var schemaName = "";
+						var tableName = name.substring(name.indexOf(".") + 1);
+					} else {
+						var schemaName = name.substring(name.indexOf(".") + 1, name.lastIndexOf("."));
+						var tableName = name.substring(name.lastIndexOf(".") + 1);
+					}
+					if(checked[tableName]) {
+						alert("Error : Duplicate table name!!!");
+						isError = true;
+					} else {
+						checked[tableName] = schemaName;
+					}
+				}
 			}
 		}
 	}
-	if(!isSubmit) {
+	if(!isChecked) {
 		alert("No Selected Table!!!");
+	} else if(!isError) {
+		document.getElementById("list_frm").action = "select";
+		document.getElementById("list_frm").submit();
 	}
 }
 </script>
