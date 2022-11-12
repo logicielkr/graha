@@ -746,10 +746,54 @@ function calculation(obj) {
 		}
 	}
 }
+function check() {
+	var list = getList("input", "row_count_input");
+	for(var i = 0; i &lt; list.length; i++) {
+		if(list[i].disabled) {
+		} else if(isNumberic(list[i].value)){
+		} else {
+			alert("Error : Enter only numbers, Row Count");
+			list[i].focus();
+			return false;
+		}
+	}
+	
+	list = getList("input", "insert_validation_info");
+	for(var i = 0; i &lt; list.length; i++) {
+		if(isNumberic(list[i].value)){
+		} else {
+			alert("Error : Enter only numbers, Validation Length");
+			list[i].focus();
+			return false;
+		}
+	}
+	var isSearch = document.getElementById("search");
+	
+	if(isSearch.checked) {
+		list = getList("input", "list_search_column");
+		var cnt = 0;
+		for(var i = 0; i &lt; list.length; i++) {
+			if(list[i].disabled) {
+			} else if(list[i].checked) {
+				cnt++;
+			}
+		}
+		if(cnt == 0) {
+			alert("Error : Search Column not checked");
+		}
+	}
+	return true;
+}
+function isNumberic(v) {
+	if(!isNaN(Number(v)) &amp;&amp; !isNaN(parseInt(v)) &amp;&amp; parseInt(v).toString() == v) {
+		return true;
+	}
+	return false;
+}
 </script>
 </head>
 <body>
-<form action="gen" method="post" class="conf">
+<form action="gen" method="post" class="conf" onsubmit="return check();">
 	<xsl:for-each select="/document/params/table">
 		<xsl:sort select="@master" order="descending" />
 		<input type="hidden" name="tables" value="{@name}" />
