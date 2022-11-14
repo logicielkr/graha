@@ -297,11 +297,12 @@ public class Manager extends HttpServlet {
 			sb.append("<driver>" + m.getDriverName() + "</driver>");
 			sb.append("<driver_version>" + m.getDriverVersion() + "</driver_version>");
 			sb.append("</param></params>");
+			sb.append(cm.getPropertyList("list"));
 			sb.append("</document>");
 
 			con.close();
 			con = null;
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
@@ -435,11 +436,12 @@ public class Manager extends HttpServlet {
 				sb.append("<jndi>" + request.getParameter("jndi") + "</jndi>");
 			}
 			sb.append("</param></params>");
+			sb.append(cm.getPropertyList("table"));
 			sb.append("</document>");
 			
 			con.close();
 			con = null;
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
@@ -628,8 +630,10 @@ public class Manager extends HttpServlet {
 			if(ownerColumnByDef != null && !ownerColumnByDef.equals("")) {
 				sb.append("<prop><owner_column>" + ownerColumnByDef + "</owner_column></prop>");
 			}
-			sb.append("</params></document>");
-		} catch (SQLException | NamingException e) {
+			sb.append("</params>\n");
+			sb.append(cm.getPropertyList("select"));
+			sb.append("</document>");
+		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
@@ -697,6 +701,7 @@ public class Manager extends HttpServlet {
 				sb.append("<param type=\"r\"><jndi>" + request.getParameter("jndi") + "</jndi></param>");
 			}
 			sb.append("</params>");
+			sb.append(cm.getPropertyList("redirect"));
 			sb.append("</document>");
 		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
@@ -835,11 +840,12 @@ public class Manager extends HttpServlet {
 				sb.append("<jndi>" + request.getParameter("jndi") + "</jndi>");
 			}
 			sb.append("</param></params>");
+			sb.append(cm.getPropertyList("data"));
 			sb.append("</document>");
 			
 			con.close();
 			con = null;
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException | NamingException | IOException e) {
 			sb.setLength(0);
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		} finally {
@@ -1033,11 +1039,12 @@ public class Manager extends HttpServlet {
 				sb.append("<gen><![CDATA[" + XML.fix(bw.toString()) + "]]></gen>");
 				sb.append("</row></rows>");
 			}
+			sb.append(cm.getPropertyList("query"));
 			sb.append("</document>");
 			
 			con.close();
 			con = null;
-		} catch (NamingException e) {
+		} catch (NamingException | IOException e) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			sb.setLength(0);
 		} catch (java.sql.SQLSyntaxErrorException e) {

@@ -8,8 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Table Data</title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/data.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 body, input, textarea, select, button, table, p, td, a {
@@ -112,7 +111,10 @@ table tbody td a {
 			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 		</input>
 	</xsl:if>
-	<input type="submit" value="Search" />
+	<input>
+		<xsl:attribute name="type">submit</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/data.button.search.label" /></xsl:attribute>
+	</input>
 </form>
 <form action="list" style="float:right">
 <xsl:if test="/document/params/param/jndi">
@@ -122,7 +124,17 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<!--
 <input type="submit" value="Table List"  style="display:inline-block;float:right" />
+-->
+
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/data.button.table_list.label" /></xsl:attribute>
+</input>
+
+
 </form>
 <form action="query" style="float:right">
 <xsl:if test="/document/params/param/jndi">
@@ -132,7 +144,13 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<!--
 <input type="submit" value="SQL Runner" />
+-->
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/data.button.sql_runner.label" /></xsl:attribute>
+</input>
 </form>
 <table style="width:100%;">
 	<thead>

@@ -6,8 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title></title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/redirect.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>
 body {
@@ -34,7 +33,7 @@ div.wrapper div.link form {
 <body>
 <div class="wrapper">
 	<xsl:if test="count(/document/params/param[@type='f']/path) > 0">
-		<h3>File Created</h3>
+		<h3><xsl:value-of select="/document/props/redirect.document.file_created.label" /></h3>
 		<ul>
 			<xsl:for-each select="/document/params/param[@type='f']/path">
 				<li><xsl:value-of select="." /></li>
@@ -50,10 +49,10 @@ div.wrapper div.link form {
 				<xsl:attribute name="type">submit</xsl:attribute>
 				<xsl:choose>
 					<xsl:when test="not(/document/params/param[@type='s']/auto_redirect) or /document/params/param[@type='s']/auto_redirect != 'false'">
-						<xsl:attribute name="value">Confirm</xsl:attribute>
+						<xsl:attribute name="value"><xsl:value-of select="/document/props/redirect.button.confirm.label" /></xsl:attribute>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:attribute name="value">Table List</xsl:attribute>
+						<xsl:attribute name="value"><xsl:value-of select="/document/props/redirect.button.table_list.label" /></xsl:attribute>
 					</xsl:otherwise>
 				</xsl:choose>
 			</input>
@@ -62,7 +61,7 @@ div.wrapper div.link form {
 			<form method="get" action="{.}">
 				<input>
 					<xsl:attribute name="type">submit</xsl:attribute>
-					<xsl:attribute name="value">Go App</xsl:attribute>
+					<xsl:attribute name="value"><xsl:value-of select="/document/props/redirect.button.go_app.label" /></xsl:attribute>
 				</input>
 			</form>
 		</xsl:for-each>

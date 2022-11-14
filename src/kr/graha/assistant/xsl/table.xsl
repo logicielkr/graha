@@ -8,8 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Table Info</title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/table.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 body, input, textarea, select, button, table, p, td, a {
@@ -112,7 +111,13 @@ table tbody td a {
 			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 		</input>
 	</xsl:if>
+	<!--
 	<input type="submit" value="Search" />
+	-->
+	<input>
+		<xsl:attribute name="type">submit</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.search.label" /></xsl:attribute>
+	</input>
 </form>
 <form action="list" style="float:right">
 <xsl:if test="/document/params/param/jndi">
@@ -122,7 +127,13 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<!--
 <input type="submit" value="Table List" />
+-->
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.table_list.label" /></xsl:attribute>
+</input>
 </form>
 <form action="query" style="float:right">
 <xsl:if test="/document/params/param/jndi">
@@ -132,7 +143,13 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<!--
 <input type="submit" value="SQL Runner" />
+-->
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.sql_runner.label" /></xsl:attribute>
+</input>
 </form>
 <form method="post" action="table">
 <xsl:if test="/document/params/param/jndi">
@@ -196,7 +213,14 @@ table tbody td a {
 		</xsl:otherwise>
 	</xsl:choose>
 </input>
+<!--
 <input type="submit" value="Save Comments" style="display:inline-block;" />
+-->
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="style">display:inline-block;</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.save_comments.label" /></xsl:attribute>
+</input>
 </form>
 <ul>
 	<li>DatabaseProductName : <xsl:value-of select="/document/params/param/name" /></li>

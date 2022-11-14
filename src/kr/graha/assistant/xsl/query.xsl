@@ -8,8 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>SQL Runner</title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/query.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 body, input, textarea, select, button, table, p, td, a {
@@ -74,9 +73,9 @@ table tbody td a {
 }
 </style>
 <script>
-<![CDATA[
+
 function ctrlenter(e) {
-	if((e.keyCode == 13 || e.keyCode == 10) && e.ctrlKey) {
+	if((e.keyCode == 13 || e.keyCode == 10) &amp;&amp; e.ctrlKey) {
 		document.getElementById("query").submit();
 		if(Storage) {
 			localStorage.selectionStart = document.getElementById('sql').selectionStart;
@@ -91,7 +90,7 @@ function bodyload() {
 	document.getElementById('sql').focus();
 	document.getElementById('sql').setSelectionRange(localStorage.selectionStart, localStorage.selectionEnd);
 	if(Storage) {
-		if(document.getElementById('sql').value != null && document.getElementById('sql').value != "" && !document.getElementById("_error")) {
+		if(document.getElementById('sql').value != null &amp;&amp; document.getElementById('sql').value != "" &amp;&amp; !document.getElementById("_error")) {
 			var cnt = localStorage.sqlHistoryCount;
 			if(cnt == null || cnt == "") {
 				cnt = 0;
@@ -102,7 +101,9 @@ function bodyload() {
 		}
 		var txt = "";
 		for(var i = localStorage.sqlHistoryCount; i > 0; i--) {
-			txt += "<li idx='" + i + "' ondblclick='setHistory(this)' style='white-space:pre-line;margin-top:10px;'>" + localStorage.getItem("sqlHistory" + i) + "</li>";
+<![CDATA[
+			txt += ("<li idx='" + i + "' ondblclick='setHistory(this)' style='white-space:pre-line;margin-top:10px;'>" + localStorage.getItem("sqlHistory" + i) + "</li>");
+//]]>
 		}
 		document.getElementById("_history").innerHTML = txt;
 	}
@@ -110,18 +111,23 @@ function bodyload() {
 function toggleGen(obj) {
 	if(document.getElementById('gen').style.display == "block") {
 		document.getElementById('gen').style.display='none';
-		obj.value = "Graha XML Config";
+		obj.value = "<xsl:value-of select="/document/props/query.button.generation.label" />";
 	} else {
 		document.getElementById('gen').style.display='block';
-		obj.value = "Hide Graha XML Config";
+		obj.value = "<xsl:value-of select="/document/props/query.button.generation.hide.label" />";
 	}
 }
-//]]>
+
 </script>
 </head>
 <body onload="bodyload()">
 <form action="list" style="float:right">
-<input type="submit" value="Table List"  style="display:inline-block;float:right" />
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.table_list.label" /></xsl:attribute>
+</input>
+
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -153,11 +159,19 @@ function toggleGen(obj) {
 		</select>
 	</xsl:if>
 	<textarea name="sql" style="width:100%;height:100px;" onkeypress="ctrlenter(event)" id="sql"><xsl:value-of select="/document/params/param/sql" /></textarea>
-	<input type="submit" value="Search" />
+	<input>
+		<xsl:attribute name="type">submit</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.execute.label" /></xsl:attribute>
+	</input>
 </form>
 <form class="graha_xml_config">
 <xsl:if test="/document/rows[@id='gen']/row/gen">
-	<input type="button" value="Graha XML Config" onclick="toggleGen(this)" />
+	<input>
+		<xsl:attribute name="type">button</xsl:attribute>
+		<xsl:attribute name="onclick">toggleGen(this)</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.generation.label" /></xsl:attribute>
+	</input>
+	
 	<textarea name="gen" id="gen" style="width:100%;height:100px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
 </xsl:if>
 </form>

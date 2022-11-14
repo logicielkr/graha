@@ -27,6 +27,8 @@ import javax.servlet.ServletRegistration;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
+import kr.graha.helper.LOG;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -34,6 +36,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * Graha(그라하) Manager Connection Manager
@@ -58,6 +63,7 @@ public class CManager {
 	private List<String> jndis = null;
 	private int majorVersion;
 	private int minorVersion;
+	private Properties _messges = null;
 	protected CManager(ServletConfig c, HttpServletRequest request) {
 		this.c = c;
 		this.request = request;
@@ -113,9 +119,60 @@ public class CManager {
 			return this.jndis.toArray(new String[]{});
 		}
 	}
-	protected String getResource() {
+	private String getResource() {
 		return this.resource;
 	}
+	protected Properties getMessages() throws IOException {
+		if(this._messges == null) {
+			this._messges = new Properties();
+			if(this.getResource() == null) {
+				this._messges.load(getClass().getResourceAsStream("resource/ko.properties"));
+			} else {
+				this._messges.load(getClass().getResourceAsStream(this.getResource()));
+			}
+		}
+		return this._messges;
+	}
+	protected StringBuffer getPropertyList(String prefix) throws IOException {
+		Properties messges = this.getMessages();
+		Enumeration names = messges.propertyNames();
+		StringBuffer sb = new StringBuffer();
+		int index = 0;
+		while(names.hasMoreElements()) {
+			String name = (String)names.nextElement();
+			if(name.startsWith(prefix + ".")) {
+				if(index == 0) {
+					sb.append("<props>\n");
+				}
+				sb.append("<");
+				sb.append(name);
+				sb.append(">");
+				sb.append("<![CDATA[");
+				sb.append(this.getProperty(messges, name));
+				sb.append("]]>");
+				sb.append("</");
+				sb.append(name);
+				sb.append(">\n");
+				index++;
+			}
+		}
+		if(index > 0) {
+			sb.append("</props>\n");
+		}
+		return sb;
+	}
+	protected String getProperty(Properties messges, String key) {
+		String value = messges.getProperty(key);
+		if(value != null) {
+			try {
+				return new String(value.getBytes("iso-8859-1"), "UTF-8");
+			} catch (java.io.UnsupportedEncodingException e) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+			}
+		}
+		return null;
+	}
+
 	protected String getDef() {
 		return this.def;
 	}

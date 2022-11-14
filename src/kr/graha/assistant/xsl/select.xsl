@@ -8,8 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Select Master Table</title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/select.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 body, input, textarea, select, button, table, p, td, a {
@@ -174,6 +173,9 @@ table.view td.calculation {
 	white-space:nowrap;
 }
 
+select.auth_column {
+	margin-right:20px;
+}
 </style>
 <script>
 function getList(prefix, className) {
@@ -723,7 +725,7 @@ function calculation(obj) {
 			func = "comma";
 		}
 		if(func != null) {
-			var expr = funct + "(";
+			var expr = func + "(";
 			if(tableName == masterTableName) {
 				expr += columnName.toLowerCase() + ")";
 			} else {
@@ -731,14 +733,14 @@ function calculation(obj) {
 				var relation = getElementByClassAndName("select", "relation_select", "relation_" + tableName);
 				if(relation == null) {
 					expr += ")";
-					alert("Unknown Error(relation is null)");
+					alert("<xsl:value-of select="/document/props/select.message.generation.relation_is_null.error.msg" />");
 				} else {
 					if(relation.value == "1") {
 						expr += ")";
 					} else if(relation.value == "many") {
 						expr += ".{N})";
 					} else {
-						alert("Unknown Error(relation.value = " + relation.value + ")");
+						alert("<xsl:value-of select="/document/props/select.message.generation.relation_value_unknown.error.msg" /> : " + relation.value + "");
 					}
 				}
 			}
@@ -752,7 +754,7 @@ function check() {
 		if(list[i].disabled) {
 		} else if(isNumberic(list[i].value)){
 		} else {
-			alert("Error : Enter only numbers, Row Count");
+			alert("<xsl:value-of select="/document/props/select.message.generation.row_count.error.msg" />");
 			list[i].focus();
 			return false;
 		}
@@ -762,7 +764,7 @@ function check() {
 	for(var i = 0; i &lt; list.length; i++) {
 		if(isNumberic(list[i].value)){
 		} else {
-			alert("Error : Enter only numbers, Validation Length");
+			alert("<xsl:value-of select="/document/props/select.message.generation.validation_length.error.msg" />");
 			list[i].focus();
 			return false;
 		}
@@ -779,7 +781,7 @@ function check() {
 			}
 		}
 		if(cnt == 0) {
-			alert("Error : Search Column not checked");
+			alert("<xsl:value-of select="/document/props/select.message.generation.search_column.error.msg" />");
 		}
 	}
 	return true;
@@ -805,10 +807,10 @@ function isNumberic(v) {
 			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 		</input>
 	</xsl:if>
-	<h3 class="basic">1. Basic</h3>
+	<h3 class="basic">1. <xsl:value-of select="/document/props/select.document.basic.label" /></h3>
 	<table class="basic">
 		<tr>
-			<th>Master Table</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.master_table.label" /></th>
 			<td>
 				<select name="table" onChange="changeMasterTable(this)" id="masterTableName">
 					<xsl:for-each select="/document/params/table[@master = 'true']">
@@ -824,19 +826,19 @@ function isNumberic(v) {
 			</td>
 		</tr>
 		<tr>
-			<th>XML File Name</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.xml_file_name.label" /></th>
 			<td>
 				<input type="text" name="xml_file_name" id="xml_file_name" value="{/document/params/table[@master = 'true']/@xml_file_name}" />
 			</td>
 		</tr>
 		<tr>
-			<th>File Upload</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.file_upload.label" /></th>
 			<td>
 				<input type="checkbox" name="file_upload" value="true" />
 			</td>
 		</tr>
 		<tr>
-			<th>Authentication</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.authentication.label" /></th>
 			<td>
 				<input type="checkbox" name="authentication" value="true" onClick="clickAuthentication(this)" />
 			</td>
@@ -860,18 +862,18 @@ function isNumberic(v) {
 								</xsl:if>
 							</xsl:for-each>
 						</select>
-						* Select Authentication Column
+						<xsl:value-of select="/document/props/select.table.basic.select_authentication_column.label" />
 				</td>
 			</tr>
 		</xsl:for-each>
 		<tr>
-			<th>Search</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.search.label" /></th>
 			<td>
 				<input type="checkbox" name="search" value="true" onClick="clickSearch(this)" id="search" />
 			</td>
 		</tr>
 		<tr>
-			<th>List Type</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.list_type.label" /></th>
 			<td>
 				<select name="list_type">
 					<option value="page">page</option>
@@ -880,7 +882,7 @@ function isNumberic(v) {
 			</td>
 		</tr>
 		<tr>
-			<th>Width(Header Column)(Detail and Insert/Update)</th>
+			<th><xsl:value-of select="/document/props/select.table.basic.width.label" /></th>
 			<td>
 				<input type="text" name="header_column_width" value="120px" />
 			</td>
@@ -888,13 +890,13 @@ function isNumberic(v) {
 	</table>
 	<xsl:variable name="master_table_name"><xsl:value-of select="/document/params/table[@master = 'true']/@name" /></xsl:variable>
 	<xsl:if test="count(/document/params/table) > 1">
-		<h3 class="tables">2. Tables</h3>
+		<h3 class="tables">2. <xsl:value-of select="/document/props/select.document.tables.label" /></h3>
 		<table class="tables">
 			<tr>
-				<th class="table_name">Table Name</th>
-				<th class="relation">Relation</th>
-				<th class="header_position">Header Position(Detail/Insert)</th>
-				<th class="row_count">Row Count</th>
+				<th class="table_name"><xsl:value-of select="/document/props/select.table.tables.table_name.label" /></th>
+				<th class="relation"><xsl:value-of select="/document/props/select.table.tables.relation.label" /></th>
+				<th class="header_position"><xsl:value-of select="/document/props/select.table.tables.header_position.label" /></th>
+				<th class="row_count"><xsl:value-of select="/document/props/select.table.tables.row_count.label" /></th>
 			</tr>
 			<xsl:for-each select="/document/params/table">
 				<xsl:sort select="@master" order="descending" />
@@ -955,7 +957,7 @@ function isNumberic(v) {
 		</table>
 	</xsl:if>
 	
-	<h3 class="view"><xsl:choose><xsl:when test="count(/document/params/table) > 1">3</xsl:when><xsl:otherwise>2</xsl:otherwise></xsl:choose>. Display</h3>
+	<h3 class="view"><xsl:choose><xsl:when test="count(/document/params/table) > 1">3</xsl:when><xsl:otherwise>2</xsl:otherwise></xsl:choose>. <xsl:value-of select="/document/props/select.document.display.label" /></h3>
 	<xsl:for-each select="/document/params/table">
 		<xsl:sort select="@master" order="descending" />
 		<xsl:variable name="table_name"><xsl:value-of select="@name" /></xsl:variable>
@@ -964,47 +966,50 @@ function isNumberic(v) {
 		<table class="view {@name}">
 			<tr>
 				<th class="column" colspan="1">
-					Column <span class="column_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'column')">(+)</span>
+					<xsl:value-of select="/document/props/select.table.display.column.label" /> <span class="column_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'column')">(+)</span>
 					<span class="column_header_hide {@name}" onClick="showOrHideColumn(this, '{@name}', 'column')">(-)</span>
 				</th>
-				<th class="format" rowspan="2">Format</th>
+				<th class="format" rowspan="2"><xsl:value-of select="/document/props/select.table.display.format.label" /></th>
 				<xsl:if test="count(/document/params/codes/code) > 0">
-					<th class="code" rowspan="2">Code</th>
+					<th class="code" rowspan="2"><xsl:value-of select="/document/props/select.table.display.code.label" /></th>
 				</xsl:if>
 				<th class="list" colspan="1">
-					List <span class="list_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'list')">(+)</span>
+					<xsl:value-of select="/document/props/select.table.display.list.label" /> <span class="list_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'list')">(+)</span>
 					<span class="list_header_hide {@name}" onClick="showOrHideColumn(this, '{@name}', 'list')">(-)</span>
 				</th>
 				<th class="detail" colspan="1">
-					Detail <span class="detail_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'detail')">(+)</span>
+					<xsl:value-of select="/document/props/select.table.display.detail.label" /> <span class="detail_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'detail')">(+)</span>
 					<span class="detail_header_hide {@name}" onClick="showOrHideColumn(this, '{@name}', 'detail')">(-)</span>
 				</th>
 				<th class="insert" colspan="1">
-					Insert/Update <span class="insert_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'insert')">(+)</span>
+					<xsl:value-of select="/document/props/select.table.display.insert_or_update.label" /> <span class="insert_header {@name}" onClick="showOrHideColumn(this, '{@name}', 'insert')">(+)</span>
 					<span class="insert_header_hide {@name}" onClick="showOrHideColumn(this, '{@name}', 'insert')">(-)</span>
 				</th>
 			</tr>
 			<tr>
-				<th class="column_name">Name</th>
-				<th class="comments_hidden">Comments</th>
-				<th class="data_type_name_hidden">Data Type Name</th>
-				<th class="graha_data_type_hidden">Graha Data Type</th>
-				<th class="view">View</th>
-				<th class="link_hidden">Link</th>
-				<th class="align_hidden">Align</th>
-				<th class="width_hidden">Width</th>
-				<th class="search_hidden">Search</th>
-				<th class="hide_mobile_hidden">Hide(Mobile)</th>
-				<th class="view">View</th>
-				<th class="detail_align_hidden">Align</th>
-				<th class="detail_width_hidden">Width</th>
-				<th class="detail_hide_mobile_hidden">Hide(Mobile)</th>
-				<th class="view">View</th>
-				<th class="insert_align_hidden">Align</th>
-				<th class="insert_width_hidden">Width</th>
-				<th class="validation_hidden">Validation</th>
-				<th class="calculation_hidden">Calculation</th>
-				<th class="readonly_hidden">Readonly</th>
+				<th class="column_name"><xsl:value-of select="/document/props/select.table.display.column_name.label" /></th>
+				<th class="comments_hidden"><xsl:value-of select="/document/props/select.table.display.column_comments.label" /></th>
+				<th class="data_type_name_hidden"><xsl:value-of select="/document/props/select.table.display.column_data_type_name.label" /></th>
+				<th class="graha_data_type_hidden"><xsl:value-of select="/document/props/select.table.display.column_graha_data_type.label" /></th>
+				
+				<th class="view"><xsl:value-of select="/document/props/select.table.display.list_view.label" /></th>
+				<th class="link_hidden"><xsl:value-of select="/document/props/select.table.display.list_link.label" /></th>
+				<th class="align_hidden"><xsl:value-of select="/document/props/select.table.display.list_align.label" /></th>
+				<th class="width_hidden"><xsl:value-of select="/document/props/select.table.display.list_width.label" /></th>
+				<th class="search_hidden"><xsl:value-of select="/document/props/select.table.display.list_search.label" /></th>
+				<th class="hide_mobile_hidden"><xsl:value-of select="/document/props/select.table.display.list_hide_mobile.label" /></th>
+				
+				<th class="view"><xsl:value-of select="/document/props/select.table.display.detail_view.label" /></th>
+				<th class="detail_align_hidden"><xsl:value-of select="/document/props/select.table.display.detail_align.label" /></th>
+				<th class="detail_width_hidden"><xsl:value-of select="/document/props/select.table.display.detail_width.label" /></th>
+				<th class="detail_hide_mobile_hidden"><xsl:value-of select="/document/props/select.table.display.detail_hide_mobile.label" /></th>
+				
+				<th class="view"><xsl:value-of select="/document/props/select.table.display.insert_view.label" /></th>
+				<th class="insert_align_hidden"><xsl:value-of select="/document/props/select.table.display.insert_align.label" /></th>
+				<th class="insert_width_hidden"><xsl:value-of select="/document/props/select.table.display.insert_width.label" /></th>
+				<th class="validation_hidden"><xsl:value-of select="/document/props/select.table.display.insert_validation.label" /></th>
+				<th class="calculation_hidden"><xsl:value-of select="/document/props/select.table.display.insert_calculation.label" /></th>
+				<th class="readonly_hidden"><xsl:value-of select="/document/props/select.table.display.insert_readonly.label" /></th>
 			</tr>
 			<xsl:for-each select="column">
 				<tr>
@@ -1271,7 +1276,15 @@ function isNumberic(v) {
 			</xsl:for-each>
 		</table>
 	</xsl:for-each>
-	<div style="width:100%;text-align:center;"><input type="submit" value="Generation"/></div>
+	<div style="width:100%;text-align:center;">
+		<input>
+			<xsl:attribute name="type">submit</xsl:attribute>
+			<xsl:attribute name="value"><xsl:value-of select="/document/props/select.button.generation.label" /></xsl:attribute>
+		</input>
+		<!--
+		<input type="submit" value="Generation"/>
+		-->
+	</div>
 </form>
 </body>
 </html>

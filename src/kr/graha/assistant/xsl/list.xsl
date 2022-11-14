@@ -8,8 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Table List</title>
-<meta http-equiv="Content-Language" content="Korean" />
+<title><xsl:value-of select="/document/props/list.document.title" /></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 body, input, textarea, select, button, table, p, td, a {
@@ -85,7 +84,7 @@ function gen() {
 						var tableName = name.substring(name.lastIndexOf(".") + 1);
 					}
 					if(checked[tableName]) {
-						alert("Error : Duplicate table name!!!");
+						alert("<xsl:value-of select="/document/props/list.message.generation.duplicate_table_name.error.msg" />");
 						isError = true;
 					} else {
 						checked[tableName] = schemaName;
@@ -95,7 +94,7 @@ function gen() {
 		}
 	}
 	if(!isChecked) {
-		alert("No Selected Table!!!");
+		alert("<xsl:value-of select="/document/props/list.message.generation.no_selected_table.error.msg" />");
 	} else if(!isError) {
 		document.getElementById("list_frm").action = "select";
 		document.getElementById("list_frm").submit();
@@ -125,7 +124,10 @@ function gen() {
 				</xsl:choose>
 			</xsl:for-each>
 		</select>
-		<input type="submit" value="Search" />
+		<input>
+			<xsl:attribute name="type">submit</xsl:attribute>
+			<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.search.label" /></xsl:attribute>
+		</input>
 	</form>
 </xsl:if>
 <form action="list" style="float:right" method="post">
@@ -136,7 +138,18 @@ function gen() {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<!--
 <input type="button" value="Generation"  style="display:inline-block;float:right" onclick="gen()" />
+-->
+<input>
+	<xsl:attribute name="type">button</xsl:attribute>
+	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
+	<xsl:attribute name="onclick">gen();</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.generation.label" /></xsl:attribute>
+</input>
+
+
+
 </form>
 <form action="query" style="float:right">
 <xsl:if test="/document/params/param/jndi">
@@ -146,7 +159,13 @@ function gen() {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.sql_runner.label" /></xsl:attribute>
+</input>
+<!--
 <input type="submit" value="SQL Runner" />
+-->
 </form>
 <form method="post" id="list_frm" action="list">
 <xsl:if test="/document/params/param/jndi">
@@ -162,10 +181,10 @@ function gen() {
 		
 			<th />
 			
-			<th style="padding:8px;">Schema</th>
-			<th style="width:100px;padding:10px;">Table Name</th>
-			<th style="width:100px;padding:10px;">Type</th>
-			<th style="padding:8px;">Comments</th>
+			<th style="padding:8px;"><xsl:value-of select="/document/props/list.table.schema.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/list.table.table_name.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/list.table.type.label" /></th>
+			<th style="padding:8px;"><xsl:value-of select="/document/props/list.table.comments.label" /></th>
 			<th style="padding:8px;" colspan="2" />
 		</tr>
 	</thead>
@@ -211,20 +230,23 @@ function gen() {
 			<td style="text-align:center;padding:10px;">
 				<a>
 					<xsl:attribute name="href">table?table=<xsl:if test="table_schem"><xsl:value-of select="table_schem" />.</xsl:if><xsl:value-of select="table_name" /><xsl:if test="/document/params/param/jndi">&amp;jndi=<xsl:value-of select="/document/params/param/jndi" /></xsl:if></xsl:attribute>
-					Table Info
+					<xsl:value-of select="/document/props/list.table.table_info.label" />
 				</a>
 			</td>
 			<td style="text-align:center;padding:10px;">
 				<a>
 					<xsl:attribute name="href">data?table=<xsl:if test="table_schem"><xsl:value-of select="table_schem" />.</xsl:if><xsl:value-of select="table_name" /><xsl:if test="/document/params/param/jndi">&amp;jndi=<xsl:value-of select="/document/params/param/jndi" /></xsl:if></xsl:attribute>
-					View Data
+					<xsl:value-of select="/document/props/list.table.view_data.label" />
 				</a>
 			</td>
 		</tr>
 		</xsl:for-each>
 	</tbody>
 </table>
-<input type="submit" value="Save Comments" />
+<input>
+	<xsl:attribute name="type">submit</xsl:attribute>
+	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.save_comments.label" /></xsl:attribute>
+</input>
 </form>
 <ul>
 	<li>DatabaseProductName : <xsl:value-of select="/document/params/param/name" /></li>

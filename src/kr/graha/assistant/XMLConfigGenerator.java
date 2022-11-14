@@ -76,12 +76,7 @@ public final class XMLConfigGenerator {
 	}
 	private void init() throws SQLException, IOException {
 		this._db = DBUtil.getDBUtil(this._con, this._cm.getDef(), this._cm.getMapping());
-		this._messges = new Properties();
-		if(this._cm.getResource() == null) {
-			this._messges.load(getClass().getResourceAsStream("resource/ko.properties"));
-		} else {
-			this._messges.load(getClass().getResourceAsStream(this._cm.getResource()));
-		}
+		this._messges = this._cm.getMessages();
 	}
 	private void addFile(String filePath) {
 		if(this.files == null) {
@@ -407,19 +402,8 @@ public final class XMLConfigGenerator {
 			return "";
 		}
 	}
-	private String getProperty(Properties messges, String key) {
-		String value = messges.getProperty(key);
-		if(value != null) {
-			try {
-				return new String(value.getBytes("iso-8859-1"), "UTF-8");
-			} catch (java.io.UnsupportedEncodingException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-		}
-		return null;
-	}
 	private String getProperty(String key) {
-		return this.getProperty(this._messges, key);
+		return this._cm.getProperty(this._messges, key);
 	}
 	private Table getMasterTable() throws SQLException {
 		if(this._masterTable != null) {
@@ -1063,11 +1047,11 @@ public final class XMLConfigGenerator {
 		bw.write("		<layout>\n");
 		bw.write("			<top>\n");
 		bw.write("				<left>\n");
-		bw.write("					<link name=\"insert\" label=\"" + this.getProperty("button.new.label") + "\" path=\"/" + xmlName + "/insert\" />\n");
+		bw.write("					<link name=\"insert\" label=\"" + this.getProperty("gen.button.new.label") + "\" path=\"/" + xmlName + "/insert\" />\n");
 		bw.write("				</left>\n");
 		if(this.search()) {
 			bw.write("				<center>\n");
-			bw.write("					<search label=\"" + this.getProperty("button.search.label") + "\" path=\"/" + xmlName + "/list\">\n");
+			bw.write("					<search label=\"" + this.getProperty("gen.button.search.label") + "\" path=\"/" + xmlName + "/list\">\n");
 			bw.write("						<params>\n");
 			index = 0;
 			for(Column col : masterTable.cols) {
@@ -1342,13 +1326,13 @@ public final class XMLConfigGenerator {
 			}
 			bw.write("		</files>\n");
 		}
-		bw.write("		<layout msg=\"" + this.getProperty("message.save.confirm.msg") + "\">\n");
+		bw.write("		<layout msg=\"" + this.getProperty("gen.message.save.confirm.msg") + "\">\n");
 		bw.write("			<top>\n");
 		bw.write("				<left />\n");
 		bw.write("				<center />\n");
 		bw.write("				<right>\n");
 		if(this.page() || this.search()) {
-			bw.write("					<link name=\"list\" label=\"" + this.getProperty("button.list.label") + "\" path=\"/" + xmlName + "/list\">\n");
+			bw.write("					<link name=\"list\" label=\"" + this.getProperty("gen.button.list.label") + "\" path=\"/" + xmlName + "/list\">\n");
 			bw.write("						<params>\n");
 			if(this.page()) {
 				bw.write("							<param name=\"page\" type=\"param\" value=\"page\" />\n");
@@ -1372,9 +1356,9 @@ public final class XMLConfigGenerator {
 			bw.write("						</params>\n");
 			bw.write("					</link>\n");
 		} else {
-			bw.write("					<link name=\"list\" label=\"" + this.getProperty("button.list.label") + "\" path=\"/" + xmlName + "/list\" />\n");
+			bw.write("					<link name=\"list\" label=\"" + this.getProperty("gen.button.list.label") + "\" path=\"/" + xmlName + "/list\" />\n");
 		}
-		bw.write("					<link name=\"save\" label=\"" + this.getProperty("button.save.label") + "\" path=\"/" + xmlName + "/insert\" method=\"post\" type=\"submit\" full=\"true\">\n");
+		bw.write("					<link name=\"save\" label=\"" + this.getProperty("gen.button.save.label") + "\" path=\"/" + xmlName + "/insert\" method=\"post\" type=\"submit\" full=\"true\">\n");
 		bw.write("						<params>\n");
 		
 		for(Column col : masterTable.cols) {
@@ -1729,7 +1713,7 @@ public final class XMLConfigGenerator {
 		bw.write("				<center />\n");
 		bw.write("				<right>\n");
 		if(this.page() || this.search()) {
-			bw.write("					<link name=\"list\" label=\"" + this.getProperty("button.list.label") + "\" path=\"/" + xmlName + "/list\">\n");
+			bw.write("					<link name=\"list\" label=\"" + this.getProperty("gen.button.list.label") + "\" path=\"/" + xmlName + "/list\">\n");
 			bw.write("						<params>\n");
 			if(this.page()) {
 				bw.write("							<param name=\"page\" type=\"param\" value=\"page\" />\n");
@@ -1753,9 +1737,9 @@ public final class XMLConfigGenerator {
 			bw.write("						</params>\n");
 			bw.write("					</link>\n");
 		} else {
-			bw.write("					<link name=\"list\" label=\"" + this.getProperty("button.list.label") + "\" path=\"/" + xmlName + "/list\" />\n");
+			bw.write("					<link name=\"list\" label=\"" + this.getProperty("gen.button.list.label") + "\" path=\"/" + xmlName + "/list\" />\n");
 		}
-		bw.write("					<link name=\"update\" label=\"" + this.getProperty("button.update.label") + "\" path=\"/" + xmlName + "/insert\">\n");
+		bw.write("					<link name=\"update\" label=\"" + this.getProperty("gen.button.update.label") + "\" path=\"/" + xmlName + "/insert\">\n");
 		bw.write("						<params>\n");
 		
 		for(Column col : masterTable.cols) {
@@ -1837,7 +1821,7 @@ public final class XMLConfigGenerator {
 		bw.write("			</middle>\n");
 		bw.write("			<bottom>\n");
 		bw.write("				<left>\n");
-		bw.write("					<link label=\"" + this.getProperty("button.del.label") + "\" path=\"/" + xmlName + "/delete\" method=\"post\" type=\"submit\" msg=\"" + this.getProperty("message.del.confirm.msg") + "\">\n");
+		bw.write("					<link label=\"" + this.getProperty("gen.button.del.label") + "\" path=\"/" + xmlName + "/delete\" method=\"post\" type=\"submit\" msg=\"" + this.getProperty("gen.message.del.confirm.msg") + "\">\n");
 		bw.write("						<params>\n");
 		
 		for(Column col : masterTable.cols) {
