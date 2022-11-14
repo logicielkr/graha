@@ -243,10 +243,12 @@ function gen() {
 		</xsl:for-each>
 	</tbody>
 </table>
-<input>
-	<xsl:attribute name="type">submit</xsl:attribute>
-	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.save_comments.label" /></xsl:attribute>
-</input>
+<div style="width:100%;text-align:center;">
+	<input>
+		<xsl:attribute name="type">submit</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.save_comments.label" /></xsl:attribute>
+	</input>
+</div>
 </form>
 <ul>
 	<li>DatabaseProductName : <xsl:value-of select="/document/params/param/name" /></li>

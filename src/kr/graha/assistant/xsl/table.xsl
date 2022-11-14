@@ -162,12 +162,12 @@ table tbody td a {
 <table style="width:100%;">
 	<thead>
 		<tr style="background-color:#788BBD;">
-			<th style="padding:8px;">Column Name</th>
-			<th style="width:100px;padding:10px;">Data Type</th>
-			<th style="width:100px;padding:10px;">PK</th>
-			<th style="width:100px;padding:10px;">NULL</th>
-			<th style="width:100px;padding:10px;">Auto Increment</th>
-			<th style="padding:8px;">Comments</th>
+			<th style="padding:8px;"><xsl:value-of select="/document/props/table.table.column_name.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/table.table.data_type.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/table.table.pk.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/table.table.null.label" /></th>
+			<th style="width:100px;padding:10px;"><xsl:value-of select="/document/props/table.table.auto_increment.label" /></th>
+			<th style="padding:8px;"><xsl:value-of select="/document/props/table.table.comments.label" /></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -216,11 +216,12 @@ table tbody td a {
 <!--
 <input type="submit" value="Save Comments" style="display:inline-block;" />
 -->
-<input>
-	<xsl:attribute name="type">submit</xsl:attribute>
-	<xsl:attribute name="style">display:inline-block;</xsl:attribute>
-	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.save_comments.label" /></xsl:attribute>
-</input>
+<div style="width:100%;text-align:center;">
+	<input>
+		<xsl:attribute name="type">submit</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.save_comments.label" /></xsl:attribute>
+	</input>
+</div>
 </form>
 <ul>
 	<li>DatabaseProductName : <xsl:value-of select="/document/params/param/name" /></li>
