@@ -173,7 +173,7 @@ public class GeneratorServlet extends HttpServlet {
 							if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]Not exists database connection info"); }
 							throw new ServletException();
 						}
-						con = DBHelper.getConnection(info);
+						con = DBHelper.getConnection(info, params);
 						if(con == null) {
 							if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 							throw new ServletException();
@@ -229,7 +229,7 @@ public class GeneratorServlet extends HttpServlet {
 					throw new ServletException();
 				}
 				if(FileHelper.isRequireConnection(query, "validation/command")) {
-					con = DBHelper.getConnection(info);
+					con = DBHelper.getConnection(info, params);
 					if(con == null) {
 						if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 						throw new ServletException();
@@ -293,7 +293,7 @@ public class GeneratorServlet extends HttpServlet {
 					sb = new Buffer();
 				}
 				if(con == null) {
-					con = DBHelper.getConnection(info);
+					con = DBHelper.getConnection(info, params);
 					if(con == null) {
 						if(logger.isLoggable(Level.SEVERE)) { logger.severe("[SC_INTERNAL_SERVER_ERROR]database connection is null"); }
 						throw new ServletException();

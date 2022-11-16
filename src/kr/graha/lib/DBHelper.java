@@ -64,51 +64,85 @@ import kr.graha.helper.LOG;
 
 public final class DBHelper {
 	private static Logger logger = Logger.getLogger("kr.graha.lib.DBHelper");
+	private static int FOUND_CONNECTION_INFO_QUERY = 1;
+	private static int FOUND_CONNECTION_INFO_EXTENDS = 2;
+	private static int FOUND_CONNECTION_INFO_QUERYS = 3;
+	private static int FOUND_CONNECTION_INFO_PARENT = 4;
+	private static int NOT_FOUND_CONNECTION_INFO = 0;
 	private DBHelper() {
+	}
+	private static int found(Element node, int current) {
+		if(node != null) {
+			return current;
+		} else {
+			return DBHelper.NOT_FOUND_CONNECTION_INFO;
+		}
 	}
 	public static Record getConnectionInfo(Element query, File config) {
 		Record info = new Record();
+		int foundDb = DBHelper.NOT_FOUND_CONNECTION_INFO;
+		int foundNode = DBHelper.NOT_FOUND_CONNECTION_INFO;
 		try {
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
 		
 			XPathExpression expr = xpath.compile("header/jndi");
 			Element node = (Element)expr.evaluate(query, XPathConstants.NODE);
+			expr = xpath.compile("header/connection");
+			Element db = (Element)expr.evaluate(query, XPathConstants.NODE);
 			if(node == null) {
 				expr = xpath.compile("header/jdbc");
 				node = (Element)expr.evaluate(query, XPathConstants.NODE);
 			}
-			if(node == null) {
+			foundDb = found(db, DBHelper.FOUND_CONNECTION_INFO_QUERY);
+			foundNode = found(node, DBHelper.FOUND_CONNECTION_INFO_QUERY);
+			if(node == null || db == null) {
 				if(query.hasAttribute("extends")) {
-					expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/header/jndi");
-					node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+					if(db == null) {
+						expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/header/connection");
+						db = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+						foundDb = found(db, DBHelper.FOUND_CONNECTION_INFO_EXTENDS);
+					}
 					if(node == null) {
-						expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/header/jdbc");
+						expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/header/jndi");
 						node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+						if(node == null) {
+							expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/header/jdbc");
+							node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+						}
+						foundNode = found(node, DBHelper.FOUND_CONNECTION_INFO_EXTENDS);
 					}
 				}
 			}
 			
-			if(node == null) {
-				expr = xpath.compile("header/jndi");
-				node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+			if(node == null || db == null) {
+				if(db == null) {
+					expr = xpath.compile("header/connection");
+					db = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+					foundDb = found(db, DBHelper.FOUND_CONNECTION_INFO_QUERYS);
+				}
+				if(node == null) {
+					expr = xpath.compile("header/jndi");
+					node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+					if(node == null) {
+						expr = xpath.compile("header/jdbc");
+						node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+					}
+					foundNode = found(node, DBHelper.FOUND_CONNECTION_INFO_QUERYS);
+				}
 			}
-			if(node == null) {
-				expr = xpath.compile("header/jdbc");
-				node = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
-			}
-			if(node == null) {
+			if(node == null || db == null) {
 				expr = xpath.compile("header");
 				Element header = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
-				if(header == null) {
+				if(node == null && db == null && header == null) {
 					return null;
 				}
-				if(!header.hasAttribute("extends")) {
+				if(node == null && db == null && !header.hasAttribute("extends")) {
 					return null;
 				}
 				File parent = new File(config.getParent() + File.separator + header.getAttribute("extends"));
 				
-				if(!parent.exists()) {
+				if(node == null && db == null && !parent.exists()) {
 					return null;
 				}
 				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -116,40 +150,87 @@ public final class DBHelper {
 				dbf.setXIncludeAware(true);
 				Document doc = dbf.newDocumentBuilder().parse(parent);
 				doc.getDocumentElement().normalize();
-				expr = xpath.compile("/querys/header/jndi");
-				node = (Element)expr.evaluate(doc, XPathConstants.NODE);
+				if(db == null) {
+					expr = xpath.compile("/querys/header/connection");
+					db = (Element)expr.evaluate(doc, XPathConstants.NODE);
+					foundDb = found(db, DBHelper.FOUND_CONNECTION_INFO_PARENT);
+				}
 				if(node == null) {
-					expr = xpath.compile("/querys/header/jdbc");
+					expr = xpath.compile("/querys/header/jndi");
 					node = (Element)expr.evaluate(doc, XPathConstants.NODE);
+					if(node == null) {
+						expr = xpath.compile("/querys/header/jdbc");
+						node = (Element)expr.evaluate(doc, XPathConstants.NODE);
+					}
+					foundNode = found(node, DBHelper.FOUND_CONNECTION_INFO_PARENT);
 				}
 			}
-			if(node == null) {
+			if(node == null && db == null) {
 				return null;
 			}
-			if(node.getNodeName().equals("jndi")) {
+			if(node != null && node.getNodeName().equals("jndi")) {
 				info.put("type", "jndi");
 				info.put("name", node.getAttribute("name"));
-			} else if(node.getNodeName().equals("jdbc")) {
+			} else if(node != null && node.getNodeName().equals("jdbc")) {
 				info.put("type", "jdbc");
 				info.put("driverClassName", node.getAttribute("driverClassName"));
 				info.put("url", node.getAttribute("url"));
 				info.put("username", node.getAttribute("username"));
 				info.put("password", node.getAttribute("password"));
-			} else {
+			} else if(db == null) {
 				return null;
 			}
-			info.put("sql_list_template", node.getAttribute("sql_list_template"));
-			info.put("sql_cnt_template", node.getAttribute("sql_cnt_template"));
-			info.put("sql_sequence_template", node.getAttribute("sql_sequence_template"));
+			if(db != null) {
+				info.put("factory", node.getAttribute("factory"));
+				info.put("factory_found", foundDb);
+			}
+			if(node != null) {
+				info.put("connection_found", foundNode);
+				info.put("sql_list_template", node.getAttribute("sql_list_template"));
+				info.put("sql_cnt_template", node.getAttribute("sql_cnt_template"));
+				info.put("sql_sequence_template", node.getAttribute("sql_sequence_template"));
+			}
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			e.printStackTrace();
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		return info;
 	}
-	
-	public static Connection getConnection(Record info) {
+	private static ConnectionFactory getConnectionFactory(Record info) {
+		if(!info.containsKey("factory") || !info.containsKey("factory_found")) {
+			return null;
+		}
+		String factoryClassName = (String)info.get("factory");
+		if(factoryClassName == null || factoryClassName.trim().equals("")) {
+			return null;
+		}
+		int foundDb = (int)info.get("factory_found");
+		int foundNode = DBHelper.NOT_FOUND_CONNECTION_INFO;
+		if(info.containsKey("connection_found")) {
+			foundNode = (int)info.get("connection_found");
+			if(foundNode < foundDb) {
+				return null;
+			}
+		}
+		ConnectionFactory factory = null;
+		try {
+			factory = (ConnectionFactory) Class.forName(factoryClassName).getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+			factory = null;
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		}
+		return factory;
+	}
+	public static Connection getConnection(Record info, Record parmas) {
 		Connection con = null;
-		if(info.hasKey("type") && info.getString("type").equals("jndi")) {
+		ConnectionFactory factory = getConnectionFactory(info);
+		if(factory != null) {
+			try {
+				con = factory.getConnection(info, parmas);
+			} catch (SQLException e) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				con = null;
+			}
+		} else if(info.hasKey("type") && info.getString("type").equals("jndi")) {
 			con = DB.getConnection(info.getString("name"));
 		} else if(info.hasKey("type") && info.getString("type").equals("jdbc") && info.hasKey("driverClassName") && info.hasKey("url")) {
 			try {
@@ -157,6 +238,7 @@ public final class DBHelper {
 				con = DriverManager.getConnection(info.getString("url"), info.getString("username"), info.getString("password"));
 			} catch (ClassNotFoundException | SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				con = null;
 			}
 		}
 		return con;
@@ -233,12 +315,23 @@ public final class DBHelper {
 				sql += "\n";
 				
 			} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-				Element e = (Element)n;
-				if(!e.hasAttribute("cond") || AuthParser.auth(e.getAttribute("cond"), params)) {
-					sql += e.getFirstChild().getNodeValue();
-					sql += "\n";
-					
-				}
+					Element e = (Element)n;
+					if(!e.hasAttribute("cond") || AuthParser.auth(e.getAttribute("cond"), params)) {
+						if(n.getNodeName() != null && n.getNodeName().equals("entity")) {
+/*
+이 기능은 신중하게 사용하세요.
+사용자가 입력한 파라미터를 테이블이름 등으로 대체하는 것은
+원칙적으로 허용되지 않는 방식입니다.
+*/
+							Record result  = FileHelper.parse(e.getFirstChild().getNodeValue(), params);
+							if(result != null && result.get("_system.filepath") != null) {
+								sql += result.get("_system.filepath");
+							}
+						} else if(n.getNodeName() != null && n.getNodeName().equals("tile")) {
+							sql += e.getFirstChild().getNodeValue();
+							sql += "\n";
+						}
+					}
 			} else {
 				if(logger.isLoggable(Level.WARNING)) {
 					logger.warning("NodeName = " + n.getNodeName());
@@ -268,7 +361,13 @@ public final class DBHelper {
 		return sql;
 	}
 	protected static String getListSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
-		if(info != null && info.hasKey("sql_list_template")) {
+		ConnectionFactory factory = getConnectionFactory(info);
+		if(factory != null) {
+			String listSQL = factory.getListSql(sql, info, dmd);
+			if(listSQL != null && !listSQL.trim().equals("")) {
+				return listSQL;
+			}
+		} else if(info != null && info.hasKey("sql_list_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
 			Record result = FileHelper.getFilePath(p, info.getString("sql_list_template"));
@@ -290,7 +389,13 @@ public final class DBHelper {
 
 	}
 	protected static String getCountSql(String sql, Record info, DatabaseMetaData dmd) throws SQLException {
-		if(info != null && info.hasKey("sql_cnt_template")) {
+		ConnectionFactory factory = getConnectionFactory(info);
+		if(factory != null) {
+			String countSQL = factory.getCountSql(sql, info, dmd);
+			if(countSQL != null && !countSQL.trim().equals("")) {
+				return countSQL;
+			}
+		} else if(info != null && info.hasKey("sql_cnt_template")) {
 			Record p = new Record();
 			p.put("sql", sql);
 			Record result = FileHelper.getFilePath(p, info.getString("sql_cnt_template"));
@@ -308,7 +413,13 @@ public final class DBHelper {
 		}
 	}
 	protected static String getSeqSql(String name, Record info, DatabaseMetaData dmd) throws SQLException {
-		if(info != null && info.hasKey("sql_sequence_template")) {
+		ConnectionFactory factory = getConnectionFactory(info);
+		if(factory != null) {
+			String seqSQL = factory.getSeqSql(name, info, dmd);
+			if(seqSQL != null && !seqSQL.trim().equals("")) {
+				return seqSQL;
+			}
+		} else if(info != null && info.hasKey("sql_sequence_template")) {
 			Record p = new Record();
 			p.put("name", name);
 			Record result = FileHelper.getFilePath(p, info.getString("sql_sequence_template"));

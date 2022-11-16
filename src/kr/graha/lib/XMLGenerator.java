@@ -444,7 +444,6 @@ public class XMLGenerator {
 						stmtCount = this.prepareStatement(DBHelper.getCountSql(s, this._info, this.dmd));
 					} else {
 						stmtCount = this.prepareStatement(s1);
-						
 					}
 				}
 				
