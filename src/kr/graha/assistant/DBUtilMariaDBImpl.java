@@ -34,7 +34,7 @@ import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
-
+import java.util.Set;
 
 /**
  * Graha(그라하) MariaDB를 위한 데이타베이스 유틸리티
@@ -155,6 +155,15 @@ SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
 				}
 			}
 		}
+	}
+	protected Set getCommentByColumnName(Connection con, String columnName) {
+		try {
+			createCommentTable(con, false);
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			return null;
+		}
+		return super.getCommentByColumnNameFromGrahaColComments(con, columnName, false);
 	}
 	protected Hashtable<String, String> getTableComments(Connection con, String schemaName, String tableName) {
 		return getComments(con, schemaName, tableName, true);

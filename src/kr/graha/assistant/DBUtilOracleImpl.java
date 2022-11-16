@@ -34,6 +34,7 @@ import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Graha(그라하) 오라클을 위한 데이타베이스 유틸리티
@@ -218,6 +219,9 @@ select * from user_views c where a.table_name = c.view_name
 			}
 		}
 		return 0;
+	}
+	protected Set getCommentByColumnNameFromGrahaColComments(Connection con, String columnName) {
+		return super.getCommentByColumnNameFromGrahaColComments(con, columnName, true);
 	}
 	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
 /*

@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
 import kr.graha.helper.LOG;
+import kr.graha.helper.DB;
 import kr.graha.helper.XML;
 
 import javax.servlet.ServletException;
@@ -44,6 +45,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * Graha(그라하) XML 자동생성기
@@ -125,6 +127,8 @@ public class Manager extends HttpServlet {
 			&& !path.equals("/select")
 			&& !path.equals("/table")
 			&& !path.equals("/query")
+			&& !path.equals("/options")
+			&& !path.equals("/gen_from_query")
 		) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found path : " + path); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -141,6 +145,10 @@ public class Manager extends HttpServlet {
 			_table(request, response);
 		} else if(path != null && path.equals("/query")) {
 			query(request, response);
+		} else if(path != null && path.equals("/options")) {
+			_options(request, response);
+		} else if(path != null && path.equals("/gen_from_query")) {
+			_gen_from_query(request, response);
 		}
 	}
 	private void xsl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -536,6 +544,244 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
+	private void _options(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Connection con = null;
+		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
+		request.setCharacterEncoding(charset);
+		CManager cm = new CManager(this.getServletConfig(), request);
+		if(!cm.valid()) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		StringBuffer sb = new StringBuffer();
+		try {
+			con = cm.getConnection();
+			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
+			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=options\" ?>");
+			sb.append("<document>");
+			sb.append("<columns>");
+			int columnCount = 0;
+			java.util.Enumeration<String> e = request.getParameterNames();
+	
+			while (e.hasMoreElements()) {
+				String key = cm.value(e.nextElement());
+				if(key != null && key.startsWith("column.")) {
+/*
+sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) + "</column>");
+*/
+						sb.append("<column key=\"" + key + "\">");
+						sb.append("<name>" + cm.value(request.getParameter(key)) + "</name>");
+						Set labels = db.getCommentByColumnName(con, cm.value(request.getParameter(key)));
+//						System.out.println(labels);
+						if(labels != null && !labels.isEmpty()) {
+							sb.append("<labels>");
+							java.util.Iterator<String> it = labels.iterator();
+							while(it.hasNext()) {
+								String label = (String)it.next();
+								sb.append("<label>" + label + "</label>");
+							}
+							sb.append("</labels>");
+						}
+						sb.append("</column>");
+						
+						columnCount++;
+				}
+			}
+			sb.append("</columns>");
+			sb.append("<params>");
+			if(columnCount > 0) {
+				sb.append("<param name=\"column_count\">" + columnCount + "</param>");
+			}
+			e = request.getParameterNames();
+			while (e.hasMoreElements()) {
+				String key = cm.value(e.nextElement());
+				if(key != null && !key.startsWith("column.")) {
+						sb.append("<param name=\"" + key + "\">" + cm.value(request.getParameter(key)) + "</param>");
+				}
+			}
+			sb.append("</params>");
+			sb.append(cm.getPropertyList("options"));
+			sb.append("</document>");
+			con.close();
+			con = null;
+		} catch (SQLException | NamingException | IOException e) {
+			sb.setLength(0);
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		} finally {
+			if(con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				}
+			}
+		}
+		if(sb.length() > 0) {
+			response.setContentType("text/xml; charset=UTF-8");
+			response.getWriter().append(sb);
+		} else {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+		}
+//		response.setContentType("text/xml; charset=UTF-8");
+//		response.getWriter().append(sb);
+	}
+	private void _gen_from_query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
+		request.setCharacterEncoding(charset);
+		CManager cm = new CManager(this.getServletConfig(), request);
+		if(!cm.valid()) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		Connection con = null;
+		DatabaseMetaData dmd = null;
+		boolean oracleType = false;
+		try {
+			con = cm.getConnection();
+			dmd = con.getMetaData();
+			if(dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || dmd.getDatabaseProductName().equalsIgnoreCase("Tibero")) {
+				oracleType = true;
+			}
+			DB.close(con);
+		} catch (SQLException | NamingException e) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		} finally {
+			DB.close(con);
+		}
+		String id = cm.param("query_id");
+		String label = cm.param("query_label");
+		if(label.trim().equals("")) {
+			label = id;
+		}
+		String fetched = cm.param("fetched");
+		String updated = cm.param("updated");
+		
+		int fetchedCount = -1;
+		int updatedCount = -1;
+		if(!fetched.trim().equals("")) {
+			try {
+				fetchedCount = Integer.valueOf(fetched);
+			} catch (NumberFormatException e) {
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+			}
+		}
+		if(!updated.trim().equals("")) {
+			try {
+				updatedCount = Integer.valueOf(updated);
+			} catch (NumberFormatException e) {
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+			}
+		}
+		
+		String funcType = cm.param("func_type");
+		if(updatedCount >= 0) {
+			funcType = "query";
+		}
+
+		String redirectPath = cm.param("redirect_path");
+		String print = cm.param("print");
+		String file = cm.param("file");
+		String filePath = cm.param("file_path");
+		String sql = cm.param("sql");
+		int columnCount = 0;
+		if(!cm.param("column_count").trim().equals("")) {
+			try {
+				columnCount = Integer.valueOf(cm.param("column_count"));
+			} catch (NumberFormatException e) {
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+			}
+		}
+		
+		StringBuffer bw = new StringBuffer();
+		bw.append("	<query id=\"" + id + "\" funcType=\"" + funcType + "\" label=\"" + label + "\">\n");
+		bw.append("		<header>\n");
+		bw.append("		</header>\n");
+		bw.append("		<commands>\n");
+		bw.append("			<command name=\"" + id + "\">\n");
+		bw.append("				<sql>\n");
+		bw.append(sql);
+		bw.append("\n");
+		bw.append("				</sql>\n");
+		if(funcType.equals("list")) {
+			bw.append("				<sql_cnt>\n");
+			bw.append("select count(*) from (\n");
+			bw.append(sql);
+			bw.append("\n");
+			if(oracleType) {
+				bw.append(")\n");
+			} else {
+				bw.append(") as _\n");
+			}
+			bw.append("				</sql_cnt>\n");
+		}
+		bw.append("				<!--params>\n");
+		bw.append("					<param default=\"null\" name=\"input column name!!!\" datatype=\"input data type!!!\" value=\"input value!!!\" />\n");
+		bw.append("				</params-->\n");
+		bw.append("			</command>\n");
+		bw.append("		</commands>\n");
+		if(fetchedCount >= 0) {
+			bw.append("		<layout>\n");
+			bw.append("			<top>\n");
+			bw.append("				<left />\n");
+			bw.append("				<center />\n");
+			bw.append("				<right />\n");
+			bw.append("			</top>\n");
+			bw.append("			<middle>\n");
+			bw.append("				<tab name=\"" + id + "\" label=\"" + label + "\">\n");
+			for(int x = 1; x <= columnCount; x++) {
+				if(funcType.equals("detail")) {
+					bw.append("					<row>\n");
+					bw.append("						<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
+					bw.append("					</row>\n");
+				} else if(funcType.equals("list") || funcType.equals("listAll")) {
+					bw.append("						<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
+				}
+			}
+			bw.append("				</tab>\n");
+			bw.append("			</middle>\n");
+			bw.append("			<bottom>\n");
+			bw.append("				<left />\n");
+			bw.append("				<center />\n");
+			bw.append("				<right />\n");
+			bw.append("			</bottom>\n");
+			bw.append("		</layout>\n");
+		} else if(updatedCount >= 0) {
+			bw.append("		<redirect path=\"" + redirectPath + "\">\n");
+			bw.append("			<!--param name=\"page\" type=\"param\" value=\"page\" /-->\n");
+			bw.append("		</redirect>\n");
+		}
+		bw.append("	</query>\n");
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=gen_from_query\" ?>");
+		sb.append("<document>");
+		sb.append("<rows id=\"gen\"><row>");
+		sb.append("<gen><![CDATA[" + XML.fix(bw.toString()) + "]]></gen>");
+		sb.append("</row></rows>");
+		if(!cm.param("jndi").trim().equals("")) {
+			sb.append("<params>");
+			sb.append("<param name=\"jndi\">" + cm.param("jndi") + "</param>");
+			sb.append("</params>");
+		}
+		try {
+			sb.append(cm.getPropertyList("gen_from_query"));
+			sb.append("</document>");
+		} catch (IOException e) {
+			sb.setLength(0);
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		}
+
+		if(sb.length() > 0) {
+			response.setContentType("text/xml; charset=UTF-8");
+			response.getWriter().append(sb);
+		} else {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+		}
+	}
 	private void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
@@ -878,6 +1124,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
+	/*
 	private StringBuffer getGrahaConfig(String sql, java.util.List<String> columns, int fetchCount) throws SQLException {
 		StringBuffer bw = new StringBuffer();
 		if(columns != null) {
@@ -936,6 +1183,7 @@ public class Manager extends HttpServlet {
 		bw.append("	</query>\n");
 		return bw;
 	}
+	*/
 	private void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
@@ -944,7 +1192,7 @@ public class Manager extends HttpServlet {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuffer sb = new StringBuffer();
-		StringBuffer bw = new StringBuffer();
+//		StringBuffer bw = new StringBuffer();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
@@ -1022,11 +1270,11 @@ public class Manager extends HttpServlet {
 						index++;
 					}
 					sb.append("</rows>");
-					bw = getGrahaConfig(sql, columns, index);
+//					bw = getGrahaConfig(sql, columns, index);
 					rs.close();
 					rs = null;
 				} else {
-					bw = getGrahaConfig(sql, null, pstmt.getUpdateCount());
+//					bw = getGrahaConfig(sql, null, pstmt.getUpdateCount());
 					sb.append("<rows id=\"count\"><row>");
 					sb.append("<count>" + pstmt.getUpdateCount() + "</count>");
 					sb.append("</row></rows>");
@@ -1034,11 +1282,13 @@ public class Manager extends HttpServlet {
 				pstmt.close();
 				pstmt = null;
 			}
+			/*
 			if(bw.length() > 0) {
 				sb.append("<rows id=\"gen\"><row>");
 				sb.append("<gen><![CDATA[" + XML.fix(bw.toString()) + "]]></gen>");
 				sb.append("</row></rows>");
 			}
+			*/
 			sb.append(cm.getPropertyList("query"));
 			sb.append("</document>");
 			
@@ -1058,7 +1308,13 @@ public class Manager extends HttpServlet {
 			sb.append("<error_code>" + e.getErrorCode( ) + "</error_code>");
 			sb.append("<sql_state>" + e.getSQLState( ) + "</sql_state>");
 			sb.append("</error></errors>");
-			sb.append("</document>");
+			try {
+				sb.append(cm.getPropertyList("query"));
+				sb.append("</document>");
+			} catch (IOException ee) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				sb.setLength(0);
+			}
 			
 			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 		} catch (SQLException e) {
@@ -1072,7 +1328,13 @@ public class Manager extends HttpServlet {
 			sb.append("<error_code>" + e.getErrorCode( ) + "</error_code>");
 			sb.append("<sql_state>" + e.getSQLState( ) + "</sql_state>");
 			sb.append("</error></errors>");
-			sb.append("</document>");
+			try {
+				sb.append(cm.getPropertyList("query"));
+				sb.append("</document>");
+			} catch (IOException ee) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				sb.setLength(0);
+			}
 /*
 			for(Throwable t: e){
 				System.out.println(t.getMessage());

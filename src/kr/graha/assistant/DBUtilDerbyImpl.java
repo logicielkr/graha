@@ -34,6 +34,7 @@ import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Graha(그라하) Apache Derby를 위한 데이타베이스 유틸리티
@@ -153,6 +154,15 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 	}
 	protected Hashtable<String, String> getColumnComments(Connection con, String schemaName, String tableName) {
 		return getComments(con, schemaName, tableName, false);
+	}
+	protected Set getCommentByColumnName(Connection con, String columnName) {
+		try {
+			createCommentTable(con, false);
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			return null;
+		}
+		return super.getCommentByColumnNameFromGrahaColComments(con, columnName, false);
 	}
 	private Hashtable<String, String> getComments(Connection con, String schemaName, String tableName, boolean table) {
 		Hashtable<String, String> comment = new Hashtable<String, String>();

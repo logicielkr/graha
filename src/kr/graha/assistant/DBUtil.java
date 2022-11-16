@@ -34,6 +34,9 @@ import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.io.IOException;
 import java.util.Properties;
+import kr.graha.helper.DB;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Graha(그라하) 데이타베이스 유틸리티
@@ -148,6 +151,61 @@ public class DBUtil {
 			}
 		}
 		return sequence;
+	}
+	protected Set getCommentByColumnNameFromGrahaColComments(Connection con, String columnName, boolean oracle) {
+		Set set = new HashSet();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = null;
+		if(oracle) {
+			sql = "select distinct comments from user_col_comments where column_name = ?";
+		} else {
+			sql = "select distinct COMMENTS from GRAHA_COL_COMMENTS where COLUMN_NAME = ?";
+		}
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, columnName);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				if(rs.getString(1) != null && !rs.getString(1).trim().equals("")) {
+					if(!set.contains(rs.getString(1))) {
+						set.add(rs.getString(1));
+					}
+				}
+			}
+			DB.close(rs);
+			DB.close(pstmt);
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+		} finally {
+			DB.close(rs);
+			DB.close(pstmt);
+		}
+		return set;
+	}
+	protected Set getCommentByColumnName(Connection con, String columnName) {
+		Set set = new HashSet();
+		ResultSet rs = null;
+		try {
+			DatabaseMetaData m = con.getMetaData();
+			rs = m.getColumns(con.getCatalog(), "%", "%", columnName);
+			while(rs.next()) {
+				if(rs.getString("REMARKS") != null && !rs.getString("REMARKS").trim().equals("")) {
+					if(rs.getString("TABLE_SCHEM") != null && rs.getString("TABLE_SCHEM").equalsIgnoreCase("INFORMATION_SCHEMA")) {
+						continue;
+					}
+					if(!set.contains(rs.getString("REMARKS"))) {
+						set.add(rs.getString("REMARKS"));
+					}
+				}
+			}
+			DB.close(rs);
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+		} finally {
+			DB.close(rs);
+		}
+		return set;
 	}
 	protected boolean supportBultinDateFormatFunction() {
 		return true;

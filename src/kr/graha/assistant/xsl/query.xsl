@@ -117,7 +117,11 @@ function toggleGen(obj) {
 		obj.value = "<xsl:value-of select="/document/props/query.button.generation.hide.label" />";
 	}
 }
-
+function gen(obj) {
+	document.getElementById("graha_xml_config").action = "options";
+	document.getElementById("graha_xml_config").sql.value = document.getElementById("sql").value;
+	document.getElementById("graha_xml_config").submit();
+}
 </script>
 </head>
 <body onload="bodyload()">
@@ -164,7 +168,8 @@ function toggleGen(obj) {
 		<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.execute.label" /></xsl:attribute>
 	</input>
 </form>
-<form class="graha_xml_config">
+<form class="graha_xml_config" id="graha_xml_config" method="post">
+<!--
 <xsl:if test="/document/rows[@id='gen']/row/gen">
 	<input>
 		<xsl:attribute name="type">button</xsl:attribute>
@@ -173,6 +178,49 @@ function toggleGen(obj) {
 	</input>
 	
 	<textarea name="gen" id="gen" style="width:100%;height:100px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
+</xsl:if>
+-->
+<xsl:if test="/document/rows[@id='count']/row or /document/rows[@id='data']/row or /document/rows[@id='meta']/row">
+	<xsl:if test="/document/rows[@id='count']/row">
+		<input>
+			<xsl:attribute name="type">hidden</xsl:attribute>
+			<xsl:attribute name="name">updated</xsl:attribute>
+			<xsl:attribute name="value"><xsl:value-of select="/document/rows[@id='count']/row/count" /></xsl:attribute>
+		</input>
+	</xsl:if>
+	<xsl:if test="/document/rows[@id='data']/row or /document/rows[@id='meta']/row">
+		<input>
+			<xsl:attribute name="type">hidden</xsl:attribute>
+			<xsl:attribute name="name">fetched</xsl:attribute>
+			<xsl:attribute name="value"><xsl:value-of select="count(/document/rows[@id='data']/row)" /></xsl:attribute>
+		</input>
+		<xsl:if test="/document/rows[@id='meta']/row">
+			<xsl:for-each select="/document/rows[@id='meta']/row/*">
+				<input>
+					<xsl:attribute name="type">hidden</xsl:attribute>
+					<xsl:attribute name="name">column.<xsl:value-of select="position()" /></xsl:attribute>
+					<xsl:attribute name="value"><xsl:value-of select="." /></xsl:attribute>
+				</input>
+			</xsl:for-each>
+		</xsl:if>
+	</xsl:if>
+	<xsl:if test="/document/params/param/jndi">
+		<input>
+			<xsl:attribute name="name">jndi</xsl:attribute>
+			<xsl:attribute name="type">hidden</xsl:attribute>
+			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
+		</input>
+	</xsl:if>
+	<input>
+		<xsl:attribute name="name">sql</xsl:attribute>
+		<xsl:attribute name="type">hidden</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/sql" /></xsl:attribute>
+	</input>
+	<input>
+		<xsl:attribute name="type">button</xsl:attribute>
+		<xsl:attribute name="onclick">gen(this)</xsl:attribute>
+		<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.generation.label" /></xsl:attribute>
+	</input>
 </xsl:if>
 </form>
 <div style="clear:both;" />
