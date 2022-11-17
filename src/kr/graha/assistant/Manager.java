@@ -737,7 +737,7 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 					bw.append("						<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
 					bw.append("					</row>\n");
 				} else if(funcType.equals("list") || funcType.equals("listAll")) {
-					bw.append("						<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
+					bw.append("					<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
 				}
 			}
 			bw.append("				</tab>\n");
