@@ -53,6 +53,7 @@ import java.util.Date;
 import java.sql.Timestamp;
 import kr.graha.helper.DB;
 import kr.graha.helper.LOG;
+import kr.graha.helper.XML;
 
 /**
  * Graha(그라하) 데이타베이스(DB) 관련 유틸리티
@@ -174,6 +175,9 @@ public final class DBHelper {
 			} else if(node != null && node.getNodeName().equals("jdbc")) {
 				info.put("type", "jdbc");
 				info.put("driverClassName", node.getAttribute("driverClassName"));
+				if(XML.validAttrValue(node, "hiddenUrl")) {
+					info.put("hiddenUrl", node.getAttribute("hiddenUrl"));
+				}
 				info.put("url", node.getAttribute("url"));
 				info.put("username", node.getAttribute("username"));
 				info.put("password", node.getAttribute("password"));
@@ -220,12 +224,12 @@ public final class DBHelper {
 		}
 		return factory;
 	}
-	public static Connection getConnection(Record info, Record parmas) {
+	public static Connection getConnection(Record info, Record params) {
 		Connection con = null;
 		ConnectionFactory factory = getConnectionFactory(info);
 		if(factory != null) {
 			try {
-				con = factory.getConnection(info, parmas);
+				con = factory.getConnection(info, params);
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				con = null;
@@ -233,9 +237,19 @@ public final class DBHelper {
 		} else if(info.hasKey("type") && info.getString("type").equals("jndi")) {
 			con = DB.getConnection(info.getString("name"));
 		} else if(info.hasKey("type") && info.getString("type").equals("jdbc") && info.hasKey("driverClassName") && info.hasKey("url")) {
+			String url = null;
+			if(info.hasKey("hiddenUrl")) {
+				Record result  = FileHelper.parse(info.getString("hiddenUrl"), params);
+				if(result != null && result.get("_system.filepath") != null) {
+					url = result.getString("_system.filepath");
+				}
+			}
+			if(url == null) {
+				url = info.getString("url");
+			}
 			try {
 				Class.forName(info.getString("driverClassName"));
-				con = DriverManager.getConnection(info.getString("url"), info.getString("username"), info.getString("password"));
+				con = DriverManager.getConnection(url, info.getString("username"), info.getString("password"));
 			} catch (ClassNotFoundException | SQLException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				con = null;
