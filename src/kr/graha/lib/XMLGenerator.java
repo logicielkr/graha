@@ -507,6 +507,26 @@ public class XMLGenerator {
 						}
 						String value = null;
 						if(
+							this.dmd.getDatabaseProductName().equalsIgnoreCase("SQLite") &&
+							rsmd.getColumnType(x) == java.sql.Types.DATE
+						) {
+							if(
+								rsmd.getColumnTypeName(x).equals("DATETIME") &&
+								rs.getTimestamp(x) != null &&
+								pattern != null &&
+								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+							) {
+								value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+							} else if(
+								rs.getDate(x) != null &&
+								pattern != null &&
+								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+							) {
+								value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+							} else {
+								value = rs.getString(x);
+							}
+						} else if(
 							rsmd.getColumnType(x) == java.sql.Types.DATE &&
 							rs.getDate(x) != null &&
 							pattern != null &&
