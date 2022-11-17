@@ -118,8 +118,14 @@ public class HTMLTag {
 			return "</tr>";
 		}
 	}
-	protected String th(String name) {
-		if(name == null || name.equals("")) {
+	protected String th(String name, boolean isClass) {
+		if(!isClass) {
+			if(div) {
+				return "<div";
+			} else {
+				return "<th";
+			}
+		} else if(name == null || name.equals("")) {
 			if(div) {
 				return "<div class=\"graha th\"";
 			} else {
@@ -158,8 +164,14 @@ public class HTMLTag {
 			return "</th>";
 		}
 	}
-	protected String td(String name) {
-		if(name == null || name.equals("")) {
+	protected String td(String name, boolean isClass) {
+		if(!isClass) {
+			if(div) {
+				return "<div";
+			} else {
+				return "<td";
+			}
+		} else if(name == null || name.equals("")) {
 			if(div) {
 				return "<div class=\"graha td\"";
 			} else {

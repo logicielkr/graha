@@ -164,29 +164,43 @@ public class XSLGenerator {
 			}
 			sb.appendL(this._html.thead());
 			sb.appendL(this._html.tr());
-			this._expr = this._xpath.compile("column");
-			NodeList columns = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
-			for(int i = 0; i < columns.getLength(); i++) {
-				Element column = (Element)columns.item(i);
-				AuthInfo authInfo = null;
-				if(XML.validAttrValue(column, "cond")) {
-					authInfo = AuthParser.parse(column.getAttribute("cond"));
+			NodeList columns = null;
+			if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
+				if(tabs.getLength() == 1) {
+					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
+				} else {
+					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
 				}
-				if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
-					if(!AuthParser.auth(authInfo, this._params)) {
-						continue;
+				sb.appendL(this._html.th(null, false) + ">");
+				sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+				sb.appendL("<xsl:value-of select=\"name(.)\" />");
+				sb.appendL(this._html.thE());
+				sb.appendL("</xsl:for-each>");
+			} else {
+				this._expr = this._xpath.compile("column");
+				columns = (NodeList)this._expr.evaluate(tab, XPathConstants.NODESET);
+				for(int i = 0; i < columns.getLength(); i++) {
+					Element column = (Element)columns.item(i);
+					AuthInfo authInfo = null;
+					if(XML.validAttrValue(column, "cond")) {
+						authInfo = AuthParser.parse(column.getAttribute("cond"));
 					}
-				}
-				if(authInfo != null) {
-					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
-				}
-				sb.appendL(this._html.th(column.getAttribute("name")));
-				if(column.hasAttribute("width")) {
-					sb.appendL(" style=\"width:" + column.getAttribute("width") + "\"");
-				}
-				sb.append(">" + column.getAttribute("label") + this._html.thE());
-				if(authInfo != null) {
-					sb.appendL("</xsl:if>");
+					if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+						if(!AuthParser.auth(authInfo, this._params)) {
+							continue;
+						}
+					}
+					if(authInfo != null) {
+						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+					}
+					sb.appendL(this._html.th(column.getAttribute("name"), true));
+					if(column.hasAttribute("width")) {
+						sb.appendL(" style=\"width:" + column.getAttribute("width") + "\"");
+					}
+					sb.append(">" + column.getAttribute("label") + this._html.thE());
+					if(authInfo != null) {
+						sb.appendL("</xsl:if>");
+					}
 				}
 			}
 			sb.appendL(this._html.trE());
@@ -198,32 +212,41 @@ public class XSLGenerator {
 				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 			}
 			sb.appendL(this._html.tr());
-			for(int i = 0; i < columns.getLength(); i++) {
-				Element column = (Element)columns.item(i);
-				AuthInfo authInfo = null;
-				if(XML.validAttrValue(column, "cond")) {
-					authInfo = AuthParser.parse(column.getAttribute("cond"));
-				}
-				if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
-					if(!AuthParser.auth(authInfo, this._params)) {
-						continue;
-					}
-				}
-				if(authInfo != null) {
-					sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
-				}
-				sb.appendL(this._html.td(column.getAttribute("name")));
-				if(column.hasAttribute("align")) {
-					sb.append(" align=\"" + column.getAttribute("align") + "\"");
-				}
-				if(column.hasAttribute("width")) {
-					sb.append(" style=\"width:" + column.getAttribute("width") + "\"");
-				}
-				sb.append(">");
-				sb.append(this.column(column, false, tab.getAttribute("name")));
+			if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
+				sb.appendL("<xsl:for-each select=\"./*\">");
+				sb.appendL(this._html.td(null, false) + ">");
+				sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+				sb.appendL("<xsl:value-of select=\".\" />");
 				sb.appendL(this._html.tdE());
-				if(authInfo != null) {
-					sb.appendL("</xsl:if>");
+				sb.appendL("</xsl:for-each>");
+			} else {
+				for(int i = 0; i < columns.getLength(); i++) {
+					Element column = (Element)columns.item(i);
+					AuthInfo authInfo = null;
+					if(XML.validAttrValue(column, "cond")) {
+						authInfo = AuthParser.parse(column.getAttribute("cond"));
+					}
+					if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+						if(!AuthParser.auth(authInfo, this._params)) {
+							continue;
+						}
+					}
+					if(authInfo != null) {
+						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+					}
+					sb.appendL(this._html.td(column.getAttribute("name"), true));
+					if(column.hasAttribute("align")) {
+						sb.append(" align=\"" + column.getAttribute("align") + "\"");
+					}
+					if(column.hasAttribute("width")) {
+						sb.append(" style=\"width:" + column.getAttribute("width") + "\"");
+					}
+					sb.append(">");
+					sb.append(this.column(column, false, tab.getAttribute("name")));
+					sb.appendL(this._html.tdE());
+					if(authInfo != null) {
+						sb.appendL("</xsl:if>");
+					}
 				}
 			}
 			sb.appendL(this._html.trE());
@@ -555,9 +578,9 @@ public class XSLGenerator {
 						if(!XML.trueAttrValue(tab, "single")) {
 							if(XML.emptyAttrValue(col, "islabel") || !XML.falseAttrValue(col, "islabel")) {
 								if(col.hasAttribute("labelWidth")) {
-									sb.appendL(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
+									sb.appendL(this._html.th(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
 								} else {
-									sb.appendL(this._html.th(col.getAttribute("name")) + ">" + col.getAttribute("label") + this._html.thE());
+									sb.appendL(this._html.th(col.getAttribute("name"), true) + ">" + col.getAttribute("label") + this._html.thE());
 								}
 							}
 						}
@@ -847,9 +870,9 @@ public class XSLGenerator {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 					}
 					if(col.hasAttribute("width")) {
-						sb.appendL(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">" + col.getAttribute("label") + this._html.thE());
+						sb.appendL(this._html.th(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("width") + ";\">" + col.getAttribute("label") + this._html.thE());
 					} else {
-						sb.appendL(this._html.th(col.getAttribute("name")) + ">" + col.getAttribute("label") + this._html.thE());
+						sb.appendL(this._html.th(col.getAttribute("name"), true) + ">" + col.getAttribute("label") + this._html.thE());
 					}
 					if(authInfo != null) {
 						sb.appendL("</xsl:if>");
@@ -875,9 +898,9 @@ public class XSLGenerator {
 						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
 					}
 					if(col.hasAttribute("width")) {
-						sb.appendL(this._html.td(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("width") + ";\">");
+						sb.appendL(this._html.td(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("width") + ";\">");
 					} else {
-						sb.appendL(this._html.td(col.getAttribute("name")) + ">");
+						sb.appendL(this._html.td(col.getAttribute("name"), true) + ">");
 					}
 					if(x == 0) {
 						this._expr = this._xpath.compile("column[@type = 'hidden']");
@@ -1012,9 +1035,9 @@ public class XSLGenerator {
 						sb.appendL(this._html.thG(col.getAttribute("name")));
 						if(!col.hasAttribute("islabel") || !col.getAttribute("islabel").equals("false")) {
 							if(col.hasAttribute("labelWidth")) {
-								sb.append(this._html.th(col.getAttribute("name")) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
+								sb.append(this._html.th(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
 							} else {
-								sb.append(this._html.th(col.getAttribute("name")) + ">" + col.getAttribute("label") + this._html.thE());
+								sb.append(this._html.th(col.getAttribute("name"), true) + ">" + col.getAttribute("label") + this._html.thE());
 							}
 						}
 						sb.append(this.td(col, "td"));
@@ -1079,9 +1102,9 @@ public class XSLGenerator {
 		Buffer sb = new Buffer();
 		
 		if(tagName != null && tagName.equals("td")) {
-			sb.append(this._html.td(col.getAttribute("name")));
+			sb.append(this._html.td(col.getAttribute("name"), true));
 		} else if(tagName != null && tagName.equals("th")) {
-			sb.append(this._html.th(col.getAttribute("name")));
+			sb.append(this._html.th(col.getAttribute("name"), true));
 		} else {
 			throw new ParsingException();
 		}
