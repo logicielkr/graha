@@ -52,7 +52,8 @@ public class DBUtilSqliteImpl extends DBUtil {
 		LOG.setLogLevel(logger);
 	}
 	protected String getToday() {
-		return "current_timestamp";
+//		return "current_timestamp";
+		return "strftime('%Y-%m-%d %H:%M:%f', current_timestamp, 'localtime')";
 	}
 /*
 	%Y-%m-%d %H:%M:%S
