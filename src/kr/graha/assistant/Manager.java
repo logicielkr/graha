@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Graha(그라하) XML 자동생성기
@@ -627,6 +628,25 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 //		response.setContentType("text/xml; charset=UTF-8");
 //		response.getWriter().append(sb);
 	}
+	private String getColumnLebelFromColumnName(String columnName) {
+		if(columnName == null) {
+			return "";
+		}
+		StringBuffer result = new StringBuffer();
+		StringTokenizer st = new StringTokenizer(columnName, "()-_, ");
+		int index = 0;
+		while (st.hasMoreTokens()) {
+			String token = st.nextToken();
+			if(token != null && token.length() > 0) {
+				if(index > 0) {
+					result.append(" ");
+				}
+				result.append(token.substring(0, 1).toUpperCase() + token.substring(1).toLowerCase());
+				index++;
+			}
+		}
+		return result.toString();
+	}
 	private void _gen_from_query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
@@ -654,7 +674,7 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 		String id = cm.param("query_id");
 		String label = cm.param("query_label");
 		if(label.trim().equals("")) {
-			label = id;
+			label = getColumnLebelFromColumnName(id);
 		}
 		String fetched = cm.param("fetched");
 		String updated = cm.param("updated");
@@ -734,10 +754,10 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 			for(int x = 1; x <= columnCount; x++) {
 				if(funcType.equals("detail")) {
 					bw.append("					<row>\n");
-					bw.append("						<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
+					bw.append("						<column label=\"" + cm.param("label_column." + x, getColumnLebelFromColumnName(cm.param("name_column." + x))) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
 					bw.append("					</row>\n");
 				} else if(funcType.equals("list") || funcType.equals("listAll")) {
-					bw.append("					<column label=\"" + cm.param("label_column." + x) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
+					bw.append("					<column label=\"" + cm.param("label_column." + x, getColumnLebelFromColumnName(cm.param("name_column." + x))) + "\" name=\"" + cm.param("name_column." + x).toLowerCase() + "\" />\n");
 				}
 			}
 			bw.append("				</tab>\n");

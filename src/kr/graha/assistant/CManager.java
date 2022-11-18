@@ -253,6 +253,15 @@ public class CManager {
 	protected String param(String key) {
 		return this.value(this.request.getParameter(key));
 	}
+	protected String param(String key, String defaultValue) {
+		if(this.request.getParameter(key) == null) {
+			return defaultValue;
+		} else if(this.request.getParameter(key).equals("")) {
+			return defaultValue;
+		} else {
+			return this.value(this.request.getParameter(key));
+		}
+	}
 	protected java.util.Enumeration<java.lang.String> getParameterNames() {
 		return this.request.getParameterNames();
 	}
