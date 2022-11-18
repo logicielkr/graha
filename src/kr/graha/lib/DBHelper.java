@@ -54,6 +54,10 @@ import java.sql.Timestamp;
 import kr.graha.helper.DB;
 import kr.graha.helper.LOG;
 import kr.graha.helper.XML;
+import kr.graha.helper.STR;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+import java.util.Locale;
 
 /**
  * Graha(그라하) 데이타베이스(DB) 관련 유틸리티
@@ -175,8 +179,8 @@ public final class DBHelper {
 			} else if(node != null && node.getNodeName().equals("jdbc")) {
 				info.put("type", "jdbc");
 				info.put("driverClassName", node.getAttribute("driverClassName"));
-				if(XML.validAttrValue(node, "hiddenUrl")) {
-					info.put("hiddenUrl", node.getAttribute("hiddenUrl"));
+				if(XML.validAttrValue(node, "protectedUrl")) {
+					info.put("protectedUrl", node.getAttribute("protectedUrl"));
 				}
 				info.put("url", node.getAttribute("url"));
 				info.put("username", node.getAttribute("username"));
@@ -236,10 +240,16 @@ public final class DBHelper {
 			}
 		} else if(info.hasKey("type") && info.getString("type").equals("jndi")) {
 			con = DB.getConnection(info.getString("name"));
-		} else if(info.hasKey("type") && info.getString("type").equals("jdbc") && info.hasKey("driverClassName") && info.hasKey("url")) {
+		} else if(
+			info.hasKey("type") && info.getString("type").equals("jdbc") &&
+			(
+				info.hasKey("driverClassName") && info.hasKey("url") ||
+				info.hasKey("driverClassName") && info.hasKey("protectedUrl")
+			)
+		) {
 			String url = null;
-			if(info.hasKey("hiddenUrl")) {
-				Record result  = FileHelper.parse(info.getString("hiddenUrl"), params);
+			if(info.hasKey("protectedUrl")) {
+				Record result  = FileHelper.parse(info.getString("protectedUrl"), params);
 				if(result != null && result.get("_system.filepath") != null) {
 					url = result.getString("_system.filepath");
 				}
@@ -256,6 +266,58 @@ public final class DBHelper {
 			}
 		}
 		return con;
+	}
+	public static String getSQLiteTimestampOrDateValue(ResultSet rs, int index, String pattern, boolean isTimestamp) throws SQLException {
+/*
+Caused by: java.text.ParseException: Unparseable date: "2015-08-05 15:11:16" does not match (\p{Nd}++)\Q-\E(\p{Nd}++)\Q-\E(\p{Nd}++)\Q \E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q.\E(\p{Nd}++)
+*/
+		Timestamp timestampValue = null;
+		Date dateValue = null;
+		try {
+			if(isTimestamp) {
+				timestampValue = rs.getTimestamp(index);
+				if(pattern == null) {
+					return timestampValue.toString();
+				} else {
+					return STR.formatDate(timestampValue, pattern);
+				}
+			} else {
+				dateValue = rs.getTimestamp(index);
+				if(pattern == null) {
+					return dateValue.toString();
+				} else {
+					return STR.formatDate(dateValue, pattern);
+				}
+			}
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+		}
+		String str = null;
+		try {
+			str = rs.getString(index);
+			if(str != null) {
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+				if(isTimestamp) {
+					if(pattern == null) {
+						return (new Timestamp(df.parse(str).getTime())).toString();
+					} else {
+						return STR.formatDate(new Timestamp(df.parse(str).getTime()), pattern);
+					}
+				} else {
+					if(pattern == null) {
+						return df.parse(str).toString();
+					} else {
+						return STR.formatDate(df.parse(str), pattern);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+			throw e;
+		} catch (java.text.ParseException e) {
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+		}
+		return str;
 	}
 	public static int getNextSequenceValue(PreparedStatement pstmt) throws SQLException {
 		ResultSet rs = null;

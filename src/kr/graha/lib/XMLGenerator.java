@@ -512,17 +512,19 @@ public class XMLGenerator {
 						) {
 							if(
 								rsmd.getColumnTypeName(x).equals("DATETIME") &&
-								rs.getTimestamp(x) != null &&
+//								rs.getTimestamp(x) != null &&
 								pattern != null &&
 								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
 							) {
-								value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+								value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), true);
+//								value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
 							} else if(
-								rs.getDate(x) != null &&
+//								rs.getDate(x) != null &&
 								pattern != null &&
 								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
 							) {
-								value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+								value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), false);
+//								value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
 							} else {
 								value = rs.getString(x);
 							}
@@ -1077,7 +1079,26 @@ public class XMLGenerator {
 						
 						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 							String value = null;
-							if(rsmd.getColumnType(x) == java.sql.Types.DATE && rs.getDate(x) != null) {
+							if(
+								this.dmd.getDatabaseProductName().equalsIgnoreCase("SQLite") &&
+								rsmd.getColumnType(x) == java.sql.Types.DATE
+							) {
+								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
+								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
+								if(rsmd.getColumnTypeName(x).equals("DATETIME")) {
+									if(qqq != null && qqq.hasAttribute("pattern")) {
+										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, qqq.getAttribute("pattern"), true);
+									} else {
+										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, null, true);
+									}
+								} else {
+									if(qqq != null && qqq.hasAttribute("pattern")) {
+										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, qqq.getAttribute("pattern"), false);
+									} else {
+										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, null, false);
+									}
+								}
+							} else 	if(rsmd.getColumnType(x) == java.sql.Types.DATE && rs.getDate(x) != null) {
 								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
 								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
 								if(qqq != null && qqq.hasAttribute("pattern")) {
