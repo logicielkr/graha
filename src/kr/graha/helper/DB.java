@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
@@ -103,6 +104,20 @@ public final class DB {
 			try {
 				pstmt.close();
 				pstmt = null;
+			} catch (SQLException e) {
+				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+			}
+		}
+	}
+/**
+ * CallableStatement 객체를 닫는다.
+ * @param cstmt CallableStatement 객체
+ */
+	public static void close(CallableStatement cstmt) {
+		if(cstmt != null) {
+			try {
+				cstmt.close();
+				cstmt = null;
 			} catch (SQLException e) {
 				if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
 			}
