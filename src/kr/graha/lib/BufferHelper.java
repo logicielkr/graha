@@ -55,9 +55,9 @@ public final class BufferHelper {
 	private BufferHelper() {
 	}
 	protected static void addRecord(String key, Record params, Buffer sb, XMLTag tag) {
-		if(params.isArray(key)) {
+		if(!key.startsWith("prop.") && params.isArray(key)) {
 			java.util.List<String> items = params.getArray(key);
-			for(String item : items){
+			for(String item : items) {
 				if(item != null) {
 					sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
 					sb.append("<![CDATA[");
@@ -79,12 +79,12 @@ public final class BufferHelper {
 				sb.append(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, true));
 				sb.append("<![CDATA[");
 				if(key.startsWith("error.") && ((String)params.get(key)).startsWith("message.") && params.hasKey((String)params.get(key))) {
-					sb.append(params.get((String)params.get(key)));
+					sb.append(params.get((String)params.getString(key)));
 				} else {
 					if(params.get(key) instanceof String) {
-						sb.append(XML.fix((String)params.get(key)));
+						sb.append(XML.fix((String)params.getString(key)));
 					} else {
-						sb.append(params.get(key));
+						sb.append(params.getString(key));
 					}
 				}
 				sb.append("]]>");
