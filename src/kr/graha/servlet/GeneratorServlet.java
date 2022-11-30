@@ -248,6 +248,9 @@ public class GeneratorServlet extends HttpServlet {
 						if(g.isError()) {
 							params.put("header.method", "ERROR");
 						}
+						if(g.isQueryAndResultSet()) {
+							params.put("header.method", "QUERY");
+						}
 						XSLGenerator g1 = new XSLGenerator(query, params, null, config, request);
 						sb1 = g1.execute();
 						StringReader reader = new StringReader(sb1.toString());
@@ -363,6 +366,9 @@ public class GeneratorServlet extends HttpServlet {
 					if(g.isError()) {
 						params.put("header.method", "ERROR");
 					}
+					if(g.isQueryAndResultSet()) {
+						params.put("header.method", "QUERY");
+					}
 					XSLGenerator g1 = new XSLGenerator(query, params, null, config, request);
 					sb1 = g1.execute();
 					StringReader reader = new StringReader(sb1.toString());
@@ -415,6 +421,8 @@ public class GeneratorServlet extends HttpServlet {
 					params.put("header.method", "POST");
 				} else if(request.getParameter("method") != null && request.getParameter("method").equals("error")) {
 					params.put("header.method", "ERROR");
+				} else if(request.getParameter("method") != null && request.getParameter("method").equals("query")) {
+					params.put("header.method", "QUERY");
 				}
 				XSLGenerator g = new XSLGenerator(query, params, null, config, request);
 				if(util.acceptsGZipEncoding(request, super.getServletConfig().getInitParameter("gzip"))) {

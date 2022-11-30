@@ -98,7 +98,14 @@ public class XSLGenerator {
 		Buffer sb = new Buffer();
 		if(this._params.equals("header.method", "ERROR")) {
 			sb.append(this.error());
-		} else if(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll"})) {
+		} else if(
+			XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll"}) ||
+			(
+				XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "query") &&
+				XML.existsIgnoreCaseAttrValue(this._query, "displayType", new String[]{"list", "listAll"}) &&
+				this._params.equals("header.method", "QUERY")
+			)
+		) {
 			this._expr = this._xpath.compile("commands/command");
 			NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 			if(commands.getLength() > 0) { 
@@ -108,7 +115,14 @@ public class XSLGenerator {
 			sb.append(this.list());
 			sb.append(this.after());
 			
-		} else if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "detail")) {
+		} else if(
+			XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "detail") ||
+			(
+				XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "query") &&
+				XML.equalsIgnoreCaseAttrValue(this._query, "displayType", "detail") &&
+				this._params.equals("header.method", "QUERY")
+			)
+		) {
 			this._expr = this._xpath.compile("commands/command");
 			NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
 			if(commands.getLength() > 0) { 
@@ -131,7 +145,11 @@ public class XSLGenerator {
 			sb.append(this.after());
 		} else if(
 			this._params.equals("header.method", "POST") ||
-			(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"}) && XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") && this._params.equals("header.method", "GET"))
+			(
+				XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"}) &&
+				XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") &&
+				this._params.equals("header.method", "GET")
+			)
 		) {
 			sb.append(this.post());
 		}
@@ -442,71 +460,20 @@ public class XSLGenerator {
 				rows.getLength() == 1
 			) {
 				sb.appendL(this._html.thead());
-				for(int i = 0; i < rows.getLength(); i++) {
-					Element row = (Element)rows.item(i);
-					this._expr = this._xpath.compile("column");
-					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
+				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 					sb.appendL(this._html.tr());
-					for(int x = 0; x < cols.getLength(); x++) {
-						Element col = (Element)cols.item(x);
-						AuthInfo authInfo = null;
-						if(XML.validAttrValue(col, "cond")) {
-							authInfo = AuthParser.parse(col.getAttribute("cond"));
-						}
-						if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
-							if(!AuthParser.auth(authInfo, this._params)) {
-								continue;
-							}
-						}
-						if(authInfo != null) {
-							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
-						}
-						sb.append(this.td(col, "th"));
-						sb.appendL(col.getAttribute("label") + this._html.thE());
-						if(authInfo != null) {
-							sb.appendL("</xsl:if>");
-						}
+					if(tabs.getLength() == 1) {
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
+					} else {
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
 					}
+					sb.appendL(this._html.th(null, false) + ">");
+					sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+					sb.appendL("<xsl:value-of select=\"name(.)\" />");
+					sb.appendL(this._html.thE());
+					sb.appendL("</xsl:for-each>");
 					sb.appendL(this._html.trE());
-				}
-				sb.appendL(this._html.theadE());
-				sb.appendL(this._html.tbody());
-				
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
-				for(int i = 0; i < rows.getLength(); i++) {
-					Element row = (Element)rows.item(i);
-					sb.appendL(this._html.tr());
-					this._expr = this._xpath.compile("column");
-					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
-					for(int x = 0; x < cols.getLength(); x++) {
-						Element col = (Element)cols.item(x);
-						AuthInfo authInfo = null;
-						if(XML.validAttrValue(col, "cond")) {
-							authInfo = AuthParser.parse(col.getAttribute("cond"));
-						}
-						if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
-							if(!AuthParser.auth(authInfo, this._params)) {
-								continue;
-							}
-						}
-						if(authInfo != null) {
-							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
-						}
-						sb.append(this.td(col, "td"));
-						sb.append(this.column(col, false, tab.getAttribute("name")));
-						sb.appendL(this._html.tdE());
-						if(authInfo != null) {
-							sb.appendL("</xsl:if>");
-						}
-						
-					}
-					sb.appendL(this._html.trE());
-				}
-				sb.appendL("</xsl:for-each>");
-				sb.appendL(this._html.tbodyE());
-			} else {
-				if(XML.trueAttrValue(tab, "single")) {
-					sb.appendL(this._html.thead());
+				} else {
 					for(int i = 0; i < rows.getLength(); i++) {
 						Element row = (Element)rows.item(i);
 						this._expr = this._xpath.compile("column");
@@ -529,10 +496,101 @@ public class XSLGenerator {
 							sb.append(this.td(col, "th"));
 							sb.appendL(col.getAttribute("label") + this._html.thE());
 							if(authInfo != null) {
-								sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+								sb.appendL("</xsl:if>");
 							}
 						}
 						sb.appendL(this._html.trE());
+					}
+					sb.appendL(this._html.theadE());
+				}
+				sb.appendL(this._html.tbody());
+				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
+				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
+					sb.appendL(this._html.tr());
+					sb.appendL("<xsl:for-each select=\"./*\">");
+					sb.appendL(this._html.td(null, false) + ">");
+					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+					sb.appendL("<xsl:value-of select=\".\" />");
+					sb.appendL(this._html.tdE());
+					sb.appendL("</xsl:for-each>");
+					sb.appendL(this._html.trE());
+				} else {
+					for(int i = 0; i < rows.getLength(); i++) {
+						Element row = (Element)rows.item(i);
+						sb.appendL(this._html.tr());
+						this._expr = this._xpath.compile("column");
+						NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
+						for(int x = 0; x < cols.getLength(); x++) {
+							Element col = (Element)cols.item(x);
+							AuthInfo authInfo = null;
+							if(XML.validAttrValue(col, "cond")) {
+								authInfo = AuthParser.parse(col.getAttribute("cond"));
+							}
+							if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+								if(!AuthParser.auth(authInfo, this._params)) {
+									continue;
+								}
+							}
+							if(authInfo != null) {
+								sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+							}
+							sb.append(this.td(col, "td"));
+							sb.append(this.column(col, false, tab.getAttribute("name")));
+							sb.appendL(this._html.tdE());
+							if(authInfo != null) {
+								sb.appendL("</xsl:if>");
+							}
+							
+						}
+						sb.appendL(this._html.trE());
+					}
+				}
+				sb.appendL("</xsl:for-each>");
+				sb.appendL(this._html.tbodyE());
+			} else {
+				if(XML.trueAttrValue(tab, "single")) {
+					sb.appendL(this._html.thead());
+					if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
+						sb.appendL(this._html.tr());
+						if(tabs.getLength() == 1) {
+							sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
+						} else {
+							sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
+						}
+						sb.appendL(this._html.th(null, false) + ">");
+						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+						sb.appendL("<xsl:value-of select=\"name(.)\" />");
+						sb.appendL(this._html.thE());
+						sb.appendL("</xsl:for-each>");
+						sb.appendL(this._html.trE());
+					} else {
+						for(int i = 0; i < rows.getLength(); i++) {
+							Element row = (Element)rows.item(i);
+							this._expr = this._xpath.compile("column");
+							NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
+							sb.appendL(this._html.tr());
+							for(int x = 0; x < cols.getLength(); x++) {
+								Element col = (Element)cols.item(x);
+								AuthInfo authInfo = null;
+								if(XML.validAttrValue(col, "cond")) {
+									authInfo = AuthParser.parse(col.getAttribute("cond"));
+								}
+								if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+									if(!AuthParser.auth(authInfo, this._params)) {
+										continue;
+									}
+								}
+								if(authInfo != null) {
+									sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+								}
+								sb.append(this.td(col, "th"));
+								sb.appendL(col.getAttribute("label") + this._html.thE());
+								if(authInfo != null) {
+									sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+								}
+							}
+							sb.appendL(this._html.trE());
+						}
 					}
 					sb.appendL(this._html.theadE());
 				}
@@ -543,65 +601,82 @@ public class XSLGenerator {
 				) {
 					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				}
-				for(int i = 0; i < rows.getLength(); i++) {
-					Element row = (Element)rows.item(i);
-					AuthInfo rowAuthInfo = null;
-					if(XML.validAttrValue(row, "cond")) {
-						rowAuthInfo = AuthParser.parse(row.getAttribute("cond"));
-					}
-					if(rowAuthInfo != null && this._tag.testInServer(rowAuthInfo, this._params)) {
-						if(!AuthParser.auth(rowAuthInfo, this._params)) {
-							continue;
-						}
-					}
-					if(rowAuthInfo != null) {
-						sb.appendL("<xsl:if test=\"" + this._tag.testExpr(rowAuthInfo, this._params) + "\">");
-					}
+				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 					sb.appendL(this._html.tr());
-					this._expr = this._xpath.compile("column");
-					NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
-					for(int x = 0; x < cols.getLength(); x++) {
-						Element col = (Element)cols.item(x);
-						AuthInfo authInfo = null;
-						if(XML.validAttrValue(col, "cond")) {
-							authInfo = AuthParser.parse(col.getAttribute("cond"));
+					sb.appendL("<xsl:for-each select=\"./*\">");
+					if(!XML.trueAttrValue(tab, "single")) {
+						sb.appendL(this._html.th(null, false) + ">");
+						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+						sb.appendL("<xsl:value-of select=\"name(.)\" />");
+						sb.appendL(this._html.thE());
+					}
+					sb.appendL(this._html.td(null, false) + ">");
+					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+					sb.appendL("<xsl:value-of select=\".\" />");
+					sb.appendL(this._html.tdE());
+					sb.appendL("</xsl:for-each>");
+					sb.appendL(this._html.trE());
+				} else {
+					for(int i = 0; i < rows.getLength(); i++) {
+						Element row = (Element)rows.item(i);
+						AuthInfo rowAuthInfo = null;
+						if(XML.validAttrValue(row, "cond")) {
+							rowAuthInfo = AuthParser.parse(row.getAttribute("cond"));
 						}
-						if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
-							if(!AuthParser.auth(authInfo, this._params)) {
+						if(rowAuthInfo != null && this._tag.testInServer(rowAuthInfo, this._params)) {
+							if(!AuthParser.auth(rowAuthInfo, this._params)) {
 								continue;
 							}
 						}
-						if(authInfo != null) {
-							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+						if(rowAuthInfo != null) {
+							sb.appendL("<xsl:if test=\"" + this._tag.testExpr(rowAuthInfo, this._params) + "\">");
 						}
-						sb.appendL(this._html.thG(col.getAttribute("name")));
-						if(!XML.trueAttrValue(tab, "single")) {
-							if(XML.emptyAttrValue(col, "islabel") || !XML.falseAttrValue(col, "islabel")) {
-								if(col.hasAttribute("labelWidth")) {
-									sb.appendL(this._html.th(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
-								} else {
-									sb.appendL(this._html.th(col.getAttribute("name"), true) + ">" + col.getAttribute("label") + this._html.thE());
+						sb.appendL(this._html.tr());
+						this._expr = this._xpath.compile("column");
+						NodeList cols = (NodeList)this._expr.evaluate(row, XPathConstants.NODESET);
+						for(int x = 0; x < cols.getLength(); x++) {
+							Element col = (Element)cols.item(x);
+							AuthInfo authInfo = null;
+							if(XML.validAttrValue(col, "cond")) {
+								authInfo = AuthParser.parse(col.getAttribute("cond"));
+							}
+							if(authInfo != null && this._tag.testInServer(authInfo, this._params)) {
+								if(!AuthParser.auth(authInfo, this._params)) {
+									continue;
 								}
 							}
+							if(authInfo != null) {
+								sb.appendL("<xsl:if test=\"" + this._tag.testExpr(authInfo, this._params) + "\">");
+							}
+							sb.appendL(this._html.thG(col.getAttribute("name")));
+							if(!XML.trueAttrValue(tab, "single")) {
+								if(XML.emptyAttrValue(col, "islabel") || !XML.falseAttrValue(col, "islabel")) {
+									if(col.hasAttribute("labelWidth")) {
+										sb.appendL(this._html.th(col.getAttribute("name"), true) + " style=\"width:" + col.getAttribute("labelWidth") + ";\">" + col.getAttribute("label") + this._html.thE());
+									} else {
+										sb.appendL(this._html.th(col.getAttribute("name"), true) + ">" + col.getAttribute("label") + this._html.thE());
+									}
+								}
+							}
+							sb.append(this.td(col, "td"));
+							if(
+								XML.trueAttrValue(table, "multi") &&
+								rows.getLength() > 1
+							) {
+								sb.append(this.column(col, false, tab.getAttribute("name")));
+							} else {
+								sb.append(this.column(col, true, tab.getAttribute("name")));
+							}
+							sb.appendL(this._html.tdE());
+							sb.appendL(this._html.tdGE());
+							if(authInfo != null) {
+								sb.appendL("</xsl:if>");
+							}
 						}
-						sb.append(this.td(col, "td"));
-						if(
-							XML.trueAttrValue(table, "multi") &&
-							rows.getLength() > 1
-						) {
-							sb.append(this.column(col, false, tab.getAttribute("name")));
-						} else {
-							sb.append(this.column(col, true, tab.getAttribute("name")));
-						}
-						sb.appendL(this._html.tdE());
-						sb.appendL(this._html.tdGE());
-						if(authInfo != null) {
+						sb.appendL(this._html.trE());
+						if(rowAuthInfo != null) {
 							sb.appendL("</xsl:if>");
 						}
-					}
-					sb.appendL(this._html.trE());
-					if(rowAuthInfo != null) {
-						sb.appendL("</xsl:if>");
 					}
 				}
 				if(

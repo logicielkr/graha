@@ -890,7 +890,7 @@ public final class XMLConfigGenerator {
 		}
 		bw.write("		</header>\n");
 		bw.write("		<commands>\n");
-		bw.write("			<command name=\"" + masterTable.getLowerName() + "\">\n");
+		bw.write("			<command name=\"" + masterTable.getLowerName() + "\" query_to_param=\"no\">\n");
 		if(!this._db.supportBultinDateFormatFunction()) {
 			index = 0;
 			for(Column col : masterTable.cols) {
@@ -1214,7 +1214,12 @@ public final class XMLConfigGenerator {
 		}
 		
 		bw.write("		<tables>\n");
-		bw.write("			<table tableName=\"" + getTName(masterTable) + "\" name=\"" + masterTable.getLowerName() + "\" label=\"" + masterTable.getRemarksOrName() + "\">\n");
+		bw.write("			<table tableName=\"" + getTName(masterTable) + "\" name=\"" + masterTable.getLowerName() + "\" label=\"" + masterTable.getRemarksOrName() + "\"");
+		if(this.fileUpload()) {
+			bw.write(">\n");
+		} else {
+			bw.write(" query_to_param=\"no\">\n");
+		}
 		
 		for(Column col : masterTable.cols) {
 			String dataType = this._db.getGrahaDataType(col.dataType);
@@ -1249,7 +1254,7 @@ public final class XMLConfigGenerator {
 			if(isMasterTable(tab2)) {
 				continue;
 			}
-			bw.write("			<table tableName=\"" + getTName(tab2) + "\" name=\"" + tab2.getLowerName() + "\" label=\"" + tab2.getRemarksOrName() + "\"" + getMultiForInsert(tab2) + ">\n");
+			bw.write("			<table tableName=\"" + getTName(tab2) + "\" name=\"" + tab2.getLowerName() + "\" label=\"" + tab2.getRemarksOrName() + "\"" + getMultiForInsert(tab2) + " query_to_param=\"no\">\n");
 			for(Column col : tab2.cols) {
 				String dataType = this._db.getGrahaDataType(col.dataType);
 				if(col.isPk()) {
@@ -1520,7 +1525,12 @@ public final class XMLConfigGenerator {
 		}
 		bw.write("		</header>\n");
 		bw.write("		<commands>\n");
-		bw.write("			<command name=\"" + masterTable.getLowerName() + "\">\n");
+		bw.write("			<command name=\"" + masterTable.getLowerName() + "\"");
+		if(this.fileUpload()) {
+			bw.write(">\n");
+		} else {
+			bw.write(" query_to_param=\"no\">\n");
+		}
 		if(!this._db.supportBultinDateFormatFunction()) {
 			index = 0;
 			for(Column col : masterTable.cols) {
@@ -1594,7 +1604,7 @@ public final class XMLConfigGenerator {
 			if(isMasterTable(tab2)) {
 				continue;
 			}
-			bw.write("			<command name=\"" + tab2.getLowerName() + "\"" + getMultiForDetail(tab2) + ">\n");
+			bw.write("			<command name=\"" + tab2.getLowerName() + "\"" + getMultiForDetail(tab2) + " query_to_param=\"no\">\n");
 			if(!this._db.supportBultinDateFormatFunction()) {
 				index = 0;
 				for(Column col : tab2.cols) {

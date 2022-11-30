@@ -58,6 +58,8 @@ import kr.graha.helper.STR;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.util.Locale;
+import java.security.NoSuchProviderException;
+import java.sql.ResultSetMetaData;
 
 /**
  * Graha(그라하) 데이타베이스(DB) 관련 유틸리티
@@ -267,7 +269,133 @@ public final class DBHelper {
 		}
 		return con;
 	}
-	public static String getSQLiteTimestampOrDateValue(ResultSet rs, int index, String pattern, boolean isTimestamp) throws SQLException {
+	protected static int getXMLStringFromResultSet(
+		ResultSet rs,
+		XMLTag tag,
+		String commandName,
+		java.util.Map<String, Encryptor> encryptor,
+		java.util.Map<String, String> encrypted,
+		Record params,
+		java.util.Map<String, String> pattern,
+		String funcType,
+		String databaseProductName,
+		boolean multi,
+		boolean queryToParam,
+		Buffer sb
+	) throws SQLException {
+//		sb.appendL(tag.tag("rows", commandName, true));
+		int index = 0;
+		ResultSetMetaData rsmd = rs.getMetaData();
+		while(rs.next()) {
+			sb.append(tag.tag("row", null, true));
+			for(int x = 1; x <= rsmd.getColumnCount(); x++) {
+				if(
+					(
+						databaseProductName.equalsIgnoreCase("Oracle")
+						|| databaseProductName.equalsIgnoreCase("Tibero")
+					)
+					&& rsmd.getColumnName(x) != null
+					&& rsmd.getColumnName(x).equals("RNUM$") 
+				) {
+					continue;
+				}
+				String value = null;
+				if(
+					databaseProductName.equalsIgnoreCase("SQLite") &&
+					rsmd.getColumnType(x) == java.sql.Types.DATE
+				) {
+					if(
+						rsmd.getColumnTypeName(x).equals("DATETIME") &&
+						pattern != null &&
+						pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+					) {
+						value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), true);
+					} else if(
+						pattern != null &&
+						pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+					) {
+						value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), false);
+					} else {
+						value = rs.getString(x);
+					}
+				} else if(
+					rsmd.getColumnType(x) == java.sql.Types.DATE &&
+					rs.getDate(x) != null &&
+					pattern != null &&
+					pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+				) {
+					value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+				} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP &&
+					rs.getTimestamp(x) != null &&
+					pattern != null &&
+					pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
+				) {
+					value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
+				} else {
+					value = rs.getString(x);
+				}
+				if(value != null) {
+					if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
+						try {
+							value = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
+//							sb.append(XML.fix(encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value)));
+/*
+							String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
+							if(tmp != null) {
+								sb.append(XML.fix(tmp));
+							}
+*/
+						} catch (NoSuchProviderException e) {
+							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+						}
+					}
+				}
+				if(value != null) {
+
+					if(
+						!queryToParam && (
+							funcType.equals("detail") ||
+							funcType.equals("report") ||
+							funcType.equals("user") ||
+							funcType.equals("insert")
+						)
+					) {
+						if(commandName != null && !commandName.equals("")) {
+							if(multi) {
+								params.put("query." + commandName + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
+							} else {
+								params.put("query." + commandName + "." + rsmd.getColumnName(x).toLowerCase(), value);
+							}
+						}
+					}
+					sb.append("<");
+					sb.append(tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
+					
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+						sb.append("><![CDATA[");
+					} else {
+						sb.append(">");
+					}
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+						sb.append(XML.fix(value));
+					} else {
+						sb.append(value);
+					}
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+						sb.append("]]></");
+					} else {
+						sb.append("</");
+					}
+					sb.append(tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, false));
+					sb.appendL(">");
+				}
+			}
+			sb.appendL(tag.tag("row", null, false));
+			index++;
+		}
+		return index;
+	}
+	protected static String getSQLiteTimestampOrDateValue(ResultSet rs, int index, String pattern, boolean isTimestamp) throws SQLException {
 /*
 Caused by: java.text.ParseException: Unparseable date: "2015-08-05 15:11:16" does not match (\p{Nd}++)\Q-\E(\p{Nd}++)\Q-\E(\p{Nd}++)\Q \E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q.\E(\p{Nd}++)
 */

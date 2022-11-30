@@ -64,6 +64,7 @@ import java.nio.file.DirectoryStream;
 
 import kr.graha.helper.LOG;
 import kr.graha.helper.XML;
+import kr.graha.helper.DB;
 import kr.graha.helper.STR;
 
 import java.util.List;
@@ -95,6 +96,7 @@ public class XMLGenerator {
 	XMLTag _tag;
 	Record _info;
 	boolean isError = false;
+	boolean isQueryAndResultSet = false;
 	DatabaseMetaData dmd = null;
 	
 	public XMLGenerator(
@@ -174,7 +176,7 @@ public class XMLGenerator {
 				sb.append(this.after());
 				sb_tmp.append(this.report(sb));
 			}
-			if(this.isError()) {
+			if(this.isError() || this.isQueryAndResultSet) {
 				sb.init();
 				sb.append(this.before());
 				sb.append(sb_tmp);
@@ -251,31 +253,17 @@ public class XMLGenerator {
 						}
 						if(command.getAttribute("type").equals("query")) {
 							stmt.executeUpdate();
-							stmt.close();
-							stmt = null;
+							DB.close(stmt);
 						} else {
 							cstmt.executeUpdate();
-							cstmt.close();
-							cstmt = null;
+							DB.close(cstmt);
 						}
 				} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					throw e;
 				} finally {
-					try {
-						if(stmt != null) {
-							stmt.close();
-						}
-					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-					}
-					try {
-						if(cstmt != null) {
-							cstmt.close();
-						}
-					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-					}
+					DB.close(stmt);
+					DB.close(cstmt);
 				}
 			}
 		}
@@ -293,6 +281,7 @@ public class XMLGenerator {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
 		CallableStatement cstmt = null;
+		ResultSet rs = null;
 		int totalUpdateCount = 0;
 		this._expr = this._xpath.compile("commands/command");
 		NodeList commands = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
@@ -337,18 +326,51 @@ public class XMLGenerator {
 						}
 					}
 					int result = 0;
+					boolean isResultSet = false;
 					if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("plsql")) {
 						cstmt.executeUpdate();
 						result = cstmt.getUpdateCount();
-						cstmt.close();
-						cstmt = null;
+						DB.close(cstmt);
 					} else {
+						if(stmt.execute()) {
+							isResultSet = true;
+							this.isQueryAndResultSet = true;
+							rs = stmt.getResultSet();
+							java.util.Map<String, String> encrypted = null;
+							if(encryptor != null) {
+								encrypted = getEncrypted(command, "decrypt/column");
+							}
+							java.util.Map<String, String> pattern = getRattern(command, "pattern/column");
+							sb.appendL(this._tag.tag("rows", command.getAttribute("name"), true));
+							index = DBHelper.getXMLStringFromResultSet(
+								rs,
+								this._tag,
+								command.getAttribute("name"),
+								encryptor,
+								encrypted,
+								this._params,
+								pattern,
+								this._query.getAttribute("funcType"),
+								this.dmd.getDatabaseProductName(),
+								XML.trueAttrValue(command, "multi"),
+								XML.falseAttrValue(command, "query_to_param"),
+								sb
+							);
+							if(XML.validAttrValue(command, "name")) {
+								this._params.put("query.row." + command.getAttribute("name") + ".count", index);
+							}
+							sb.appendL(this._tag.tag("rows", command.getAttribute("name"), false));
+							DB.close(rs);
+						} else {
+							result = stmt.getUpdateCount();
+						}
+						DB.close(stmt);
+						/*
 						stmt.executeUpdate();
 						result = stmt.getUpdateCount();
-						stmt.close();
-						stmt = null;
+						*/
 					}
-					if(XML.validAttrValue(command, "name")) {
+					if(!isResultSet && XML.validAttrValue(command, "name")) {
 						sb.append(this._tag.tag("row", command.getAttribute("name"), true));
 						sb.append(this._tag.tag("row", "rowcount", null, true) + result + this._tag.tag("row", "rowcount", null, false));
 						sb.append(this._tag.tag("row", command.getAttribute("name"), false));
@@ -359,20 +381,9 @@ public class XMLGenerator {
 					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 					throw e;
 				} finally {
-					try {
-						if(stmt != null) {
-							stmt.close();
-						}
-					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-					}
-					try {
-						if(cstmt != null) {
-							cstmt.close();
-						}
-					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-					}
+					DB.close(rs);
+					DB.close(stmt);
+					DB.close(cstmt);
 				}
 			}
 		}
@@ -457,7 +468,6 @@ public class XMLGenerator {
 				int index = 1;
 				for(int i = 0; i < param.getLength(); i++) {
 					Element p = (Element)param.item(i);
-					
 					if(!p.hasAttribute("cond") || AuthParser.auth(p.getAttribute("cond"), this._params)) {
 						this.bind(stmt, p.getAttribute("datatype"), index, new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
 						if(this._query.getAttribute("funcType").equals("list")) {
@@ -470,10 +480,12 @@ public class XMLGenerator {
 					this.setInt(stmt, index + 0, pageSize);
 					this.setInt(stmt, index + 1, (page - 1) * pageSize);
 				}
-				rs = stmt.executeQuery();
-				
-				ResultSetMetaData rsmd = rs.getMetaData();
-				
+				java.util.Map<String, String> encrypted = null;
+				if(encryptor != null) {
+					encrypted = getEncrypted(command, "decrypt/column");
+				}
+				java.util.Map<String, String> pattern = getRattern(command, "pattern/column");
+				/*
 				this._expr = this._xpath.compile("decrypt/column");
 				NodeList decryptColumn = (NodeList)this._expr.evaluate(command, XPathConstants.NODESET);
 				
@@ -493,9 +505,25 @@ public class XMLGenerator {
 						pattern.put(((Element)patternColumn.item(i)).getAttribute("name").toLowerCase(), ((Element)patternColumn.item(i)).getAttribute("pattern"));
 					}
 				}
-				
+				*/
 				sb.appendL(this._tag.tag("rows", command.getAttribute("name"), true));
-				index = 0;
+				rs = stmt.executeQuery();
+				index = DBHelper.getXMLStringFromResultSet(
+					rs,
+					this._tag,
+					command.getAttribute("name"),
+					encryptor,
+					encrypted,
+					this._params,
+					pattern,
+					this._query.getAttribute("funcType"),
+					this.dmd.getDatabaseProductName(),
+					XML.trueAttrValue(command, "multi"),
+					XML.falseAttrValue(command, "query_to_param"),
+					sb
+				);
+				/*
+				ResultSetMetaData rsmd = rs.getMetaData();
 				while(rs.next()) {
 					sb.append(this._tag.tag("row", null, true));
 					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
@@ -591,14 +619,13 @@ public class XMLGenerator {
 					sb.appendL(this._tag.tag("row", null, false));
 					index++;
 				}
+				*/
 				totalFetchCount += index;
 				if(XML.validAttrValue(command, "name")) {
 					this._params.put("query.row." + command.getAttribute("name") + ".count", index);
 				}
-				rs.close();
-				rs = null;
-				stmt.close();
-				stmt = null;
+				DB.close(rs);
+				DB.close(stmt);
 				sb.appendL(this._tag.tag("rows", command.getAttribute("name"), false));
 				
 				if(this._query.getAttribute("funcType").equals("list")) {
@@ -644,12 +671,10 @@ public class XMLGenerator {
 							}
 							
 						}
-						rsCount.close();
-						rsCount = null;
+						DB.close(rsCount);
 						sb.appendL(this._tag.tag("pages", null, false));
 					}
-					stmtCount.close();
-					stmtCount = null;
+					DB.close(stmtCount);
 				}
 			}
 			this._params.put("query.row.total_fetch_count", totalFetchCount);
@@ -735,34 +760,10 @@ public class XMLGenerator {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(rsCount != null) {
-					rsCount.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmt != null) {
-					stmt.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmtCount != null) {
-					stmtCount.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
+			DB.close(rs);
+			DB.close(rsCount);
+			DB.close(stmt);
+			DB.close(stmtCount);
 		}
 		return sb;
 	}
@@ -770,7 +771,7 @@ public class XMLGenerator {
 	private Buffer delete() throws XPathExpressionException, SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		PreparedStatement stmt = null;
-		ResultSet rs = null;
+		
 		String sql = "";
 		int totalUpdateCount = 0;
 		try {
@@ -831,8 +832,7 @@ public class XMLGenerator {
 				stmt.executeUpdate();
 				int result = stmt.getUpdateCount();
 				totalUpdateCount += result;
-				stmt.close();
-				stmt = null;
+				DB.close(stmt);
 				if(XML.validAttrValue(p, "name")) {
 					sb.append(this._tag.tag("row", p.getAttribute("tableName"), true));
 					sb.append(this._tag.tag("row", "rowcount", null, true) + result + this._tag.tag("row", "rowcount", null, false));
@@ -918,20 +918,7 @@ public class XMLGenerator {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmt != null) {
-					stmt.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
+			DB.close(stmt);
 		}
 		return sb;
 	}
@@ -1059,7 +1046,12 @@ public class XMLGenerator {
 							}
 						}
 					}
-					
+					java.util.Map<String, String> encrypted = null;
+					if(encryptor != null) {
+						encrypted = getEncrypted(p, "column[@encrypt]");
+					}
+					java.util.Map<String, String> pattern = getRattern(p, "column[@pattern]");
+					/*
 					this._expr = this._xpath.compile("column[@encrypt]");
 					NodeList decryptColumn = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 					java.util.Map<String, String> encrypted = new java.util.Hashtable();
@@ -1068,10 +1060,34 @@ public class XMLGenerator {
 							encrypted.put(((Element)decryptColumn.item(qq)).getAttribute("name"), ((Element)decryptColumn.item(qq)).getAttribute("encrypt"));
 						}
 					}
+					this._expr = this._xpath.compile("column[@pattern]");
+					NodeList patternColumn = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 					
-					
-					
+					java.util.Map<String, String> pattern = new java.util.Hashtable();
+					if(patternColumn != null && patternColumn.getLength() > 0) {
+						for(int qq = 0; qq < patternColumn.getLength(); qq++) {
+							pattern.put(((Element)patternColumn.item(qq)).getAttribute("name").toLowerCase(), ((Element)patternColumn.item(qq)).getAttribute("pattern"));
+						}
+					}
+					*/
 					rs = stmt.executeQuery();
+					index = DBHelper.getXMLStringFromResultSet(
+						rs,
+						this._tag,
+						p.getAttribute("name"),
+						encryptor,
+						encrypted,
+						this._params,
+						pattern,
+						this._query.getAttribute("funcType"),
+						this.dmd.getDatabaseProductName(),
+						XML.trueAttrValue(p, "multi"),
+						XML.falseAttrValue(p, "query_to_param"),
+						sb
+					);
+	
+
+					/*
 					ResultSetMetaData rsmd = rs.getMetaData();
 					index = 0;
 					while(rs.next()) {
@@ -1160,14 +1176,13 @@ public class XMLGenerator {
 						sb.appendL(this._tag.tag("row", null, false));
 						index++;
 					}
+					*/
 					totalFetchCount += index;
 					if(XML.validAttrValue(p, "name")) {
 						this._params.put("query.row." + p.getAttribute("name") + ".count", index);
 					}
-					rs.close();
-					rs = null;
-					stmt.close();
-					stmt = null;
+					DB.close(rs);
+					DB.close(stmt);
 				}
 				if(p.hasAttribute("total") && Integer.parseInt(p.getAttribute("total")) > 0) {
 					for(int q = index; q < Integer.parseInt(p.getAttribute("total")); q++) {
@@ -1275,20 +1290,8 @@ public class XMLGenerator {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmt != null) {
-					stmt.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
+			DB.close(rs);
+			DB.close(stmt);
 		}
 		return sb;
 	}
@@ -1771,8 +1774,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 									if(rs.next()) {
 										this._params.put(generated + "." + index, rs.getInt(1));
 									}
-									rs.close();
-									rs = null;
+									DB.close(rs);
 								}
 							} else if(isDelete) {
 								stmtDelete.executeUpdate();
@@ -1800,8 +1802,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 									if(rs.next()) {
 										this._params.put(generated, rs.getInt(1));
 									}
-									rs.close();
-									rs = null;
+									DB.close(rs);
 								}
 							}
 						}
@@ -1814,20 +1815,16 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 							
 						}
 						if(!XML.trueAttrValue(p, "multi")) {
-							stmt.close();
-							stmt = null;
+							DB.close(stmt);
 							iscontinue = false;
 							break;
 						}
 						idx++;
 					}
 					if(XML.trueAttrValue(p, "multi")) {
-						stmtInsert.close();
-						stmtInsert = null;
-						stmtUpdate.close();
-						stmtUpdate = null;
-						stmtDelete.close();
-						stmtDelete = null;
+						DB.close(stmtInsert);
+						DB.close(stmtUpdate);
+						DB.close(stmtDelete);
 					}
 					sb.append(this._tag.tag("rows", null, false));
 				}
@@ -1837,41 +1834,11 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			throw e;
 		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmt != null) {
-					stmt.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmtInsert != null) {
-					stmtInsert.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmtUpdate != null) {
-					stmtUpdate.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmtDelete != null) {
-					stmtDelete.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
+			DB.close(rs);
+			DB.close(stmt);
+			DB.close(stmtInsert);
+			DB.close(stmtUpdate);
+			DB.close(stmtDelete);
 		}
 		return sb;
 	}
@@ -1935,14 +1902,23 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 	public boolean isError() {
 		return this.isError;
 	}
+	public boolean isQueryAndResultSet() {
+		return this.isQueryAndResultSet;
+	}
 	private Buffer before() throws SQLException, NoSuchProviderException {
 		Buffer sb = new Buffer();
 		sb.appendL("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		if(this.isError) {
 			sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=error\"?>");
 		} else if(
-			this._params.equals("header.method", "POST") ||
-			(XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"}) && XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") && this._params.equals("header.method", "GET"))
+			!this.isQueryAndResultSet &&
+			(
+				this._params.equals("header.method", "POST") ||
+				(
+					XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"query", "report"}) &&
+					XML.equalsIgnoreCaseAttrValue(this._query, "allow", "get") && this._params.equals("header.method", "GET")
+				)
+			)
 		) {
 			sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=post\"?>");
 		} else {
@@ -1953,6 +1929,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			} catch (XPathExpressionException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
+			/*
 			if(
 				(
 					this._query.getAttribute("funcType").equals("list") || 
@@ -1964,17 +1941,26 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				layout.getAttribute("href") != null && 
 				!layout.getAttribute("href").equals("")
 			) {
+			*/
+			if(
+				XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll", "detail"}) &&
+				XML.validAttrValue(layout, "href")
+			) {
 				sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + layout.getAttribute("href") + "\"?>");
 			} else {
-				if(this._params.hasKey("header.method") && this._params.getString("header.method").equals("POST")) {
-					sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=post");
+				if(this._params.equals("header.method", "POST")) {
+					if(this.isQueryAndResultSet) {
+						sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=query");
+					} else {
+						sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=post");
+					}
 				} else {
 					sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl");
 				}
 				if(this._params != null && !this._params.isEmpty()) {
 					Iterator<String> it = this._params.keySet().iterator();
 					int index = 0;
-					if(this._params.hasKey("header.method") && this._params.getString("header.method").equals("POST")) {
+					if(this._params.equals("header.method", "POST")) {
 						index = 1;
 					}
 					while(it.hasNext()) {
@@ -2023,7 +2009,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			parseMessage(sb, doc);
 			if(
 				this._params.hasKey("header.method") && 
-				!this._params.getString("header.method").equals("POST") && 
+				(
+					!this._params.getString("header.method").equals("POST") ||
+					!this.isQueryAndResultSet
+				) && 
 				!this.isError
 			) {
 				this._expr = this._xpath.compile("header/codes/code");
@@ -2237,7 +2226,10 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		if(isBuffer && XML.trueAttrValue(node, "public")) {
 			if(
 				this._params.hasKey("header.method") && 
-				!this._params.getString("header.method").equals("POST") && 
+				(
+					!this._params.getString("header.method").equals("POST") ||
+					!this.isQueryAndResultSet
+				) && 
 				!this.isError
 			) {
 				if(label != null) {
@@ -2291,10 +2283,8 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 					index++;
 				}
 				sb.appendL(this._tag.tag("code", null, false));
-				rs.close();
-				rs = null;
-				stmt.close();
-				stmt = null;
+				DB.close(rs);
+				DB.close(stmt);
 			} else {
 				sb.appendL(this._tag.tag("code", node.getAttribute("name"), true));
 				NodeList list = node.getChildNodes();
@@ -2319,20 +2309,8 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			return null;
 		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			try {
-				if(stmt != null) {
-					stmt.close();
-				}
-			} catch (SQLException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
+			DB.close(rs);
+			DB.close(stmt);
 		}
 		return sb;
 	}
@@ -2577,29 +2555,15 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				if(rs.next()) {
 					record.put("result", rs.getString(1));
 				}
-				rs.close();
-				rs = null;
-				stmt.close();
-				stmt = null;
+				DB.close(rs);
+				DB.close(stmt);
 				result = AuthParser.auth(check, record);
 			} catch (XPathExpressionException | SQLException | NoSuchProviderException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				throw e;
 			} finally {
-				try {
-					if(rs != null) {
-						rs.close();
-					}
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
-				try {
-					if(stmt != null) {
-						stmt.close();
-					}
-				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-				}
+				DB.close(rs);
+				DB.close(stmt);
 			}
 		}
 		
@@ -2628,6 +2592,21 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		return encryptor;
 	}
-	
-	
+	public java.util.Map<String, String> getRattern(Element node, String xpath) throws XPathExpressionException {
+		return getRatternOrEncrypted(node, xpath, "pattern");
+	}
+	public java.util.Map<String, String> getEncrypted(Element node, String xpath) throws XPathExpressionException {
+		return getRatternOrEncrypted(node, xpath, "encrypt");
+	}
+	private java.util.Map<String, String> getRatternOrEncrypted(Element node, String xpath, String attrName) throws XPathExpressionException {
+		this._expr = this._xpath.compile(xpath);
+		NodeList columns = (NodeList)this._expr.evaluate(node, XPathConstants.NODESET);
+		java.util.Map<String, String> map = new java.util.Hashtable();
+		if(columns != null && columns.getLength() > 0) {
+			for(int i = 0; i < columns.getLength(); i++) {
+				map.put(((Element)columns.item(i)).getAttribute("name"), ((Element)columns.item(i)).getAttribute(attrName));
+			}
+		}
+		return map;
+	}
 }
