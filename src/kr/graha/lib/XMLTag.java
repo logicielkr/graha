@@ -311,7 +311,7 @@ public class XMLTag {
 		if(tagName != null && tagName.equals("props")) {
 			if(isRDF) {
 				if(isStart) {
-					return "<RDF:Description uc:for=\"urn:root:props\"><uc:results>";
+					return "<RDF:Description uc:for=\"urn:root:props\"><uc:props>";
 				} else {
 					return "</uc:props></RDF:Description>";
 				}
