@@ -569,13 +569,9 @@ public class Manager extends HttpServlet {
 			while (e.hasMoreElements()) {
 				String key = cm.value(e.nextElement());
 				if(key != null && key.startsWith("column.")) {
-/*
-sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) + "</column>");
-*/
 						sb.append("<column key=\"" + key + "\">");
 						sb.append("<name>" + cm.value(request.getParameter(key)) + "</name>");
 						Set labels = db.getCommentByColumnName(con, cm.value(request.getParameter(key)));
-//						System.out.println(labels);
 						if(labels != null && !labels.isEmpty()) {
 							sb.append("<labels>");
 							java.util.Iterator<String> it = labels.iterator();
@@ -625,8 +621,6 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
-//		response.setContentType("text/xml; charset=UTF-8");
-//		response.getWriter().append(sb);
 	}
 	private String getColumnLebelFromColumnName(String columnName) {
 		if(columnName == null) {
@@ -1144,66 +1138,7 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	/*
-	private StringBuffer getGrahaConfig(String sql, java.util.List<String> columns, int fetchCount) throws SQLException {
-		StringBuffer bw = new StringBuffer();
-		if(columns != null) {
-			if(fetchCount == 1) {
-				bw.append("	<query id=\"input query id!!!\" funcType=\"detail\" label=\"input label!!!\">\n");
-			} else {
-				bw.append("	<query id=\"input query id!!!\" funcType=\"listAll\" label=\"input label!!!\">\n");
-			}
-		} else {
-			bw.append("	<query id=\"input query id!!!\" funcType=\"query\" label=\"input label!!!\">\n");
-		}
-		bw.append("		<header>\n");
-		bw.append("		</header>\n");
-		bw.append("		<commands>\n");
-		bw.append("			<command name=\"default\">\n");
-		bw.append("				<sql>\n");
-		bw.append(sql);
-		bw.append("\n");
-		bw.append("				</sql>\n");
-		bw.append("				<!--params>\n");
-		bw.append("					<param default=\"null\" name=\"input column name!!!\" datatype=\"input data type!!!\" value=\"input value!!!\" />\n");
-		bw.append("				</params-->\n");
-		bw.append("			</command>\n");
-		bw.append("		</commands>\n");
-		if(columns != null) {
-			bw.append("		<layout>\n");
-			bw.append("			<top>\n");
-			bw.append("				<left />\n");
-			bw.append("				<center />\n");
-			bw.append("				<right />\n");
-			bw.append("			</top>\n");
-			bw.append("			<middle>\n");
-			bw.append("				<tab name=\"default\" label=\"input label!!!\">\n");
-			for(int x = 0; x < columns.size(); x++) {
-				if(fetchCount == 1) {
-					bw.append("					<row>\n");
-					bw.append("						<column label=\"" + columns.get(x) + "\" name=\"" + columns.get(x) + "\" />\n");
-					bw.append("					</row>\n");
-				} else {
-					bw.append("						<column label=\"" + columns.get(x) + "\" name=\"" + columns.get(x) + "\" />\n");
-				}
-			}
-			bw.append("				</tab>\n");
-			bw.append("			</middle>\n");
-			bw.append("			<bottom>\n");
-			bw.append("				<left />\n");
-			bw.append("				<center />\n");
-			bw.append("				<right />\n");
-			bw.append("			</bottom>\n");
-			bw.append("		</layout>\n");
-		} else {
-			bw.append("		<redirect path=\"list\">\n");
-			bw.append("			<param name=\"page\" type=\"param\" value=\"page\" />\n");
-			bw.append("		</redirect>\n");
-		}
-		bw.append("	</query>\n");
-		return bw;
-	}
-	*/
+	
 	private void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
@@ -1212,7 +1147,7 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuffer sb = new StringBuffer();
-//		StringBuffer bw = new StringBuffer();
+
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe("not found jndi config"); }
@@ -1290,11 +1225,9 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 						index++;
 					}
 					sb.append("</rows>");
-//					bw = getGrahaConfig(sql, columns, index);
 					rs.close();
 					rs = null;
 				} else {
-//					bw = getGrahaConfig(sql, null, pstmt.getUpdateCount());
 					sb.append("<rows id=\"count\"><row>");
 					sb.append("<count>" + pstmt.getUpdateCount() + "</count>");
 					sb.append("</row></rows>");
@@ -1302,13 +1235,7 @@ sb.append("<column key=\"" + key + "\">" + cm.value(request.getParameter(key)) +
 				pstmt.close();
 				pstmt = null;
 			}
-			/*
-			if(bw.length() > 0) {
-				sb.append("<rows id=\"gen\"><row>");
-				sb.append("<gen><![CDATA[" + XML.fix(bw.toString()) + "]]></gen>");
-				sb.append("</row></rows>");
-			}
-			*/
+
 			sb.append(cm.getPropertyList("query"));
 			sb.append("</document>");
 			
