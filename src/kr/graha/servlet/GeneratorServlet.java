@@ -346,7 +346,6 @@ public class GeneratorServlet extends HttpServlet {
 							logger.severe("allowblank : " + XML.trueAttrValue(query, "allowblank"));
 						}
 						response.sendError(HttpServletResponse.SC_NOT_FOUND);
-//						response.sendError(404);
 						return;
 					}
 				}
