@@ -185,12 +185,6 @@ public class CManager {
 		}
 		return this.grahaCommonCodeTableName;
 	}
-//	protected String getGrahaMenuTableName() {
-//		if(this.grahaMenuTableName == null || this.grahaMenuTableName.trim().equals("")) {
-//			return null;
-//		}
-//		return this.grahaMenuTableName;
-//	}
 	protected boolean valid() {
 		if(this.jndi == null || this.jndis == null || this.jndis.size() == 0 || this.sjndi == null) {
 			return false;
