@@ -281,7 +281,6 @@ public class XSLGenerator {
 		String tableName
 	) throws XPathExpressionException {
 		Buffer sb = new Buffer();
-//		this.cond(sb, column, true);
 		if(column.getChildNodes().getLength() > 0) {
 			this._expr = this._xpath.compile("link");
 			Element link = (Element)this._expr.evaluate(column, XPathConstants.NODE);
@@ -331,7 +330,6 @@ public class XSLGenerator {
 		} else {
 			sb.append(this.code(column, isFull, tableName));
 		}
-//		this.cond(sb, column, false);
 		return sb;
 	}
 	private Buffer code(
@@ -695,35 +693,7 @@ public class XSLGenerator {
 		return sb;
 		
 	}
-	/*
-	private void cond(Buffer sb, Element element, boolean start) {
-		if(this._tag.isRDF) {
-			if(
-				element.hasAttribute("xTest") &&
-				element.getAttribute("xTest") != null &&
-				!((String)element.getAttribute("xTest")).equals("")
-			) {
-				if(start) {
-					sb.append("<xsl:if test=\"" + element.getAttribute("xTest") + "\">");
-				} else {
-					sb.append("</xsl:if>");
-				}
-			}
-		} else {
-			if(
-				element.hasAttribute("test") &&
-				element.getAttribute("test") != null &&
-				!((String)element.getAttribute("test")).equals("")
-			) {
-				if(start) {
-					sb.append("<xsl:if test=\"" + element.getAttribute("test") + "\">");
-				} else {
-					sb.append("</xsl:if>");
-				}
-			}
-		}
-	}
-	*/
+
 	private void fileLI(NodeList files, Buffer sb, String before, String after) {
 		if(files != null && files.getLength() > 0 && FileHelper.isAllow(this._query, this._params)) {
 			for(int y = 0; y < files.getLength(); y++) {
@@ -1326,9 +1296,9 @@ public class XSLGenerator {
 				}
 			}
 		} else {
-			if(col.getAttribute("type").equals("textarea")) {
+			if(XML.equalsIgnoreCaseAttrValue(col, "type", "textarea")) {
 				sb.appendL("<textarea>");
-			} else if(col.getAttribute("type").equals("select")) {
+			} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "select")) {
 				sb.appendL("<select>");
 			} else if(XML.equalsIgnoreCaseAttrValue(col, "type", "button") && XML.validAttrValue(col, "icon")) {
 				sb.appendL("<button>");
@@ -1341,9 +1311,9 @@ public class XSLGenerator {
 				sb.append(" readonly");
 			}
 			sb.appendL("</xsl:attribute>");
-			if(col.getAttribute("type").equals("textarea") || col.getAttribute("type").equals("select")) {
+			if(XML.existsIgnoreCaseAttrValue(col, "type", new String[]{"textarea", "select"})) {
 			} else {
-				if(!col.hasAttribute("type") || col.getAttribute("type").equals("datalist")) {
+				if(XML.emptyAttrValue(col, "type") || XML.equalsIgnoreCaseAttrValue(col, "type", "datalist")) {
 					sb.appendL("	<xsl:attribute name=\"type\">text</xsl:attribute>");
 				} else {
 					sb.appendL("	<xsl:attribute name=\"type\">" + col.getAttribute("type") + "</xsl:attribute>");
@@ -1373,20 +1343,29 @@ public class XSLGenerator {
 					}
 				}
 			}
-			if(e != null && e.hasAttribute("expr")) {
+			if(XML.validAttrValue(e, "expr")) {
 				sb.appendL("	<xsl:attribute name=\"expr\">" + e.getAttribute("expr") + "</xsl:attribute>");
 			}
-			if(e != null && e.hasAttribute("follow")) {
+			if(XML.validAttrValue(e, "follow")) {
 				sb.appendL("	<xsl:attribute name=\"follow\">" + e.getAttribute("follow") + "</xsl:attribute>");
 			}
-			if(e != null && e.hasAttribute("datatype")) {
+			if(XML.validAttrValue(e, "datatype")) {
 				sb.appendL("	<xsl:attribute name=\"datatype\">" + e.getAttribute("datatype") + "</xsl:attribute>");
 			}
-			if(e != null && e.hasAttribute("constraint")) {
+			if(XML.validAttrValue(e, "constraint")) {
 				sb.appendL("	<xsl:attribute name=\"constraint\">" + e.getAttribute("constraint") + "</xsl:attribute>");
 			}
-			if(col.hasAttribute("autocomplete")) {
+			if(XML.validAttrValue(e, "autocomplete")) {
 				sb.appendL("	<xsl:attribute name=\"autocomplete\">" + col.getAttribute("autocomplete") + "</xsl:attribute>");
+			}
+			if(XML.validAttrValue(e, "placeholder")) {
+				sb.appendL("	<xsl:attribute name=\"placeholder\">" + col.getAttribute("placeholder") + "</xsl:attribute>");
+			}
+			if(XML.validAttrValue(e, "pattern")) {
+				sb.appendL("	<xsl:attribute name=\"pattern\">" + col.getAttribute("pattern") + "</xsl:attribute>");
+			}
+			if(XML.validAttrValue(e, "title")) {
+				sb.appendL("	<xsl:attribute name=\"title\">" + col.getAttribute("title") + "</xsl:attribute>");
 			}
 			if(col.hasAttribute("disabled")) {
 				AuthInfo authInfo = null;
@@ -1407,7 +1386,7 @@ public class XSLGenerator {
 					}
 				}
 			}
-			if(col.getAttribute("type").equals("textarea")) {
+			if(XML.equalsIgnoreCaseAttrValue(col, "type", "textarea")) {
 				if(defaultValue != null) {
 					sb.appendL("<xsl:choose>");
 					sb.appendL("<xsl:when test=\"" + valueExpr + " and " + valueExpr + " != ''\">");
@@ -1466,7 +1445,7 @@ public class XSLGenerator {
 					}
 				}
 			}
-			if(col.getAttribute("type").equals("select")) {
+			if(XML.equalsIgnoreCaseAttrValue(col, "type", "select")) {
 				if(col.hasAttribute("for") && col.getAttribute("for") != null && !col.getAttribute("for").equals("")) {
 					if(defaultValue != null) {
 					} else {
@@ -2037,62 +2016,10 @@ public class XSLGenerator {
 		return sb;
 		
 	}
-	private Buffer getTitle(String text) {
-		String title = new String(text);
-		Buffer sb = new Buffer();
-		while(true) {
-			if(title.indexOf("${") >= 0) {
-				sb.append(title.substring(0, title.indexOf("${")));
-				title = title.substring(title.indexOf("${") + 2);
-				if(title.indexOf("}") > 0) {
-					String val = title.substring(0, title.indexOf("}"));
-					sb.append("<xsl:value-of select=\"" + val + "\" />");
-					title = title.substring(title.indexOf("}") + 1);
-				} else {
-					sb.append(title);
-					break;
-				}
-			} else {
-				sb.append(title);
-				break;
-			}
-		}
-		return sb;
-	}
-	private Buffer getTitle() {
-		Buffer sb = new Buffer();
-		
-		try {
-			this._expr = this._xpath.compile("header/labels/label");
-			NodeList labels = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			if(labels.getLength() > 0) {
-				for(int i = 0; i < labels.getLength(); i++) {
-					Element label = (Element)labels.item(i);
-					if(!label.hasAttribute("cond") || AuthParser.auth(label.getAttribute("cond"), this._params)) {
-						if(this._tag.isRDF && label.hasAttribute("xText")) {
-							sb.append(this.getTitle(label.getAttribute("xText")));
-						} else {
-							sb.append(this.getTitle(label.getAttribute("text")));
-						}
-						break;
-					}
-				}
-			}
-		} catch (XPathExpressionException e) {
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-		}
-		if(sb.length() == 0 && this._query.hasAttribute("label") || this._query.hasAttribute("xLabel")) {
-			if(this._tag.isRDF && this._query.hasAttribute("xLabel")) {
-				sb.append(this.getTitle(this._query.getAttribute("xLabel")));
-			} else {
-				sb.append(this.getTitle(this._query.getAttribute("label")));
-			}
-		}
-		return sb;
-	}
+	
 	private Buffer before() {
 		Buffer sb = new Buffer();
-		Buffer title = this.getTitle();
+		Buffer title = BufferHelper.getTitle(this._xpath, this._expr, this._query, this._params, this._tag);
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append(this._tag.path("stylesheet", null));
 		sb.append("<xsl:output method=\"html\" encoding=\"utf-8\" indent=\"yes\" version=\"5.0\" omit-xml-declaration=\"no\" />");
@@ -2111,9 +2038,28 @@ public class XSLGenerator {
 		sb.append("<title>");
 		sb.append(title);
 		sb.append("</title>");
+		Buffer desc = BufferHelper.getDesc(this._xpath, this._expr, this._query, this._params, this._tag);
+		Buffer author = BufferHelper.getAuthor(this._xpath, this._expr, this._query, this._params, this._tag);
+		Buffer keyword = BufferHelper.getKeyword(this._xpath, this._expr, this._query, this._params, this._tag);
+		if(desc != null && desc.length() > 0) {
+			sb.append("<meta name=\"description\" content=\"" + desc + "\" />");
+		}
+		if(author != null && author.length() > 0) {
+			sb.append("<meta name=\"author\" content=\"" + author + "\" />");
+		}
+		if(keyword != null && keyword.length() > 0) {
+			sb.append("<meta name=\"keywords\" content=\"" + keyword + "\" />");
+		}
 		sb.append("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />");
 		sb.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
-		Document doc = null;
+		sb.append(BufferHelper.header(
+			this._xpath,
+			this._expr,
+			this._config,
+			this._query,
+			"head"
+		));
+		
 		sb.appendL("<xsl:if test=\"" + this._tag.path("message", null) + "\">");
 		sb.appendL("<script>");
 		sb.appendL("var _messages = new Array();");
@@ -2125,139 +2071,21 @@ public class XSLGenerator {
 		sb.append("</xsl:for-each>");
 		sb.appendL("</script>");
 		sb.appendL("</xsl:if>");
-		try {
-			this._expr = this._xpath.compile("header");
-			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-			
-			this._expr = this._xpath.compile("header/style");
-			NodeList[] nodes = new NodeList[6];
-			nodes[0] = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			nodes[1] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			nodes[2] = null;
-			if(nodes[0].getLength() == 0 && this._query.hasAttribute("extends")) {
-				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/header/style");
-				nodes[0] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			}
-			
-			this._expr = this._xpath.compile("header/script");
-			nodes[3] = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			nodes[4] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			nodes[5] = null;
-			if(nodes[3].getLength() == 0 && this._query.hasAttribute("extends")) {
-				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/header/script");
-				nodes[3] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			}
-
-			if(header.hasAttribute("extends")) {
-				if(doc == null) {
-					File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-					dbf.setNamespaceAware(true);
-					dbf.setXIncludeAware(true);
-					doc = dbf.newDocumentBuilder().parse(parent);
-					doc.getDocumentElement().normalize();
-				}
-				this._expr = this._xpath.compile("/querys/header/style");
-				nodes[2] = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-				this._expr = this._xpath.compile("/querys/header/script");
-				nodes[5] = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-			}
-			
-			for(int x = nodes.length - 1; x >= 0 ; x--) {
-				if(nodes[x] == null || nodes[x].getLength() == 0) {
-					continue;
-				}
-				for(int i = 0; i < nodes[x].getLength(); i++) {
-					Element node = (Element)nodes[x].item(i);
-					if(node.hasAttribute("name")) {
-						if(x > 2) {
-							this._expr = this._xpath.compile("header/script[@name='" + node.getAttribute("name") + "' and @override='true']");
-						} else {
-							this._expr = this._xpath.compile("header/style[@name='" + node.getAttribute("name") + "' and @override='true']");
-						}
-						NodeList p = null;
-						if(x == 2 || x == 5 || x == 1 || x == 4) {
-							p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-						if(x == 2 || x == 5) {
-							p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-					}
-					if(x > 2) {
-						if(!node.hasAttribute("src")) {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("\n<xsl:comment>[if IE]>");
-								sb.appendL("&lt;script>");
-							} else {
-								sb.appendL("<script>");
-							}
-						} else {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("\n<xsl:comment>[if IE]>");
-								if(node.hasAttribute("charset")) {
-									sb.appendL("&lt;script src=\"" + node.getAttribute("src") + "\" charset=\"" + node.getAttribute("charset") + "\" />");
-								} else {
-									sb.appendL("&lt;script src=\"" + node.getAttribute("src") + "\" />");
-								}
-								sb.appendL("&lt;![endif]</xsl:comment>\n");
-							} else {
-								if(node.hasAttribute("charset")) {
-									sb.appendL("<script src=\"" + node.getAttribute("src") + "\" charset=\"" + node.getAttribute("charset") + "\" />");
-								} else {
-									sb.appendL("<script src=\"" + node.getAttribute("src") + "\" />");
-								}
-							}
-						}
-					} else {
-						if(!node.hasAttribute("src")) {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("\n<xsl:comment>[if IE]>");
-								sb.appendL("&lt;style>");
-							} else {
-								sb.appendL("<style>");
-							}
-						} else {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("\n<xsl:comment>[if IE]>");
-								sb.appendL("&lt;link rel=\"stylesheet\" href=\"" + node.getAttribute("src") + "\" type=\"text/css\" media=\"all\" />");
-								sb.appendL("&lt;![endif]</xsl:comment>\n");
-								
-							} else {
-								sb.appendL("<link rel=\"stylesheet\" href=\"" + node.getAttribute("src") + "\" type=\"text/css\" media=\"all\" />");
-							}
-						}
-					}
-					if(!node.hasAttribute("src")) {
-						sb.append(node.getTextContent());
-						sb.append("");
-						if(x > 2) {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("&lt;/script>");
-								sb.appendL("&lt;![endif]</xsl:comment>\n");
-							} else {
-								sb.appendL("</script>");
-							}
-						} else {
-							if(node.hasAttribute("only") && node.getAttribute("only").equals("ie")) {
-								sb.appendL("&lt;/style>");
-								sb.appendL("&lt;![endif]</xsl:comment>\n");
-							} else {
-								sb.appendL("</style>");
-							}
-						}
-					}
-				}
-			}
-			
-		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-		}
+		sb.append(BufferHelper.header(
+			this._xpath,
+			this._expr,
+			this._config,
+			this._query,
+			"style"
+		));
+		sb.append(BufferHelper.header(
+			this._xpath,
+			this._expr,
+			this._config,
+			this._query,
+			"script"
+		));
+		
 		try {
 			this._expr = this._xpath.compile("calculator/param");
 			NodeList list = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
@@ -2299,7 +2127,7 @@ public class XSLGenerator {
 				sb.appendL("</script>");
 			}
 		} catch (XPathExpressionException | DOMException e) {
-			e.printStackTrace();
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 		try {
 			this._expr = this._xpath.compile("validation");
@@ -2367,72 +2195,38 @@ public class XSLGenerator {
 				}
 			}
 		} catch (XPathExpressionException | DOMException e) {
-			e.printStackTrace();
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 		}
 
 		sb.append("</head>"); 
 		sb.append("<body>");
-		try {
-			this._expr = this._xpath.compile("header");
-			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-			
-			this._expr = this._xpath.compile("header/top");
-			NodeList[] nodes = new NodeList[3];
-			nodes[0] = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			nodes[1] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			nodes[2] = null;
-			if(nodes[0].getLength() == 0 && this._query.hasAttribute("extends")) {
-				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/header/top");
-				nodes[0] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			}
-
-			if(header.hasAttribute("extends")) {
-				if(doc == null) {
-					File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-					dbf.setNamespaceAware(true);
-					dbf.setXIncludeAware(true);
-					doc = dbf.newDocumentBuilder().parse(parent);
-					doc.getDocumentElement().normalize();
-				}
-				this._expr = this._xpath.compile("/querys/header/top");
-				nodes[2] = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-			}
-			
-			for(int x = nodes.length - 1; x >= 0 ; x--) {
-				if(nodes[x] == null || nodes[x].getLength() == 0) {
-					continue;
-				}
-				for(int i = 0; i < nodes[x].getLength(); i++) {
-					Element node = (Element)nodes[x].item(i);
-					if(node.hasAttribute("name")) {
-						this._expr = this._xpath.compile("header/top[@name='" + node.getAttribute("name") + "' and override='true']");
-						NodeList p = null;
-						if(x == 1) {
-							p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-						if(x == 2 || x == 1) {
-							p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-					}
-					sb.append(node.getTextContent());
-					sb.append("");
-				}
-			}
-			
-		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-		}
+		sb.append(BufferHelper.header(
+			this._xpath,
+			this._expr,
+			this._config,
+			this._query,
+			"top"
+		));
+		
 		if(title.length() > 0) {
 			sb.append("<h2 class=\"title\">");
 			sb.append(title);
 			sb.append("</h2>");
+		}
+		if(author != null && author.length() > 0) {
+			sb.append("<div class=\"author\">");
+			sb.append(author);
+			sb.append("</div>");
+		}
+		if(keyword != null && keyword.length() > 0) {
+			sb.append("<div class=\"keyword\">");
+			sb.append(keyword);
+			sb.append("</div>");
+		}
+		if(desc != null && desc.length() > 0) {
+			sb.append("<div class=\"description\">");
+			sb.append(desc);
+			sb.append("</div>");
 		}
 		return sb;
 	}
@@ -2469,7 +2263,6 @@ public class XSLGenerator {
 			} else {
 				sb.appendL("	out.push({param:\"" + key + "\" + \".\" + index, msg:\"" + (String)e.getAttribute("msg") + "\", " + type.replace("-", "_") + ":\"" + (String)e.getAttribute(type) + "\"});");
 			}
-			
 			
 			sb.appendL("	result = false;");
 			sb.appendL("} else {");
@@ -2523,61 +2316,14 @@ public class XSLGenerator {
 	}
 	private Buffer after() {
 		Buffer sb = new Buffer();
-		try {
-			this._expr = this._xpath.compile("header");
-			Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-			
-			this._expr = this._xpath.compile("header/bottom");
-			NodeList[] nodes = new NodeList[3];
-			nodes[0] = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-			nodes[1] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			nodes[2] = null;
-			if(nodes[0].getLength() == 0 && this._query.hasAttribute("extends")) {
-				this._expr = this._xpath.compile("query[@id='" + this._query.getAttribute("extends") + "']/header/bottom");
-				nodes[0] = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-			}
+		sb.append(BufferHelper.header(
+			this._xpath,
+			this._expr,
+			this._config,
+			this._query,
+			"bottom"
+		));
 
-			Document doc = null;
-			if(header.hasAttribute("extends")) {
-					File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-					dbf.setNamespaceAware(true);
-					dbf.setXIncludeAware(true);
-					doc = dbf.newDocumentBuilder().parse(parent);
-					doc.getDocumentElement().normalize();
-					this._expr = this._xpath.compile("/querys/header/bottom");
-					nodes[2] = (NodeList)this._expr.evaluate(doc, XPathConstants.NODESET);
-			}
-			
-			for(int x = nodes.length - 1; x >= 0 ; x--) {
-				if(nodes[x] == null || nodes[x].getLength() == 0) {
-					continue;
-				}
-				for(int i = 0; i < nodes[x].getLength(); i++) {
-					Element node = (Element)nodes[x].item(i);
-					if(node.hasAttribute("name")) {
-						this._expr = this._xpath.compile("header/bottom[@name='" + node.getAttribute("name") + "' and override='true']");
-						NodeList p = null;
-						if(x == 1) {
-							p = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-						if(x == 2 || x == 1) {
-							p = (NodeList)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODESET);
-							if(p.getLength() > 0) {
-								continue;
-							}
-						}
-					}
-					sb.append(node.getTextContent());
-					sb.append("");
-				}
-			}
-		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-		}
 /*
 		sb.append("Version:");
 		sb.append("<xsl:value-of select=\"system-property('xsl:version')\" />");

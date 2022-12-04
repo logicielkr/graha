@@ -217,11 +217,10 @@ public class XMLGenerator {
 					continue;
 				}
 			}
-			
-			if(command.hasAttribute("type") && command.getAttribute("type") != null && command.getAttribute("type").equals("native")) {
+			if(XML.equalsIgnoreCaseAttrValue(command, "type", "native")) {
 				Processor processor = (Processor) Class.forName(command.getAttribute("class")).getConstructor().newInstance();
 				processor.execute(request, response, this._params, this._con);
-			} else if(command.hasAttribute("type") && command.getAttribute("type") != null && (command.getAttribute("type").equals("query") || command.getAttribute("type").equals("plsql"))) {
+			} else if(XML.existsIgnoreCaseAttrValue(command, "type", new String[]{"query", "plsql"})) {
 				PreparedStatement stmt = null;
 				CallableStatement cstmt = null;
 				try {
@@ -365,10 +364,6 @@ public class XMLGenerator {
 							result = stmt.getUpdateCount();
 						}
 						DB.close(stmt);
-						/*
-						stmt.executeUpdate();
-						result = stmt.getUpdateCount();
-						*/
 					}
 					if(!isResultSet && XML.validAttrValue(command, "name")) {
 						sb.append(this._tag.tag("row", command.getAttribute("name"), true));
@@ -485,27 +480,7 @@ public class XMLGenerator {
 					encrypted = getEncrypted(command, "decrypt/column");
 				}
 				java.util.Map<String, String> pattern = getRattern(command, "pattern/column");
-				/*
-				this._expr = this._xpath.compile("decrypt/column");
-				NodeList decryptColumn = (NodeList)this._expr.evaluate(command, XPathConstants.NODESET);
-				
-				java.util.Map<String, String> encrypted = new java.util.Hashtable();
-				if(encryptor != null && decryptColumn != null && decryptColumn.getLength() > 0) {
-					for(int i = 0; i < decryptColumn.getLength(); i++) {
-						encrypted.put(((Element)decryptColumn.item(i)).getAttribute("name"), ((Element)decryptColumn.item(i)).getAttribute("encrypt"));
-					}
-				}
-				
-				this._expr = this._xpath.compile("pattern/column");
-				NodeList patternColumn = (NodeList)this._expr.evaluate(command, XPathConstants.NODESET);
-				
-				java.util.Map<String, String> pattern = new java.util.Hashtable();
-				if(patternColumn != null && patternColumn.getLength() > 0) {
-					for(int i = 0; i < patternColumn.getLength(); i++) {
-						pattern.put(((Element)patternColumn.item(i)).getAttribute("name").toLowerCase(), ((Element)patternColumn.item(i)).getAttribute("pattern"));
-					}
-				}
-				*/
+
 				sb.appendL(this._tag.tag("rows", command.getAttribute("name"), true));
 				rs = stmt.executeQuery();
 				index = DBHelper.getXMLStringFromResultSet(
@@ -522,104 +497,7 @@ public class XMLGenerator {
 					XML.falseAttrValue(command, "query_to_param"),
 					sb
 				);
-				/*
-				ResultSetMetaData rsmd = rs.getMetaData();
-				while(rs.next()) {
-					sb.append(this._tag.tag("row", null, true));
-					for(int x = 1; x <= rsmd.getColumnCount(); x++) {
-						if(
-							(this.dmd.getDatabaseProductName().equalsIgnoreCase("Oracle") || this.dmd.getDatabaseProductName().equalsIgnoreCase("Tibero"))
-							&& rsmd.getColumnName(x) != null && rsmd.getColumnName(x).equals("RNUM$") 
-						) {
-							continue;
-						}
-						String value = null;
-						if(
-							this.dmd.getDatabaseProductName().equalsIgnoreCase("SQLite") &&
-							rsmd.getColumnType(x) == java.sql.Types.DATE
-						) {
-							if(
-								rsmd.getColumnTypeName(x).equals("DATETIME") &&
-//								rs.getTimestamp(x) != null &&
-								pattern != null &&
-								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
-							) {
-								value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), true);
-//								value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
-							} else if(
-//								rs.getDate(x) != null &&
-								pattern != null &&
-								pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
-							) {
-								value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, pattern.get(rsmd.getColumnName(x).toLowerCase()), false);
-//								value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
-							} else {
-								value = rs.getString(x);
-							}
-						} else if(
-							rsmd.getColumnType(x) == java.sql.Types.DATE &&
-							rs.getDate(x) != null &&
-							pattern != null &&
-							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
-						) {
-							value = STR.formatDate(rs.getDate(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
-						} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP &&
-							rs.getTimestamp(x) != null &&
-							pattern != null &&
-							pattern.containsKey(rsmd.getColumnName(x).toLowerCase())
-						) {
-							value = STR.formatDate(rs.getTimestamp(x), pattern.get(rsmd.getColumnName(x).toLowerCase()));
-						} else {
-							value = rs.getString(x);
-						}
-						if(value != null) {
-							if(
-								this._query.getAttribute("funcType").equals("detail") ||
-								this._query.getAttribute("funcType").equals("report") ||
-								this._query.getAttribute("funcType").equals("user")
-							) {
-								if(command.hasAttribute("name") && !command.getAttribute("name").equals("")) {
-									if(XML.trueAttrValue(command, "multi")) {
-										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
-									} else {
-										this._params.put("query." + command.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
-									}
-								}
-							}
-							sb.append("<");
-							sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
-							
-							if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-								sb.append("><![CDATA[");
-							} else {
-								sb.append(">");
-							}
-							if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
-								try {
-									sb.append(XML.fix(encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value)));
-								} catch (NoSuchProviderException e) {
-									sb.append(XML.fix(value));
-								}
-							} else {
-								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-									sb.append(XML.fix(value));
-								} else {
-									sb.append(value);
-								}
-							}
-							if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-								sb.append("]]></");
-							} else {
-								sb.append("</");
-							}
-							sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, false));
-							sb.appendL(">");
-						}
-					}
-					sb.appendL(this._tag.tag("row", null, false));
-					index++;
-				}
-				*/
+				
 				totalFetchCount += index;
 				if(XML.validAttrValue(command, "name")) {
 					this._params.put("query.row." + command.getAttribute("name") + ".count", index);
@@ -1051,25 +929,7 @@ public class XMLGenerator {
 						encrypted = getEncrypted(p, "column[@encrypt]");
 					}
 					java.util.Map<String, String> pattern = getRattern(p, "column[@pattern]");
-					/*
-					this._expr = this._xpath.compile("column[@encrypt]");
-					NodeList decryptColumn = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
-					java.util.Map<String, String> encrypted = new java.util.Hashtable();
-					if(encryptor != null && decryptColumn != null && decryptColumn.getLength() > 0) {
-						for(int qq = 0; qq < decryptColumn.getLength(); qq++) {
-							encrypted.put(((Element)decryptColumn.item(qq)).getAttribute("name"), ((Element)decryptColumn.item(qq)).getAttribute("encrypt"));
-						}
-					}
-					this._expr = this._xpath.compile("column[@pattern]");
-					NodeList patternColumn = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 					
-					java.util.Map<String, String> pattern = new java.util.Hashtable();
-					if(patternColumn != null && patternColumn.getLength() > 0) {
-						for(int qq = 0; qq < patternColumn.getLength(); qq++) {
-							pattern.put(((Element)patternColumn.item(qq)).getAttribute("name").toLowerCase(), ((Element)patternColumn.item(qq)).getAttribute("pattern"));
-						}
-					}
-					*/
 					rs = stmt.executeQuery();
 					index = DBHelper.getXMLStringFromResultSet(
 						rs,
@@ -1085,98 +945,7 @@ public class XMLGenerator {
 						XML.falseAttrValue(p, "query_to_param"),
 						sb
 					);
-	
 
-					/*
-					ResultSetMetaData rsmd = rs.getMetaData();
-					index = 0;
-					while(rs.next()) {
-						sb.appendL(this._tag.tag("row", null, true));
-						
-						for(int x = 1; x <= rsmd.getColumnCount(); x++) {
-							String value = null;
-							if(
-								this.dmd.getDatabaseProductName().equalsIgnoreCase("SQLite") &&
-								rsmd.getColumnType(x) == java.sql.Types.DATE
-							) {
-								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-								if(rsmd.getColumnTypeName(x).equals("DATETIME")) {
-									if(qqq != null && qqq.hasAttribute("pattern")) {
-										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, qqq.getAttribute("pattern"), true);
-									} else {
-										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, null, true);
-									}
-								} else {
-									if(qqq != null && qqq.hasAttribute("pattern")) {
-										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, qqq.getAttribute("pattern"), false);
-									} else {
-										value = DBHelper.getSQLiteTimestampOrDateValue(rs, x, null, false);
-									}
-								}
-							} else 	if(rsmd.getColumnType(x) == java.sql.Types.DATE && rs.getDate(x) != null) {
-								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-								if(qqq != null && qqq.hasAttribute("pattern")) {
-									value = STR.formatDate(rs.getDate(x), qqq.getAttribute("pattern"));
-								} else {
-									value = rs.getDate(x).toString();
-								}
-							} else if(rsmd.getColumnType(x) == java.sql.Types.TIMESTAMP && rs.getTimestamp(x) != null) {
-								this._expr = this._xpath.compile("column[@name='" + rsmd.getColumnName(x).toLowerCase() + "']");
-								Element qqq = (Element)this._expr.evaluate(p, XPathConstants.NODE);
-								if(qqq != null && qqq.hasAttribute("pattern")) {
-									value = STR.formatDate(rs.getTimestamp(x), qqq.getAttribute("pattern"));
-								} else {
-									value = rs.getTimestamp(x).toString();
-								}
-							} else {
-								value = rs.getString(x);
-							}
-							if(value != null) {
-								if(p.hasAttribute("name") && !p.getAttribute("name").equals("")) {
-									if(XML.trueAttrValue(p, "multi")) {
-										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase() + "." + index, value);
-									} else {
-										this._params.put("query." + p.getAttribute("name") + "." + rsmd.getColumnName(x).toLowerCase(), value);
-									}
-								}
-								sb.append("<");
-								sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
-								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-									sb.append("><![CDATA[");
-								} else {
-									sb.append(">");
-								}
-								if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
-									try {
-										String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
-										if(tmp != null) {
-											sb.append(XML.fix(tmp));
-										}
-									} catch (NoSuchProviderException e) {
-										sb.append(XML.fix(value));
-									}
-								} else {
-									if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-										sb.append(XML.fix(value));
-									} else {
-										sb.append(value);
-									}
-								}
-								if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
-									sb.append("]]></");
-								} else {
-									sb.append("</");
-								}
-								sb.append(this._tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
-								sb.appendL(">");
-							}
-						}
-						sb.appendL(this._tag.tag("row", null, false));
-						index++;
-					}
-					*/
 					totalFetchCount += index;
 					if(XML.validAttrValue(p, "name")) {
 						this._params.put("query.row." + p.getAttribute("name") + ".count", index);
@@ -1929,19 +1698,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			} catch (XPathExpressionException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			}
-			/*
-			if(
-				(
-					this._query.getAttribute("funcType").equals("list") || 
-					this._query.getAttribute("funcType").equals("listAll") || 
-					this._query.getAttribute("funcType").equals("detail")
-				) &&
-				layout != null && 
-				layout.hasAttribute("href") && 
-				layout.getAttribute("href") != null && 
-				!layout.getAttribute("href").equals("")
-			) {
-			*/
+			
 			if(
 				XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll", "detail"}) &&
 				XML.validAttrValue(layout, "href")
@@ -2005,7 +1762,12 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		sb.appendL(this._tag.tag("document", null, true));
 		try {
-			Document doc = this.getExtendsDocument();
+			Document doc = BufferHelper.getExtendsDocument(
+				this._xpath,
+				this._expr,
+				this._config,
+				this._query
+			);
 			parseMessage(sb, doc);
 			if(
 				this._params.hasKey("header.method") && 
@@ -2086,20 +1848,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		return sb;
 	}
-	private Document getExtendsDocument() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		this._expr = this._xpath.compile("header");
-		Element header = (Element)this._expr.evaluate(this._query.getParentNode(), XPathConstants.NODE);
-		Document doc = null;
-		if(header.hasAttribute("extends")) {
-			File parent = new File(this._config.getParent() + File.separator + header.getAttribute("extends"));
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			dbf.setNamespaceAware(true);
-			dbf.setXIncludeAware(true);
-			doc = dbf.newDocumentBuilder().parse(parent);
-			doc.getDocumentElement().normalize();
-		}
-		return doc;
-	}
+	
 	private void parseMessage(Buffer sb, Document doc) throws XPathExpressionException {
 		Buffer sb_message = null;
 		if(sb != null) {
