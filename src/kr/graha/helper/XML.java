@@ -173,7 +173,7 @@ https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc
  * @param element
  * @param attr 속성이름
  * @param value
- * @return value 에서 attr 에 대항하는 속성값이 발견되면 true 를 리턴한다.
+ * @return value 에서 attr 에 대응하는 속성값이 발견되면 true 를 리턴한다.
  */
 	public static boolean existsAttrValue(Element element, String attr, String[] value) {
 		if(element != null && element.hasAttribute(attr) && element.getAttribute(attr) != null) {
@@ -185,12 +185,12 @@ https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc
 	}
 /**
  * 첫 번째 파라미터로 공급된 속성값이, 2 번째 파라미터로 공급된 문자열 배열에 있는지 검사한다.
- * STR.exists 메소드를 호출하여 비교한다.
+ * STR.existsIgnoreCase 메소드를 호출하여 비교한다.
  * 속성값의 정의가 없는 경우 무조건 false 를 반환한다.
  * @param element
  * @param attr 속성이름
  * @param value
- * @return value 에서 attr 에 대항하는 속성값이 발견되면 true 를 리턴한다.
+ * @return value 에서 attr 에 대응하는 속성값이 발견되면 true 를 리턴한다.
  */
 	public static boolean existsIgnoreCaseAttrValue(Element element, String attr, String[] value) {
 		if(element != null && element.hasAttribute(attr) && element.getAttribute(attr) != null) {
