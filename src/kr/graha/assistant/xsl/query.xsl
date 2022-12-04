@@ -108,6 +108,7 @@ function bodyload() {
 		document.getElementById("_history").innerHTML = txt;
 	}
 }
+/*
 function toggleGen(obj) {
 	if(document.getElementById('gen').style.display == "block") {
 		document.getElementById('gen').style.display='none';
@@ -117,6 +118,7 @@ function toggleGen(obj) {
 		obj.value = "<xsl:value-of select="/document/props/query.button.generation.hide.label" />";
 	}
 }
+*/
 function gen(obj) {
 	document.getElementById("graha_xml_config").action = "options";
 	document.getElementById("graha_xml_config").sql.value = document.getElementById("sql").value;
@@ -169,17 +171,6 @@ function gen(obj) {
 	</input>
 </form>
 <form class="graha_xml_config" id="graha_xml_config" method="post">
-<!--
-<xsl:if test="/document/rows[@id='gen']/row/gen">
-	<input>
-		<xsl:attribute name="type">button</xsl:attribute>
-		<xsl:attribute name="onclick">toggleGen(this)</xsl:attribute>
-		<xsl:attribute name="value"><xsl:value-of select="/document/props/query.button.generation.label" /></xsl:attribute>
-	</input>
-	
-	<textarea name="gen" id="gen" style="width:100%;height:100px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
-</xsl:if>
--->
 <xsl:if test="/document/rows[@id='count']/row or /document/rows[@id='data']/row or /document/rows[@id='meta']/row">
 	<xsl:if test="/document/rows[@id='count']/row">
 		<input>

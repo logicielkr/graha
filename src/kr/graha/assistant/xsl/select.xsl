@@ -1281,9 +1281,6 @@ function isNumberic(v) {
 			<xsl:attribute name="type">submit</xsl:attribute>
 			<xsl:attribute name="value"><xsl:value-of select="/document/props/select.button.generation.label" /></xsl:attribute>
 		</input>
-		<!--
-		<input type="submit" value="Generation"/>
-		-->
 	</div>
 </form>
 </body>

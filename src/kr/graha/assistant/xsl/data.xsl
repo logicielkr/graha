@@ -124,10 +124,6 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
-<!--
-<input type="submit" value="Table List"  style="display:inline-block;float:right" />
--->
-
 <input>
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
@@ -144,9 +140,6 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
-<!--
-<input type="submit" value="SQL Runner" />
--->
 <input>
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/data.button.sql_runner.label" /></xsl:attribute>

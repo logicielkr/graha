@@ -138,9 +138,6 @@ function gen() {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
-<!--
-<input type="button" value="Generation"  style="display:inline-block;float:right" onclick="gen()" />
--->
 <input>
 	<xsl:attribute name="type">button</xsl:attribute>
 	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
@@ -163,9 +160,6 @@ function gen() {
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.sql_runner.label" /></xsl:attribute>
 </input>
-<!--
-<input type="submit" value="SQL Runner" />
--->
 </form>
 <form method="post" id="list_frm" action="list">
 <xsl:if test="/document/params/param/jndi">

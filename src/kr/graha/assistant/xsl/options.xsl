@@ -59,14 +59,6 @@ table.column td input[type='text'] {
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
-/*
-table.basic tr.file_path_hidden {
-	display:none;
-}
-table.basic tr.file_path {
-	
-}
-*/
 </style>
 <script>
 function check(obj) {
@@ -76,15 +68,6 @@ function check(obj) {
 		obj.query_id.focus();
 		return false;
 	}
-/*
-	if(obj.file.checked) {
-		if(obj.file_path.value == null || obj.file_path.value == "") {
-			alert("<xsl:value-of select="/document/props/options.message.generation.file_path_is_null.error.msg" />");
-			obj.file_path.focus();
-			return false;
-		}
-	}
-*/
 	var msg = null;
 	if(obj.query_label.value == null || obj.query_label.value == "") {
 		msg = "<xsl:value-of select="/document/props/options.message.generation.query_label_is_null.error.msg" />"
@@ -107,15 +90,6 @@ function check(obj) {
 	}
 	return true;
 }
-/*
-function clickFile(obj) {
-	if(obj.checked) {
-		document.getElementById("file_path").className = "file_path";
-	} else {
-		document.getElementById("file_path").className = "file_path_hidden";
-	}
-}
-*/
 function changeLabel(obj) {
 	document.getElementById("gen_from_query")["label_column." + obj.name.substring(obj.name.indexOf(".") + 1)].value = obj.options[obj.options.selectedIndex].value;
 }

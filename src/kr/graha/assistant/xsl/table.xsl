@@ -111,9 +111,6 @@ table tbody td a {
 			<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 		</input>
 	</xsl:if>
-	<!--
-	<input type="submit" value="Search" />
-	-->
 	<input>
 		<xsl:attribute name="type">submit</xsl:attribute>
 		<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.search.label" /></xsl:attribute>
@@ -127,9 +124,6 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
-<!--
-<input type="submit" value="Table List" />
--->
 <input>
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.table_list.label" /></xsl:attribute>
@@ -143,9 +137,6 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/params/param/jndi" /></xsl:attribute>
 	</input>
 </xsl:if>
-<!--
-<input type="submit" value="SQL Runner" />
--->
 <input>
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.sql_runner.label" /></xsl:attribute>
@@ -213,9 +204,6 @@ table tbody td a {
 		</xsl:otherwise>
 	</xsl:choose>
 </input>
-<!--
-<input type="submit" value="Save Comments" style="display:inline-block;" />
--->
 <div style="width:100%;text-align:center;">
 	<input>
 		<xsl:attribute name="type">submit</xsl:attribute>
