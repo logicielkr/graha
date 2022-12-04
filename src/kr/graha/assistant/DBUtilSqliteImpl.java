@@ -55,13 +55,6 @@ public class DBUtilSqliteImpl extends DBUtil {
 //		return "current_timestamp";
 		return "strftime('%Y-%m-%d %H:%M:%f', current_timestamp, 'localtime')";
 	}
-/*
-	%Y-%m-%d %H:%M:%S
-	
-	
-	select datetime(current_timestamp, 'localtime') as now
-	select date(current_timestamp, 'localtime') as now
-*/
 	protected String dateFormat(String columnName, String format) {
 		if(format.equals("date")) {
 			return "date(" + columnName + ", 'localtime') as " + columnName;
