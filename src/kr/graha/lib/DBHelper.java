@@ -283,7 +283,6 @@ public final class DBHelper {
 		boolean queryToParam,
 		Buffer sb
 	) throws SQLException {
-//		sb.appendL(tag.tag("rows", commandName, true));
 		int index = 0;
 		ResultSetMetaData rsmd = rs.getMetaData();
 		while(rs.next()) {
@@ -338,13 +337,6 @@ public final class DBHelper {
 					if(encrypted != null && encryptor != null && encrypted.containsKey(rsmd.getColumnName(x).toLowerCase())) {
 						try {
 							value = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
-//							sb.append(XML.fix(encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value)));
-/*
-							String tmp = encryptor.get(encrypted.get(rsmd.getColumnName(x).toLowerCase())).decrypt(value);
-							if(tmp != null) {
-								sb.append(XML.fix(tmp));
-							}
-*/
 						} catch (NoSuchProviderException e) {
 							if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 						}
