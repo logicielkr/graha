@@ -58,13 +58,13 @@ public class DBUtilOracleImpl extends DBUtil {
 		return "sysdate";
 	}
 	/*
-	select to_char(sysdate, 'yyyy-mm-dd') as now from dual
+select to_char(sysdate, 'yyyy-mm-dd') as now from dual
 	
-	select to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') as now,
-sysdate,
-systimestamp,
-CURRENT_TIMESTAMP,
-CURRENT_DATE
+select to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') as now,
+	sysdate,
+	systimestamp,
+	CURRENT_TIMESTAMP,
+	CURRENT_DATE
 from dual
 
 select dbtimezone from dual
