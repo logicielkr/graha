@@ -1355,16 +1355,16 @@ public class XSLGenerator {
 			if(XML.validAttrValue(e, "constraint")) {
 				sb.appendL("	<xsl:attribute name=\"constraint\">" + e.getAttribute("constraint") + "</xsl:attribute>");
 			}
-			if(XML.validAttrValue(e, "autocomplete")) {
+			if(XML.validAttrValue(col, "autocomplete")) {
 				sb.appendL("	<xsl:attribute name=\"autocomplete\">" + col.getAttribute("autocomplete") + "</xsl:attribute>");
 			}
-			if(XML.validAttrValue(e, "placeholder")) {
+			if(XML.validAttrValue(col, "placeholder")) {
 				sb.appendL("	<xsl:attribute name=\"placeholder\">" + col.getAttribute("placeholder") + "</xsl:attribute>");
 			}
-			if(XML.validAttrValue(e, "pattern")) {
+			if(XML.validAttrValue(col, "pattern")) {
 				sb.appendL("	<xsl:attribute name=\"pattern\">" + col.getAttribute("pattern") + "</xsl:attribute>");
 			}
-			if(XML.validAttrValue(e, "title")) {
+			if(XML.validAttrValue(col, "title")) {
 				sb.appendL("	<xsl:attribute name=\"title\">" + col.getAttribute("title") + "</xsl:attribute>");
 			}
 			if(col.hasAttribute("disabled")) {
