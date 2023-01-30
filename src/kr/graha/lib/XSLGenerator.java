@@ -184,14 +184,10 @@ public class XSLGenerator {
 			sb.appendL(this._html.tr());
 			NodeList columns = null;
 			if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
-				if(tabs.getLength() == 1) {
-					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
-				} else {
-					sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
-				}
+				sb.appendL("<xsl:for-each select=\"" + this._tag.path("firstrow", tab.getAttribute("name")) + "/*\">");
 				sb.appendL(this._html.th(null, false) + ">");
-				sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
-				sb.appendL("<xsl:value-of select=\"name(.)\" />");
+				sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
+				sb.appendL("<xsl:value-of select =\"local-name()\"/>");
 				sb.appendL(this._html.thE());
 				sb.appendL("</xsl:for-each>");
 			} else {
@@ -224,16 +220,16 @@ public class XSLGenerator {
 			sb.appendL(this._html.trE());
 			sb.appendL(this._html.theadE());
 			sb.appendL(this._html.tbody());
-			if(tabs.getLength() == 1) {
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "\">");
-			} else {
-				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
-			}
+			sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 			sb.appendL(this._html.tr());
 			if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
-				sb.appendL("<xsl:for-each select=\"./*\">");
+				if(this._tag.isRDF) {
+					sb.appendL("<xsl:for-each select=\"./RDF:item/*\">");
+				} else {
+					sb.appendL("<xsl:for-each select=\"./*\">");
+				}
 				sb.appendL(this._html.td(null, false) + ">");
-				sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+				sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
 				sb.appendL("<xsl:value-of select=\".\" />");
 				sb.appendL(this._html.tdE());
 				sb.appendL("</xsl:for-each>");
@@ -460,14 +456,10 @@ public class XSLGenerator {
 				sb.appendL(this._html.thead());
 				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 					sb.appendL(this._html.tr());
-					if(tabs.getLength() == 1) {
-						sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
-					} else {
-						sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
-					}
+					sb.appendL("<xsl:for-each select=\"" + this._tag.path("firstrow", tab.getAttribute("name")) + "/*\">");
 					sb.appendL(this._html.th(null, false) + ">");
-					sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
-					sb.appendL("<xsl:value-of select=\"name(.)\" />");
+					sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
+					sb.appendL("<xsl:value-of select=\"local-name()\" />");
 					sb.appendL(this._html.thE());
 					sb.appendL("</xsl:for-each>");
 					sb.appendL(this._html.trE());
@@ -505,9 +497,13 @@ public class XSLGenerator {
 				sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "\">");
 				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 					sb.appendL(this._html.tr());
-					sb.appendL("<xsl:for-each select=\"./*\">");
+					if(this._tag.isRDF) {
+						sb.appendL("<xsl:for-each select=\"./RDF:item/*\">");
+					} else {
+						sb.appendL("<xsl:for-each select=\"./*\">");
+					}
 					sb.appendL(this._html.td(null, false) + ">");
-					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
 					sb.appendL("<xsl:value-of select=\".\" />");
 					sb.appendL(this._html.tdE());
 					sb.appendL("</xsl:for-each>");
@@ -550,14 +546,10 @@ public class XSLGenerator {
 					sb.appendL(this._html.thead());
 					if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 						sb.appendL(this._html.tr());
-						if(tabs.getLength() == 1) {
-							sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", null) + "[position() = 1]/*\">");
-						} else {
-							sb.appendL("<xsl:for-each select=\"" + this._tag.path("row", tab.getAttribute("name")) + "[position() = 1]/*\">");
-						}
+						sb.appendL("<xsl:for-each select=\"" + this._tag.path("firstrow", tab.getAttribute("name")) + "/*\">");
 						sb.appendL(this._html.th(null, false) + ">");
-						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
-						sb.appendL("<xsl:value-of select=\"name(.)\" />");
+						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
+						sb.appendL("<xsl:value-of select=\"local-name()\" />");
 						sb.appendL(this._html.thE());
 						sb.appendL("</xsl:for-each>");
 						sb.appendL(this._html.trE());
@@ -601,15 +593,19 @@ public class XSLGenerator {
 				}
 				if(XML.equalsIgnoreCaseAttrValue(tab, "column", "auto")) {
 					sb.appendL(this._html.tr());
-					sb.appendL("<xsl:for-each select=\"./*\">");
+					if(this._tag.isRDF) {
+						sb.appendL("<xsl:for-each select=\"./RDF:item/*\">");
+					} else {
+						sb.appendL("<xsl:for-each select=\"./*\">");
+					}
 					if(!XML.trueAttrValue(tab, "single")) {
 						sb.appendL(this._html.th(null, false) + ">");
-						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
-						sb.appendL("<xsl:value-of select=\"name(.)\" />");
+						sb.appendL("<xsl:attribute name=\"class\">graha th <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
+						sb.appendL("<xsl:value-of select=\"local-name()\" />");
 						sb.appendL(this._html.thE());
 					}
 					sb.appendL(this._html.td(null, false) + ">");
-					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"name(.)\" /></xsl:attribute>");
+					sb.appendL("<xsl:attribute name=\"class\">graha td <xsl:value-of select=\"local-name()\" /></xsl:attribute>");
 					sb.appendL("<xsl:value-of select=\".\" />");
 					sb.appendL(this._html.tdE());
 					sb.appendL("</xsl:for-each>");
@@ -801,6 +797,12 @@ public class XSLGenerator {
 				return this._params.getString("system.prefix") + href.substring(0, href.length() - 1);
 			} else {
 				return this._params.getString("system.prefix") + href + this._params.getString("system.suffix");
+			}
+		} else if(href.startsWith("../")) {
+			if(href.endsWith("!")) {
+				return href.substring(0, href.length() - 1);
+			} else {
+				return href + this._params.getString("system.suffix");
 			}
 		} else if(href == null || href.trim().equals("")) {
 			return "";
@@ -1248,6 +1250,7 @@ public class XSLGenerator {
 				sb.appendL("	<input>");
 				sb.appendL("		<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
 				sb.appendL("		<xsl:attribute name=\"type\">radio</xsl:attribute>");
+				sb.append(BufferHelper.getDataAttr(col));
 				sb.append("		<xsl:attribute name=\"value\">");
 				sb.append("<xsl:value-of select=\"@" + this._tag.path("code", "value", null, isFull) + "\" />");
 				sb.appendL("</xsl:attribute>");
@@ -1276,6 +1279,7 @@ public class XSLGenerator {
 					sb.appendL("<input>");
 					sb.appendL("	<xsl:attribute name=\"name\">" + name + "</xsl:attribute>");
 					sb.appendL("	<xsl:attribute name=\"type\">radio</xsl:attribute>");
+					sb.append(BufferHelper.getDataAttr(col));
 					sb.appendL("	<xsl:attribute name=\"value\">" + option.getAttribute("value") + "</xsl:attribute>");
 					if(defaultValue != null) {
 						sb.appendL("	<xsl:choose>");
@@ -1367,6 +1371,10 @@ public class XSLGenerator {
 			if(XML.validAttrValue(col, "title")) {
 				sb.appendL("	<xsl:attribute name=\"title\">" + col.getAttribute("title") + "</xsl:attribute>");
 			}
+			if(XML.validAttrValue(col, "required")) {
+				sb.appendL("	<xsl:attribute name=\"required\">" + col.getAttribute("required") + "</xsl:attribute>");
+			}
+			sb.append(BufferHelper.getDataAttr(col));
 			if(col.hasAttribute("disabled")) {
 				AuthInfo authInfo = null;
 				if(XML.validAttrValue(col, "dcond")) {
