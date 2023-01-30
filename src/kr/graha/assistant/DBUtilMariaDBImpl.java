@@ -52,9 +52,6 @@ public class DBUtilMariaDBImpl extends DBUtil {
 		LOG.setLogLevel(logger);
 	}
 	protected String dateFormat(String columnName, String format) {
-/*
-select DATE_FORMAT(now(), '%Y-%m-%d')
-*/
 		if(format.equals("date")) {
 			return "DATE_FORMAT(" + columnName + ", '%Y-%m-%d') as " + columnName;
 		} else if(format.equals("datetime")) {
@@ -64,9 +61,6 @@ select DATE_FORMAT(now(), '%Y-%m-%d')
 		}
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
-/*
-SELECT table_name FROM INFORMATION_SCHEMA.TABLES where TABLE_TYPE = 'SEQUENCE'
-*/
 		String catalogName = null;
 		try {
 			catalogName = con.getCatalog();

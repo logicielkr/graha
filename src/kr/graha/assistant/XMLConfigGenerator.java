@@ -756,12 +756,9 @@ public final class XMLConfigGenerator {
 				bw.write("		<style name=\"input.width\" src=\"../../graha_css/" + grahaCssBaseDirectory.getName() + inputWidthCss + "\" />\n");
 				bw.write("		<script name=\"get_message\" src=\"../../graha_js/" + grahaJsBaseDirectory.getName() + getMessageJs + "\" />\n");
 				bw.write("		<script name=\"check_submit\" src=\"../../graha_js/" + grahaJsBaseDirectory.getName() + checkSubmitJs + "\" />\n");
-//				bw.write("		<script name=\"fn_check\" src=\"../../graha_js/" + grahaJsBaseDirectory.getName() + fnCheckJs + "\"/>\n");
 				result.put("fn_check.js", "../../graha_js/" + grahaJsBaseDirectory.getName() + fnCheckJs);
 				bw.write("		<script name=\"ajax_parse_graha_xml_document\" src=\"../../graha_js/" + grahaJsBaseDirectory.getName() + parseGrahaXmlDocumentJs + "\" />\n");
-//				bw.write("		<script name=\"graha.formula\" src=\"../../graha_js/" + grahaFormulaJsDirectory.getName() + grahaFormulaJs + "\" />\n");
 				result.put("GrahaFormula.js", "../../graha_js/" + grahaFormulaJsDirectory.getName() + grahaFormulaJs);
-//				bw.write("		<script name=\"date.parser\" src=\"../../graha_js/" + dateParserJsDirectory.getName() + dateParserJs + "\" />\n");
 				result.put("DateParser.js", "../../graha_js/" + dateParserJsDirectory.getName() + dateParserJs);
 				bw.write("<!--\n");
 				bw.write("		<style name=\"default.default\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + defaultCss + "\" />\n");
@@ -770,13 +767,10 @@ public final class XMLConfigGenerator {
 				bw.write("		<style name=\"input.width\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + inputWidthCss + "\" />\n");
 				bw.write("		<script name=\"get_message\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + getMessageJs + "\" />\n");
 				bw.write("		<script name=\"check_submit\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + checkSubmitJs + "\" />\n");
-//				bw.write("		<script name=\"fn_check\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + fnCheckJs + "\"/>\n");
 				result.put("fn_check.js.remote", "//graha.kr/static-contents/client_lib/graha_base_library" + fnCheckJs);
 				bw.write("		<script name=\"ajax_parse_graha_xml_document\" src=\"//graha.kr/static-contents/client_lib/graha_base_library" + parseGrahaXmlDocumentJs + "\" />\n");
 				
-//				bw.write("		<script name=\"graha.formula\" src=\"//graha.kr/static-contents/client_lib/formula" + grahaFormulaJs + "\"/>\n");
 				result.put("GrahaFormula.js.remote", "//graha.kr/static-contents/client_lib/formula" + grahaFormulaJs);
-//				bw.write("		<script name=\"date.parser\" src=\"//graha.kr/static-contents/client_lib/date_parser" + dateParserJs + "\"/>\n");
 				result.put("DateParser.js.remote", "//graha.kr/static-contents/client_lib/date_parser" + dateParserJs);
 				
 				bw.write("-->\n");

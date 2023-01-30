@@ -52,18 +52,12 @@ public class DBUtilDerbyImpl extends DBUtil {
 		LOG.setLogLevel(logger);
 	}
 	protected String getToday() {
-/*
-		select current_timestamp from SYSIBM.SYSDUMMY1
-*/
 		return "current_timestamp";
 	}
 	protected boolean supportBultinDateFormatFunction() {
 		return false;
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
-/*
-select SEQUENCENAME from sys.SYSSEQUENCES
-*/
 		String prefix = "";
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
 			prefix = schemaName + ".";
@@ -113,7 +107,6 @@ select SEQUENCENAME from sys.SYSSEQUENCES
 			sql = "create table GRAHA_TAB_COMMENTS (\n";
 			sql += "SCHEMA_NAME varchar(50),\n";
 			sql += "TABLE_NAME varchar(50),\n";
-//			sql += "TABLE_TYPE varchar(50),\n";
 			sql += "COMMENTS varchar(50),\n";
 			sql += "PRIMARY KEY (SCHEMA_NAME, TABLE_NAME)\n";
 			sql += ")";

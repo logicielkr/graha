@@ -133,21 +133,6 @@ function changeLabel(obj) {
 			</td>
 		</tr>
 </xsl:if>
-<!--
-		<tr class="print_and_file">
-			<th><xsl:value-of select="/document/props/options.table.basic.exec_type.label" /></th>
-			<td>
-				<input type="checkbox" name="print" value="print" checked="checked" disabled="disabled" /> <xsl:value-of select="/document/props/options.table.basic.exec_type.print.label" />
-				<input type="checkbox" name="file" value="file" onclick="clickFile(this)" /> <xsl:value-of select="/document/props/options.table.basic.exec_type.file.label" />
-			</td>
-		</tr>
-		<tr class="file_path_hidden" id="file_path">
-			<th><xsl:value-of select="/document/props/options.table.basic.file_path.label" /></th>
-			<td>
-				WEB-INF/graha/generated/<input type="text" name="file_path" style="width:200px;" />.xml
-			</td>
-		</tr>
--->
 	</table>
 <xsl:if test="count(/document/columns/column) > 0">
 	<h3 class="column">2. <xsl:value-of select="/document/props/options.document.column_info.label" /></h3>

@@ -57,18 +57,6 @@ public class DBUtilOracleImpl extends DBUtil {
 	protected String getToday() {
 		return "sysdate";
 	}
-	/*
-select to_char(sysdate, 'yyyy-mm-dd') as now from dual
-	
-select to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') as now,
-	sysdate,
-	systimestamp,
-	CURRENT_TIMESTAMP,
-	CURRENT_DATE
-from dual
-
-select dbtimezone from dual
-	*/
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 		String prefix = "";
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
@@ -136,13 +124,6 @@ select dbtimezone from dual
 		return getTables(con, tables, true);
 	}
 	protected List<Table> getTables(Connection con, List<Table> tables, boolean columns) throws SQLException {
-/*
-select * from user_tab_comments a  where exists (
-select * from user_tables b where a.table_name = b.table_name
-) or exists(
-select * from user_views c where a.table_name = c.view_name
-)
-*/
 		Table table = null;
 		if(tables != null && tables.size() == 1) {
 			table = tables.get(0);
@@ -224,25 +205,6 @@ select * from user_views c where a.table_name = c.view_name
 		return super.getCommentByColumnNameFromGrahaColComments(con, columnName, true);
 	}
 	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
-/*
-select 
-	a.table_name, 
-	a.column_name,
-	a.nullable,
-	b.comments, 
-	(
-		select position from user_cons_columns, user_constraints
-		where user_constraints.CONSTRAINT_TYPE = 'P'
-			and user_constraints.CONSTRAINT_NAME = user_cons_columns.CONSTRAINT_NAME
-			and user_constraints.TABLE_NAME = a.table_name
-			and user_cons_columns.TABLE_NAME = a.table_name
-			and user_cons_columns.column_name  = a.column_name
-	) as pk
-from user_tab_columns a, 
-	user_col_comments b 
-where a.table_name = b.table_name 
-	and a.column_name = b.column_name
-*/
 		List<Column> l = new ArrayList<Column>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

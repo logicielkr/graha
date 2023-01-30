@@ -101,24 +101,15 @@ function bodyload() {
 		}
 		var txt = "";
 		for(var i = localStorage.sqlHistoryCount; i > 0; i--) {
+			if(localStorage.getItem("sqlHistory" + i) != null &amp;&amp; localStorage.getItem("sqlHistory" + i) != "") {
 <![CDATA[
-			txt += ("<li idx='" + i + "' ondblclick='setHistory(this)' style='white-space:pre-line;margin-top:10px;'>" + localStorage.getItem("sqlHistory" + i) + "</li>");
+				txt += ("<li idx='" + i + "' ondblclick='setHistory(this)' style='white-space:pre-line;margin-top:10px;'>" + localStorage.getItem("sqlHistory" + i) + "</li>");
 //]]>
+			}
 		}
 		document.getElementById("_history").innerHTML = txt;
 	}
 }
-/*
-function toggleGen(obj) {
-	if(document.getElementById('gen').style.display == "block") {
-		document.getElementById('gen').style.display='none';
-		obj.value = "<xsl:value-of select="/document/props/query.button.generation.label" />";
-	} else {
-		document.getElementById('gen').style.display='block';
-		obj.value = "<xsl:value-of select="/document/props/query.button.generation.hide.label" />";
-	}
-}
-*/
 function gen(obj) {
 	document.getElementById("graha_xml_config").action = "options";
 	document.getElementById("graha_xml_config").sql.value = document.getElementById("sql").value;

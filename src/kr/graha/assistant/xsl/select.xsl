@@ -814,9 +814,6 @@ function isNumberic(v) {
 			<td>
 				<select name="table" onChange="changeMasterTable(this)" id="masterTableName">
 					<xsl:for-each select="/document/params/table[@master = 'true']">
-<!--
-					<xsl:for-each select="/document/params/table">
--->
 						<xsl:sort select="@master" order="descending" />
 						<option value="{@name}">
 							<xsl:value-of select="@name" />

@@ -48,10 +48,6 @@ public class DBUtilH2Impl extends DBUtil {
 		LOG.setLogLevel(logger);
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
-		/*
-SELECT SEQUENCE_NAME
-FROM INFORMATION_SCHEMA.SEQUENCES
-		*/
 		String prefix = "";
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
 			prefix = schemaName + ".";

@@ -79,7 +79,7 @@ public class CManager {
 		this.rjndi = this.request.getParameter("jndi");
 		this.grahaCommonCodeTableName = this.c.getInitParameter("graha_common_code_table_name");
 //		this.grahaMenuTableName = this.c.getInitParameter("graha_menu_table_name");
-//		
+		
 		if(this.rjndi != null) {
 			this.rjndi = this.rjndi.trim();
 		}

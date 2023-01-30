@@ -92,9 +92,6 @@ public class DBUtil {
 		return getNextval(con, table.name, columnName, table.schema, defaultSchema);
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
-/*
-		select sequencename from pg_sequences
-*/
 		String prefix = "";
 		if(defaultSchema != null && schemaName != null && !schemaName.equals(defaultSchema)) {
 			prefix = schemaName + ".";
@@ -211,9 +208,6 @@ public class DBUtil {
 		return true;
 	}
 	protected String dateFormat(String columnName, String format) {
-/*
-select to_char(now(), 'yyyy-mm-dd') as now
-*/
 		if(format.equals("date")) {
 			return "to_char(" + columnName + ", 'yyyy-mm-dd') as " + columnName;
 		} else if(format.equals("datetime")) {
