@@ -5,7 +5,8 @@
 	<property name = "tomcat10.dir" value = "${base.dir}/tomcat10"/>
 	<property name = "package.dir" value = "${base.dir}/package"/>
 	<property name = "app.name" value = "graha"/>
-	<property name = "app.version" value = "0.5.0.6"/>
+	<property name = "version.file" value = "version.property" />
+	<property file = "${version.file}" />
 	<presetdef name="javac">
 		<javac includeantruntime="false" />
 	</presetdef>
