@@ -344,15 +344,15 @@ public class XMLGenerator {
 							index = DBHelper.getXMLStringFromResultSet(
 								rs,
 								this._tag,
-								command.getAttribute("name"),
+								command,
+								this._query,
 								encryptor,
 								encrypted,
 								this._params,
 								pattern,
-								this._query.getAttribute("funcType"),
-								this.dmd.getDatabaseProductName(),
-								XML.trueAttrValue(command, "multi"),
-								XML.falseAttrValue(command, "query_to_param"),
+								this.dmd,
+								this._xpath,
+								this._expr,
 								sb
 							);
 							if(XML.validAttrValue(command, "name")) {
@@ -475,6 +475,8 @@ public class XMLGenerator {
 					this.setInt(stmt, index + 0, pageSize);
 					this.setInt(stmt, index + 1, (page - 1) * pageSize);
 				}
+				rs = stmt.executeQuery();
+				
 				java.util.Map<String, String> encrypted = null;
 				if(encryptor != null) {
 					encrypted = getEncrypted(command, "decrypt/column");
@@ -482,22 +484,21 @@ public class XMLGenerator {
 				java.util.Map<String, String> pattern = getRattern(command, "pattern/column");
 
 				sb.appendL(this._tag.tag("rows", command.getAttribute("name"), true));
-				rs = stmt.executeQuery();
+				
 				index = DBHelper.getXMLStringFromResultSet(
 					rs,
 					this._tag,
-					command.getAttribute("name"),
+					command,
+					this._query,
 					encryptor,
 					encrypted,
 					this._params,
 					pattern,
-					this._query.getAttribute("funcType"),
-					this.dmd.getDatabaseProductName(),
-					XML.trueAttrValue(command, "multi"),
-					XML.falseAttrValue(command, "query_to_param"),
+					this.dmd,
+					this._xpath,
+					this._expr,
 					sb
 				);
-				
 				totalFetchCount += index;
 				if(XML.validAttrValue(command, "name")) {
 					this._params.put("query.row." + command.getAttribute("name") + ".count", index);
@@ -934,18 +935,17 @@ public class XMLGenerator {
 					index = DBHelper.getXMLStringFromResultSet(
 						rs,
 						this._tag,
-						p.getAttribute("name"),
+						p,
+						this._query,
 						encryptor,
 						encrypted,
 						this._params,
 						pattern,
-						this._query.getAttribute("funcType"),
-						this.dmd.getDatabaseProductName(),
-						XML.trueAttrValue(p, "multi"),
-						XML.falseAttrValue(p, "query_to_param"),
+						this.dmd,
+						this._xpath,
+						this._expr,
 						sb
 					);
-
 					totalFetchCount += index;
 					if(XML.validAttrValue(p, "name")) {
 						this._params.put("query.row." + p.getAttribute("name") + ".count", index);
@@ -1233,8 +1233,9 @@ public class XMLGenerator {
 					NodeList cc = null;
 					NodeList ddd = null;
 					if(XML.trueAttrValue(p, "multi")) {
-						this._expr = this._xpath.compile("layout/middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
-						cc = (NodeList)this._expr.evaluate(this._query, XPathConstants.NODESET);
+						Element layout = BufferHelper.getLayoutElement(this._xpath, this._expr, this._query);
+						this._expr = this._xpath.compile("middle/tab[@name = '" + p.getAttribute("name") + "']/*/column");
+						cc = (NodeList)this._expr.evaluate(layout, XPathConstants.NODESET);
 						if(cc == null || cc.getLength() <= 0) {
 							this._expr = this._xpath.compile("column");
 							ddd = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
@@ -1355,7 +1356,7 @@ public class XMLGenerator {
 							continue;
 						}
 						java.util.Map<String, Encryptor> encryptor = getEncryptor(p);
-						sb.append(this._tag.tag("row", null, true));
+						sb.append(this._tag.tag("row", p.getAttribute("name"), true));
 						if(!isDelete) {
 							for(int x = 0; x < column.getLength(); x++) {
 								Element c = (Element)column.item(x);
@@ -1576,7 +1577,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 							}
 						}
 						sb.append(this._tag.tag("row", "rowcount", null, true) + result + this._tag.tag("row", "rowcount", null, false));
-						sb.append(this._tag.tag("row", null, false));
+						sb.append(this._tag.tag("row", p.getAttribute("name"), false));
 						if(table.getLength() > 0) {
 							this._params.put("query.row." + p.getAttribute("name") + ".count", result);
 						} else {
@@ -1674,7 +1675,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 	public boolean isQueryAndResultSet() {
 		return this.isQueryAndResultSet;
 	}
-	private Buffer before() throws SQLException, NoSuchProviderException {
+	private Buffer before() throws SQLException, NoSuchProviderException, XPathExpressionException {
 		Buffer sb = new Buffer();
 		sb.appendL("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		if(this.isError) {
@@ -1691,14 +1692,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		) {
 			sb.appendL("<?xml-stylesheet type=\"text/xsl\" href=\"" + this._query.getAttribute("id").substring(this._query.getAttribute("id").lastIndexOf("/") + 1) + ".xsl?method=post\"?>");
 		} else {
-			Element layout = null;
-			try {
-				this._expr = this._xpath.compile("layout");
-				layout = (Element)this._expr.evaluate(this._query, XPathConstants.NODE);
-			} catch (XPathExpressionException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			}
-			
+			Element layout = BufferHelper.getLayoutElement(this._xpath, this._expr, this._query);
 			if(
 				XML.existsIgnoreCaseAttrValue(this._query, "funcType", new String[]{"list", "listAll", "detail"}) &&
 				XML.validAttrValue(layout, "href")
