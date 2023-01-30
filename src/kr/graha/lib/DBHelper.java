@@ -272,6 +272,46 @@ public final class DBHelper {
 	protected static int getXMLStringFromResultSet(
 		ResultSet rs,
 		XMLTag tag,
+		Element command,
+		Element query,
+		java.util.Map<String, Encryptor> encryptor,
+		java.util.Map<String, String> encrypted,
+		Record params,
+		java.util.Map<String, String> pattern,
+		DatabaseMetaData dmd,
+		XPath xpath,
+		XPathExpression expr,
+		Buffer sb
+	) throws SQLException, XPathExpressionException {
+		Element layout = BufferHelper.getLayoutElement(xpath, expr, query);
+		Element tab = null;
+		if(layout != null) {
+			if(command.hasAttribute("name")) {
+				expr = xpath.compile("middle/tab[@name='" + command.getAttribute("name") + "']");
+			} else {
+				expr = xpath.compile("middle/tab");
+			}
+			tab = (Element)expr.evaluate(layout, XPathConstants.NODE);
+		}
+		return getXMLStringFromResultSet(
+			rs,
+			tag,
+			command.getAttribute("name"),
+			encryptor,
+			encrypted,
+			params,
+			pattern,
+			query.getAttribute("funcType"),
+			dmd.getDatabaseProductName(),
+			XML.trueAttrValue(command, "multi"),
+			XML.falseAttrValue(command, "query_to_param"),
+			XML.equalsIgnoreCaseAttrValue(tab, "column", "auto"),
+			sb
+		);
+	}
+	private static int getXMLStringFromResultSet(
+		ResultSet rs,
+		XMLTag tag,
 		String commandName,
 		java.util.Map<String, Encryptor> encryptor,
 		java.util.Map<String, String> encrypted,
@@ -281,6 +321,7 @@ public final class DBHelper {
 		String databaseProductName,
 		boolean multi,
 		boolean queryToParam,
+		boolean columnAuto,
 		Buffer sb
 	) throws SQLException {
 		int index = 0;
@@ -363,23 +404,27 @@ public final class DBHelper {
 					sb.append("<");
 					sb.append(tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
 					
-					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR || rsmd.getColumnType(x) == java.sql.Types.OTHER) {
 						sb.append("><![CDATA[");
 					} else {
 						sb.append(">");
 					}
-					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR || rsmd.getColumnType(x) == java.sql.Types.OTHER) {
 						sb.append(XML.fix(value));
 					} else {
 						sb.append(value);
 					}
-					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR) {
+					if(rsmd.getColumnType(x) == java.sql.Types.VARCHAR || rsmd.getColumnType(x) == java.sql.Types.OTHER) {
 						sb.append("]]></");
 					} else {
 						sb.append("</");
 					}
 					sb.append(tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, false));
 					sb.appendL(">");
+				} else if(columnAuto) {
+					sb.append("<");
+					sb.append(tag.tag("row", rsmd.getColumnName(x).toLowerCase(), null, true));
+					sb.appendL(" />");
 				}
 			}
 			sb.appendL(tag.tag("row", null, false));
