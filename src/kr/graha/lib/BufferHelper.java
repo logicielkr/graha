@@ -35,6 +35,8 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Attr;
+import org.w3c.dom.NamedNodeMap;
 import java.util.logging.Level;
 import org.xml.sax.SAXException;
 import java.sql.SQLException;
@@ -92,6 +94,19 @@ public final class BufferHelper {
 				sb.appendL(tag.tag(key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), null, false));
 			}
 		}
+	}
+	protected static Element getLayoutElement(
+		XPath xpath,
+		XPathExpression expr,
+		Element query
+	) throws XPathExpressionException {
+		expr = xpath.compile("layout");
+		Element layout = (Element)expr.evaluate(query, XPathConstants.NODE);
+		if(layout == null && query.hasAttribute("extends")) {
+			expr = xpath.compile("query[@id='" + query.getAttribute("extends") + "']/layout");
+			layout = (Element)expr.evaluate(query.getParentNode(), XPathConstants.NODE);
+		}
+		return layout;
 	}
 	protected static Document getExtendsDocument(
 		XPath xpath,
@@ -368,6 +383,24 @@ public final class BufferHelper {
 				sb.append(BufferHelper.parseLabelOrDescOrAuthorOrKeywords(query.getAttribute(x)));
 			} else {
 				sb.append(BufferHelper.parseLabelOrDescOrAuthorOrKeywords(query.getAttribute(name)));
+			}
+		}
+		return sb;
+	}
+	protected static Buffer getDataAttr(Element col) {
+		Buffer sb = new Buffer();
+		NamedNodeMap nnm = col.getAttributes();
+		for(int x = 0; x < nnm.getLength(); x++) {
+			Attr attr = (Attr)nnm.item(x);
+			String attrName = attr.getNodeName();
+			String attrValue = attr.getNodeValue();
+			if(
+				attrName != null &&
+				attrValue != null &&
+				attrName.startsWith("data-") &&
+				!attrValue.trim().equals("")
+			) {
+				sb.appendL("	<xsl:attribute name=\"" + attrName + "\">" + attrValue + "</xsl:attribute>");
 			}
 		}
 		return sb;
