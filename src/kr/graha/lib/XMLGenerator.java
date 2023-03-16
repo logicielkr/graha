@@ -171,10 +171,11 @@ public class XMLGenerator {
 			if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "query")) {
 				sb_tmp.append(this.query());
 			} else if(XML.equalsIgnoreCaseAttrValue(this._query, "funcType", "report")) {
-				sb_tmp.append(sb);
-				sb.append(this.list());
-				sb.append(this.after());
-				sb_tmp.append(this.report(sb));
+				Buffer sb_report_tmp = new Buffer();
+				sb_report_tmp.append(sb);
+				sb_report_tmp.append(this.list());
+				sb_report_tmp.append(this.after());
+				sb_tmp.append(this.report(sb_report_tmp));
 			}
 			if(this.isError() || this.isQueryAndResultSet) {
 				sb.init();
@@ -245,7 +246,7 @@ public class XMLGenerator {
 								if(command.getAttribute("type").equals("query")) {
 									this.bind(stmt, p.getAttribute("datatype"), index, new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
 								} else {
-									this.bind(cstmt, p.getAttribute("datatype"), Integer.parseInt(p.getAttribute("index")), new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
+									this.bind(cstmt, p.getAttribute("datatype"),index, new String[] {p.getAttribute("value")}, -1, p.getAttribute("default"), p.getAttribute("pattern"), null, null, encryptor, p.getAttribute("encrypt"), null);
 								}
 								index++;
 							}
