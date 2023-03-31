@@ -102,6 +102,10 @@ public class DownloadAdapter {
 				response.setContentLength((int)f.length());
 				response.setDateHeader("Last-Modified", f.lastModified());
 				response.setHeader("Accept-Ranges", "bytes");
+				String mimeType = request.getServletContext().getMimeType(f.getName());
+				if(mimeType != null && !mimeType.equals("")) {
+					response.setContentType(request.getServletContext().getMimeType(f.getName()));
+				}
 				ServletOutputStream out = null;
 				FileInputStream fis = null;
 				try {
