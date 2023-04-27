@@ -132,7 +132,9 @@ public final class BufferHelper {
 		XPathExpression expr,
 		File config,
 		Element query,
-		String headerName
+		String headerName,
+		Record params,
+		XMLTag tag
 	) {
 		Buffer sb = new Buffer();
 		Document doc = null;
@@ -170,7 +172,9 @@ public final class BufferHelper {
 					query,
 					headerName,
 					extendNodes,
-					BufferHelper.NodesPositionExtend
+					BufferHelper.NodesPositionExtend,
+					params,
+					tag
 				));
 			}
 			if(parentNodes != null && parentNodes.getLength() >= 0) {
@@ -180,7 +184,9 @@ public final class BufferHelper {
 					query,
 					headerName,
 					parentNodes,
-					BufferHelper.NodesPositionParent
+					BufferHelper.NodesPositionParent,
+					params,
+					tag
 				));
 			}
 			if(nodes != null && nodes.getLength() >= 0) {
@@ -190,7 +196,9 @@ public final class BufferHelper {
 					query,
 					headerName,
 					nodes,
-					BufferHelper.NodesPositionCurrent
+					BufferHelper.NodesPositionCurrent,
+					params,
+					tag
 				));
 			}
 		} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException | DOMException e) {
@@ -207,7 +215,9 @@ public final class BufferHelper {
 		Element query,
 		String headerName,
 		NodeList nodes,
-		int nodesPosition
+		int nodesPosition,
+		Record params,
+		XMLTag tag
 	) throws XPathExpressionException {
 		Buffer sb = new Buffer();
 		for(int i = 0; i < nodes.getLength(); i++) {
@@ -226,6 +236,20 @@ public final class BufferHelper {
 					continue;
 				}
 			}
+			
+			AuthInfo authInfo = null;
+			if(XML.validAttrValue(node, "cond")) {
+				authInfo = AuthParser.parse(node.getAttribute("cond"));
+			}
+			if(authInfo != null && tag.testInServer(authInfo, params)) {
+				if(!AuthParser.auth(authInfo, params)) {
+					continue;
+				}
+			}
+			if(authInfo != null) {
+				sb.appendL("<xsl:if test=\"" + tag.testExpr(authInfo, params) + "\">");
+			}
+			
 			if(
 				headerName.equals("top") ||
 				headerName.equals("bottom") ||
@@ -280,6 +304,9 @@ public final class BufferHelper {
 				} else {
 					sb.appendL("</" + headerName + ">");
 				}
+			}
+			if(authInfo != null) {
+				sb.appendL("</xsl:if>");
 			}
 		}
 		return sb;

@@ -37,6 +37,7 @@ import kr.graha.helper.LOG;
 public class XMLTag {
 	public boolean isRDF = true;
 	private String uc;
+	private String output;
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	protected XMLTag(boolean isRDF, String uc) {
 		this.isRDF = isRDF;
@@ -46,8 +47,10 @@ public class XMLTag {
 	protected XMLTag(String output, String uc, HttpServletRequest request) {
 		if(output != null && output.equals("rdf")) {
 			this.isRDF = true;
+			this.output = "rdf";
 		} else {
 			this.isRDF = false;
+			this.output = "xml";
 		}
 		if(uc == null || uc.trim().equals("")) {
 			this.uc = parseUC(request);
@@ -55,6 +58,9 @@ public class XMLTag {
 			this.uc = uc;
 		}
 		LOG.setLogLevel(logger);
+	}
+	protected String getOutput() {
+		return this.output;
 	}
 	private String parseUC(HttpServletRequest request) {
 		String id = request.getPathInfo().trim();

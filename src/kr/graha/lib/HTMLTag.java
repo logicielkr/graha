@@ -40,12 +40,18 @@ public class HTMLTag {
 		this.htmlType = htmlType;
 		if(htmlType == null) {
 			div = false;
+			this.htmlType = "table";
 		} else if(htmlType != null && htmlType.equals("div")) {
 			div = true;
+			this.htmlType = "div";
 		} else {
 			div = false;
+			this.htmlType = "table";
 		}
 		LOG.setLogLevel(logger);
+	}
+	protected String getHtmlType() {
+		return this.htmlType;
 	}
 	protected String table(String id) {
 		if(id == null || id.equals("")) {

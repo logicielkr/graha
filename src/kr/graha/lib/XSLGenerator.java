@@ -92,6 +92,11 @@ public class XSLGenerator {
 		
 		this._tag = new XMLTag(this._query.getAttribute("output"), this._query.getAttribute("uc"), request);
 		this._html = new HTMLTag(this._query.getAttribute("htmltype"));
+		
+		this._params.put("system.output", this._tag.getOutput());
+		this._params.put("system.htmltype", this._html.getHtmlType());
+		
+		
 		LOG.setLogLevel(logger);
 	}
 	public Buffer execute() throws Exception {
@@ -2065,7 +2070,9 @@ public class XSLGenerator {
 			this._expr,
 			this._config,
 			this._query,
-			"head"
+			"head",
+			this._params,
+			this._tag
 		));
 		
 		sb.appendL("<xsl:if test=\"" + this._tag.path("message", null) + "\">");
@@ -2084,14 +2091,18 @@ public class XSLGenerator {
 			this._expr,
 			this._config,
 			this._query,
-			"style"
+			"style",
+			this._params,
+			this._tag
 		));
 		sb.append(BufferHelper.header(
 			this._xpath,
 			this._expr,
 			this._config,
 			this._query,
-			"script"
+			"script",
+			this._params,
+			this._tag
 		));
 		
 		try {
@@ -2213,7 +2224,9 @@ public class XSLGenerator {
 			this._expr,
 			this._config,
 			this._query,
-			"top"
+			"top",
+			this._params,
+			this._tag
 		));
 		
 		if(title.length() > 0) {
@@ -2329,7 +2342,9 @@ public class XSLGenerator {
 			this._expr,
 			this._config,
 			this._query,
-			"bottom"
+			"bottom",
+			this._params,
+			this._tag
 		));
 
 /*
