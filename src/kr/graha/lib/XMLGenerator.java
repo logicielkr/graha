@@ -1768,7 +1768,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 				this._params.hasKey("header.method") && 
 				(
 					!this._params.getString("header.method").equals("POST") ||
-					!this.isQueryAndResultSet
+					this.isQueryAndResultSet
 				) && 
 				!this.isError
 			) {
