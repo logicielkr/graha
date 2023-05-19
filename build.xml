@@ -52,7 +52,7 @@
 		</javac>
 	</target>
 	<target name="package" depends="compile">
-		<jar destfile="${package.dir}/${app.name}.${app.version}.jar">
+		<jar destfile="${package.dir}/${app.name}.${app.graha.version}.jar">
 			<fileset dir="${build.dir}" includes="kr/**/*.class"/>
 			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
 			<fileset dir="${src.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties, kr/**/*.js, kr/**/*.css, kr/**/file.lst"/>
@@ -71,7 +71,7 @@
 		</javac>
 	</target>
 	<target name="package-tomcat10" depends="compile-tomcat10">
-		<jar destfile="${package.dir}/${app.name}.${app.version}-tomcat10.jar">
+		<jar destfile="${package.dir}/${app.name}.${app.graha.version}-tomcat10.jar">
 			<fileset dir="${tomcat10.dir}" includes="kr/**/*.class"/>
 			<fileset dir="${base.dir}" includes="README.md,LICENSE"/>
 			<fileset dir="${tomcat10.dir}" includes="kr/**/*.java, kr/**/*.xsl, kr/**/*.xml, kr/**/*.properties, kr/**/*.js, kr/**/*.css, kr/**/file.lst"/>
