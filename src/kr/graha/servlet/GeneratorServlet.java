@@ -78,6 +78,10 @@ public class GeneratorServlet extends HttpServlet {
 	
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if(request.getPathInfo() == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 		String pathInfo = request.getPathInfo().trim();
 		if(pathInfo != null && (pathInfo.equals("") || (!pathInfo.endsWith(".xml") && !pathInfo.endsWith(".xsl") && !pathInfo.endsWith(".html")))) {
 			if(pathInfo.indexOf(".xml/download/") == -1 && pathInfo.indexOf(".html/download/") == -1) {

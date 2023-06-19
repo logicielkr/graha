@@ -300,28 +300,89 @@ public class XSLGenerator {
 				} else {
 					sb.append(this.getPath(link.getAttribute("path")));
 				}
+				sb.append("<xsl:variable name=\"hrefparam\">");
 				this._expr = this._xpath.compile("param");
 				NodeList param = (NodeList)this._expr.evaluate(link, XPathConstants.NODESET);
+				boolean isContainsConst = false;
+				java.util.List params = new java.util.ArrayList();
+				String expr = null;
 				for(int x = 0; x < param.getLength(); x++) {
 					Element p = (Element)param.item(x);
-					if(x > 0) {
-						sb.append("&amp;");
-					} else {
-						sb.append("?");
+					
+					if(XML.equalsIgnoreCaseAttrValue(p, "type", "query")) {
+						expr = this._tag.path("row", p.getAttribute("value"), tableName, isFull);
+						params.add(expr);
+					} else if(XML.equalsIgnoreCaseAttrValue(p, "type", "param")) {
+						expr = this._tag.path("param", p.getAttribute("value"), null, true);
+						params.add(expr);
+					} else if(XML.equalsIgnoreCaseAttrValue(p, "type", "prop")) {
+						expr = this._tag.path("prop", p.getAttribute("value"), null, true);
+						params.add(expr);
+					} else if(XML.equalsIgnoreCaseAttrValue(p, "type", "result")) {
+						expr = this._tag.path("result", p.getAttribute("value"), null, true);
+						params.add(expr);
+					} else if(XML.existsIgnoreCaseAttrValue(p, "type", new String[]{"default", "const"})) {
+						
 					}
-					sb.append(p.getAttribute("name") + "=");
-					if(p.getAttribute("type").equals("query")) {
-						sb.append("<xsl:value-of select=\"" + this._tag.path("row", p.getAttribute("value"), tableName, isFull) + "\"/>");
-					} else if(p.getAttribute("type").equals("param")) {
-						sb.append("<xsl:value-of select=\"" + this._tag.path("param", p.getAttribute("value"), null, true) + "\"/>");
-					} else if(p.getAttribute("type").equals("prop")) {
-						sb.append("<xsl:value-of select=\"" + this._tag.path("prop", p.getAttribute("value"), null, true) + "\"/>");
-					} else if(p.getAttribute("type").equals("result")) {
-						sb.append("<xsl:value-of select=\"" + this._tag.path("result", p.getAttribute("value"), null, true) + "\"/>");
+					if(XML.existsIgnoreCaseAttrValue(p, "type", new String[]{"query", "param", "prop", "result"})) {
+						sb.append("<xsl:if test=\"");
+						if(XML.equalsIgnoreCaseAttrValue(p, "type", "param") && XML.equalsIgnoreCaseAttrValue(p, "value", "page")) {
+							sb.append("(");
+							sb.append(expr);
+							sb.append(" and ");
+							sb.append(expr);
+							sb.append(" > 1");
+							sb.append(")");
+						} else {
+							sb.append("(");
+							sb.append(expr);
+							sb.append(" and ");
+							sb.append(expr);
+							sb.append(" != ''");
+							sb.append(")");
+						}
+						sb.append("\">");
+					}
+					if(isContainsConst) {
+						sb.append("&amp;");
+					} else if(x > 0) {
+						if(params != null && params.size() > 1) {
+							sb.append("<xsl:if test=\"");
+							for(int i = 0; i < (params.size() - 1); i++) {
+								if(i > 0) {
+									sb.append(" or");
+								}
+								if(kr.graha.helper.STR.compareIgnoreCase((String)params.get(i), this._tag.path("param", "page", null, true))) {
+									sb.append("(");
+									sb.append(params.get(i));
+									sb.append(" and ");
+									sb.append(params.get(i));
+									sb.append(" > 1");
+									sb.append(")");
+								} else {
+									sb.append("(");
+									sb.append(params.get(i));
+									sb.append(" and ");
+									sb.append(params.get(i));
+									sb.append(" != ''");
+									sb.append(")");
+								}
+							}
+							sb.append("\">&amp;</xsl:if>");
+						}
+					}
+					if(XML.existsIgnoreCaseAttrValue(p, "type", new String[]{"query", "param", "prop", "result"})) {
+						sb.append(p.getAttribute("name") + "=");
+						sb.append("<xsl:value-of select=\"" + expr + "\"/>");
+						sb.append("</xsl:if>");
 					} else if(p.getAttribute("type").equals("default") || p.getAttribute("type").equals("const")) {
+						sb.append(p.getAttribute("name") + "=");
 						sb.append(p.getAttribute("value"));
+						isContainsConst = true;
 					}
 				}
+				sb.append("</xsl:variable>");
+				sb.append("<xsl:if test=\"$hrefparam\">?<xsl:value-of select=\"$hrefparam\" /></xsl:if>");
 				sb.append("</xsl:attribute>");
 				sb.append(this.code(column, isFull, tableName));
 				sb.append("</a>");
