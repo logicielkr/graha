@@ -72,7 +72,7 @@ public class Record extends HashMap {
 		}
 		*/
 		if(super.containsKey(key)) {
-			if(logger.isLoggable(Level.FINE)) { logger.fine("key exists!!! : " + key); }
+			if(logger.isLoggable(Level.FINER)) { logger.finer("key exists!!! : " + key); }
 			List l = null;
 			if(super.get(key) instanceof List) {
 				l = (List)super.get(key);

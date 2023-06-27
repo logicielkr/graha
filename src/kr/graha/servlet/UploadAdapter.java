@@ -86,7 +86,7 @@ public class UploadAdapter {
 			FileItem fileItem = it.next();
 			boolean isFormField = fileItem.isFormField();
 			if(isFormField) {
-				if(logger.isLoggable(Level.FINE)) { logger.fine(fileItem.getFieldName()); }
+				if(logger.isLoggable(Level.FINER)) { logger.finer(fileItem.getFieldName()); }
 				if(fileItem.getFieldName().startsWith("_deletefile_.")) {
 					Record result = FileHelper.getFilePath2(fileItem.getFieldName().substring("_deletefile_.".length()), params, query);
 					if(result == null) {
@@ -122,7 +122,7 @@ public class UploadAdapter {
 			FileItem fileItem = it.next();
 			boolean isFormField = fileItem.isFormField();
 			if(!isFormField) {
-				if(logger.isLoggable(Level.FINE)) { logger.fine(fileItem.getFieldName()); }
+				if(logger.isLoggable(Level.FINER)) { logger.finer(fileItem.getFieldName()); }
 				if(fileItem.getSize() == 0) {
 					continue;
 				}

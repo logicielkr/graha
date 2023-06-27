@@ -747,14 +747,14 @@ public class XMLGenerator {
 											if(ff != null) {
 												for (File f : ff) {
 													f.delete();
-													if(logger.isLoggable(Level.FINE)) { logger.fine("delete file (" + f.getPath() + ")"); }
+													if(logger.isLoggable(Level.FINER)) { logger.finer("delete file (" + f.getPath() + ")"); }
 													if(x == 0) {
 														index++;
 													}
 												}
 											}
 											dir.delete();
-											if(logger.isLoggable(Level.FINE)) { logger.fine("delete directory (" + dir.getPath() + ")"); }
+											if(logger.isLoggable(Level.FINER)) { logger.finer("delete directory (" + dir.getPath() + ")"); }
 										} else {
 											if(logger.isLoggable(Level.WARNING)) { logger.warning("file paths is not exists (path = " + path + "), (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 										}
@@ -774,12 +774,12 @@ public class XMLGenerator {
 									if(ff != null) {
 										for (File f : ff) {
 											f.delete();
-											if(logger.isLoggable(Level.FINE)) { logger.fine("delete file (" + f.getPath() + ")"); }
+											if(logger.isLoggable(Level.FINER)) { logger.finer("delete file (" + f.getPath() + ")"); }
 											index++;
 										}
 									}
 									dir.delete();
-									if(logger.isLoggable(Level.FINE)) { logger.fine("delete directory (" + dir.getPath() + ")"); }
+									if(logger.isLoggable(Level.FINER)) { logger.finer("delete directory (" + dir.getPath() + ")"); }
 								} else {
 									if(logger.isLoggable(Level.WARNING)) { logger.warning("file path is not exists (path = " + filePath + "), (path = " + file.getAttribute("path") + "), (backup=" + file.getAttribute("backup") + ")"); }
 								}
@@ -1312,7 +1312,7 @@ public class XMLGenerator {
 								if(cc.getLength() > 0) {
 									for(int xx = 0; xx < cc.getLength(); xx++) {
 										Element e = (Element)cc.item(xx);
-										if(logger.isLoggable(Level.FINE)) { logger.fine(e.getAttribute("name")); }
+										if(logger.isLoggable(Level.FINER)) { logger.finer(e.getAttribute("name")); }
 										if(
 											e.hasAttribute("type") && 
 											(
@@ -1619,7 +1619,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		int index, 
 		int value
 	) throws SQLException {
-		if(logger.isLoggable(Level.FINE)) { logger.fine(index + " = " + value); }
+		if(logger.isLoggable(Level.FINEST)) { logger.finest(index + " = " + value); }
 		stmt.setInt(index, value);
 	}
 	
@@ -2266,7 +2266,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 			if(command.hasAttribute("check")) {
 				check = command.getAttribute("check");
 			}
-			if(logger.isLoggable(Level.FINE)) { logger.fine("check : " + check); }
+			if(logger.isLoggable(Level.FINER)) { logger.finer("check : " + check); }
 			if(check != null && check.equals("exists")) {
 				check = "${result} exists";
 			} else if(check != null && check.equals("0")) {

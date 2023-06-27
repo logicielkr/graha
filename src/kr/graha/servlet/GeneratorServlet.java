@@ -205,7 +205,7 @@ public class GeneratorServlet extends HttpServlet {
 				new DownloadAdapter().execute(request, response, query, params);
 				return;
 			} else {
-				if(logger.isLoggable(Level.FINE)) { logger.fine("isDownloadable is false"); }
+				if(logger.isLoggable(Level.FINER)) { logger.finer("isDownloadable is false"); }
 				response.sendError(403);
 				return;
 			}

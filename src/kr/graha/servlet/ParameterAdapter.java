@@ -104,7 +104,7 @@ public class ParameterAdapter {
 					boolean isFormField = fileItem.isFormField();
 					if(isFormField) {
 						params.puts("param." + fileItem.getFieldName(), fileItem.getString(request.getCharacterEncoding()));
-						if(logger.isLoggable(Level.FINE)) { logger.fine("param." + fileItem.getFieldName() + " : " + fileItem.getString(request.getCharacterEncoding())); 	}
+						if(logger.isLoggable(Level.FINER)) { logger.finer("param." + fileItem.getFieldName() + " : " + fileItem.getString(request.getCharacterEncoding())); 	}
 					}
 				}
 			}
@@ -136,10 +136,10 @@ public class ParameterAdapter {
 							)
 						) {
 							params.puts("param." + key, new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
-							if(logger.isLoggable(Level.FINE)) { logger.fine("param." + key + " : " + new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)); }
+							if(logger.isLoggable(Level.FINER)) { logger.finer("param." + key + " : " + new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)); }
 						} else {
 							params.puts("param." + key, value);
-							if(logger.isLoggable(Level.FINE)) { logger.fine("param." + key + " : " + value); }
+							if(logger.isLoggable(Level.FINER)) { logger.finer("param." + key + " : " + value); }
 						}
 					}
 				}

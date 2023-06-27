@@ -95,7 +95,7 @@ public class DownloadAdapter {
 			} else {
 				basePath = result.getString("_system.filepath");
 			}
-			if(logger.isLoggable(Level.FINE)) { logger.fine(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
+			if(logger.isLoggable(Level.FINER)) { logger.finer(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
 			File f = new File(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
 			if(f.exists()) {
 				if(logger.isLoggable(Level.CONFIG)) { logger.config("File Path = " + f.getPath()); }

@@ -56,7 +56,7 @@ public class UserRoleAdapter {
 			params.put("header.remote_user_roles", roles.toArray(new String[]{}));
 		} else {
 			if(request.getUserPrincipal() != null) {
-				if(logger.isLoggable(Level.FINE)) { logger.fine(request.getUserPrincipal().getClass().getName()); }
+				if(logger.isLoggable(Level.FINER)) { logger.finer(request.getUserPrincipal().getClass().getName()); }
 			}
 		}
 	}
