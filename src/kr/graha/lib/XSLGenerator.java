@@ -1720,14 +1720,21 @@ public class XSLGenerator {
 						}
 						if(type != null && (type.equals("const") || type.equals("default"))) {
 							value = input.getAttribute("value");
+							sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"" + value + "\" />");
 						} else {
 							String ref = input.getAttribute("ref");
 							if(ref == null || ref.equals("")) {
 								ref = this._defaultName;
 							}
-							value = "{" + this._tag.path(type, input.getAttribute("value"), ref, true) + "}";
+							value = this._tag.path(type, input.getAttribute("value"), ref, true);
+							if(kr.graha.helper.STR.compareIgnoreCase(value, this._tag.path("param", "page", null, true))) {
+								sb.append("<xsl:if test=\"" + value + " and " + value + " > 1\">");
+							} else {
+								sb.append("<xsl:if test=\"" + value + " and " + value + " != ''\">");
+							}
+							sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+							sb.append("</xsl:if>");
 						}
-						sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"" + value + "\" />");
 					}
 					if(XML.validAttrValue(link, "icon")) {
 						sb.append("<button type=\"submit\">");
@@ -1819,14 +1826,21 @@ public class XSLGenerator {
 						}
 						if(type != null && (type.equals("const") || type.equals("default"))) {
 							value = input.getAttribute("value");
+							sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"" + value + "\" />");
 						} else {
 							String ref = input.getAttribute("ref");
 							if(ref == null || ref.equals("")) {
 								ref = this._defaultName;
 							}
-							value = "{" + this._tag.path(type, input.getAttribute("value"), ref, true) + "}";
+							value = "" + this._tag.path(type, input.getAttribute("value"), ref, true) + "";
 						}
-						sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"" + value + "\" />");
+						if(kr.graha.helper.STR.compareIgnoreCase(value, this._tag.path("param", "page", null, true))) {
+							sb.append("<xsl:if test=\"" + value + " and " + value + " > 1\">");
+						} else {
+							sb.append("<xsl:if test=\"" + value + " and " + value + " != ''\">");
+						}
+						sb.append("<input type=\"hidden\" class=\""+ input.getAttribute("name") + "\" name=\""+ input.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+						sb.append("</xsl:if>");
 					} else if(input.hasAttribute("type") && input.getAttribute("type").equals("select")) {
 						sb.append("<select name=\"" + input.getAttribute("name") + "\" class=\"" + input.getAttribute("name") + "\" value=\"{" + this._tag.path("row", input.getAttribute("value"), null, true) + "}\">");
 						if(input.hasAttribute("for") && input.getAttribute("for") != null && !input.getAttribute("for").equals("")) {
@@ -1912,7 +1926,13 @@ public class XSLGenerator {
 			if(p.getAttribute("type").equals("const") || p.getAttribute("type").equals("default")) {
 				sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"" + p.getAttribute("value") + "\" />");
 			} else {
+				if(kr.graha.helper.STR.compareIgnoreCase(value, this._tag.path("param", "page", null, true))) {
+					sb.append("<xsl:if test=\"" + value + " and " + value + " > 1\">");
+				} else {
+					sb.append("<xsl:if test=\"" + value + " and " + value + " != ''\">");
+				}
 				sb.appendL("<input type=\"hidden\" class=\"" + p.getAttribute("name") + "\" name=\"" + p.getAttribute("name") + "\" value=\"{" + value + "}\" />");
+				sb.append("</xsl:if>");
 			}
 		}
 		if(!XML.falseAttrValue(n, "autoredirect")) {
