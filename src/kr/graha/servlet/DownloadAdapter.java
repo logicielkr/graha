@@ -77,7 +77,18 @@ public class DownloadAdapter {
 		) {
 			filePath = new String(filePath.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 		}
-		
+		if(
+			filePath.indexOf("/") < 0 ||
+			filePath.substring(0, filePath.indexOf("/")).startsWith("..") ||
+			filePath.substring(0, filePath.indexOf("/")).startsWith("/") ||
+			filePath.substring(0, filePath.indexOf("/")).startsWith("%2F") ||
+			filePath.substring(filePath.indexOf("/") + 1).indexOf("/") >= 0 ||
+			filePath.substring(filePath.indexOf("/") + 1).indexOf("%2F") >= 0
+		) {
+			if(logger.isLoggable(Level.WARNING)) { logger.warning("[SC_INVALID_REQUEST]File Path = " + filePath); }
+			response.sendError(400);
+			return;
+		}
 		Record result = FileHelper.getFilePath2(filePath.substring(0, filePath.indexOf("/")) + ".0", params, query);
 		if(result != null && !result.isEmpty()) {
 			String basePath = null;

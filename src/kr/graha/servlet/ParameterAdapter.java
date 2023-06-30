@@ -98,6 +98,7 @@ public class ParameterAdapter {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e1)); 	}
 			}
 			if(fields != null) {
+				int uploadFieldCount = 0;
 				it = fields.iterator();
 				while (it.hasNext()) {
 					FileItem fileItem = it.next();
@@ -105,7 +106,12 @@ public class ParameterAdapter {
 					if(isFormField) {
 						params.puts("param." + fileItem.getFieldName(), fileItem.getString(request.getCharacterEncoding()));
 						if(logger.isLoggable(Level.FINER)) { logger.finer("param." + fileItem.getFieldName() + " : " + fileItem.getString(request.getCharacterEncoding())); 	}
+					} else {
+						uploadFieldCount++;
 					}
+				}
+				if(uploadFieldCount == 0) {
+					fields = null;
 				}
 			}
 		} else {
