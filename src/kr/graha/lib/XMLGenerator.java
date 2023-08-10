@@ -187,7 +187,7 @@ public class XMLGenerator {
 			sb_tmp.clear();
 			sb_tmp = null;
 		}
-		sb.append(this.after());
+//		sb.append(this.after());
 		return sb;
 	}
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
@@ -2058,7 +2058,7 @@ Primary Key 가 아닌데도 불구하고, Sequence로 입력되는 경우가 �
 		}
 		return sb;
 	}
-	private Buffer after() {
+	public Buffer after() {
 		Buffer sb = new Buffer();
 		if(this._params != null && !this._params.isEmpty()) {
 			boolean existsResult = false;

@@ -356,6 +356,7 @@ public class GeneratorServlet extends HttpServlet {
 				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.Before_After_Processor);
 				g.processor(false);
 				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.After_After_Processor);
+				sb.append(g.after());
 				if(query.getAttribute("funcType") != null && query.getAttribute("funcType").equals("user")) {
 					StreamSource style = new StreamSource(new File(request.getServletContext().getRealPath("/WEB-INF/graha/" + query.getAttribute("xsl"))));
 					TransformerFactory factory = TransformerFactory.newInstance();
