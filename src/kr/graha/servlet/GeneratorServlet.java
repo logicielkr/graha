@@ -79,6 +79,7 @@ public class GeneratorServlet extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if(request.getPathInfo() == null) {
+			if(logger.isLoggable(Level.INFO)) { logger.info("[SC_NOT_FOUND]request.getPathInfo() is null"); }
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -318,9 +319,9 @@ public class GeneratorServlet extends HttpServlet {
 						new UploadAdapter().execute(request, fields, query, params);
 					} else {
 						if(logger.isLoggable(Level.SEVERE)) {
-							logger.severe("hasKey : " + params.hasKey("query.row.total_update_count"));
-							logger.severe("getInt : " + params.getInt("query.row.total_update_count"));
-							logger.severe("isAllow : " + FileHelper.isAllow(query, params));
+							logger.severe("[SC_NOT_FOUND]hasKey : " + params.hasKey("query.row.total_update_count"));
+							logger.severe("[SC_NOT_FOUND]getInt : " + params.getInt("query.row.total_update_count"));
+							logger.severe("[SC_NOT_FOUND]isAllow : " + FileHelper.isAllow(query, params));
 						}
 					}
 				}
@@ -344,10 +345,10 @@ public class GeneratorServlet extends HttpServlet {
 							sb.clear();
 							sb = null;
 						}
-						if(logger.isLoggable(Level.FINEST)) {
-							logger.severe("hasKey : " + params.hasKey("query.row.total_fetch_count"));
-							logger.severe("getInt : " + params.getInt("query.row.total_fetch_count"));
-							logger.severe("allowblank : " + XML.trueAttrValue(query, "allowblank"));
+						if(logger.isLoggable(Level.SEVERE)) {
+							logger.severe("[SC_NOT_FOUND]hasKey : " + params.hasKey("query.row.total_fetch_count"));
+							logger.severe("[SC_NOT_FOUND]getInt : " + params.getInt("query.row.total_fetch_count"));
+							logger.severe("[SC_NOT_FOUND]allowblank : " + XML.trueAttrValue(query, "allowblank"));
 						}
 						response.sendError(HttpServletResponse.SC_NOT_FOUND);
 						return;
