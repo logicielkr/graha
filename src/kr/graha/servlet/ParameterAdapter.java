@@ -90,7 +90,6 @@ public class ParameterAdapter {
 			if(info.hasKey("maxRequestSize")) {
 				upload.setSizeMax(info.getLong("maxRequestSize"));
 			}
-			
 			upload.setHeaderEncoding(request.getCharacterEncoding());
 			try {
 				fields = parseRequest(upload, src);
@@ -104,8 +103,8 @@ public class ParameterAdapter {
 					FileItem fileItem = it.next();
 					boolean isFormField = fileItem.isFormField();
 					if(isFormField) {
-						params.puts("param." + fileItem.getFieldName(), fileItem.getString(request.getCharacterEncoding()));
-						if(logger.isLoggable(Level.FINER)) { logger.finer("param." + fileItem.getFieldName() + " : " + fileItem.getString(request.getCharacterEncoding())); 	}
+						params.puts("param." + fileItem.getFieldName(), fileItem.getString(StandardCharsets.UTF_8.name()));
+						if(logger.isLoggable(Level.FINER)) { logger.finer("param." + fileItem.getFieldName() + " : " + fileItem.getString(StandardCharsets.UTF_8.name())); }
 					} else {
 						uploadFieldCount++;
 					}

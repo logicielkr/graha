@@ -33,8 +33,16 @@ import kr.graha.lib.XMLGenerator;
 import kr.graha.helper.LOG;
 import kr.graha.lib.FileHelper;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.w3c.dom.Element;
 import java.nio.file.Files;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -49,7 +57,7 @@ public class UploadAdapter {
 	protected UploadAdapter() {
 		LOG.setLogLevel(logger);
 	}
-	protected File saveFile(String path, int idx, FileItem fileItem, File firstFile, Record params) throws Exception {
+	protected URI saveFile(HttpServletRequest request, String path, int idx, FileItem fileItem, URI firstFile, Record params) throws Exception {
 		File f = new File(path + File.separator);
 		
 		if(!f.exists()) {
@@ -57,28 +65,34 @@ public class UploadAdapter {
 		}
 		int index = 0;
 		String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
+		if(logger.isLoggable(Level.FINER)) { logger.finer("fileName = " + fileName); }
+		URI uri = null;
 		while(true) {
 			if(index == 0) {
-				f = new File(path + java.io.File.separator + fileName);
+				uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8"));
 			} else {
 				if(fileName.lastIndexOf(".") > 0) {
-					f = new File(path + java.io.File.separator + fileName.substring(0, fileName.lastIndexOf("."))  + "-" + index + "." + fileName.substring(fileName.lastIndexOf(".") + 1));
+					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName.substring(0, fileName.lastIndexOf(".")), "UTF-8")  + "-" + index + "." + java.net.URLEncoder.encode(fileName.substring(fileName.lastIndexOf(".") + 1), "UTF-8"));
 				} else {
-					f = new File(path + java.io.File.separator + fileName + "-" + index);
+					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8") + "-" + index);
 				}
 			}
-			if(!f.exists()) {
+			if(Files.notExists(Paths.get(uri))) {
 				break;
 			}
 			index++;
 		}
 		if(firstFile != null) {
-			Files.copy(firstFile.toPath(), f.toPath());
+			Files.copy(Paths.get(firstFile), Paths.get(uri));
 		} else {
-			fileItem.write(f);
-			params.put("uploaded.file.path." + idx, f.getPath());
+			if(fileItem.isInMemory()) {
+				Files.write(Paths.get(firstFile), fileItem.get());
+			} else {
+				Files.move(((DiskFileItem)fileItem).getStoreLocation().toPath(), Paths.get(uri));
+			}
+			params.put("uploaded.file.path." + idx, Paths.get(uri).toString());
 		}
-		return f;
+		return uri;
 	}
 	protected void execute(HttpServletRequest request, List<FileItem> fields, Element query, Record params) throws UnsupportedEncodingException, Exception {
 		Iterator<FileItem> it = fields.iterator();
@@ -96,7 +110,7 @@ public class UploadAdapter {
 						List paths = result.getArray("_system.filepath");
 						for(Object path : paths) {
 							if(path != null && path instanceof String) {
-								File f = new File(path + java.io.File.separator + fileItem.getString(request.getCharacterEncoding()));
+								File f = new File(path + java.io.File.separator + fileItem.getString(StandardCharsets.UTF_8.name()));
 								if(f.exists()) {
 									f.delete();
 								}
@@ -107,7 +121,7 @@ public class UploadAdapter {
 						if(path == null) {
 							continue;
 						}
-						File f = new File(path + java.io.File.separator + fileItem.getString(request.getCharacterEncoding()));
+						File f = new File(path + java.io.File.separator + fileItem.getString(StandardCharsets.UTF_8.name()));
 						if(f.exists()) {
 							f.delete();
 						}
@@ -134,14 +148,14 @@ public class UploadAdapter {
 				if(result.isArray("_system.filepath")) {
 					List paths = result.getArray("_system.filepath");
 					if(paths != null) {
-						File firstFile = null;
+						URI firstFileURI = null;
 						for(int i = 0; i < paths.size(); i++) {
 							String path = (String)paths.get(i);
 							if(path != null && path instanceof String) {
 								if(i == 0) {
-									firstFile = saveFile((String)path, idx, fileItem, firstFile, params);
+									firstFileURI = saveFile(request, (String)path, idx, fileItem, firstFileURI, params);
 								} else {
-									saveFile((String)path, idx, fileItem, firstFile, params);
+									saveFile(request, (String)path, idx, fileItem, firstFileURI, params);
 								}
 							}
 						}
@@ -152,7 +166,7 @@ public class UploadAdapter {
 						if(logger.isLoggable(Level.WARNING)) { logger.warning("path is null"); }
 						continue;
 					}
-					saveFile(path, idx, fileItem, null, params);
+					saveFile(request, path, idx, fileItem, null, params);
 				}
 				idx++;
 			}

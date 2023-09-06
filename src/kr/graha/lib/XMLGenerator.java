@@ -187,7 +187,6 @@ public class XMLGenerator {
 			sb_tmp.clear();
 			sb_tmp = null;
 		}
-//		sb.append(this.after());
 		return sb;
 	}
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
@@ -583,7 +582,7 @@ public class XMLGenerator {
 								try {
 									stream = Files.newDirectoryStream(Paths.get(filePath));
 									for(Path path : stream) {
-										if(path.toFile().isFile()) {
+										if(Files.isRegularFile(path)) {
 											sb.append(this._tag.tag("file", null, true));
 											sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
 											sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
@@ -990,7 +989,7 @@ public class XMLGenerator {
 								try {
 									stream = Files.newDirectoryStream(Paths.get(filePath));
 									for(Path path : stream) {
-										if(path.toFile().isFile()) {
+										if(Files.isRegularFile(path)) {
 											sb.append(this._tag.tag("file", null, true));
 											sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
 											sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));

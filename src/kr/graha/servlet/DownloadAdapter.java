@@ -21,7 +21,7 @@
 package kr.graha.servlet;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Enumeration;
@@ -37,6 +37,11 @@ import kr.graha.lib.XMLGenerator;
 import kr.graha.helper.LOG;
 import kr.graha.lib.FileHelper;
 import org.w3c.dom.Element;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -66,13 +71,10 @@ public class DownloadAdapter {
 			filePath = request.getPathInfo().trim().substring(request.getPathInfo().trim().indexOf(".html/download/") + ".html/download/".length());
 		}
 		if(
-			Charset.defaultCharset().equals(StandardCharsets.US_ASCII)
-			|| !(
-				request.getServletContext().getMajorVersion() > 3
-				|| (
-					request.getServletContext().getMajorVersion() >= 3
-					&& request.getServletContext().getMinorVersion() > 0
-				)
+			request.getServletContext().getMajorVersion() < 3
+			|| (
+				request.getServletContext().getMajorVersion() == 3
+				&& request.getServletContext().getMinorVersion() == 0
 			)
 		) {
 			filePath = new String(filePath.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
@@ -107,21 +109,30 @@ public class DownloadAdapter {
 				basePath = result.getString("_system.filepath");
 			}
 			if(logger.isLoggable(Level.FINER)) { logger.finer(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1)); }
-			File f = new File(basePath + java.io.File.separator + filePath.substring(filePath.indexOf("/") + 1));
-			if(f.exists()) {
-				if(logger.isLoggable(Level.CONFIG)) { logger.config("File Path = " + f.getPath()); }
-				response.setContentLength((int)f.length());
-				response.setDateHeader("Last-Modified", f.lastModified());
+
+			String fileName = filePath.substring(filePath.indexOf("/") + 1);
+			Path path = null;
+			try {
+				path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8")));
+			} catch (URISyntaxException e) {
+				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				response.sendError(500);
+				return;
+			}
+			if(path != null && Files.exists(path)) {
+				if(logger.isLoggable(Level.CONFIG)) { logger.config("File Path = " + path.toString()); }
+				response.setContentLength((int)Files.size(path));
+				response.setDateHeader("Last-Modified", Files.getLastModifiedTime(path).toMillis());
 				response.setHeader("Accept-Ranges", "bytes");
-				String mimeType = request.getServletContext().getMimeType(f.getName());
+				String mimeType = request.getServletContext().getMimeType(fileName);
 				if(mimeType != null && !mimeType.equals("")) {
-					response.setContentType(request.getServletContext().getMimeType(f.getName()));
+					response.setContentType(request.getServletContext().getMimeType(fileName));
 				}
 				ServletOutputStream out = null;
-				FileInputStream fis = null;
+				InputStream fis = null;
 				try {
 					out = response.getOutputStream();
-					fis = new FileInputStream(f);
+					fis = Files.newInputStream(path);
 					byte[] buffer = new byte[8192];
 					int len = 0;
 					while((len = fis.read(buffer)) >= 0) {
@@ -152,7 +163,7 @@ public class DownloadAdapter {
 					}
 				}
 			} else {
-				if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_NOT_FOUND]File Path = " + f.getPath()); }
+				if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_NOT_FOUND]File Path = " + path.toString()); }
 				response.sendError(404);
 			}
 		} else {
