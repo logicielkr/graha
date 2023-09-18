@@ -75,7 +75,6 @@ public class GeneratorServlet extends HttpServlet {
 		}
 		LOG.setLogLevel(logger);
 	}
-	
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if(request.getPathInfo() == null) {
@@ -161,7 +160,6 @@ public class GeneratorServlet extends HttpServlet {
 		if(query.hasAttribute("auth") && query.getAttribute("auth") != null && !query.getAttribute("auth").trim().equals("")) {
 			if(!AuthParser.auth(query.getAttribute("auth"), params)) {
 				if(logger.isLoggable(Level.CONFIG)) { logger.config("[SC_FORBIDDEN]auth = " + query.getAttribute("auth")); }
-				
 				response.sendError(403);
 				return;
 			}
@@ -313,7 +311,6 @@ public class GeneratorServlet extends HttpServlet {
 				g.processor(true);
 				new PropAdapter().execute(request, config, query, params, con, g, PropAdapter.After_Before_Processor);
 				sb.append(g.execute());
-				
 				if(fields != null) {
 					if(params.hasKey("query.row.total_update_count") && params.getInt("query.row.total_update_count") > 0 && FileHelper.isAllow(query, params)) {
 						new UploadAdapter().execute(request, fields, query, params);

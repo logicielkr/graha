@@ -69,12 +69,12 @@ public class UploadAdapter {
 		URI uri = null;
 		while(true) {
 			if(index == 0) {
-				uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8"));
+				uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
 			} else {
 				if(fileName.lastIndexOf(".") > 0) {
-					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName.substring(0, fileName.lastIndexOf(".")), "UTF-8")  + "-" + index + "." + java.net.URLEncoder.encode(fileName.substring(fileName.lastIndexOf(".") + 1), "UTF-8"));
+					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName.substring(0, fileName.lastIndexOf(".")), "UTF-8").replaceAll("\\+", "%20")  + "-" + index + "." + java.net.URLEncoder.encode(fileName.substring(fileName.lastIndexOf(".") + 1), "UTF-8").replaceAll("\\+", "%20"));
 				} else {
-					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8") + "-" + index);
+					uri = new URI("file://" + path + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20") + "-" + index);
 				}
 			}
 			if(Files.notExists(Paths.get(uri))) {
@@ -86,7 +86,7 @@ public class UploadAdapter {
 			Files.copy(Paths.get(firstFile), Paths.get(uri));
 		} else {
 			if(fileItem.isInMemory()) {
-				Files.write(Paths.get(firstFile), fileItem.get());
+				Files.write(Paths.get(uri), fileItem.get());
 			} else {
 				Files.move(((DiskFileItem)fileItem).getStoreLocation().toPath(), Paths.get(uri));
 			}

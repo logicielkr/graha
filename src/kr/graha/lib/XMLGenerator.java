@@ -836,10 +836,9 @@ public class XMLGenerator {
 			for(int i = 0; i < table.getLength(); i++) {
 				Element p = (Element)table.item(i);
 				sb.appendL(this._tag.tag("rows", p.getAttribute("name"), true));
-				
-				this._expr = this._xpath.compile("column");
-				NodeList column = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 				if(!isNew ) {
+					this._expr = this._xpath.compile("column");
+					NodeList column = (NodeList)this._expr.evaluate(p, XPathConstants.NODESET);
 					
 					String sql = "select ";
 					index = 0;
@@ -981,35 +980,37 @@ public class XMLGenerator {
 					}
 					index = 0;
 					Record result = FileHelper.getFilePath(this._params, file.getAttribute("path"));
-					if(result != null && !result.isEmpty()) {
-						String filePath = result.getString("_system.filepath");
-						if(filePath != null) {
-							if(Files.exists(Paths.get(filePath)) && Files.isDirectory(Paths.get(filePath))) {
-								DirectoryStream<Path> stream = null;
-								try {
-									stream = Files.newDirectoryStream(Paths.get(filePath));
-									for(Path path : stream) {
-										if(Files.isRegularFile(path)) {
-											sb.append(this._tag.tag("file", null, true));
-											sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
-											sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
-											sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
-											sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
-											sb.append(this._tag.tag("file", null, false));
-											index++;
+					if(!isNew ) {
+						if(result != null && !result.isEmpty()) {
+							String filePath = result.getString("_system.filepath");
+							if(filePath != null) {
+								if(Files.exists(Paths.get(filePath)) && Files.isDirectory(Paths.get(filePath))) {
+									DirectoryStream<Path> stream = null;
+									try {
+										stream = Files.newDirectoryStream(Paths.get(filePath));
+										for(Path path : stream) {
+											if(Files.isRegularFile(path)) {
+												sb.append(this._tag.tag("file", null, true));
+												sb.append(this._tag.tag("file", "name", null, true) + "<![CDATA[" + FileHelper.decodeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name", null, false));
+												sb.append(this._tag.tag("file", "name2", null, true) + "<![CDATA[" + FileHelper.escapeFileName(path.toUri()) + "]]>" + this._tag.tag("file", "name2", null, false));
+												sb.append(this._tag.tag("file", "length", null, true) + Files.size(path) + this._tag.tag("file", "length", null, false));
+												sb.append(this._tag.tag("file", "lastModified", null, true) + Files.getLastModifiedTime(path).toMillis() + this._tag.tag("file", "lastModified", null, false));
+												sb.append(this._tag.tag("file", null, false));
+												index++;
+											}
 										}
-									}
-									stream.close();
-									stream = null;
-								} catch(IOException ex) {
-									if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
-									throw ex;
-								} finally {
-									if(stream != null) {
-										try {
-											stream.close();
-											stream = null;
-										} catch(IOException e) {
+										stream.close();
+										stream = null;
+									} catch(IOException ex) {
+										if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(ex)); 	}
+										throw ex;
+									} finally {
+										if(stream != null) {
+											try {
+												stream.close();
+												stream = null;
+											} catch(IOException e) {
+											}
 										}
 									}
 								}

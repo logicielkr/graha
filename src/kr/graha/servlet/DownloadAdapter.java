@@ -113,7 +113,7 @@ public class DownloadAdapter {
 			String fileName = filePath.substring(filePath.indexOf("/") + 1);
 			Path path = null;
 			try {
-				path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8")));
+				path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
 			} catch (URISyntaxException e) {
 				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 				response.sendError(500);
