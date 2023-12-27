@@ -43,6 +43,8 @@ import java.util.Iterator;
  */
 
 public final class LOG {
+	private static Logger logger = Logger.getLogger("kr.graha.helper.LOG");
+	
 	private LOG() {
 	}
 /**
@@ -187,32 +189,30 @@ public final class LOG {
 		sb.append("}\n");
 		return sb.toString();
 	}
-
 	public static void setLogLevel(Logger logger) {
 	}
 	public static void setLogLevel2(Logger logger) {
 		Level level = null;
 		if(System.getProperty("kr.graha.LogLevel") != null) {
 			String logLevel = System.getProperty("kr.graha.LogLevel");
-			
 			if(logLevel != null && logLevel.equals("ALL")) {
 				level = Level.ALL;
-			} else if(logLevel != null && logLevel.equals("CONFIG")) {
-				level = Level.CONFIG;
-			} else if(logLevel != null && logLevel.equals("FINE")) {
-				level = Level.FINE;
-			} else if(logLevel != null && logLevel.equals("FINER")) {
-				level = Level.FINER;
 			} else if(logLevel != null && logLevel.equals("FINEST")) {
 				level = Level.FINEST;
+			} else if(logLevel != null && logLevel.equals("FINER")) {
+				level = Level.FINER;
+			} else if(logLevel != null && logLevel.equals("FINE")) {
+				level = Level.FINE;
+			} else if(logLevel != null && logLevel.equals("CONFIG")) {
+				level = Level.CONFIG;
 			} else if(logLevel != null && logLevel.equals("INFO")) {
 				level = Level.INFO;
-			} else if(logLevel != null && logLevel.equals("OFF")) {
-				level = Level.OFF;
-			} else if(logLevel != null && logLevel.equals("SEVERE")) {
-				level = Level.SEVERE;
 			} else if(logLevel != null && logLevel.equals("WARNING")) {
 				level = Level.WARNING;
+			} else if(logLevel != null && logLevel.equals("SEVERE")) {
+				level = Level.SEVERE;
+			} else if(logLevel != null && logLevel.equals("OFF")) {
+				level = Level.OFF;
 			}
 		}
 		if(level == null) {
@@ -231,5 +231,195 @@ public final class LOG {
 			}
 		}
 	}
+/**
+ * 이 메소드를 호출한 소스코드의 Line Number 를 반환한다.
+ * @return 이 메소드를 호출한 소스코드의 Line Number
+ */
+	public static int lineNumber() {
+		return Thread.currentThread().getStackTrace()[2].getLineNumber();
+	}
+/**
+ * 이 메소드를 호출한 소스코드의 StackTrace 를 반환한다.
+ * 이 메소드는 getMsg 를 통해서만 호출되고, getMsg 메소드는 severe 등의 메소드를 통해 호출된다고 전제하고, 4번째 StackTrace를 반환한다.
+ * @return 이 메소드를 호출한 소스코드의 StackTrace
+ */
+	private static StackTraceElement getStackTraceElement() {
+		return Thread.currentThread().getStackTrace()[4];
+	}
+/**
+ * Exception 이 발생한 소스코드의 StackTrace 를 반환한다.
+ * @return 이 메소드를 호출한 소스코드의 StackTrace
+ */
+	private static StackTraceElement getStackTraceElement(Exception e) {
+		return e.getStackTrace()[1];
+	}
+/**
+ * 로그 메시지를 조합한다.
+ * Class 이름, Method 이름, 소스코드의 Line Number, 메시지로 구성된다.
+ * @return 로그 메시지
+ */
+	private static String getMsg(String msg) {
+		return LOG.getStackTraceElement().getClassName() + "." + LOG.getStackTraceElement().getMethodName() + "(" + LOG.getStackTraceElement().getLineNumber() + ") : " + msg;
+	}
+/**
+ * 로그 메시지를 조합한다.
+ * Class 이름, Method 이름, 소스코드의 Line Number, 메시지로 구성된다.
+ * @return 로그 메시지
+ */
+	private static String getMsg(Exception e) {
+		return LOG.getStackTraceElement(e).getClassName() + "." + LOG.getStackTraceElement(e).getMethodName() + "(" + LOG.getStackTraceElement(e).getLineNumber() + ") : " + LOG.toString(e);
+	}
+	public static void severe(Logger logger, Exception e) {
+		if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.getMsg(e)); }
+	}
+	public static void severe(Exception e) {
+		if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.getMsg(e)); }
+	}
+	public static void severe(Logger logger, String... msgs) {
+		if(logger.isLoggable(Level.SEVERE)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.severe(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void severe(String... msgs) {
+		if(logger.isLoggable(Level.SEVERE)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.severe(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void info(Logger logger, Exception e) {
+		if(logger.isLoggable(Level.INFO)) { logger.info(LOG.getMsg(e)); }
+	}
+	public static void info(Exception e) {
+		if(logger.isLoggable(Level.INFO)) { logger.info(LOG.getMsg(e)); }
+	}
+	public static void info(Logger logger, String... msgs) {
+		if(logger.isLoggable(Level.INFO)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.info(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void info(String... msgs) {
+		if(logger.isLoggable(Level.INFO)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.info(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void config(Logger logger, Exception e) {
+		if(logger.isLoggable(Level.CONFIG)) { logger.config(LOG.getMsg(e)); }
+	}
+	public static void config(Exception e) {
+		if(logger.isLoggable(Level.CONFIG)) { logger.config(LOG.getMsg(e)); }
+	}
+	public static void config(Logger logger, String... msgs) {
+		if(logger.isLoggable(Level.CONFIG)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.config(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void config(String... msgs) {
+		if(logger.isLoggable(Level.CONFIG)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.config(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void finer(Logger logger, Exception e) {
+		if(logger.isLoggable(Level.FINER)) { logger.finer(LOG.getMsg(e)); }
+	}
+	public static void finer(Exception e) {
+		if(logger.isLoggable(Level.FINER)) { logger.finer(LOG.getMsg(e)); }
+	}
+	public static void finer(Logger logger, String... msgs) {
+		if(logger.isLoggable(Level.FINER)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.finer(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void finer(String... msgs) {
+		if(logger.isLoggable(Level.FINER)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.finer(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void finest(String... msgs) {
+		if(logger.isLoggable(Level.FINEST)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.finest(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void warning(Logger logger, Exception e) {
+		if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.getMsg(e)); }
+	}
 	
+	public static void warning(Exception e) {
+		if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.getMsg(e)); }
+	}
+	public static void warning(Logger logger, String... msgs) {
+		if(logger.isLoggable(Level.WARNING)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.warning(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void warning(String... msgs) {
+		if(logger.isLoggable(Level.WARNING)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.warning(LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void log(Level level, String... msgs) {
+		if(logger.isLoggable(level)) {
+			if(msgs != null) {
+				for(int i = 0; i < msgs.length; i++) {
+					logger.log(level, LOG.getMsg(msgs[i]));
+				}
+			}
+		}
+	}
+	public static void out(Logger logger, String... msgs) {
+		if(msgs != null) {
+			for(int i = 0; i < msgs.length; i++) {
+				logger.finest(LOG.getMsg(msgs[i]));
+			}
+		}
+	}
+	public static void out(String... msgs) {
+		if(msgs != null) {
+			for(int i = 0; i < msgs.length; i++) {
+				logger.finest(LOG.getMsg(msgs[i]));
+			}
+		}
+	}
 }

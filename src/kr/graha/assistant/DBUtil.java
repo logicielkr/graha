@@ -28,8 +28,6 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.io.IOException;
@@ -46,14 +44,12 @@ import java.util.Set;
  */
 
 public class DBUtil {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private String[] TYPES = {"TABLE", "VIEW"};
 	private Hashtable<String, Hashtable> pk = null;
 	private Properties prop = null;
 	private Hashtable<Integer, String> sqlTypes = null;
 	private Properties def = null;
 	protected DBUtil() throws IOException {
-		LOG.setLogLevel(logger);
 	}
 	protected static DBUtil getDBUtil(Connection con, String def, String mapping) throws SQLException, IOException {
 		DatabaseMetaData m = con.getMetaData();
@@ -73,9 +69,7 @@ public class DBUtil {
 		} else if(m.getDatabaseProductName().equalsIgnoreCase("MariaDB")) {
 			db = new DBUtilMariaDBImpl();
 		} else {
-			if(Logger.getLogger(DBUtil.class.getName()).isLoggable(Level.CONFIG)) {
-				Logger.getLogger(DBUtil.class.getName()).config(m.getDatabaseProductName());
-			}
+			LOG.config(m.getDatabaseProductName());
 			db = new DBUtil();
 		}
 		db.loadProp(con, def, mapping);
@@ -128,14 +122,14 @@ public class DBUtil {
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			LOG.severe(e);
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(pstmt != null) {
@@ -143,7 +137,7 @@ public class DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -173,7 +167,7 @@ public class DBUtil {
 			DB.close(rs);
 			DB.close(pstmt);
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			LOG.severe(e);
 		} finally {
 			DB.close(rs);
 			DB.close(pstmt);
@@ -198,7 +192,7 @@ public class DBUtil {
 			}
 			DB.close(rs);
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			LOG.severe(e);
 		} finally {
 			DB.close(rs);
 		}
@@ -239,7 +233,7 @@ public class DBUtil {
 				try {
 					this.sqlTypes.put(Integer.valueOf(field.getInt(null)), field.getName());
 				} catch (IllegalAccessException e) {
-					if(logger.isLoggable(Level.WARNING)) { logger.warning(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -301,11 +295,11 @@ public class DBUtil {
 			if(this.prop.containsKey(this.sqlTypes.get(Integer.valueOf(dataType)))) {
 				return this.prop.getProperty(this.sqlTypes.get(Integer.valueOf(dataType)));
 			} else {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(this.sqlTypes.get(Integer.valueOf(dataType)) + " is not defined"); }
+				LOG.warning(this.sqlTypes.get(Integer.valueOf(dataType)) + " is not defined");
 				return this.prop.getProperty("default");
 			}
 		} else {
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(dataType + " is not defined"); }
+			LOG.warning(dataType + " is not defined");
 			return this.prop.getProperty("default");
 		}
 	}
@@ -332,7 +326,7 @@ public class DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -359,7 +353,7 @@ public class DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -443,7 +437,7 @@ public class DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -468,7 +462,7 @@ public class DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -534,7 +528,7 @@ for sqlite
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}

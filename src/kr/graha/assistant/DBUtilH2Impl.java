@@ -28,8 +28,6 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -43,9 +41,7 @@ import java.io.IOException;
  */
 
 public class DBUtilH2Impl extends DBUtil {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
 	protected DBUtilH2Impl() throws IOException {
-		LOG.setLogLevel(logger);
 	}
 	protected String getNextval(Connection con, String tableName, String columnName, String schemaName, String defaultSchema) {
 		String prefix = "";

@@ -25,21 +25,16 @@ import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import java.io.IOException;
 import java.sql.SQLException;
-
 import java.io.InputStreamReader;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-
 import java.util.Hashtable;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -51,8 +46,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 
 public final class XMLConfigGenerator {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
-
 	private Table _masterTableByParameter;
 	private Table _masterTable = null;
 	private CManager _cm;
@@ -477,22 +470,22 @@ public final class XMLConfigGenerator {
 			is = null;
 		} catch (IOException e) {
 			list = null;
-			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+			LOG.severe(e);
 			throw e;
 		} finally {
 			if(in != null) {
 				try {in.close();} catch(IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(isr != null) {
 				try {isr.close();} catch(IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(is != null) {
 				try {is.close();} catch(IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -566,7 +559,7 @@ public final class XMLConfigGenerator {
 	}
 	private boolean createCss(String xmlName, String id, File dir) throws IOException, SQLException {
 		File f = new File(dir.getPath() + File.separator + id + ".css");
-		if(logger.isLoggable(Level.FINEST)) { logger.finest(dir.getPath() + File.separator + id + ".css"); }
+		LOG.finest(dir.getPath() + File.separator + id + ".css");
 		
 		StringBuffer css = new StringBuffer();
 		java.util.List<String> hideMobileColumn = new java.util.ArrayList<String>();
@@ -664,7 +657,7 @@ public final class XMLConfigGenerator {
 				bw = null;
 				return true;
 			} catch (IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				LOG.severe(e);
 				throw e;
 			} finally {
 				try {
@@ -672,7 +665,7 @@ public final class XMLConfigGenerator {
 						bw.close();
 					}
 				} catch (IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		} else {
@@ -779,7 +772,7 @@ public final class XMLConfigGenerator {
 				bw.close();
 				bw = null;
 			} catch (IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				LOG.severe(e);
 				throw e;
 			} finally {
 				try {
@@ -787,7 +780,7 @@ public final class XMLConfigGenerator {
 						bw.close();
 					}
 				} catch (IOException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -823,7 +816,7 @@ public final class XMLConfigGenerator {
 					bw.close();
 				}
 			} catch (IOException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				LOG.severe(e);
 			}
 		}
 		return xmlName;

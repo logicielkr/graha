@@ -28,8 +28,6 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -44,12 +42,10 @@ import java.util.Set;
  */
 
 public class DBUtilMariaDBImpl extends DBUtil {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Hashtable<String, Integer> map = null;
 	private boolean existsTableCommentTable = false;
 	private boolean existsColumnCommentTable = false;
 	protected DBUtilMariaDBImpl() throws IOException {
-		LOG.setLogLevel(logger);
 	}
 	protected String dateFormat(String columnName, String format) {
 		if(format.equals("date")) {
@@ -145,7 +141,7 @@ public class DBUtilMariaDBImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -154,7 +150,7 @@ public class DBUtilMariaDBImpl extends DBUtil {
 		try {
 			createCommentTable(con, false);
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			LOG.severe(e);
 			return null;
 		}
 		return super.getCommentByColumnNameFromGrahaColComments(con, columnName, false);
@@ -196,14 +192,14 @@ public class DBUtilMariaDBImpl extends DBUtil {
 			pstmt.close();
 			pstmt = null;
 		} catch (SQLException e) {
-			if(logger.isLoggable(Level.INFO)) { logger.info(LOG.toString(e)); }
+			LOG.severe(e);
 		} finally {
 			if(rs != null) {
 				try {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(pstmt != null) {
@@ -211,7 +207,7 @@ public class DBUtilMariaDBImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -274,7 +270,7 @@ public class DBUtilMariaDBImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}

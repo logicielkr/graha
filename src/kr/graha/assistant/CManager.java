@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletRegistration;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -49,7 +47,6 @@ import java.util.Enumeration;
  */
 
 public class CManager {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private ServletConfig c = null;
 	private HttpServletRequest request = null;
 	private String def = null;
@@ -167,7 +164,7 @@ public class CManager {
 			try {
 				return new String(value.getBytes("iso-8859-1"), "UTF-8");
 			} catch (java.io.UnsupportedEncodingException e) {
-				if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+				LOG.severe(e);
 			}
 		}
 		return null;

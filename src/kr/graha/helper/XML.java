@@ -22,6 +22,9 @@
 package kr.graha.helper;
 
 import org.w3c.dom.Element;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Graha(그라하) XML 관련 유틸리티
@@ -32,6 +35,18 @@ import org.w3c.dom.Element;
 
 public final class XML {
 	private XML() {
+	}
+/**
+ * 비어있는 Document 를 생성한다.
+ */
+	public static Document createDocument() throws ParserConfigurationException {
+		Document document = null;
+		DocumentBuilderFactory dbf = null;
+		dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		dbf.setXIncludeAware(true);
+		document = dbf.newDocumentBuilder().newDocument();
+		return document;
 	}
 /**
  * CDATA 에 허용되지 않는 문자들을 처리한다.
@@ -184,6 +199,18 @@ https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc
 		return false;
 	}
 /**
+ * 첫 번째 파라미터로 공급된 속성값이, 2 번째 이후의 파라미터와 1개라도 일치하는지 검사한다.
+ * STR.exists 메소드를 호출하여 비교한다.
+ * 속성값의 정의가 없는 경우 무조건 false 를 반환한다.
+ * @param element
+ * @param attr 속성이름
+ * @param value
+ * @return value 에서 attr 에 대응하는 속성값이 발견되면 true 를 리턴한다.
+ */
+	public static boolean vexistsAttrValue(Element element, String attr, String... value) {
+		return existsAttrValue(element, attr, value);
+	}
+/**
  * 첫 번째 파라미터로 공급된 속성값이, 2 번째 파라미터로 공급된 문자열 배열에 있는지 검사한다.
  * STR.existsIgnoreCase 메소드를 호출하여 비교한다.
  * 속성값의 정의가 없는 경우 무조건 false 를 반환한다.
@@ -199,6 +226,18 @@ https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc
 			}
 		}
 		return false;
+	}
+/**
+ * 첫 번째 파라미터로 공급된 속성값이, 2 번째 이후의 파라미터와 1개라도 일치하는지 검사한다.
+ * STR.existsIgnoreCase 메소드를 호출하여 비교한다.
+ * 속성값의 정의가 없는 경우 무조건 false 를 반환한다.
+ * @param element
+ * @param attr 속성이름
+ * @param value
+ * @return value 에서 attr 에 대응하는 속성값이 발견되면 true 를 리턴한다.
+ */
+	public static boolean vexistsIgnoreCaseAttrValue(Element element, String attr, String[] value) {
+		return existsIgnoreCaseAttrValue(element, attr, value);
 	}
 }
 

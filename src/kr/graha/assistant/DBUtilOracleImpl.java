@@ -28,8 +28,6 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -45,10 +43,8 @@ import java.util.Set;
 
 
 public class DBUtilOracleImpl extends DBUtil {
-	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Hashtable<String, Integer> map = null;
 	protected DBUtilOracleImpl() throws IOException {
-		LOG.setLogLevel(logger);
 	}
 	protected void loadProp(Connection con, String def, String mapping) throws IOException, SQLException {
 		super.loadProp(con, def, mapping);
@@ -90,7 +86,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -177,7 +173,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(pstmt != null) {
@@ -185,7 +181,7 @@ public class DBUtilOracleImpl extends DBUtil {
 					pstmt.close();
 					pstmt = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -236,14 +232,14 @@ public class DBUtilOracleImpl extends DBUtil {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 			if(pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
-					if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+					LOG.severe(e);
 				}
 			}
 		}
@@ -269,7 +265,7 @@ public class DBUtilOracleImpl extends DBUtil {
 						rs.close();
 						rs = null;
 					} catch (SQLException e) {
-						if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
+						LOG.severe(e);
 					}
 				}
 			}
