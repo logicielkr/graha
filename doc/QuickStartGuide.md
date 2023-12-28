@@ -57,7 +57,7 @@
 ```xml
 <servlet>
 	<servlet-name>GrahaServlet</servlet-name>
-	<servlet-class>kr.graha.servlet.GeneratorServlet</servlet-class>
+	<servlet-class>kr.graha.post.servlet.PostGeneratorServlet</servlet-class>
 </servlet>
 <servlet-mapping>
 	<servlet-name>GrahaServlet</servlet-name>
