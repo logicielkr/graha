@@ -322,6 +322,7 @@ public class Command extends SQLExecutor {
 				return 0;
 			}
 		}
+		super.setConnectionFactory(connectionFactory);
 		Buffer sql = super.parseSQL(this.sql, params);
 		Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 		List<SQLParameter> parameters = new ArrayList();
@@ -329,7 +330,8 @@ public class Command extends SQLExecutor {
 			for(int x = 0; x < this.param.size(); x++) {
 				Param p = (Param)this.param.get(x);
 				if(STR.startsWithIgnoreCase(p.getValue(), "sequence.")) {
-					SQLParameter parameter =  new SQLParameter(SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory()), p.getDataType());
+					Integer nextSequenceValue = SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory());
+					SQLParameter parameter =  new SQLParameter(nextSequenceValue, p.getDataType());
 					parameters.add(parameter);
 				} else {
 					SQLParameter parameter =  p.getValue(
@@ -343,7 +345,6 @@ public class Command extends SQLExecutor {
 			}
 		}
 		SQLInfo sqlInfo = null;
-		super.setConnectionFactory(connectionFactory);
 		if(queryFuncType == Query.QUERY_FUNC_TYPE_LIST) {
 			int count = 0;
 			int pageSize = Integer.parseInt(((Element)this.sql).getAttribute("pageSize"));
@@ -382,7 +383,6 @@ public class Command extends SQLExecutor {
 			ResultSet rs = null;
 			try {
 				pstmt = super.prepareStatement(sqlInfo.getSql());
-				LOG.out(sqlInfo.getSql());
 				super.bind(pstmt, parameters);
 				if(queryFuncType == Query.QUERY_FUNC_TYPE_QUERY) {
 					if(pstmt.execute()) {
@@ -459,7 +459,6 @@ public class Command extends SQLExecutor {
 		ResultSet rs = null;
 		try {
 			pstmt = super.prepareStatement(sql);
-			LOG.out(sql);
 			super.bind(pstmt, parameters);
 			rs = pstmt.executeQuery();
 			if(rs.next()) {

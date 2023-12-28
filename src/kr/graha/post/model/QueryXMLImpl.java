@@ -284,7 +284,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "GET")) {
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_QUERY || queryFuncType == Query.QUERY_FUNC_TYPE_REPORT) {
-				if(STR.compareIgnoreCase(super.getAllow(), "get")) {
+				if(STR.compareIgnoreCase(super.getAllow(), "GET")) {
 					return true;
 				}
 			}
@@ -547,7 +547,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			LOG.severe(e);
 		}
 	}
-	private void sendHTML(HttpServletRequest request, HttpServletResponse response, Record params, GDocument document) {
+	private void sendHTML(HttpServletRequest request, HttpServletResponse response, Record params, GDocument document, int queryFuncType) {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html; charset=UTF-8");
 		if(params.getBoolean(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "resultset"))) {
@@ -555,6 +555,13 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		if(params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
 			params.put(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "ERROR");
+		}
+		if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "GET")) {
+			if(queryFuncType == Query.QUERY_FUNC_TYPE_QUERY || queryFuncType == Query.QUERY_FUNC_TYPE_REPORT) {
+				if(STR.compareIgnoreCase(super.getAllow(), "GET")) {
+					params.put(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "POST");
+				}
+			}
 		}
 		try {
 			StringReader reader = new StringReader(super.toXSL(params, request, 0).toString());
@@ -602,7 +609,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {
 					this.sendXML(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_HTML) {
-					this.sendHTML(request, response, params, document);
+					this.sendHTML(request, response, params, document, queryFuncType);
 				}
 			} else {
 				document = this.getDocument(request);
@@ -611,7 +618,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {
 					this.sendXML(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_HTML) {
-					this.sendHTML(request, response, params, document);
+					this.sendHTML(request, response, params, document, queryFuncType);
 				}
 			}
 		} catch (Exception e) {

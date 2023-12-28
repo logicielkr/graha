@@ -297,6 +297,8 @@ public abstract class SQLExecutor {
 				rs = null;
 				DB.close(pstmt);
 				pstmt = null;
+			} else {
+				LOG.severe("connectionFactory or connectionFactory.getConnection() is null");
 			}
 		} catch (SQLException e) {
 			LOG.severe(e);
