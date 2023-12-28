@@ -171,7 +171,7 @@ public class Label {
 		}
 		if(rdf && STR.valid(this.getXText())) {
 			xsl.append(TextParser.parseForXSL(this.getXText(), param, rdf));
-		} if(STR.valid(this.getText())) {
+		} else if(STR.valid(this.getText())) {
 			xsl.append(TextParser.parseForXSL(this.getText(), param, rdf));
 		}
 		if(labelPosition == Label.LABEL_POSITION_HEAD) {
