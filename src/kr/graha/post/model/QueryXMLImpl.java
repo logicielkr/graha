@@ -380,9 +380,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 	public int download(HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params) throws IOException, NoSuchProviderException, SQLException {
 		super.prepare(request, servletConfig, params);
 		if(!super.auth(params) || !this.downloadable(params)) {
+			super.clear();
 			return HttpServletResponse.SC_FORBIDDEN;
 		}
-		
 		try {
 			super.closeConnectionFactory();
 			if(super.getFiles() != null) {
@@ -607,6 +607,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		try {
 			List<FileItem> fields = super.prepare(request, servletConfig, params);
 			if(!super.auth(params)) {
+				super.clear();
 				return HttpServletResponse.SC_FORBIDDEN;
 			}
 			int queryFuncType = super.getQueryFuncType();

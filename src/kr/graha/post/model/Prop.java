@@ -277,7 +277,7 @@ public class Prop extends SQLExecutor {
 			return;
 		}
 		if(STR.valid(this.getTime())) {
-			int mode = getMode();
+			int mode = this.getMode();
 			if(mode == 0 && time >= Prop.After_Before_Processor) {
 				return;
 			}
@@ -296,7 +296,7 @@ public class Prop extends SQLExecutor {
 					params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName(), "public"), "true");
 				}
 			}
-		} else {
+		} else if(time > Prop.Before_Connection) {
 			super.setConnectionFactory(connectionFactory);
 			Buffer sql = super.parseSQL(this.sql, params);
 			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);

@@ -263,6 +263,7 @@ public class QueryImpl extends Query {
 		try {
 			this.executeProp(params, Prop.Before_Connection);
 		} catch (NoSuchProviderException | SQLException e) {
+			this.abort();
 			LOG.severe(e);
 		}
 		this.userServletAdapter(request, servletConfig, params);
