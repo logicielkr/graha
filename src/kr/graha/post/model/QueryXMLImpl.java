@@ -372,6 +372,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		} catch (NoSuchProviderException | SQLException e) {
 			super.abort();
 			throw e;
+		} catch (Exception e) {
+			super.abort();
+			throw e;
 		}
 	}
 	public int download(HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params) throws IOException, NoSuchProviderException, SQLException {
@@ -379,6 +382,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		if(!super.auth(params) || !this.downloadable(params)) {
 			return HttpServletResponse.SC_FORBIDDEN;
 		}
+		
 		try {
 			super.closeConnectionFactory();
 			if(super.getFiles() != null) {
@@ -387,6 +391,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			super.clear();
 			return HttpServletResponse.SC_OK;
 		} catch (IOException e) {
+			super.abort();
+			throw e;
+		} catch (Exception e) {
 			super.abort();
 			throw e;
 		}
@@ -437,8 +444,10 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				Reporter reporter = (Reporter)Class.forName(super.getClassName()).getConstructor().newInstance();
 				reporter.execute(request, response, params, document.toXML(), super.getConnectionFactory(params).getConnection());
 			} catch (IOException | InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+				super.abort();
 				LOG.severe(e);
 			} catch (SQLException e) {
+				super.abort();
 				LOG.severe(e);
 			}
 			document.clear();
@@ -529,6 +538,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			document.add(params);
 			super.clear();
 		} catch (NoSuchProviderException | SQLException | IOException | URISyntaxException e) {
+			super.abort();
+			throw e;
+		} catch (Exception e) {
 			super.abort();
 			throw e;
 		}

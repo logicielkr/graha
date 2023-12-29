@@ -77,7 +77,7 @@ public class PostGeneratorServlet extends HttpServlet {
 					this.sendError(response, result);
 					return;
 				}
-			} catch (SQLException | NoSuchProviderException | IOException e) {
+			} catch (Exception e) {
 				LOG.severe(e); 
 				this.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
@@ -89,7 +89,7 @@ public class PostGeneratorServlet extends HttpServlet {
 					this.sendError(response, result);
 					return;
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOG.severe(e); 
 				this.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
@@ -101,7 +101,7 @@ public class PostGeneratorServlet extends HttpServlet {
 					this.sendError(response, result);
 					return;
 				}
-			} catch (SQLException | NoSuchProviderException | IOException | URISyntaxException e) {
+			} catch (Exception e) {
 				LOG.severe(e); 
 				this.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;

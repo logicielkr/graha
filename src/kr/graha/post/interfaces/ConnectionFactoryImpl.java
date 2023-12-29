@@ -91,14 +91,18 @@ public abstract class ConnectionFactoryImpl implements ConnectionFactory {
 		return this.dmd;
 	}
 	public void close() {
-		this.commit();
-		DB.close(this.conn);
-		this.conn = null;
+		if(this.conn != null) {
+			this.commit();
+			DB.close(this.conn);
+			this.conn = null;
+		}
 	}
 	public void abort() {
-		this.rollback();
-		DB.close(this.conn);
-		this.conn = null;
+		if(this.conn != null) {
+			this.rollback();
+			DB.close(this.conn);
+			this.conn = null;
+		}
 	}
 	public void rollback() {
 		try {
