@@ -133,17 +133,13 @@ public class GFile {
 		if(result != null && !result.isEmpty()) {
 			if(!isNew) {
 				String filePath = result.getString(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "filepath"));
-				LOG.out(filePath);
 				if(STR.valid(filePath)) {
-					LOG.out(filePath);
 					if(Files.exists(Paths.get(filePath)) && Files.isDirectory(Paths.get(filePath))) {
-						LOG.out(filePath);
 						DirectoryStream<Path> stream = null;
 						try {
 							stream = Files.newDirectoryStream(Paths.get(filePath));
 							for(Path path : stream) {
 								if(Files.isRegularFile(path)) {
-									LOG.out(path.toString());
 									file.add(path);
 								}
 							}
@@ -175,8 +171,6 @@ public class GFile {
 						continue;
 					}
 				}
-				LOG.out(key.toString());
-				LOG.out(result.getString(key));
 				file.addParam(new GParam(key, result.getString(key)));
 			}
 		}

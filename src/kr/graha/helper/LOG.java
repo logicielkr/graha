@@ -408,6 +408,23 @@ public final class LOG {
 			}
 		}
 	}
+/**
+ * 여기서부터는 테스트가 끝나면 지워버려야 하는 것들
+ */
+	public static void debug(Logger logger, String... msgs) {
+		if(msgs != null) {
+			for(int i = 0; i < msgs.length; i++) {
+				logger.finest(LOG.getMsg(msgs[i]));
+			}
+		}
+	}
+	public static void debug(String... msgs) {
+		if(msgs != null) {
+			for(int i = 0; i < msgs.length; i++) {
+				logger.finest(LOG.getMsg(msgs[i]));
+			}
+		}
+	}
 	public static void out(Logger logger, String... msgs) {
 		if(msgs != null) {
 			for(int i = 0; i < msgs.length; i++) {

@@ -255,22 +255,17 @@ public class Processor extends SQLExecutor {
 		ConnectionFactory connectionFactory,
 		boolean before
 	) throws NoSuchProviderException, SQLException {
-		LOG.out(this.getType());
 		if(before) {
 			if(!STR.trueValue(this.getBefore())) {
-				LOG.out(this.getBefore());
 				return;
 			}
 		} else {
 			if(!STR.trueValue(this.getAfter())) {
-				LOG.out(this.getAfter());
 				return;
 			}
 		}
 		if(STR.valid(this.getMethod())) {
 			if(!STR.compareIgnoreCase(params.getString(Record.key(Record.PREFIX_TYPE_HEADER, "method")), this.getMethod())) {
-				LOG.out(params.getString(Record.key(Record.PREFIX_TYPE_HEADER, "method")));
-				LOG.out(this.getMethod());
 				return;
 			}
 		}

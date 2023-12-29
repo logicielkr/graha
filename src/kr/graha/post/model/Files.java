@@ -352,7 +352,6 @@ param. 이 아니라, query. 으로 처리됨.
 			FileItem fileItem = it.next();
 			boolean isFormField = fileItem.isFormField();
 			if(isFormField) {
-				LOG.out(fileItem.getFieldName());
 				if(fileItem.getFieldName().startsWith("_deletefile_.")) {
 					String fileName = fileItem.getFieldName().substring("_deletefile_.".length());
 					if(fileName.lastIndexOf(".") >= 0) {

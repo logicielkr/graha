@@ -248,8 +248,6 @@ public class XmlElement {
 						buffer.appendL(indent + 1, (Buffer)childNode);
 					} else if(childNode instanceof String) {
 						buffer.appendL(indent + 1, (String)childNode);
-					} else {
-						LOG.out(childNode.toString());
 					}
 				}
 			}

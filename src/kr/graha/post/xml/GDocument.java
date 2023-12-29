@@ -421,10 +421,6 @@ public class GDocument {
 							} else if(key.getPrefix() == Record.PREFIX_TYPE_PROP) {
 								this.addProp(param);
 							} else if(key.getPrefix() == Record.PREFIX_TYPE_MESSAGE) {
-								
-								LOG.out(key.getKey());
-								LOG.out(params.getString(key));
-								
 								if(params.getObject(key) instanceof String) {
 									this.add(new GMessage(key.getKey(), XML.fix((String)params.getString(key))));
 								} else {

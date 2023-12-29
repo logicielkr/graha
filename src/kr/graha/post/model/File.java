@@ -226,8 +226,6 @@ public class File {
 					xsl.appendL("</h3>");
 				}
 			}
-			LOG.out(before + "\t" + after);
-			LOG.out(this.getBefore() + "\t" + this.getAfter());
 			if(STR.valid(this.getName())) {
 				xsl.appendL(indent, "<ul id=\"" + this.getName() + "\">");
 			} else {

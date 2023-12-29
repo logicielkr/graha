@@ -508,22 +508,10 @@ public class Table extends SQLExecutor {
 				if(STR.vexistsIgnoreCase(col.getType(), "hidden", "select", "radio")) {
 				} else {
 					if(params.hasKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx))) {
-						LOG.out(col.getName());
-						LOG.out(params.getString(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx)));
 						cr.has = true;
-					} else {
-						LOG.out(col.getName());
-						LOG.out(params.getString(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx)));
-						LOG.out(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx).toString());
 					}
 					if(params.containsKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx))) {
-						LOG.out(col.getName());
-						LOG.out(params.getString(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx)));
 						cr.contains = true;
-					} else {
-						LOG.out(col.getName());
-						LOG.out(params.getString(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx)));
-						LOG.out(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx).toString());
 					}
 				}
 			}
@@ -563,7 +551,6 @@ public class Table extends SQLExecutor {
 		List<Tab> tabs
 	) throws NoSuchProviderException, SQLException {
 		if(STR.valid(this.column)) {
-			LOG.out(this.getName());
 			int sqlType = Table.SQL_TYPE_UPDATE;
 			boolean next = false;
 			Tab tab = Table.getTab(tabs, this.getName());
@@ -577,8 +564,6 @@ public class Table extends SQLExecutor {
 				if(tab != null) {
 					List<Col> cols = tab.getCol();
 					this.contains(cols, params, idx, cr);
-					LOG.out("contains = " + Boolean.toString(cr.contains));
-					LOG.out("has = " + Boolean.toString(cr.has));
 					List<Row> rows = tab.getRow();
 					if(STR.valid(rows)) {
 						for(int i = 0; i < rows.size(); i++) {
@@ -586,8 +571,6 @@ public class Table extends SQLExecutor {
 							if(row != null) {
 								cols = row.getCol();
 								this.contains(cols, params, idx, cr);
-								LOG.out("contains = " + Boolean.toString(cr.contains));
-								LOG.out("has = " + Boolean.toString(cr.has));
 							}
 						}
 					}
@@ -615,18 +598,12 @@ public class Table extends SQLExecutor {
 					if(STR.trueValue(c.getPrimary())) {
 						if(!params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, c.getValue() + "." + idx))) {
 							cr.hasPk = false;
-							LOG.out("hasPk = " + Boolean.toString(cr.hasPk));
 						}
 					}
 				}
 				if(!cr.hasPk && !cr.has) {
-					LOG.out("hasPk = " + Boolean.toString(cr.hasPk));
-					LOG.out("has = " + Boolean.toString(cr.has));
 					idx++;
 					continue;
-				} else {
-					LOG.out("hasPk = " + Boolean.toString(cr.hasPk));
-					LOG.out("has = " + Boolean.toString(cr.has));
 				}
 				if(cr.hasPk) {
 					if(cr.has) {
