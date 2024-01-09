@@ -308,9 +308,6 @@ public class Param {
 				}
 				result = params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today.dd"));
 			} else {
-				if(!STR.compareIgnoreCase(defaultValue, "%")) {
-					params.put(Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()), defaultValue);
-				}
 				result = defaultValue;
 			}
 			if(result != null && encryptor != null && STR.valid(this.getEncrypt()) && encryptor.containsKey(this.getEncrypt())) {
@@ -345,7 +342,13 @@ public class Param {
 					value = this.getDefault(params, encryptor);
 				}
 				if(value != null && STR.startsWithIgnoreCase(this.getValue(), "param.")) {
-					params.put(Record.key(Record.PREFIX_TYPE_PARAM, this.getValue().substring(6)), value);
+					if(value instanceof String) {
+						if(!STR.compareIgnoreCase((String)value, "%")) {
+							params.put(Record.key(Record.PREFIX_TYPE_PARAM, this.getValue().substring(6)), value);
+						}
+					} else {
+						params.put(Record.key(Record.PREFIX_TYPE_PARAM, this.getValue().substring(6)), value);
+					}
 				}
 			}
 			return new SQLParameter(value, this.getDataType());
