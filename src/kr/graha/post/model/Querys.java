@@ -120,6 +120,9 @@ public class Querys {
 		}
 	}
 	private void load(Node node) {
+		if(node == null) {
+			return;
+		}
 		if(STR.compareIgnoreCase(node.getNodeName(), "header")) {
 			if(!this.headerLoaded) {
 				this.setHeader(Header.load((Element)node, this.header));
@@ -165,7 +168,11 @@ public class Querys {
 			loadQuery(id);
 			index = this.exists(id);
 		}
-		return this.query.get(index);
+		if(index >= 0) {
+			return this.query.get(index);
+		} else {
+			return null;
+		}
 	}
 	private int exists(String id) {
 		if(this.query == null) {
@@ -200,6 +207,9 @@ public class Querys {
 			XPath xpath = factory.newXPath();
 			XPathExpression expr = xpath.compile(Query.nodePath(this) + "[@id = '" + id + "']");
 			Element element = (Element)expr.evaluate(this.doc, XPathConstants.NODE);
+			if(element == null) {
+				return;
+			}
 			this.load(element);
 		} catch (XPathExpressionException e) {
 			LOG.severe(e);

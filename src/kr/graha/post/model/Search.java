@@ -229,7 +229,7 @@ public class Search {
 			xsl.append(" name=\"" + this.getName() + "\" class=\"" + this.getName() + "\"");
 		}
 		if(STR.valid(this.getMethod())) {
-			method = " method=\"" + this.getMethod() + "\"";
+			xsl.append(" method=\"" + this.getMethod() + "\"");
 		}
 		xsl.appendL(">");
 		if(STR.valid(this.param)) {
