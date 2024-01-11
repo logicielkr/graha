@@ -308,6 +308,9 @@ public class Param {
 				}
 				result = params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today.dd"));
 			} else {
+//				if(!STR.compareIgnoreCase(defaultValue, "%")) {
+//					params.put(Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()), defaultValue);
+//				}
 				result = defaultValue;
 			}
 			if(result != null && encryptor != null && STR.valid(this.getEncrypt()) && encryptor.containsKey(this.getEncrypt())) {

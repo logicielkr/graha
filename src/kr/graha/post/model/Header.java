@@ -437,7 +437,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
@@ -458,7 +458,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
@@ -479,7 +479,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
@@ -689,7 +689,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
@@ -723,7 +723,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
@@ -757,7 +757,7 @@ public class Header {
 						}
 					}
 				} else {
-					LOG.warning("header is null, index = " + i);
+					LOG.config("header is null, index = " + i);
 				}
 			}
 		}
