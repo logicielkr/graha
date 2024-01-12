@@ -264,18 +264,18 @@ public class Querys {
 		String configFileName = pathInfo.substring(0, pathInfo.indexOf("/"));
 		int requestType = 0;
 		String queryId = null;
-		if(pathInfo.endsWith(".xml")) {
-			requestType = QueryImpl.REQUEST_TYPE_XML;
-		} else if(pathInfo.endsWith(".xsl")) {
-			requestType = QueryImpl.REQUEST_TYPE_XSL;
-		} else if(pathInfo.endsWith(".html")) {
-			requestType = QueryImpl.REQUEST_TYPE_HTML;
-		} else if(pathInfo.indexOf(".xml/download/") > 0) {
+		if(pathInfo.indexOf(".xml/download/") > 0) {
 			requestType = QueryImpl.REQUEST_TYPE_XML_DOWNLOAD;
 			queryId = pathInfo.substring(pathInfo.indexOf("/") + 1, pathInfo.indexOf(".xml/download/"));
 		} else if(pathInfo.indexOf(".html/download/") > 0) {
 			requestType = QueryImpl.REQUEST_TYPE_HTML_DOWNLOAD;
 			queryId = pathInfo.substring(pathInfo.indexOf("/") + 1, pathInfo.indexOf(".html/download/"));
+		} else if(pathInfo.endsWith(".xml")) {
+			requestType = QueryImpl.REQUEST_TYPE_XML;
+		} else if(pathInfo.endsWith(".xsl")) {
+			requestType = QueryImpl.REQUEST_TYPE_XSL;
+		} else if(pathInfo.endsWith(".html")) {
+			requestType = QueryImpl.REQUEST_TYPE_HTML;
 		} else {
 			LOG.info("[SC_NOT_FOUND]invalid path info, request.getPathInfo() = " + pathInfo);
 			return null;
