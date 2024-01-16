@@ -979,14 +979,16 @@ public class Table extends SQLExecutor {
 					sqlForWhere.append(1, "and ");
 					sqlForWhere.appendL(super.parseSQL(w.getSql(), params));
 					List<Param> param = w.getParam();
-					for(int x = 0; x < param.size(); x++) {
-						Param p = (Param)param.get(x);
-							SQLParameter parameter =  p.getValue(
-							params,
-							encryptor
-						);
-						if(parameter != null) {
-							parameters.add(parameter);
+					if(STR.valid(param)) {
+						for(int x = 0; x < param.size(); x++) {
+							Param p = (Param)param.get(x);
+								SQLParameter parameter =  p.getValue(
+								params,
+								encryptor
+							);
+							if(parameter != null) {
+								parameters.add(parameter);
+							}
 						}
 					}
 				}

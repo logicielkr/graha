@@ -232,7 +232,8 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					return true;
 				} else {
 					for(int i = 0; i < msgs.size(); i++) {
-						params.puts(Record.key(Record.PREFIX_TYPE_ERROR, "error"), msgs.get(i));
+						String msg = (String)msgs.get(i);
+						params.puts(Record.key(Record.PREFIX_TYPE_ERROR, "error"), msg);
 					}
 					msgs.clear();
 					msgs = null;
@@ -626,6 +627,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				}
 			} else {
 				document = this.getDocument(request);
+				this.executeMessage(document, params);
 				this.setXslNameAndParam(document, params, queryFuncType);
 				document.add(params);
 				if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {

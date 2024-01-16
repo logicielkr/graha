@@ -60,6 +60,16 @@ public class Auth extends SQLExecutor {
 	private String check = null;
 	private Node sql = null;
 	private List<Param> param = null;
+	private String encrypt = null;
+	private List<Encrypt> encrypts = null;
+	
+	private String getEncrypt() {
+		return this.encrypt;
+	}
+	protected void setEncrypt(String encrypt) {
+		this.encrypt = encrypt;
+	}
+	
 	private String getCheck() {
 		return this.check;
 	}
@@ -77,6 +87,12 @@ public class Auth extends SQLExecutor {
 			this.param = new ArrayList<Param>();
 		}
 		this.param.add(param);
+	}
+	protected void add(Encrypt encrypt) {
+		if(this.encrypts == null) {
+			this.encrypts = new ArrayList<Encrypt>();
+		}
+		this.encrypts.add(encrypt);
 	}
 	protected static String nodeName() {
 		return Auth.nodeName;
@@ -106,6 +122,8 @@ public class Auth extends SQLExecutor {
 			this.setSql(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
+			this.add(Encrypt.load(node));
 		} else {
 			LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 		}
@@ -120,6 +138,10 @@ public class Auth extends SQLExecutor {
 						if(STR.compareIgnoreCase(node.getNodeName(), "sql")) {
 							this.load(node, null);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "params")) {
+							this.loads(node, null);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
+							this.load(node, null);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypts")) {
 							this.loads(node, null);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
@@ -141,7 +163,9 @@ public class Auth extends SQLExecutor {
 						STR.valid(node.getNodeName()) &&
 						STR.valid(node.getNodeValue())
 					) {
-						if(STR.compareIgnoreCase(node.getNodeName(), "check")) {
+						if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
+							this.setEncrypt(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "check")) {
 							this.setCheck(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
@@ -156,7 +180,13 @@ public class Auth extends SQLExecutor {
 	}
 	protected void element(XmlElement element) {
 		element.setAttribute("check", this.getCheck());
+		element.setAttribute("encrypt", this.getEncrypt());
 		element.appendChild(this.getSql());
+		if(this.encrypts != null && this.encrypts.size() > 0) {
+			for(int i = 0; i < this.encrypts.size(); i++) {
+				element.appendChild(((Encrypt)this.encrypts.get(i)).element());
+			}
+		}
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
@@ -191,7 +221,7 @@ public class Auth extends SQLExecutor {
 			}
 			super.setConnectionFactory(connectionFactory);
 			Buffer sql = super.parseSQL(this.sql, params);
-			Map<String, Encryptor> encryptor = null;
+			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			Record record = new Record();

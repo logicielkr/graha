@@ -104,7 +104,9 @@ public class ValidationCommand extends Auth {
 						STR.valid(node.getNodeName()) &&
 						STR.valid(node.getNodeValue())
 					) {
-						if(STR.compareIgnoreCase(node.getNodeName(), "check")) {
+						if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
+							super.setEncrypt(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "check")) {
 							super.setCheck(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "name")) {
 							this.setName(node.getNodeValue());

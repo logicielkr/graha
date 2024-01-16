@@ -173,14 +173,14 @@ public class Validation {
 		}
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {
-				Object p = this.param.get(i);
-				if(p instanceof ValidationCommand) {
-					ValidationCommand v = (ValidationCommand)p;
-					v.validate(params, connectionFactory, msgs);
-				} else if(p instanceof ValidationParam) {
-					ValidationParam v = (ValidationParam)p;
-					v.validate(params, msgs);
-				}
+				ValidationParam v = (ValidationParam)this.param.get(i);
+				v.validate(params, msgs);
+			}
+		}
+		if(STR.valid(this.command)) {
+			for(int i = 0; i < this.command.size(); i++) {
+				ValidationCommand v = (ValidationCommand)this.command.get(i);
+				v.validate(params, connectionFactory, msgs);
 			}
 		}
 	}
