@@ -236,7 +236,12 @@ public class QueryXSLImpl extends QueryImpl {
 		xsl.appendL(indent + 1, "position: absolute;");
 		xsl.appendL(indent + 1, "top: 50%;");
 		xsl.appendL(indent + 1, "transform: translateY(-50%);");
-		xsl.appendL(indent + 1, "width:100%;");
+		xsl.appendL(indent + 1, "width:550px;");
+		xsl.appendL(indent + 1, "left:50%;");
+		xsl.appendL(indent + 1, "margin-left:-275px;");
+		xsl.appendL(indent, "}");
+		xsl.appendL(indent, "div ul {");
+		xsl.appendL(indent + 1, "text-align:left;");
 		xsl.appendL(indent, "}");
 		xsl.appendL(indent, "</style>");
 		xsl.appendL(indent, "</head>");
@@ -246,10 +251,10 @@ public class QueryXSLImpl extends QueryImpl {
 		xsl.appendL(indent + 2, "<xsl:for-each select=\"" + kr.graha.post.xml.GParam.childNodePath("error", "error", rdf) + "\">");
 		xsl.appendL(indent + 3, "<li><xsl:value-of select=\".\" /></li>");
 		xsl.appendL(indent + 2, "</xsl:for-each>");
-		xsl.appendL(indent + 2, "<li>이 메시지를 보고 있다면, 이전 화면의 Javascript 실행 과정에서 에러가 발생했거나 웹브라우저에서 Javascript를 사용하지 않도록 설정한 것입니다.</li>");
-		xsl.appendL(indent + 2, "<li>만약 웹브라우저에서 Javascript를 사용하지 않도록 설정했다면, 웹브라우저의 뒤로가기 기능을 이용하여 이전화면으로 돌아갑니다.</li>");
+//		xsl.appendL(indent + 2, "<li>이 메시지를 보고 있다면, 이전 화면의 Javascript 실행 과정에서 에러가 발생했거나 웹브라우저에서 Javascript를 사용하지 않도록 설정한 것입니다.</li>");
+//		xsl.appendL(indent + 2, "<li>만약 웹브라우저에서 Javascript를 사용하지 않도록 설정했다면, 웹브라우저의 뒤로가기 기능을 이용하여 이전화면으로 돌아갑니다.</li>");
 		xsl.appendL(indent + 1, "</ul>");
-		xsl.appendL(indent + 1, "<input type=\"button\" value=\"돌아가기\" onclick=\"back()\" />");
+		xsl.appendL(indent + 1, "<input type=\"button\" value=\"Go back one page\" onclick=\"back()\" />");
 		xsl.appendL(indent, "</div>");
 		xsl.appendL(indent, "</body>");
 		xsl.appendL(indent, "</html>");
