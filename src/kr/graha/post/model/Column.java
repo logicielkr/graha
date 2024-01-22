@@ -159,7 +159,7 @@ public class Column extends Param {
 				if(node.getNodeType() == Node.ATTRIBUTE_NODE) {
 					if(
 						STR.valid(node.getNodeName()) &&
-						STR.valid(node.getNodeValue())
+						node.getNodeValue() != null
 					) {
 						if(STR.compareIgnoreCase(node.getNodeName(), "name")) {
 							this.setName(node.getNodeValue());
@@ -172,7 +172,11 @@ public class Column extends Param {
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "datatype")) {
 							this.setDatatype(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "default")) {
-							this.setDefaultValue(node.getNodeValue());
+							if(node.getNodeValue() == null) {
+								this.setDefaultValue("");
+							} else {
+								this.setDefaultValue(node.getNodeValue());
+							}
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "pattern")) {
 							this.setPattern(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
@@ -281,8 +285,9 @@ public class Column extends Param {
 			}
 		}
 		if(
-			STR.valid(this.getDefaultValue()) &&
-			!STR.compareIgnoreCase(this.getDefaultValue(), "null")
+			this.getDefaultValue() != null &&
+			!STR.compareIgnoreCase(this.getDefaultValue(), "null") &&
+			!STR.compareIgnoreCase(this.getDefaultValue(), "nil")
 		) {
 			if(STR.startsWithIgnoreCase(this.getDefaultValue(), "prop.")) {
 				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_PROP, this.getDefaultValue().substring(5)), encryptor);

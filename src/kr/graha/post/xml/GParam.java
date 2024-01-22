@@ -38,6 +38,8 @@ public class GParam {
 	protected static int PARAM_TYPE_RESULTS = 3;
 	protected static int PARAM_TYPE_ERRORS = 4;
 	
+	protected static int PARAM_TYPE_ENCODED_PARAMS = 5;
+	
 	private Key key;
 	private String value;
 	public GParam(Key key) {
@@ -59,12 +61,27 @@ public class GParam {
 	public void setKey(Key key) {
 		this.key = key;
 	}
-	public void toXML(Buffer xml, boolean rdf) {
+	public void toXML(Buffer xml, boolean encode, boolean rdf) {
 		if(rdf) {
-			xml.appendL(2, "<uc:" + this.getKey().getKey() + "><![CDATA[" + this.getValue() + "]]></uc:" + this.getKey().getKey() + ">");
+			xml.append(2, "<uc:" + this.getKey().getKey() + "><![CDATA[");
+			if(encode && this.getValue() != null) {
+				xml.append(this.getValue().replaceAll("%", "%25"));
+			} else {
+				xml.append(this.getValue());
+			}
+			xml.appendL("]]></uc:" + this.getKey().getKey() + ">");
 		} else {
-			xml.appendL(2, "<" + this.getKey().getKey() + "><![CDATA[" + this.getValue() + "]]></" + this.getKey().getKey() + ">");
+			xml.append(2, "<" + this.getKey().getKey() + "><![CDATA[");
+			if(encode && this.getValue() != null) {
+				xml.append(this.getValue().replaceAll("%", "%25"));
+			} else {
+				xml.append(this.getValue());
+			}
+			xml.appendL("]]></" + this.getKey().getKey() + ">");
 		}
+	}
+	public void toXML(Buffer xml, boolean rdf) {
+		this.toXML(xml, false, rdf);
 	}
 	public void toXMLForFileParam(Buffer xml, boolean rdf) {
 		if(rdf) {
@@ -81,9 +98,19 @@ public class GParam {
 	}
 	public static String childNodePath(String paramPrefix, String childNodeName, boolean rdf) {
 		if(rdf) {
-			return "/RDF:RDF/RDF:Description/uc:" + paramPrefix + "s/uc:" + childNodeName;
+			if(STR.compareIgnoreCase(paramPrefix, "linkparam")) {
+				return "/RDF:RDF/RDF:Description[@uc:for='urn:root:params:link']/uc:params/uc:" + childNodeName;
+			} else {
+				return "/RDF:RDF/RDF:Description[@uc:for='urn:root:" + paramPrefix + "s']/uc:" + paramPrefix + "s/uc:" + childNodeName;
+			}
 		} else {
-			return "/document/" + paramPrefix + "s/" + childNodeName;
+			if(STR.compareIgnoreCase(paramPrefix, "linkparam")) {
+				return "/document/params[@for='link']/" + childNodeName;
+			} else if(STR.compareIgnoreCase(paramPrefix, "param")) {
+				return "/document/params[@for='data']/" + childNodeName;
+			} else {
+				return "/document/" + paramPrefix + "s/" + childNodeName;
+			}
 		}
 	}
 	public static String nodePathForFileParam(String fileName, boolean rdf) {

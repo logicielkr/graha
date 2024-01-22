@@ -237,6 +237,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					}
 					msgs.clear();
 					msgs = null;
+					super.clear();
 					return false;
 				}
 			} catch (NoSuchProviderException | SQLException e) {

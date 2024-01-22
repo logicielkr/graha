@@ -136,11 +136,14 @@ public class LinkParam {
 						expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
 					}
 					paramList.add(expr);
-				} else if(STR.vexistsIgnoreCase(param.getType(), "param", "prop", "result")) {
+				} else if(STR.compareIgnoreCase(param.getType(), "param")) {
+					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", param.getValue(), rdf);
+					paramList.add(expr);
+				} else if(STR.vexistsIgnoreCase(param.getType(), "prop", "result")) {
 					expr = kr.graha.post.xml.GParam.childNodePath(param.getType(), param.getValue(), rdf);
 					paramList.add(expr);
 				} else if(!STR.valid(param.getType())) {
-					expr = kr.graha.post.xml.GParam.childNodePath("param", param.getValue(), rdf);
+					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", param.getValue(), rdf);
 					paramList.add(expr);
 				} else if(STR.vexistsIgnoreCase(param.getType(), "default", "const")) {
 				}

@@ -258,6 +258,8 @@ public class GDocument {
 		String tag = null;
 		if(type == GParam.PARAM_TYPE_PARAMS) {
 			tag = "params";
+		} else if(type == GParam.PARAM_TYPE_ENCODED_PARAMS) {
+			tag = "params";
 		} else if(type == GParam.PARAM_TYPE_PROPS) {
 			tag = "props";
 		} else if(type == GParam.PARAM_TYPE_RESULTS) {
@@ -266,17 +268,27 @@ public class GDocument {
 			tag = "errors";
 		}
 		if(rdf) {
-			xml.appendL(1, "<RDF:Description uc:for=\"urn:root:" + tag + "\"><uc:" + tag + ">");
+			if(type == GParam.PARAM_TYPE_ENCODED_PARAMS) {
+				xml.appendL(1, "<RDF:Description uc:for=\"urn:root:" + tag + ":link\"><uc:" + tag + ">");
+			} else {
+				xml.appendL(1, "<RDF:Description uc:for=\"urn:root:" + tag + "\"><uc:" + tag + ">");
+			}
 		} else {
 			if(type == GParam.PARAM_TYPE_PARAMS || type == GParam.PARAM_TYPE_ERRORS) {
 				xml.appendL(1, "<" + tag + " for=\"data\">");
+			} else if(type == GParam.PARAM_TYPE_ENCODED_PARAMS) {
+				xml.appendL(1, "<" + tag + " for=\"link\">");
 			} else {
 				xml.appendL(1, "<" + tag + ">");
 			}
 		}
 		for(int i = 0; i < params.size(); i++) {
 			GParam param = (GParam)params.get(i);
-			param.toXML(xml, rdf);
+			if(type == GParam.PARAM_TYPE_ENCODED_PARAMS) {
+				param.toXML(xml, true, rdf);
+			} else {
+				param.toXML(xml, rdf);
+			}
 		}
 		if(rdf) {
 			xml.appendL(1, "</uc:" + tag + "></RDF:Description>");
@@ -313,7 +325,8 @@ public class GDocument {
 			}
 		}
 		if(this.params != null && this.params.size() > 0) {
-			paramToXML(xml, params, GParam.PARAM_TYPE_PARAMS, rdf); 
+			paramToXML(xml, params, GParam.PARAM_TYPE_PARAMS, rdf);
+			paramToXML(xml, params, GParam.PARAM_TYPE_ENCODED_PARAMS, rdf);
 		}
 		if(this.props != null && this.props.size() > 0) {
 			paramToXML(xml, props, GParam.PARAM_TYPE_PROPS, rdf); 

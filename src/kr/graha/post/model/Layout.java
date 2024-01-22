@@ -570,8 +570,10 @@ public class Layout {
 		xsl.appendL("</li>");
 		xsl.appendL(indent + 3, "</xsl:when>");
 		xsl.appendL(indent + 3, "<xsl:otherwise>");
-		xsl.append(indent + 4, "<li class=\"page\">");
-		xsl.append("<a href=\"?page={" + kr.graha.post.xml.GPages.childNodeName("no", rdf) + "}");
+		xsl.appendL(indent + 4, "<li class=\"page\">");
+		xsl.appendL(indent + 5, "<a>");
+		xsl.append(indent + 6, "<xsl:attribute name=\"href\">?page=");
+		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("no", rdf) + "\" />");
 		if(param != null && !param.isEmpty()) {
 			Iterator<Key> it = param.keySet().iterator();
 			while(it.hasNext()) {
@@ -580,12 +582,14 @@ public class Layout {
 					key.getPrefix() == Record.PREFIX_TYPE_PARAM &&
 					!key.equals(Record.key(Record.PREFIX_TYPE_PARAM, "page"))
 				) {
-					xsl.append("&amp;" + key.getKey() + "={" + kr.graha.post.xml.GParam.childNodePath("param", key.getKey(), rdf) + "}");
+					xsl.append("&amp;" + key.getKey() + "=<xsl:value-of select=\"" + kr.graha.post.xml.GParam.childNodePath("linkparam", key.getKey(), rdf) + "\" />");
 				}
 			}
 		}
-		xsl.append("\" style=\"text-decoration:none;\"><xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("text", rdf)+ "\" /></a>");
-		xsl.appendL("</li>");
+		xsl.appendL("</xsl:attribute>");
+		xsl.appendL(indent + 6, "<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("text", rdf) + "\" />");
+		xsl.appendL(indent + 5, "</a>");
+		xsl.appendL(indent + 4, "</li>");
 		xsl.appendL(indent + 3, "</xsl:otherwise>");
 		xsl.appendL(indent + 2, "</xsl:choose>");
 		xsl.appendL(indent + 1, "</xsl:for-each>");

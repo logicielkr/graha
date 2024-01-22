@@ -74,7 +74,8 @@ public class XmlAttr {
 				if(this.values[i] instanceof XmlElement) {
 					return true;
 				} else if(this.values[i] instanceof String) {
-					if(STR.valid((String)this.values[i])) {
+					if(this.values[i] != null) {
+//					if(STR.valid((String)this.values[i])) {
 						return true;
 					}
 				}

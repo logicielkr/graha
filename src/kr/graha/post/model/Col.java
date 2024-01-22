@@ -354,7 +354,7 @@ public class Col {
 				if(node.getNodeType() == Node.ATTRIBUTE_NODE) {
 					if(
 						STR.valid(node.getNodeName()) &&
-						STR.valid(node.getNodeValue())
+						node.getNodeValue() != null
 					) {
 						if(STR.compareIgnoreCase(node.getNodeName(), "label")) {
 							this.setLabel(node.getNodeValue());

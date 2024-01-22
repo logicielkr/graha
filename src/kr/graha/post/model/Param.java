@@ -152,7 +152,7 @@ public class Param {
 				if(node.getNodeType() == Node.ATTRIBUTE_NODE) {
 					if(
 						STR.valid(node.getNodeName()) &&
-						STR.valid(node.getNodeValue())
+						node.getNodeValue() != null
 					) {
 						if(STR.compareIgnoreCase(node.getNodeName(), "name")) {
 							this.setName(node.getNodeValue());
@@ -330,8 +330,9 @@ public class Param {
 			if(STR.valid(this.getValue()) && params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()))) {
 				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()), encryptor);
 			} else if(
-				STR.valid(this.getDefaultValue()) &&
-				!STR.compareIgnoreCase(this.getDefaultValue(), "null")
+				this.getDefaultValue() != null &&
+				!STR.compareIgnoreCase(this.getDefaultValue(), "null") &&
+				!STR.compareIgnoreCase(this.getDefaultValue(), "nil")
 			) {
 				if(STR.startsWithIgnoreCase(this.getDefaultValue(), "prop.")) {
 					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_PROP, this.getDefaultValue().substring(5)), encryptor);
@@ -343,6 +344,7 @@ public class Param {
 					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_QUERY, this.getDefaultValue().substring(6)), encryptor);
 				} else {
 					value = this.getDefault(params, encryptor);
+					LOG.out("this.getDefault(params, encryptor) : " + value);
 				}
 				if(value != null && STR.startsWithIgnoreCase(this.getValue(), "param.")) {
 					if(value instanceof String) {
@@ -354,6 +356,8 @@ public class Param {
 					}
 				}
 			}
+			LOG.out(this.getValue());
+			LOG.out(this.getDefaultValue());
 			return new SQLParameter(value, this.getDataType());
 		}
 		return null;
