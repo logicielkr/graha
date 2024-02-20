@@ -460,7 +460,16 @@ public class File {
 	protected void list(GDocument document, Record params) throws IOException {
 		if(STR.valid(this.getPath())) {
 			Record result = new Record();
-			TextParser.parse(this.getPath(), params, result);
+//			TextParser.parse(this.getPath(), params, result);
+			if(
+				params.hasKey(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) &&
+				params.getInt(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) > 0
+			) {
+				TextParser.parse(this.getPath(), params, result);
+				LOG.finest(this.getPath(), result.getString(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "filepath")));
+			} else {
+				result = null;
+			}
 			GFile gfile = GFile.load(this.getName(), result, params);
 			if(STR.valid(this.getTotal()) && Integer.parseInt(this.getTotal()) > 0) {
 				gfile.setTotal(Integer.parseInt(this.getTotal()));

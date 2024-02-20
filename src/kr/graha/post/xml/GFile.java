@@ -141,6 +141,8 @@ public class GFile {
 							for(Path path : stream) {
 								if(Files.isRegularFile(path)) {
 									file.add(path);
+								} else {
+									LOG.warning(path.toString());
 								}
 							}
 							stream.close();

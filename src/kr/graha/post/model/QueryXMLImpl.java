@@ -528,7 +528,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
 			totalFetchCount += this.executeTable(document, params, queryFuncType);
 			this.executeFile(document, fields, params, queryFuncType);
-			if(empty(params, queryFuncType)) {
+			if(this.empty(params, queryFuncType)) {
 				super.clear();
 				return null;
 			}
