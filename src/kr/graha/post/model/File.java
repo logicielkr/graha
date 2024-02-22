@@ -373,6 +373,22 @@ public class File {
 		}
 		return null;
 	}
+/**
+ * 유일한 파일이름을 URI로 가져온다.
+ *
+ * basePath 에 fileName 과 동일한 파일이 있는 경우,
+ * 확장자가 있는 경우 확장자 앞에 확장자가 없는 경우 파일이름의 끝에 "-일련번호" 를 붙인다.
+ *
+ * 확장자는 fileName 에서 "." 이 있는 경우, 마지막 "." 뒷부분을 확장자로 한다.
+ * 확장자가 유효한지 여부를 따지지 않고, 파일이름에서 마지막 "." 뒷부분을 확장자로 취급된다.
+ * 또한 ".tar.gz" 혹은 ".tar.bz2" 와 같은 경우에도 "gz", "bz2" 가 확장자가 된다(이 부분은 향후에 개선할 의향이 있고, 만약 그렇게 된다면, kr.graha.helper 아래에 위치하게 될 가능성이 크다).
+ *
+ * 이 메소드는 kr.graha.sample.webmua.ForwardMailProcessorImpl 을 그대로 복사되었다.
+ *
+ * @param basePath 디렉토리 경로
+ * @param fileName 파일이름
+ * @return 디렉토리 경로(basePath) 에서 중복되지 않은 파일이름(fileName)
+ */
 	private URI getUniqueFileURI(String basePath, String fileName) throws UnsupportedEncodingException, URISyntaxException {
 		URI uri = null;
 		int index = 0;
