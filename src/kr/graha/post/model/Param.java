@@ -285,7 +285,7 @@ public class Param {
 					int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
 					params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.yyyy"), Integer.toString(year));
 				}
-				result = params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today.yyyy"));
+				result = params.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.yyyy"));
 			} else if(STR.compareIgnoreCase(this.getDefaultValue(), "system.today.mm")) {
 				if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.mm"))) {
 					int month = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH);
@@ -296,7 +296,7 @@ public class Param {
 						params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.mm"), "0" + Integer.toString(month));
 					}
 				}
-				result = params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today.mm"));
+				result = params.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.mm"));
 			} else if(STR.compareIgnoreCase(this.getDefaultValue(), "system.today.dd")) {
 				if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.dd"))) {
 					int day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH);
@@ -306,7 +306,7 @@ public class Param {
 						params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.dd"), "0" + Integer.toString(day));
 					}
 				}
-				result = params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today.dd"));
+				result = params.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.dd"));
 			} else {
 //				if(!STR.compareIgnoreCase(defaultValue, "%")) {
 //					params.put(Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()), defaultValue);
