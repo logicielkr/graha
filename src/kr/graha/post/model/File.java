@@ -279,7 +279,7 @@ public class File {
 				return;
 			}
 			if(path != null && Files.exists(path)) {
-				LOG.config("File Path = " + path.toString());
+				LOG.config("File Path = " + path.toUri().getPath());
 				response.setContentLength((int)Files.size(path));
 				response.setDateHeader("Last-Modified", Files.getLastModifiedTime(path).toMillis());
 				response.setHeader("Accept-Ranges", "bytes");
@@ -383,7 +383,7 @@ public class File {
  * 확장자가 유효한지 여부를 따지지 않고, 파일이름에서 마지막 "." 뒷부분을 확장자로 취급된다.
  * 또한 ".tar.gz" 혹은 ".tar.bz2" 와 같은 경우에도 "gz", "bz2" 가 확장자가 된다(이 부분은 향후에 개선할 의향이 있고, 만약 그렇게 된다면, kr.graha.helper 아래에 위치하게 될 가능성이 크다).
  *
- * 이 메소드는 kr.graha.sample.webmua.ForwardMailProcessorImpl 을 그대로 복사되었다.
+ * 이 메소드는 kr.graha.sample.webmua.ForwardMailProcessorImpl 에 그대로 복사되었다.
  *
  * @param basePath 디렉토리 경로
  * @param fileName 파일이름

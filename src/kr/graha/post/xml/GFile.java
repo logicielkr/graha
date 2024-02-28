@@ -109,8 +109,20 @@ public class GFile {
 		this.append = append;
 	}
 	private String escapeFileName(URI uri) {
-		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
+//		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
+		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
 	}
+/**
+ * URI 객체로부터 파일이름만 가져온다.
+ * URLDecoder.decode 를 이용해서 UTF-8 로 디코딩해서 가져온다.
+ * 파일이름에 "+" 가 있는 경우 "%2B" 로 변경해서 가져온다.
+ *
+ * 이 메소드는 다음과 같은 곳으로 복제되었다.
+ * kr/graha/sample/webmua/ForwardMailProcessorImpl.java
+ *
+ * @param uri URI 객체(Path.toURI() 메소드의 결과)
+ * @return 파일이름
+ */
 	private String decodeFileName(URI uri) {
 		try {
 			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/") + 1).replace("+", "%2B"), "UTF-8");
