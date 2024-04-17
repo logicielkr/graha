@@ -338,6 +338,8 @@ public class File {
 			Path path = this.getPath(basePath, fileName);
 			if(path != null && Files.exists(path)) {
 				Files.delete(path);
+			} else {
+				LOG.finer(path.toString());
 			}
 		}
 	}
@@ -361,7 +363,7 @@ public class File {
 				if(fileName == null) {
 					path = Paths.get(new URI("file://" + basePath));
 				} else {
-					path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8")));
+					path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
 				}
 			} catch (URISyntaxException e) {
 				LOG.severe(e);

@@ -114,8 +114,6 @@ public class GFile {
 	}
 /**
  * URI 객체로부터 파일이름만 가져온다.
- * URLDecoder.decode 를 이용해서 UTF-8 로 디코딩해서 가져온다.
- * 파일이름에 "+" 가 있는 경우 "%2B" 로 변경해서 가져온다.
  *
  * 이 메소드는 다음과 같은 곳으로 복제되었다.
  * kr/graha/sample/webmua/ForwardMailProcessorImpl.java
@@ -124,12 +122,15 @@ public class GFile {
  * @return 파일이름
  */
 	private String decodeFileName(URI uri) {
+		return uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1);
+		/*
 		try {
-			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/") + 1).replace("+", "%2B"), "UTF-8");
+//			return URLDecoder.decode(uri.toString().substring(uri.toString().lastIndexOf("/") + 1).replace("+", "%2B"), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return uri.toString().substring(uri.toString().lastIndexOf("/")+1);
 		}
+		*/
 	}
 	public static GFile load(String name, Record result, Record params) throws IOException {
 		return GFile.load(name, result, params, 0, 0);
