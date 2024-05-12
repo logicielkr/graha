@@ -149,6 +149,8 @@ public class Style {
 		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
 			if(!AuthUtility.auth(authInfo, param)) {
 				return null;
+			} else {
+				authInfo = null;
 			}
 		}
 		Buffer xsl = new Buffer();

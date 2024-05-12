@@ -297,7 +297,8 @@ public class Querys {
 			"query id = " + queryId,
 			"Context Root Path = " + request.getServletContext().getRealPath("/")
 		);
-		File config = new File(request.getServletContext().getRealPath("/WEB-INF/graha/" + configFileName + ".xml"));
+//		File config = new File(request.getServletContext().getRealPath("/WEB-INF/graha/" + configFileName + ".xml"));
+		File config = new File(request.getServletContext().getRealPath("/WEB-INF") + "/graha/" + configFileName + ".xml");
 		if(!config.exists()) {
 			LOG.info("[SC_NOT_FOUND]config file is not exists, config file = " + config.getPath());
 			return null;
@@ -313,7 +314,9 @@ public class Querys {
 			return null;
 		}
 		query.setRequestType(requestType);
-		params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name"), File.separator + configFileName + File.separator);
+		params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name"), configFileName);
+		params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.query.id"), queryId);
+//		params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name"), File.separator + configFileName + File.separator);
 		return query;
 	}
 	public void loadFile(File file) throws SAXException, IOException, ParserConfigurationException {

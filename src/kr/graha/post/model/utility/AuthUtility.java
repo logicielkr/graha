@@ -23,6 +23,7 @@ package kr.graha.post.model.utility;
 
 import kr.graha.post.lib.Record;
 import kr.graha.post.lib.ParsingException;
+import kr.graha.helper.LOG;
 
 /**
  * Graha(그라하) 인증 관련 유틸리티 모음
@@ -124,34 +125,54 @@ public final class AuthUtility {
 	}
 	public static boolean auth(AuthInfo info, Record param) {
 		if(info == null) {
+//			LOG.debug("info is null");
 			return true;
 		}
 		if(info.op == AuthUtility.IsEmpty) {
+//			LOG.debug(Boolean.toString(AuthUtility.isEmpty(info.left, param)));
 			return AuthUtility.isEmpty(info.left, param);
 		} else if(info.op == AuthUtility.IsNotEmpty) {
+//			LOG.debug(Boolean.toString(!AuthUtility.isEmpty(info.left, param)));
 			return !AuthUtility.isEmpty(info.left, param);
 		} else {
 			if(info.right == null) {
+//				LOG.debug("info.right is null");
 				return false;
 			}
 			if(info.op == AuthUtility.In) {
+//				LOG.debug(Boolean.toString(AuthUtility.in(info.left, info.right, param)));
 				return AuthUtility.in(info.left, info.right, param);
 			} else if(info.op == AuthUtility.NotIn) {
+//				LOG.debug(Boolean.toString(!AuthUtility.in(info.left, info.right, param)));
 				return !AuthUtility.in(info.left, info.right, param);
 			} else if(info.op == AuthUtility.Equals) {
+/*
+				LOG.debug(
+					info.left,
+					param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left)),
+					info.right,
+					Boolean.toString(AuthUtility.equals(info.left, info.right, param))
+				);
+*/
 				return AuthUtility.equals(info.left, info.right, param);
 			} else if(info.op == AuthUtility.NotEquals) {
+//				LOG.debug(Boolean.toString(!AuthUtility.equals(info.left, info.right, param)));
 				return !AuthUtility.equals(info.left, info.right, param);
 			} else if(info.op == AuthUtility.GreaterThan) {
+//				LOG.debug(Boolean.toString(AuthUtility.gt(info.left, info.right, param)));
 				return AuthUtility.gt(info.left, info.right, param);
 			} else if(info.op == AuthUtility.GreaterThanOrEqualTo) {
+//				LOG.debug(Boolean.toString(AuthUtility.gteq(info.left, info.right, param)));
 				return AuthUtility.gteq(info.left, info.right, param);
 			} else if(info.op == AuthUtility.LessThan) {
+//				LOG.debug(Boolean.toString(AuthUtility.lt(info.left, info.right, param)));
 				return AuthUtility.lt(info.left, info.right, param);
 			} else if(info.op == AuthUtility.LessThanOrEqualTo) {
+//				LOG.debug(Boolean.toString(AuthUtility.lteq(info.left, info.right, param)));
 				return AuthUtility.lteq(info.left, info.right, param);
 			}
 		}
+//		LOG.debug("unknown");
 		return true;
 	}
 	private static boolean equals(String left, String right, Record param) {
@@ -175,16 +196,31 @@ public final class AuthUtility {
 	private static boolean lteq(String left, String right, Record param) {
 		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThanOrEqualTo);
 	}
+/*
+	public static void debug(AuthInfo info) {
+		if(info != null) {
+			LOG.debug(
+				info.left,
+				Integer.toString(info.op),
+				info.right
+			);
+		}
+	}
+*/
 	public static boolean testInServer(AuthInfo info, Record params) {
 		if(info == null) {
+//			LOG.debug("info is null");
 			return false;
 		} else if(info.left == null) {
+//			LOG.debug("left is null");
 			return false;
 		} else {
 			if(params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left))) {
+//				LOG.debug(info.left + " exists");
 				return true;
 			}
 		}
+//		LOG.debug(info.left + " empty");
 		return false;
 	}
 	public static String testExpr(AuthInfo info, Record params, boolean rdf) {

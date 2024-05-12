@@ -130,7 +130,7 @@ public class Param {
 	public String getCond() {            
 		return this.cond;
 	}
-	private void setCond(String cond) {
+	protected void setCond(String cond) {
 		this.cond = cond;
 	}
 	protected static String nodeName() {
@@ -307,6 +307,10 @@ public class Param {
 					}
 				}
 				result = params.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "today.dd"));
+			} else if(STR.compareIgnoreCase(this.getDefaultValue(), "system.uuid")) {
+				return java.util.UUID.randomUUID().toString();
+			} else if(STR.compareIgnoreCase(this.getDefaultValue(), "system.uuid2")) {
+				return java.util.UUID.randomUUID().toString().replaceAll("-", "");
 			} else {
 //				if(!STR.compareIgnoreCase(defaultValue, "%")) {
 //					params.put(Record.key(Record.PREFIX_TYPE_UNKNOWN, this.getValue()), defaultValue);

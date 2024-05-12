@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Properties;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.io.InputStreamReader;
@@ -216,6 +217,17 @@ public final class XMLConfigGenerator {
 	}
 	private String getAuthenticationColumnName(Table table) {
 		return this.getAuthenticationColumnName(table.schema, table.name);
+	}
+	private Column getAuthenticationColumn(Table table) {
+		String columnName = this.getAuthenticationColumnName(table);
+		if(columnName != null && table != null && table.cols != null) {
+			for(Column column: table.cols) {
+				if(column != null && column.name != null && STR.compareIgnoreCase(columnName, column.name)) {
+					return column;
+				}
+			}
+		}
+		return null;
 	}
 	private boolean view(String type, Table table, String columnName) {
 		return this.view(type, table.schema, table.name, columnName);
@@ -948,10 +960,11 @@ public final class XMLConfigGenerator {
 					this.codeColumn(masterTable, col.name) == null
 				) {
 					if(index == 0) {
-						searchBuffer.append("<tile cond=\"${param.search} isNotEmpty\">\n");
 						if(!this.authentication() && searchBuffer.length() == 0) {
+							searchBuffer.append("<tile cond=\"${param.search} isNotEmpty\">\n");
 							searchBuffer.append("					where (");
 						} else {
+							searchBuffer.append("<tile cond=\"${param.search} isNotEmpty\">\n");
 							searchBuffer.append("						and (");
 						}
 					} else {
@@ -1005,7 +1018,9 @@ public final class XMLConfigGenerator {
 			bw.write("				<params>\n");
 		}
 		if(this.authentication()) {
-			bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+			Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+			bw.write("					<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//			bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 		}
 		if(this.search()) {
 			for(Column col : masterTable.cols) {
@@ -1226,7 +1241,9 @@ public final class XMLConfigGenerator {
 			bw.write("						" + this.getAuthenticationColumnName(masterTable) + " = ?\n");
 			bw.write("					</sql>\n");
 			bw.write("					<params>\n");
-			bw.write("						<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+			Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+			bw.write("						<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//			bw.write("						<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 			bw.write("					</params>\n");
 			bw.write("				</where>\n");
 		}
@@ -1262,7 +1279,9 @@ public final class XMLConfigGenerator {
 				bw.write("						" + this.getAuthenticationColumnName(tab2) + " = ?\n");
 				bw.write("					</sql>\n");
 				bw.write("					<params>\n");
-				bw.write("						<param name=\"" + this.getAuthenticationColumnName(tab2) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+				Column authenticationColumn = this.getAuthenticationColumn(tab2);
+				bw.write("						<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//				bw.write("						<param name=\"" + this.getAuthenticationColumnName(tab2) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 				bw.write("					</params>\n");
 				bw.write("				</where>\n");
 			}
@@ -1301,7 +1320,9 @@ public final class XMLConfigGenerator {
 				}
 				bw.write("</sql>\n");
 				bw.write("				<params>\n");
-				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+				Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+				bw.write("					<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 				for(Column col : masterTable.cols) {
 					if(col.isPk()) {
 						bw.write("					<param name=\"" + col.name + "\" datatype=\"" + this._db.getGrahaDataType(col.dataType) + "\" value=\"param.query." + masterTable.name + "." + col.name + "\" />\n");
@@ -1571,7 +1592,9 @@ public final class XMLConfigGenerator {
 			}
 		}
 		if(this.authentication()) {
-			bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+			Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+			bw.write("					<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//			bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 		}
 		bw.write("				</params>\n");
 		bw.write("			</command>\n");
@@ -1646,7 +1669,9 @@ public final class XMLConfigGenerator {
 				}
 			}
 			if(this.authentication()) {
-				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+				Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+				bw.write("					<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 			}
 			bw.write("				</params>\n");
 			bw.write("			</command>\n");
@@ -1682,7 +1707,9 @@ public final class XMLConfigGenerator {
 				}
 				bw.write("</sql>\n");
 				bw.write("				<params>\n");
-				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+				Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+				bw.write("					<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//				bw.write("					<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 				for(Column col : masterTable.cols) {
 					if(col.isPk()) {
 						bw.write("					<param name=\"" + col.name + "\" datatype=\"" + this._db.getGrahaDataType(col.dataType) + "\" value=\"param.query." + masterTable.name + "." + col.name + "\" />\n");
@@ -1860,7 +1887,9 @@ public final class XMLConfigGenerator {
 			bw.write("						" + this.getAuthenticationColumnName(masterTable) + " = ?\n");
 			bw.write("					</sql>\n");
 			bw.write("					<params>\n");
-			bw.write("						<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+			Column authenticationColumn = this.getAuthenticationColumn(masterTable);
+			bw.write("						<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//			bw.write("						<param name=\"" + this.getAuthenticationColumnName(masterTable) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 			bw.write("					</params>\n");
 			bw.write("				</where>\n");
 		}
@@ -1884,7 +1913,9 @@ public final class XMLConfigGenerator {
 				bw.write("						" + this.getAuthenticationColumnName(tab2) + " = ?\n");
 				bw.write("					</sql>\n");
 				bw.write("					<params>\n");
-				bw.write("						<param name=\"" + this.getAuthenticationColumnName(tab2) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
+				Column authenticationColumn = this.getAuthenticationColumn(tab2);
+				bw.write("						<param name=\"" + authenticationColumn.getLowerName() + "\" datatype=\"" + this._db.getGrahaDataType(authenticationColumn.dataType) + "\" value=\"" + this._db.getDef(authenticationColumn.getLowerName(), "session.") + "\" />\n");
+//				bw.write("						<param name=\"" + this.getAuthenticationColumnName(tab2) + "\" datatype=\"varchar\" value=\"prop.logined_user\" />\n");
 				bw.write("					</params>\n");
 				bw.write("				</where>\n");
 			}

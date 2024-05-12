@@ -431,7 +431,12 @@ public class Header {
 					if(STR.valid(childHeads)) {
 						for(int x = 0; x < childHeads.size(); x++) {
 							Head childHead = (Head)childHeads.get(x);
-							if(childHead != null && STR.valid(childHead.getName()) && STR.compareIgnoreCase(head.getName(), childHead.getName()) && STR.trueValue(childHead.getOverride())) {
+							if(
+								childHead != null &&
+								STR.valid(childHead.getName()) &&
+								STR.compareIgnoreCase(head.getName(), childHead.getName()) &&
+								STR.trueValue(childHead.getOverride())
+							) {
 								return true;
 							}
 						}
@@ -452,7 +457,12 @@ public class Header {
 					if(STR.valid(childStyles)) {
 						for(int x = 0; x < childStyles.size(); x++) {
 							Style childStyle = (Style)childStyles.get(x);
-							if(childStyle != null && STR.valid(childStyle.getName()) && STR.compareIgnoreCase(style.getName(), childStyle.getName()) && STR.trueValue(childStyle.getOverride())) {
+							if(
+								childStyle != null &&
+								STR.valid(childStyle.getName()) &&
+								STR.compareIgnoreCase(style.getName(), childStyle.getName()) &&
+								STR.trueValue(childStyle.getOverride())
+							) {
 								return true;
 							}
 						}
@@ -473,7 +483,13 @@ public class Header {
 					if(STR.valid(childScripts)) {
 						for(int x = 0; x < childScripts.size(); x++) {
 							Script childScript = (Script)childScripts.get(x);
-							if(childScript != null && STR.valid(childScript.getName()) && STR.compareIgnoreCase(script.getName(), childScript.getName()) && STR.trueValue(childScript.getOverride())) {
+//							LOG.config(childScript.getName() + "\t" + childScript.getOverride() + "\t" + script.getName());
+							if(
+								childScript != null &&
+								STR.valid(childScript.getName()) &&
+								STR.compareIgnoreCase(script.getName(), childScript.getName()) &&
+								STR.trueValue(childScript.getOverride())
+							) {
 								return true;
 							}
 						}
@@ -490,7 +506,8 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < this.style.size(); i++) {
 				Style s = (Style)this.style.get(i);
-				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && contains(s, childHeaders)) {
+				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
+//				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && this.contains(s, childHeaders)) {
 				} else {
 					xsl.append(s.toXSL(param, rdf));
 				}
@@ -504,7 +521,8 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < this.script.size(); i++) {
 				Script s = (Script)this.script.get(i);
-				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && contains(s, childHeaders)) {
+				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
+//				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && this.contains(s, childHeaders)) {
 				} else {
 					xsl.append(s.toXSL(param, rdf));
 				}
@@ -526,7 +544,8 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < heads.size(); i++) {
 				Head head = (Head)heads.get(i);
-				if(STR.valid(head.getName()) && STR.trueValue(head.getOverride()) && contains(headType, head, childHeaders)) {
+				if(STR.valid(head.getName()) && this.contains(headType, head, childHeaders)) {
+//				if(STR.valid(head.getName()) && STR.trueValue(head.getOverride()) && this.contains(headType, head, childHeaders)) {
 				} else {
 					xsl.append(head.toXSL(param, rdf));
 				}
@@ -717,7 +736,12 @@ public class Header {
 					if(STR.valid(childProps)) {
 						for(int x = 0; x < childProps.size(); x++) {
 							Prop childProp = (Prop)childProps.get(x);
-							if(childProp != null && STR.valid(childProp.getName()) && STR.compareIgnoreCase(prop.getName(), childProp.getName()) && STR.trueValue(childProp.getOverride())) {
+							if(
+								childProp != null &&
+								STR.valid(childProp.getName()) &&
+								STR.compareIgnoreCase(prop.getName(), childProp.getName()) &&
+								STR.trueValue(childProp.getOverride())
+							) {
 								return true;
 							}
 						}

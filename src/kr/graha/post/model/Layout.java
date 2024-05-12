@@ -54,7 +54,7 @@ public class Layout {
 	private List topLeft = null;
 	private List topCenter = null;
 	private List topRight = null;
-	private List<Tab> tab = null;
+	private List<Tab> _tab = null;
 	private List bottomLeft = null;
 	private List bottomCenter = null;
 	private List bottomRight = null;
@@ -84,7 +84,18 @@ public class Layout {
 		this.textContent = textContent;
 	}
 	protected List<Tab> getTab() {
-		return this.tab;
+		return this._tab;
+	}
+	private int getTabSize(Record params) {
+		int result = 0;
+		if(this.getTab() != null) {
+			for(int i = 0; i < this.getTab().size(); i++) {
+				if(((Tab)this.getTab().get(i)).valid(params)) {
+					result++;
+				}
+			}
+		}
+		return result;
 	}
 	private void addTopLeft(Object obj) {
 		if(this.topLeft == null) {
@@ -123,10 +134,10 @@ public class Layout {
 		this.bottomRight.add(obj);
 	}
 	private void add(Tab tab) {
-		if(this.tab == null) {
-			this.tab = new ArrayList<Tab>();
+		if(this._tab == null) {
+			this._tab = new ArrayList<Tab>();
 		}
-		this.tab.add(tab);
+		this._tab.add(tab);
 	}
 	protected static String nodeName() {
 		return Layout.nodeName;
@@ -168,19 +179,19 @@ public class Layout {
 				} else if(node.getNodeType() == Node.TEXT_NODE) {
 					if(STR.vexistsIgnoreCase(parentNodeName, "top/left", "top/center", "top/right", "bottom/left", "bottom/center", "bottom/right")) {
 						if(STR.valid(node.getTextContent()) && STR.compareIgnoreCase(node.getTextContent().trim(), "page")) {
-								if(STR.compareIgnoreCase(parentNodeName, "top/left")) {
-									this.addTopLeft("page");
-								} else if(STR.compareIgnoreCase(parentNodeName, "top/center")) {
-									this.addTopCenter("page");
-								} else if(STR.compareIgnoreCase(parentNodeName, "top/right")) {
-									this.addTopRight("page");
-								} else 	if(STR.compareIgnoreCase(parentNodeName, "bottom/left")) {
-									this.addBottomLeft("page");
-								} else if(STR.compareIgnoreCase(parentNodeName, "bottom/center")) {
-									this.addBottomCenter("page");
-								} else if(STR.compareIgnoreCase(parentNodeName, "bottom/right")) {
-									this.addBottomRight("page");
-								}
+							if(STR.compareIgnoreCase(parentNodeName, "top/left")) {
+								this.addTopLeft("page");
+							} else if(STR.compareIgnoreCase(parentNodeName, "top/center")) {
+								this.addTopCenter("page");
+							} else if(STR.compareIgnoreCase(parentNodeName, "top/right")) {
+								this.addTopRight("page");
+							} else 	if(STR.compareIgnoreCase(parentNodeName, "bottom/left")) {
+								this.addBottomLeft("page");
+							} else if(STR.compareIgnoreCase(parentNodeName, "bottom/center")) {
+								this.addBottomCenter("page");
+							} else if(STR.compareIgnoreCase(parentNodeName, "bottom/right")) {
+								this.addBottomRight("page");
+							}
 						}
 					}
 				}
@@ -296,9 +307,9 @@ public class Layout {
 			top.appendChild(this.element(this.topCenter, "center"));
 			top.appendChild(this.element(this.topRight, "right"));
 		}
-		if(this.tab != null && this.tab.size() > 0) {
-			for(int i = 0; i < this.tab.size(); i++) {
-				element.appendChild(((Tab)this.tab.get(i)).element());
+		if(this.getTab() != null && this.getTab().size() > 0) {
+			for(int i = 0; i < this.getTab().size(); i++) {
+				element.appendChild(((Tab)this.getTab().get(i)).element());
 			}
 		}
 		if(
@@ -331,15 +342,17 @@ public class Layout {
 		return null;
 	}
 	private void multitab(Files files, Record param, int indent, boolean rdf, Buffer xsl) {
-		if(this.tab.size() > 1) {
+		if(this.getTab() != null && this.getTabSize(param) > 1) {
 			xsl.appendL(indent, "<ul class=\"multitab\">");
-			for(int i = 0; i < this.tab.size(); i++) {
-				if(files != null) {
-					xsl.append(files.beforeLi(param, indent, ((Tab)this.tab.get(i)).getName(), rdf));
-				}
-				xsl.append(((Tab)this.tab.get(i)).li(param, indent, rdf));
-				if(files != null) {
-					xsl.append(files.afterLi(param, indent, ((Tab)this.tab.get(i)).getName(), rdf));
+			for(int i = 0; i < this.getTab().size(); i++) {
+				if(((Tab)this.getTab().get(i)).valid(param)) {
+					if(files != null) {
+						xsl.append(files.beforeLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
+					}
+					xsl.append(((Tab)this.getTab().get(i)).li(param, indent, rdf));
+					if(files != null) {
+						xsl.append(files.afterLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
+					}
 				}
 			}
 			if(files != null) {
@@ -372,40 +385,44 @@ public class Layout {
 		int queryFuncType,
 		Buffer xsl
 	) {
-		for(int i = 0; i < this.tab.size(); i++) {
-			if(files != null) {
-				xsl.append(files.before(param, indent, ((Tab)this.tab.get(i)).getName(), rdf, queryId, queryFuncType, (this.tab.size() > 1)));
-			}
-			Table table = null;
-			Command command = null;
-			if(
-				queryFuncType == Query.QUERY_FUNC_TYPE_LIST ||
-				queryFuncType == Query.QUERY_FUNC_TYPE_LISTALL ||
-				queryFuncType == Query.QUERY_FUNC_TYPE_DETAIL
-			) {
-				if(commands != null && commands.size() > 0) {
-					for(int x = 0; x < commands.size(); x++) {
-						if(STR.compareIgnoreCase(((Tab)this.tab.get(i)).getName(), ((Command)commands.get(x)).getName())) {
-							command = (Command)commands.get(x);
+		if(this.getTab() != null && this.getTabSize(param) > 0) {
+			for(int i = 0; i < this.getTab().size(); i++) {
+				if(((Tab)this.getTab().get(i)).valid(param)) {
+					if(files != null) {
+						xsl.append(files.before(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
+					}
+					Table table = null;
+					Command command = null;
+					if(
+						queryFuncType == Query.QUERY_FUNC_TYPE_LIST ||
+						queryFuncType == Query.QUERY_FUNC_TYPE_LISTALL ||
+						queryFuncType == Query.QUERY_FUNC_TYPE_DETAIL
+					) {
+						if(commands != null && commands.size() > 0) {
+							for(int x = 0; x < commands.size(); x++) {
+								if(((Command)commands.get(x)).valid(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Command)commands.get(x)).getName())) {
+									command = (Command)commands.get(x);
+								}
+							}
+						}
+					} else if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
+						if(tables != null && tables.size() > 0) {
+							for(int x = 0; x < tables.size(); x++) {
+								if(((Table)tables.get(x)).valid(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Table)tables.get(x)).getName())) {
+									table = (Table)tables.get(x);
+								}
+							}
 						}
 					}
-				}
-			} else if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
-				if(tables != null && tables.size() > 0) {
-					for(int x = 0; x < tables.size(); x++) {
-						if(STR.compareIgnoreCase(((Tab)this.tab.get(i)).getName(), ((Table)tables.get(x)).getName())) {
-							table = (Table)tables.get(x);
-						}
+					xsl.append(this.getTab().get(i).toXSL(param, indent, rdf, div, queryFuncType, table, command, (this.getTabSize(param) > 1)));
+					if(files != null) {
+						xsl.append(files.after(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
 					}
 				}
 			}
-			xsl.append(this.tab.get(i).toXSL(param, indent, rdf, div, queryFuncType, table, command, (this.tab.size() > 1)));
 			if(files != null) {
-				xsl.append(files.after(param, indent, ((Tab)this.tab.get(i)).getName(), rdf, queryId, queryFuncType, (this.tab.size() > 1)));
+				xsl.append(files.file(param, indent, rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
 			}
-		}
-		if(files != null) {
-			xsl.append(files.file(param, indent, rdf, queryId, queryFuncType, (this.tab.size() > 1)));
 		}
 	}
 	private boolean fileAllow(Files files, Record param) {
@@ -473,7 +490,7 @@ public class Layout {
 		Buffer xsl = new Buffer();
 		if(STR.compareIgnoreCase(this.getTemplate(), "native")) {
 			xsl.append(this.getTextContent());
-		} else 	if(this.tab != null) {
+		} else 	if(this.getTab() != null && this.getTabSize(param) > 0) {
 			this.top(tables, commands, param, rdf, queryId, xsl);
 			this.multitab(files, param, indent, rdf, xsl);
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {

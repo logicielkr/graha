@@ -52,6 +52,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) command 정보
@@ -79,6 +81,7 @@ public class Command extends SQLExecutor {
 	private List<Encrypt> encrypts = null;
 	private List<DecryptColumn> decrypt = null;
 	private List<PatternColumn> pattern = null;
+	private Boolean valid = null;
 	private String getEncrypt() {
 		return this.encrypt;
 	}
@@ -128,7 +131,21 @@ public class Command extends SQLExecutor {
 	private void setSqlCnt(Node sqlCnt) {
 		this.sqlCnt = sqlCnt;
 	}
-	
+	protected boolean valid(Record params) {
+		if(this.valid == null) {
+			this.valid = true;
+			AuthInfo tabAuthInfo = null;
+			if(STR.valid(this.getCond())) {
+				tabAuthInfo = AuthUtility.parse(this.getCond());
+			}
+			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
+				if(!AuthUtility.auth(tabAuthInfo, params)) {
+					this.valid = false;
+				}
+			}
+		}
+		return this.valid.booleanValue();
+	}
 	private void add(Param param) {
 		if(this.param == null) {
 			this.param = new ArrayList<Param>();
@@ -307,11 +324,12 @@ public class Command extends SQLExecutor {
 		ConnectionFactory connectionFactory, 
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException {
+//		if(STR.valid(this.getCond()) && !AuthUtility.auth(this.getCond(), params)) {
+		if(!this.valid(params)) {
+			return 0;
+		}
 		int result = 0;
 		if(queryFuncType == Query.QUERY_FUNC_TYPE_QUERY) {
-			if(STR.valid(this.getCond()) && !AuthUtility.auth(this.getCond(), params)) {
-				return 0;
-			}
 			if(STR.compareIgnoreCase(this.getType(), "native")) {
 				try {
 					Processor processor = (Processor)Class.forName(this.getClassName()).getConstructor().newInstance();
@@ -399,7 +417,7 @@ public class Command extends SQLExecutor {
 						params.put(Record.key(Record.PREFIX_TYPE_QUERY_ROW, this.getName(), "count"), result);
 					}
 				} else {
-					Tab tab = Table.getTab(tabs, this.getName());
+					Tab tab = Table.getTab(tabs, this.getName(), params);
 					boolean columnAuto = false;
 					if(tab != null) {
 						if(STR.compareIgnoreCase(tab.getColumn(), "auto")) {

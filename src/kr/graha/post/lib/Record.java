@@ -74,6 +74,8 @@ public class Record<K, V> {
 	
 	public static int PREFIX_TYPE_RESULT = 20;
 	
+	public static int PREFIX_TYPE_UUID = 21;
+	
 	public static boolean FIND_GROWS = true;
 	public static boolean NOT_FIND_GROWS = false;
 	public static boolean DEFAULT_FIND_GROWS = false;

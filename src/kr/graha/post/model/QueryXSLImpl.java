@@ -270,7 +270,8 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		xsl.appendL("<xsl:output method=\"html\" encoding=\"utf-8\" indent=\"yes\" version=\"5.0\" omit-xml-declaration=\"no\" />");
 		xsl.appendL("<xsl:template match=\"/\">");
-		if(param.equals(Record.key(Record.PREFIX_TYPE_HEADER, "suffix"), ".html")) {
+		if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
+//			xsl.appendL("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>");
 			xsl.appendL("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;&#xa;</xsl:text>");
 		} else { 
 			xsl.appendL("<xsl:if test=\"system-property('xsl:vendor') = 'Microsoft'\">");

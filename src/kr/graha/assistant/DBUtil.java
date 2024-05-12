@@ -248,7 +248,7 @@ public class DBUtil {
 			String value = this.def.getProperty(key);
 			if(
 				key.endsWith(".value") &&
-				((value.equals("prop.logined_user") || value.equals("header.remote_user")))
+				((value.equals("prop.logined_user") || value.equals("header.remote_user") || value.equals("session.member_id")))
 			) {
 				String only = this.def.getProperty(key.substring(0, key.length() - 6) + ".only");
 				if(only != null && only.equals("insert")) {

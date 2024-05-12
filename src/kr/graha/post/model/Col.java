@@ -533,6 +533,8 @@ public class Col {
 		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
 			if(!AuthUtility.auth(authInfo, param)) {
 				return xsl;
+			} else {
+				authInfo = null;
 			}
 		}
 		if(authInfo != null) {
@@ -823,7 +825,7 @@ public class Col {
 			if(table != null) {
 				if(STR.valid(this.getValue())) {
 					Column column = null;
-					column = table.getColumn(this.getValue());
+					column = table.getColumn(this.getValue(), param);
 					if(column != null) {
 						if(STR.valid(column.getExpr())) {
 							xsl.appendL(indent + 1, "<xsl:attribute name=\"expr\">" + column.getExpr() + "</xsl:attribute>");

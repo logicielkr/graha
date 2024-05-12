@@ -218,6 +218,8 @@ public class Search {
 		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
 			if(!AuthUtility.auth(authInfo, param)) {
 				return null;
+			} else {
+				authInfo = null;
 			}
 		}
 		if(authInfo != null) {

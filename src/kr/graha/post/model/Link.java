@@ -268,9 +268,9 @@ public class Link {
 			return "";
 		} else {
 			if(href.endsWith("!")) {
-				return param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "prefix")) + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name")) + href.substring(0, href.length() - 1);
+				return param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "prefix")) + "/" + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name")) + "/" + href.substring(0, href.length() - 1);
 			} else {
-				return param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "prefix")) + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name")) + href + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"));
+				return param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "prefix")) + "/" + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "config.file.name")) + "/" + href + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"));
 			}
 		}
 	}
@@ -319,6 +319,8 @@ public class Link {
 		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
 			if(!AuthUtility.auth(authInfo, param)) {
 				return null;
+			} else {
+				authInfo = null;
 			}
 		}
 		if(authInfo != null) {

@@ -57,6 +57,8 @@ public class Tab {
 	private String column = null;
 	private List<Row> row = null;
 	private List<Col> col = null;
+	private String cond = null;
+	private Boolean valid = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -81,6 +83,12 @@ public class Tab {
 	private void setColumn(String column) {
 		this.column = column;
 	}
+	private String getCond() {
+		return this.cond;
+	}
+	private void setCond(String cond) {
+		this.cond = cond;
+	}
 	protected List<Row> getRow() {
 		return this.row;
 	}
@@ -98,6 +106,23 @@ public class Tab {
 			this.row = new ArrayList<Row>();
 		}
 		this.row.add(row);
+	}
+	protected boolean valid(Record params) {
+		if(this.valid == null) {
+			this.valid = true;
+			AuthInfo tabAuthInfo = null;
+			if(STR.valid(this.getCond())) {
+				tabAuthInfo = AuthUtility.parse(this.getCond());
+			}
+			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
+				if(!AuthUtility.auth(tabAuthInfo, params)) {
+					this.valid = false;
+				} else {
+					tabAuthInfo = null;
+				}
+			}
+		}
+		return this.valid.booleanValue();
 	}
 	protected static String nodeName() {
 		return Tab.nodeName;
@@ -159,6 +184,8 @@ public class Tab {
 							this.setSingle(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "column")) {
 							this.setColumn(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")"); 
@@ -176,6 +203,7 @@ public class Tab {
 		element.setAttribute("label", this.getLabel());
 		element.setAttribute("single", this.getSingle());
 		element.setAttribute("column", this.getColumn());
+		element.setAttribute("cond", this.getCond());
 		if(this.col != null && this.col.size() > 0) {
 			for(int i = 0; i < this.col.size(); i++) {
 				element.appendChild(((Col)this.col.get(i)).element());
@@ -288,13 +316,30 @@ public class Tab {
 		} else if(command != null) {
 			multi = STR.trueValue(command.getMulti());
 		}
+		Buffer xsl = new Buffer();
+		boolean exists = false;
+		AuthInfo tabAuthInfo = null;
+		if(STR.valid(this.getCond())) {
+			tabAuthInfo = AuthUtility.parse(this.getCond());
+		}
+		if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, param)) {
+			if(!AuthUtility.auth(tabAuthInfo, param)) {
+				return null;
+			} else {
+				tabAuthInfo = null;
+			}
+		}
+		if(tabAuthInfo != null) {
+			xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(tabAuthInfo, param, rdf) + "\">");
+		}
 		if(
 			queryFuncType == Query.QUERY_FUNC_TYPE_LIST ||
 			queryFuncType == Query.QUERY_FUNC_TYPE_LISTALL
 		) {
 			List<Row> rows = new ArrayList<Row>();
 			rows.add(new Row(this.col));
-			return this.list(param, indent, rows, table, command, rdf, div, queryFuncType);
+			this.list(param, indent, rows, table, command, rdf, div, multiRow, queryFuncType, xsl);
+			exists = true;
 		} else if(
 			queryFuncType == Query.QUERY_FUNC_TYPE_DETAIL ||
 			queryFuncType == Query.QUERY_FUNC_TYPE_INSERT
@@ -302,27 +347,73 @@ public class Tab {
 			if(this.row != null && this.row.size() > 0) {
 				if(multi) {
 					if(this.row.size() == 1) {
-						return this.list(param, indent, this.row, table, command, rdf, div, queryFuncType);
+						this.list(param, indent, this.row, table, command, rdf, div, multiRow, queryFuncType, xsl);
+						exists = true;
 					} else if(STR.trueValue(this.getSingle())) {
-						return this.list(param, indent, this.row, table, command, rdf, div, queryFuncType);
+						this.list(param, indent, this.row, table, command, rdf, div, multiRow, queryFuncType, xsl);
+						exists = true;
 					} else {
-						return this.detail(param, indent, this.row, table, command, multi, rdf, div, multiRow, queryFuncType);
+						this.detail(param, indent, this.row, table, command, multi, rdf, div, multiRow, queryFuncType, xsl);
+						exists = true;
 					}
 				} else {
-					return this.detail(param, indent, this.row, table, command, multi, rdf, div, multiRow, queryFuncType);
+					this.detail(param, indent, this.row, table, command, multi, rdf, div, multiRow, queryFuncType, xsl);
+					exists = true;
 				}
 			}
 		}
-		return null;
+		if(exists) {
+			if(tabAuthInfo != null) {
+				xsl.appendL("</xsl:if>");
+			}
+			return xsl;
+		} else {
+			xsl.clear();
+			xsl = null;
+			return null;
+		}
 	}
-	public Buffer li(Record param, int indent, boolean rdf) {
+	protected Buffer li(Record param, int indent, boolean rdf) {
 		Buffer xsl = new Buffer();
 		if(STR.valid(this.getLabel())) {
+			AuthInfo tabAuthInfo = null;
+			if(STR.valid(this.getCond())) {
+				tabAuthInfo = AuthUtility.parse(this.getCond());
+			}
+			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, param)) {
+				if(!AuthUtility.auth(tabAuthInfo, param)) {
+					return null;
+				} else {
+					tabAuthInfo = null;
+				}
+			}
+			if(tabAuthInfo != null) {
+				xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(tabAuthInfo, param, rdf) + "\">");
+			}
 			xsl.appendL("<li class=\"" + this.getName()+ "\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</li>");
+			if(tabAuthInfo != null) {
+				xsl.appendL("</xsl:if>");
+			}
 		}
 		return xsl;
 	}
-	private Buffer detail(
+	private void h3(
+		Record param,
+		int indent,
+		boolean rdf,
+		Buffer xsl
+	) {
+		if(STR.valid(this.getLabel())) {
+			if(STR.valid(this.getName())) {
+				xsl.append(indent, "<h3 class=\"" + this.getName() + "\">");
+			} else {
+				xsl.append(indent, "<h3>");
+			}
+			xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf));
+			xsl.appendL("</h3>");
+		}
+	}
+	private void detail(
 		Record param,
 		int indent,
 		List<Row> rows,
@@ -332,19 +423,12 @@ public class Tab {
 		boolean rdf,
 		boolean div,
 		boolean multiRow,
-		int queryFuncType
+		int queryFuncType,
+		Buffer xsl
 	) {
-		Buffer xsl = new Buffer();
+//		Buffer xsl = new Buffer();
 		if(multiRow) {
-			if(STR.valid(this.getLabel())) {
-				if(STR.valid(this.getName())) {
-					xsl.append(indent, "<h3 class=\"" + this.getName() + "\">");
-				} else {
-					xsl.append(indent, "<h3>");
-				}
-				xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf));
-				xsl.appendL("</h3>");
-			}
+			this.h3(param, indent, rdf, xsl);
 		}
 		this.table(indent, div, xsl, true);
 		this.tbody(indent + 1, div, xsl, true);
@@ -394,6 +478,8 @@ public class Tab {
 						if(rowAuthInfo != null && AuthUtility.testInServer(rowAuthInfo, param)) {
 							if(!AuthUtility.auth(rowAuthInfo, param)) {
 								continue;
+							} else {
+								rowAuthInfo = null;
 							}
 						}
 						if(rowAuthInfo != null) {
@@ -406,7 +492,7 @@ public class Tab {
 								(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT && x == 0 && i == 0) &&
 								(
 									(multi && multiRow) ||
-									(table != null && table.existsForeignColumn())
+									(table != null && table.existsForeignColumn(param))
 								)
 							) {
 								xsl.append(((Col)cols.get(i)).td(param, indent2 + 2, table, this.col, this.getName(), rdf, div, !multi, queryFuncType));
@@ -427,10 +513,24 @@ public class Tab {
 		}
 		this.tbody(indent + 1, div, xsl, false);
 		this.table(indent, div, xsl, false);
-		return xsl;
+//		return xsl;
 	}
-	private Buffer list(Record param, int indent, List<Row> rows, Table table, Command command, boolean rdf, boolean div, int queryFuncType) {
-		Buffer xsl = new Buffer();
+	private void list(
+		Record param,
+		int indent,
+		List<Row> rows,
+		Table table,
+		Command command,
+		boolean rdf,
+		boolean div,
+		boolean multiRow,
+		int queryFuncType,
+		Buffer xsl
+	) {
+//		Buffer xsl = new Buffer();
+		if(multiRow) {
+			this.h3(param, indent, rdf, xsl);
+		}
 		this.table(indent, div, xsl, true);
 		this.thead(indent + 1, div, xsl, true);
 		if(
@@ -496,6 +596,6 @@ public class Tab {
 		xsl.appendL(indent + 2, "</xsl:for-each>");
 		this.tbody(indent + 1, div, xsl, false);
 		this.table(indent, div, xsl, false);
-		return xsl;
+//		return xsl;
 	}
 }

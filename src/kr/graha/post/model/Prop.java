@@ -289,6 +289,16 @@ public class Prop extends SQLExecutor {
 			if(!STR.valid(this.getTime()) && time >= Prop.Before_Before_Processor) {
 				return;
 			}
+			/*
+			String value = null;
+			if(STR.compareIgnoreCase(this.getValue(), "system.uuid")) {
+				value = java.util.UUID.randomUUID().toString();
+			} else if(STR.compareIgnoreCase(this.getValue(), "system.uuid2")) {
+				value = java.util.UUID.randomUUID().toString().replaceAll("-", "");
+			} else {
+				value = TextParser.parse(this.getValue(), params);
+			}
+			*/
 			String value = TextParser.parse(this.getValue(), params);
 			if(STR.valid(value)) {
 				params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName()), value);

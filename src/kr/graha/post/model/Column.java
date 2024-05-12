@@ -35,6 +35,8 @@ import kr.graha.post.model.utility.SQLExecutor;
 import kr.graha.post.interfaces.ConnectionFactory;
 import java.sql.SQLException;
 import java.util.List;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) column 정보
@@ -55,6 +57,7 @@ public class Column extends Param {
 	private String follow = null;
 	private String constraint = null;
 	private String select = null;
+	private Boolean valid = null;
 	
 	public String getName() {
 		return super.getName();
@@ -140,6 +143,23 @@ public class Column extends Param {
 	private void setSelect(String select) {
 		this.select = select;
 	}
+	protected boolean valid(Record params) {
+		if(this.valid == null) {
+			this.valid = true;
+			AuthInfo tabAuthInfo = null;
+			if(STR.valid(this.getCond())) {
+				tabAuthInfo = AuthUtility.parse(this.getCond());
+			}
+//			LOG.debug(this.getCond());
+//			AuthUtility.debug(tabAuthInfo);
+			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
+				if(!AuthUtility.auth(tabAuthInfo, params)) {
+					this.valid = false;
+				}
+			}
+		}
+		return this.valid.booleanValue();
+	}
 	protected static String nodeName() {
 		return Column.nodeName;
 	}
@@ -181,6 +201,8 @@ public class Column extends Param {
 							this.setPattern(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
 							this.setEncrypt(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "insert")) {
 							this.setInsert(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "only")) {
@@ -220,6 +242,7 @@ public class Column extends Param {
 		element.setAttribute("follow", this.getFollow());
 		element.setAttribute("constraint", this.getConstraint());
 		element.setAttribute("select", this.getSelect());
+		element.setAttribute("cond", this.getCond());
 		return element;
 	}
 	protected SQLParameter getValue(
@@ -239,6 +262,23 @@ public class Column extends Param {
 			if(params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, key))) {
 				value = super.getValue(params, Record.key(Record.PREFIX_TYPE_UNKNOWN, key), encryptor);
 				return new SQLParameter(value, this.getDataType());
+			} else if(
+				STR.startsWithIgnoreCase(this.getInsert(), "system.uuid") ||
+				STR.startsWithIgnoreCase(this.getInsert(), "system.uuid2")
+			) {
+				if(sqlType == Table.SQL_TYPE_INSERT) {
+					if(!params.hasKey(Record.key(Record.PREFIX_TYPE_UUID, key))) {
+						String uuid = null;
+						if(STR.startsWithIgnoreCase(this.getInsert(), "system.uuid")) {
+							uuid = java.util.UUID.randomUUID().toString();
+						} else {
+							uuid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
+						}
+							params.put(Record.key(Record.PREFIX_TYPE_UUID, key), uuid);
+					}
+					value = super.getValue(params, Record.key(Record.PREFIX_TYPE_UUID, key), encryptor);
+					return new SQLParameter(value, this.getDataType());
+				}
 			} else if(STR.startsWithIgnoreCase(this.getInsert(), "sequence.")) {
 				if(sqlType == Table.SQL_TYPE_INSERT) {
 					if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SEQUENCE, key))) {
@@ -261,11 +301,26 @@ public class Column extends Param {
 						Column column = null;
 						for(int i = 0; i < tables.size(); i++) {
 							table = (Table)tables.get(i);
-							column = table.getPrimaryColumnByValue(this.getValue());
+							column = table.getPrimaryColumnByValue(this.getValue(), params);
 							break;
 						}
 						if(column != null) {
-							if(STR.startsWithIgnoreCase(column.getInsert(), "sequence.")) {
+							if(
+								STR.startsWithIgnoreCase(column.getInsert(), "system.uuid") ||
+								STR.startsWithIgnoreCase(column.getInsert(), "system.uuid2")
+							) {
+								if(!params.hasKey(Record.key(Record.PREFIX_TYPE_UUID, column.getValue()))) {
+									String uuid = null;
+									if(STR.startsWithIgnoreCase(column.getInsert(), "system.uuid")) {
+										uuid = java.util.UUID.randomUUID().toString();
+									} else {
+										uuid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
+									}
+										params.put(Record.key(Record.PREFIX_TYPE_UUID, column.getValue()), uuid);
+								}
+								value = super.getValue(params, Record.key(Record.PREFIX_TYPE_UUID, column.getValue()), encryptor);
+								return new SQLParameter(value, this.getDataType());
+							} else if(STR.startsWithIgnoreCase(column.getInsert(), "sequence.")) {
 								if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()))) {
 									if(this.getDataType() == Param.DATA_TYPE_INT) {
 										params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), SQLExecutor.getNextSequenceIntegerValue(column.getInsert(), connectionFactory));

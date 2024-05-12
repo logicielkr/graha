@@ -50,7 +50,11 @@ public class TextParser {
 				path = path.substring(path.indexOf("${") + 2);
 				if(path.indexOf("}") > 0) {
 					String val = path.substring(0, path.indexOf("}"));
-					if(param.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val + ".0"))) {
+					if(STR.compareIgnoreCase(val, "system.uuid")) {
+						sb.append(java.util.UUID.randomUUID().toString());
+					} else if(STR.compareIgnoreCase(val, "system.uuid2")) {
+						sb.append(java.util.UUID.randomUUID().toString().replaceAll("-", ""));
+					} else if(param.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val + ".0"))) {
 						sb.append(param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, val + ".0")));
 						result.put(Record.key(Record.PREFIX_TYPE_UNKNOWN, val), param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, val + ".0")));
 					} else if(param.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val))) {
@@ -71,8 +75,11 @@ public class TextParser {
 		result.puts(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "filepath"), sb.toString());
 	}
 	public static Buffer parseForXSL(String text, Record params, boolean rdf) {
-		String title = new String(text);
 		Buffer sb = new Buffer();
+		if(text == null) {
+			return sb;
+		}
+		String title = new String(text);
 		while(true) {
 			if(title.indexOf("${") >= 0) {
 				if(STR.nonempty(title.substring(0, title.indexOf("${")))) {
@@ -81,8 +88,16 @@ public class TextParser {
 				title = title.substring(title.indexOf("${") + 2);
 				if(title.indexOf("}") > 0) {
 					String val = title.substring(0, title.indexOf("}"));
-					String v = XPathUtility.valueExpr(val, rdf);
-					sb.append("<xsl:value-of select=\"" + v + "\" />");
+					if(STR.compareIgnoreCase(val, "system.uuid")) {
+						sb.append("<xsl:text>" + java.util.UUID.randomUUID().toString() + "</xsl:text>");
+					} else if(STR.compareIgnoreCase(val, "system.uuid2")) {
+						sb.append("<xsl:text>" + java.util.UUID.randomUUID().toString().replaceAll("-", "") + "</xsl:text>");
+					} else if(params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val))) {
+						sb.append(params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, val)));
+					} else {
+						String v = XPathUtility.valueExpr(val, rdf);
+						sb.append("<xsl:value-of select=\"" + v + "\" />");
+					}
 					title = title.substring(title.indexOf("}") + 1);
 				} else {
 					if(STR.nonempty(title)) {
