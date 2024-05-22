@@ -325,7 +325,7 @@ public final class AuthUtility {
 					info.left.startsWith("error.") ||
 					info.left.startsWith("query.")
 				) {
-					left = XPathUtility.valueExpr(info.left, rdf);
+					left = XPathUtility.valueExpr(info.left, rdf, full);
 				} else if(info.left.startsWith("code.")) {
 					throw new ParsingException();
 				} else {
@@ -342,7 +342,7 @@ public final class AuthUtility {
 					info.right.startsWith("error.") ||
 					info.right.startsWith("query.")
 				) {
-					right = XPathUtility.valueExpr(info.right, rdf);
+					right = XPathUtility.valueExpr(info.right, rdf, full);
 				} else if(info.right.startsWith("code.")) {
 					throw new ParsingException();
 				} else {
