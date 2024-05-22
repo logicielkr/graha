@@ -156,6 +156,8 @@ public class Tab {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "row")) {
 							this.load(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")"); 
 						}
@@ -483,11 +485,11 @@ public class Tab {
 							}
 						}
 						if(rowAuthInfo != null) {
-							xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(rowAuthInfo, param, rdf) + "\">");
+							xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(rowAuthInfo, param, rdf, !multi) + "\">");
 						}
 						this.tr(indent2 + 1, div, xsl, true);
 						for(int i = 0; i < cols.size(); i++) {
-							xsl.append(((Col)cols.get(i)).th(param, indent2 + 2, rdf, div, queryFuncType, Tab.VIEW_TYPE_DETAIL));
+							xsl.append(((Col)cols.get(i)).th(param, indent2 + 2, rdf, div, !multi, queryFuncType, Tab.VIEW_TYPE_DETAIL));
 							if(
 								(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT && x == 0 && i == 0) &&
 								(
@@ -551,7 +553,7 @@ public class Tab {
 					if(cols != null && cols.size() > 0) {
 						this.tr(indent + 2, div, xsl, true);
 						for(int i = 0; i < cols.size(); i++) {
-							xsl.append(((Col)cols.get(i)).th(param, indent + 3, rdf, div, queryFuncType, Tab.VIEW_TYPE_LIST));
+							xsl.append(((Col)cols.get(i)).th(param, indent + 3, rdf, div, true, queryFuncType, Tab.VIEW_TYPE_LIST));
 						}
 						this.tr(indent + 2, div, xsl, false);
 					}

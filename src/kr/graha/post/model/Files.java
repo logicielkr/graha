@@ -142,6 +142,8 @@ public class Files {
 							this.load(node, null);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "auth")) {
 							this.load(node, null);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

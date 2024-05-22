@@ -44,6 +44,8 @@ import java.util.Map;
 import kr.graha.post.lib.Buffer;
 import kr.graha.post.interfaces.ConnectionFactory;
 import java.security.NoSuchProviderException;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) auth 정보
@@ -63,6 +65,9 @@ public class Auth extends SQLExecutor {
 	private String encrypt = null;
 	private List<Encrypt> encrypts = null;
 	
+	private String cond = null;
+	private Boolean valid = null;
+	
 	private String getEncrypt() {
 		return this.encrypt;
 	}
@@ -75,6 +80,12 @@ public class Auth extends SQLExecutor {
 	}
 	protected void setCheck(String check) {
 		this.check = check;
+	}
+	protected String getCond() {
+		return this.cond;
+	}
+	private void setCond(String cond) {
+		this.cond = cond;
 	}
 	private Node getSql() {
 		return this.sql;
@@ -93,6 +104,21 @@ public class Auth extends SQLExecutor {
 			this.encrypts = new ArrayList<Encrypt>();
 		}
 		this.encrypts.add(encrypt);
+	}
+	protected boolean valid(Record params) {
+		if(this.valid == null) {
+			this.valid = true;
+			AuthInfo tabAuthInfo = null;
+			if(STR.valid(this.getCond())) {
+				tabAuthInfo = AuthUtility.parse(this.getCond());
+			}
+			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
+				if(!AuthUtility.auth(tabAuthInfo, params)) {
+					this.valid = false;
+				}
+			}
+		}
+		return this.valid.booleanValue();
 	}
 	protected static String nodeName() {
 		return Auth.nodeName;
@@ -143,6 +169,10 @@ public class Auth extends SQLExecutor {
 							this.load(node, null);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypts")) {
 							this.loads(node, null);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}
@@ -181,6 +211,7 @@ public class Auth extends SQLExecutor {
 	protected void element(XmlElement element) {
 		element.setAttribute("check", this.getCheck());
 		element.setAttribute("encrypt", this.getEncrypt());
+		element.setAttribute("cond", this.getCond());
 		element.appendChild(this.getSql());
 		if(this.encrypts != null && this.encrypts.size() > 0) {
 			for(int i = 0; i < this.encrypts.size(); i++) {
@@ -200,6 +231,9 @@ public class Auth extends SQLExecutor {
 		return element;
 	}
 	protected boolean check(Record params, ConnectionFactory connectionFactory) throws NoSuchProviderException, SQLException {
+		if(!this.valid(params)) {
+			return true;
+		}
 		boolean result = false;
 		if(this.sql == null) {
 			result = true;

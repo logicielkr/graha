@@ -34,6 +34,8 @@ import java.sql.SQLException;
 import kr.graha.post.interfaces.Validator;
 import kr.graha.helper.LOG;
 import java.lang.reflect.InvocationTargetException;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) ValidationCommand 정보
@@ -141,12 +143,26 @@ public class ValidationCommand extends Auth {
 		return element;
 	}
 	
-	protected Buffer toValidationXSL(int indent) {
+	protected Buffer toValidationXSL(Record params, int indent, boolean rdf) {
 		if(
 			STR.compareIgnoreCase(this.getType(), "native") &&
 			STR.valid(this.getFunc())
 		) {
+			AuthInfo authInfo = null;
+			if(STR.valid(super.getCond())) {
+				authInfo = AuthUtility.parse(super.getCond());
+			}
+			if(authInfo != null && AuthUtility.testInServer(authInfo, params)) {
+				if(!AuthUtility.auth(authInfo, params)) {
+					return null;
+				} else {
+					authInfo = null;
+				}
+			}
 			Buffer xsl = new Buffer();
+			if(authInfo != null) {
+				xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, params, rdf) + "\">");
+			}
 			xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form, \"" + this.getName() + "\");");
 			xsl.appendL(indent, "if(_msg != null) {");
 			xsl.appendL(indent + 1, "if(arguments.length > 1) {");
@@ -158,11 +174,17 @@ public class ValidationCommand extends Auth {
 			xsl.appendL(indent + 2, "return false;");
 			xsl.appendL(indent + 1, "}");
 			xsl.appendL(indent, "}");
+			if(authInfo != null) {
+				xsl.appendL(indent, "</xsl:if>");
+			}
 			return xsl;
 		}
 		return null;
 	}
 	protected void validate(Record params, ConnectionFactory connectionFactory, List<String> msgs) throws NoSuchProviderException, SQLException {
+		if(!super.valid(params)) {
+			return;
+		}
 		if(
 			STR.compareIgnoreCase(this.getType(), "native") &&
 			STR.valid(this.getClassName())

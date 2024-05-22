@@ -22,11 +22,14 @@
 package kr.graha.post.model;
 
 import kr.graha.post.lib.Buffer;
+import kr.graha.post.lib.Record;
 import kr.graha.helper.STR;
 import kr.graha.helper.LOG;
 import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import kr.graha.post.element.XmlElement;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) CalculatorParam 정보
@@ -46,6 +49,8 @@ public class CalculatorParam {
 	private String refer = null;
 	private String event = null;
 	private String form = null;
+	private String cond = null;
+	
 	private String getName() {
 		return this.name;
 	}
@@ -82,6 +87,12 @@ public class CalculatorParam {
 	private void setForm(String form) {
 		this.form = form;
 	}
+	private String getCond() {
+		return this.cond;
+	}
+	private void setCond(String cond) {
+		this.cond = cond;
+	}
 	protected static String nodeName() {
 		return CalculatorParam.nodeName;
 	}
@@ -115,6 +126,8 @@ public class CalculatorParam {
 							this.setEvent(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "form")) {
 							this.setForm(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -134,10 +147,25 @@ public class CalculatorParam {
 		element.setAttribute("refer", this.getRefer());
 		element.setAttribute("event", this.getEvent());
 		element.setAttribute("form", this.getForm());
+		element.setAttribute("cond", this.getCond());
 		return element;
 	}
-	protected Buffer toXSL(int indent) {
+	protected Buffer toXSL(Record params, String queryId, int indent, boolean rdf) {
+		AuthInfo authInfo = null;
+		if(STR.valid(this.getCond())) {
+			authInfo = AuthUtility.parse(this.getCond());
+		}
+		if(authInfo != null && AuthUtility.testInServer(authInfo, params)) {
+			if(!AuthUtility.auth(authInfo, params)) {
+				return null;
+			} else {
+				authInfo = null;
+			}
+		}
 		Buffer xsl = new Buffer();
+		if(authInfo != null) {
+			xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, params, rdf) + "\">");
+		}
 		if(STR.valid(this.getExpr())) {
 			xsl.appendL(indent, "expr:\"" + this.getExpr().replace("\"", "\\\"") + "\",");
 		}
@@ -156,7 +184,10 @@ public class CalculatorParam {
 		if(STR.valid(this.getForm())) {
 			xsl.appendL(indent, "formName:\"" + this.getForm() + "\"");
 		} else {
-			xsl.appendL(indent, "formName:\"insert\"");
+			xsl.appendL(indent, "formName:\"" + queryId + "\"");
+		}
+		if(authInfo != null) {
+			xsl.appendL(indent, "</xsl:if>");
 		}
 		return xsl;
 	}

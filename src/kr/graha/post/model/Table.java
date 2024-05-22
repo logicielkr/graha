@@ -305,6 +305,8 @@ public class Table extends SQLExecutor {
 							this.loads(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "order")) {
 							this.load(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")"); 
 						}

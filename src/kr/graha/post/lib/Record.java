@@ -679,6 +679,8 @@ public class Record<K, V> {
 			if(this.get(key) == null) {
 				return false;
 			}
+			return this.check(this.getIntObject(key), this.intObject(value), check);
+			/*
 			Integer i1 = this.getIntObject(key);
 			Integer i2 = this.intObject(value);
 			if(i1 == null || i2 == null) {
@@ -693,8 +695,45 @@ public class Record<K, V> {
 			} else if(check == AuthUtility.LessThanOrEqualTo && i1.intValue() <= i2.intValue()) {
 				return true;
 			}
+			*/
 		}
 		return false;
+	}
+	public boolean check(Key key, Key value, int check) {
+		if(this.containsKey(key) && this.containsKey(value)) {
+			if(this.get(key) == null || this.get(value) == null) {
+				return false;
+			}
+			return this.check(this.getIntObject(key), this.getIntObject(value), check);
+		}
+		return false;
+	}
+	public boolean check(String key, Key value, int check) {
+		if(this.containsKey(value) && key != null && !key.trim().equals("")) {
+			if(this.get(value) == null) {
+				return false;
+			}
+			return this.check(this.intObject(key), this.getIntObject(value), check);
+		}
+		return false;
+	}
+	public boolean check(Integer i1, Integer i2, int check) {
+		if(i1 == null || i2 == null) {
+			return false;
+		}
+		if(check == AuthUtility.GreaterThan && i1.intValue() > i2.intValue()) {
+			return true;
+		} else if(check == AuthUtility.GreaterThanOrEqualTo && i1.intValue() >= i2.intValue()) {
+			return true;
+		} else if(check == AuthUtility.LessThan && i1.intValue() < i2.intValue()) {
+			return true;
+		} else if(check == AuthUtility.LessThanOrEqualTo && i1.intValue() <= i2.intValue()) {
+			return true;
+		}
+		return false;
+	}
+	public boolean check(String key, String value, int check) {
+		return this.check(this.intObject(key), this.intObject(value), check);
 	}
 /**
  * ValidationParam 에서 사용

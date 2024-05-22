@@ -235,6 +235,8 @@ public class Command extends SQLExecutor {
 							this.loads(node, "decrypt");
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "pattern")) {
 							this.loads(node, "pattern");
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

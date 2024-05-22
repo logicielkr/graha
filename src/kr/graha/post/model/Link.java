@@ -58,7 +58,11 @@ public class Link {
 	private String cond = null;
 	private String msg = null;
 	private String value = null;
+/***
+* 사용되지 않는다.
+*/
 	private String method = null;
+	private String appearance = null;
 	private List<LinkParam> param = null;
 	private String getName() {
 		return this.name;
@@ -126,6 +130,12 @@ public class Link {
 	private void setMethod(String method) {
 		this.method = method;
 	}
+	private String getAppearance() {
+		return this.appearance;
+	}
+	private void setAppearance(String appearance) {
+		this.appearance = appearance;
+	}
 	protected List<LinkParam> getParam() {
 		return this.param;
 	}
@@ -176,6 +186,8 @@ public class Link {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "params")) {
 							this.loads(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}
@@ -218,6 +230,8 @@ public class Link {
 							this.setValue(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "method")) {
 							this.setMethod(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "appearance")) {
+							this.setAppearance(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -242,7 +256,8 @@ public class Link {
 		element.setAttribute("msg", this.getMsg());
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("method", this.getMethod());
-
+		element.setAttribute("appearance", this.getAppearance());
+		
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
@@ -276,37 +291,122 @@ public class Link {
 	}
 	protected Buffer link(Record param, String tabName, String label, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
-		xsl.appendL(indent, "<a>");
-		if(STR.compareIgnoreCase(this.getType(), "query")) {
-			xsl.append(indent + 1, "<xsl:attribute name=\"link\">");
-			if(full) {
-				xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf) + "\" />");
+		AuthInfo authInfo = null;
+		if(STR.valid(this.getCond())) {
+			authInfo = AuthUtility.parse(this.getCond());
+		}
+		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
+			if(!AuthUtility.auth(authInfo, param)) {
+				return null;
 			} else {
-				xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf) + "\" />");
+				authInfo = null;
+			}
+		}
+		if(authInfo != null) {
+			xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf, full) + "\">");
+			indent++;
+		}
+		if(STR.valid(this.getAppearance()) && STR.vexistsIgnoreCase(this.getAppearance(), "button", "submit")) {
+			xsl.appendL(indent, "<form>");
+			xsl.append(indent + 1, "<xsl:attribute name=\"action\">");
+			if(STR.compareIgnoreCase(this.getType(), "query")) {
+				if(full) {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf) + "\" />");
+				} else {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf) + "\" />");
+				}
+			} else if(STR.compareIgnoreCase(this.getType(), "external")) {
+				xsl.append(this.getPath());
+			} else {
+				xsl.append(Link.getPath(this.getPath(), param));
 			}
 			xsl.appendL("</xsl:attribute>");
-		}
-		if(this.param != null && this.param.size() > 0) {
-			xsl.append(LinkParam.param(tabName, this.param, indent + 1, rdf, full));
-		}
-		xsl.append(indent + 1, "<xsl:attribute name=\"href\">");
-		if(STR.compareIgnoreCase(this.getType(), "query")) {
-			if(full) {
-				xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf) + "\" />");
-			} else {
-				xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf) + "\" />");
+			if(STR.compareIgnoreCase(this.getAppearance(), "submit")) {
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+//				xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\" method=\"post\" onsubmit=\"return check_submit(this, '" + this.getMsg() + "');\"");
+//			} else {
+//				xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\"");
 			}
-		} else if(STR.compareIgnoreCase(this.getType(), "external")) {
-			xsl.append(this.getPath());
+			if(STR.valid(this.getName())) {
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			}
+			if(STR.valid(this.param)) {
+				for(int i = 0; i < this.param.size(); i++) {
+//					xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));
+					xsl.append(((LinkParam)this.param.get(i)).hidden(tabName, indent + 1, rdf, full));
+				}
+			}
+			if(STR.valid(this.getIcon())) {
+				xsl.appendL(indent + 1, "<button type=\"submit\">");
+				if(STR.valid(this.getClassName())) {
+					xsl.appendL(indent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+				} else {
+					xsl.appendL(indent + 2, "<i>" + this.getIcon() + "</i>");
+				}
+				xsl.append(indent + 2, "<span>");
+				if(STR.valid(this.getLabel())) {
+					xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf, full));
+				} else {
+					xsl.append(label);
+				}
+				xsl.appendL("</span>");
+				xsl.appendL(indent + 1, "</button>");
+			} else {
+				xsl.appendL(indent + 1, "<input>");
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+				xsl.append(indent + 2, "<xsl:attribute name=\"value\">");
+				if(STR.valid(this.getLabel())) {
+					xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf, full));
+				} else {
+					xsl.append(label);
+				}
+				xsl.appendL("</xsl:attribute>");
+				xsl.appendL(indent + 1, "</input>");
+			}
+			xsl.appendL(indent, "</form>");
 		} else {
-			xsl.append(Link.getPath(this.getPath(), param));
+			xsl.appendL(indent, "<a>");
+			if(STR.compareIgnoreCase(this.getType(), "query")) {
+				xsl.append(indent + 1, "<xsl:attribute name=\"link\">");
+				if(full) {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf) + "\" />");
+				} else {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf) + "\" />");
+				}
+				xsl.appendL("</xsl:attribute>");
+			}
+			if(this.param != null && this.param.size() > 0) {
+				xsl.append(LinkParam.param(tabName, this.param, indent + 1, rdf, full));
+			}
+			xsl.append(indent + 1, "<xsl:attribute name=\"href\">");
+			if(STR.compareIgnoreCase(this.getType(), "query")) {
+				if(full) {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf) + "\" />");
+				} else {
+					xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf) + "\" />");
+				}
+			} else if(STR.compareIgnoreCase(this.getType(), "external")) {
+				xsl.append(this.getPath());
+			} else {
+				xsl.append(Link.getPath(this.getPath(), param));
+			}
+			if(this.param != null && this.param.size() > 0) {
+				xsl.append("<xsl:if test=\"$hrefparam\">?<xsl:value-of select=\"$hrefparam\" /></xsl:if>");
+			}
+			xsl.appendL("</xsl:attribute>");
+			if(STR.valid(this.getLabel())) {
+				xsl.append(1, TextParser.parseForXSL(this.getLabel(), param, rdf, full));
+			} else {
+				xsl.append(1, label);
+			}
+			xsl.appendL(indent, "</a>");
 		}
-		if(this.param != null && this.param.size() > 0) {
-			xsl.append("<xsl:if test=\"$hrefparam\">?<xsl:value-of select=\"$hrefparam\" /></xsl:if>");
+		if(authInfo != null) {
+			indent--;
+			xsl.appendL(indent, "</xsl:if>");
 		}
-		xsl.appendL("</xsl:attribute>");
-		xsl.append(1, label);
-		xsl.appendL(indent, "</a>");
 		return xsl;
 	}
 	protected Buffer button(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf, String queryId, String layoutMsg) {
@@ -331,71 +431,95 @@ public class Link {
 			!STR.valid(this.getFull()) ||
 			!STR.trueValue(this.getFull())
 		) {
-			if(STR.compareIgnoreCase(this.getType(), "submit")) {
-				xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\" method=\"post\" onsubmit=\"return check_submit(this, '" + this.getMsg() + "');\"");
-			} else {
-				xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\"");
-			}
-			if(STR.valid(this.getName())) {
-				xsl.append(" name=\"" + this.getName() + "\" class=\"" + this.getName() + "\"");
-			}
-			xsl.appendL(">");
-			if(STR.valid(this.param)) {
-				for(int i = 0; i < this.param.size(); i++) {
-					xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));
+			if(STR.compareIgnoreCase(this.getType(), "anchor")) {
+				xsl.append(internalIndent, "<a>");
+				if(this.param != null && this.param.size() > 0) {
+					xsl.append(LinkParam.param(tables, commands, null, this.param, internalIndent + 1, rdf, true));
 				}
-			}
-			if(STR.valid(this.getIcon())) {
-				xsl.appendL(internalIndent + 1, "<button type=\"submit\">");
-				if(STR.valid(this.getClassName())) {
-					xsl.appendL(internalIndent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+				xsl.append(internalIndent + 1, "<xsl:attribute name=\"href\">");
+				xsl.append(Link.getPath(this.getPath(), param));
+				if(this.param != null && this.param.size() > 0) {
+					xsl.append("<xsl:if test=\"$hrefparam\">?<xsl:value-of select=\"$hrefparam\" /></xsl:if>");
+				}
+				xsl.appendL("</xsl:attribute>");
+				if(STR.valid(this.getName())) {
+					xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+				}
+				xsl.append(internalIndent + 1, TextParser.parseForXSL(this.getLabel(), param, rdf));
+				
+				xsl.append(internalIndent, "</a>");
+			} else {
+				if(STR.compareIgnoreCase(this.getType(), "submit")) {
+					xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\" method=\"post\" onsubmit=\"return check_submit(this, '" + this.getMsg() + "');\"");
 				} else {
-					xsl.appendL(internalIndent + 2, "<i>" + this.getIcon() + "</i>");
+					xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\"");
 				}
-				xsl.appendL(internalIndent + 2, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
-				xsl.appendL(internalIndent + 1, "</button>");
-			} else {
-				xsl.appendL(internalIndent + 1, "<input>");
-				xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
-				xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
-				xsl.appendL(internalIndent + 1, "</input>");
+				if(STR.valid(this.getName())) {
+					xsl.append(" name=\"" + this.getName() + "\" class=\"" + this.getName() + "\"");
+				}
+				xsl.appendL(">");
+				if(STR.valid(this.param)) {
+					for(int i = 0; i < this.param.size(); i++) {
+						xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));
+					}
+				}
+				if(STR.valid(this.getIcon())) {
+					xsl.appendL(internalIndent + 1, "<button type=\"submit\">");
+					if(STR.valid(this.getClassName())) {
+						xsl.appendL(internalIndent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+					} else {
+						xsl.appendL(internalIndent + 2, "<i>" + this.getIcon() + "</i>");
+					}
+					xsl.appendL(internalIndent + 2, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
+					xsl.appendL(internalIndent + 1, "</button>");
+				} else {
+					xsl.appendL(internalIndent + 1, "<input>");
+					xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+					xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
+					xsl.appendL(internalIndent + 1, "</input>");
+				}
+				xsl.appendL(internalIndent, "</form>");
 			}
-			xsl.appendL(internalIndent, "</form>");
 		} else {
 			if(STR.valid(this.getIcon())) {
 				xsl.appendL(internalIndent, "<button type=\"submit\" form=\"" + queryId + "\" id=\"" + queryId + "_submit\">");
-				if(!param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
-					xsl.appendL(internalIndent, "<xsl:if test=\"system-property('xsl:vendor') = 'Microsoft'\">");
-					internalIndent++;
-				}
-				xsl.append(internalIndent + 1, "<xsl:attribute name=\"onclick\">");
-				if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
-					xsl.append("if(this.form == null) {");
-				}
-				xsl.append("if(check_submit(document.getElementById(\"" + queryId + "\"), '" + layoutMsg + "')) {");
-				xsl.append("document.getElementById(\"" + queryId + "\").submit();");
-				xsl.append("}");
-				if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
-					xsl.append("}");
-				}
-				xsl.appendL("</xsl:attribute>");
-				if(!param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
-					internalIndent--;
-					xsl.appendL(internalIndent, "</xsl:if>");
-				}
-				if(STR.valid(this.getClassName())) {
-					xsl.appendL(internalIndent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
-				} else {
-					xsl.appendL(internalIndent + 1, "<i>" + this.getIcon() + "</i>");
-				}
-				xsl.appendL(internalIndent + 1, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
-				xsl.appendL(internalIndent, "</button>");
 			} else {
 				xsl.appendL(internalIndent, "<input>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"form\">" + queryId + "</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"id\">" + queryId + "_submit</xsl:attribute>");
+			}
+			if(!param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
+				xsl.appendL(internalIndent, "<xsl:if test=\"system-property('xsl:vendor') = 'Microsoft'\">");
+				internalIndent++;
+			}
+			xsl.append(internalIndent + 1, "<xsl:attribute name=\"onclick\">");
+			if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
+				xsl.append("if(this.form == null) {");
+			}
+			xsl.append("if(check_submit(document.getElementById(\"" + queryId + "\"), '" + layoutMsg + "')) {");
+			xsl.append("document.getElementById(\"" + queryId + "\").submit();");
+			xsl.append("}");
+			if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
+				xsl.append("}");
+			}
+			xsl.appendL("</xsl:attribute>");
+			if(!param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
+				internalIndent--;
+				xsl.appendL(internalIndent, "</xsl:if>");
+			}
+			if(STR.valid(this.getIcon())) {
+				if(STR.valid(this.getClassName())) {
+					xsl.appendL(internalIndent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+				} else {
+					xsl.appendL(internalIndent + 1, "<i>" + this.getIcon() + "</i>");
+				}
+				xsl.appendL(internalIndent + 1, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
+			}
+			if(STR.valid(this.getIcon())) {
+				xsl.appendL(internalIndent, "</button>");
+			} else {
 				xsl.appendL(internalIndent, "</input>");
 			}
 		}

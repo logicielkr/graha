@@ -37,6 +37,9 @@ public class XPathUtility {
 	private XPathUtility() {
 	}
 	public static String valueExpr(String val, boolean rdf) {
+		return XPathUtility.valueExpr(val, rdf, true);
+	}
+	public static String valueExpr(String val, boolean rdf, boolean full) {
 		if(
 			val.startsWith("param.") ||
 			val.startsWith("result.") ||
@@ -58,11 +61,18 @@ public class XPathUtility {
 				);
 				
 			} else {
-				return GRow.childNodePath(
-					null,
-					val.substring(val.indexOf(".") + 1),
-					rdf
-				);
+				if(full) {
+					return GRow.childNodePath(
+						null,
+						val.substring(val.indexOf(".") + 1),
+						rdf
+					);
+				} else {
+					return GRow.childNodeName(
+						val.substring(val.indexOf(".") + 1),
+						rdf
+					);
+				}
 			}
 		} else if(val.startsWith("message.")) {
 			return GMessage.labelPath(val.substring(val.indexOf(".") + 1), rdf); 

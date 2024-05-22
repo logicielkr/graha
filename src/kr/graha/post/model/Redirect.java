@@ -136,6 +136,8 @@ public class Redirect {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "msgs")) {
 							this.loads(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

@@ -312,6 +312,8 @@ public class Header {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "keywords")) {
 							this.loads(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement((Element)node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

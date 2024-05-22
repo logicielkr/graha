@@ -75,6 +75,9 @@ public class TextParser {
 		result.puts(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "filepath"), sb.toString());
 	}
 	public static Buffer parseForXSL(String text, Record params, boolean rdf) {
+		return TextParser.parseForXSL(text, params, rdf, true);
+	}
+	public static Buffer parseForXSL(String text, Record params, boolean rdf, boolean full) {
 		Buffer sb = new Buffer();
 		if(text == null) {
 			return sb;
@@ -92,10 +95,13 @@ public class TextParser {
 						sb.append("<xsl:text>" + java.util.UUID.randomUUID().toString() + "</xsl:text>");
 					} else if(STR.compareIgnoreCase(val, "system.uuid2")) {
 						sb.append("<xsl:text>" + java.util.UUID.randomUUID().toString().replaceAll("-", "") + "</xsl:text>");
-					} else if(params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val))) {
+					} else if(
+						!STR.startsWithIgnoreCase(val, "query.") &&
+						params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, val))
+					) {
 						sb.append(params.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, val)));
 					} else {
-						String v = XPathUtility.valueExpr(val, rdf);
+						String v = XPathUtility.valueExpr(val, rdf, full);
 						sb.append("<xsl:value-of select=\"" + v + "\" />");
 					}
 					title = title.substring(title.indexOf("}") + 1);

@@ -121,6 +121,9 @@ public class LinkParam {
 		return element;
 	}
 	protected static Buffer param(String tabName, List<LinkParam> params, int indent, boolean rdf, boolean full) {
+		return LinkParam.param(null, null, tabName, params, indent, rdf, full);
+	}
+	protected static Buffer param(List<Table> tables, List<Command> commands, String tabName, List<LinkParam> params, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
 		if(STR.valid(params)) {
 			xsl.append(indent, "<xsl:variable name=\"hrefparam\">");
@@ -130,10 +133,32 @@ public class LinkParam {
 			for(int i = 0; i < params.size(); i++) {
 				LinkParam param = (LinkParam)params.get(i);
 				if(STR.compareIgnoreCase(param.getType(), "query")) {
-					if(full) {
-						expr = kr.graha.post.xml.GRow.childNodePath(tabName, param.getValue(), rdf);
+					if(STR.valid(param.getValue()) && param.getValue().indexOf(".") > 0) {
+						expr = kr.graha.post.xml.GRow.childNodePath(
+							param.getValue().substring(0, param.getValue().indexOf(".")),
+							param.getValue().substring(param.getValue().indexOf(".") + 1),
+							rdf
+						);
+					} else if(tabName == null) {
+						String ref = param.getRef();
+						if(!STR.valid(ref)) {
+							if(tables != null && tables.size() > 0) {
+								ref = ((Table)tables.get(0)).getName();
+							} else if(commands != null && commands.size() > 0) {
+								ref = ((Command)commands.get(0)).getName();
+							}
+						}
+						if(STR.valid(ref)) {
+							expr = kr.graha.post.xml.GRow.childNodePath(ref, param.getValue(), rdf);
+						} else {
+							expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
+						}
 					} else {
-						expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
+						if(full) {
+							expr = kr.graha.post.xml.GRow.childNodePath(tabName, param.getValue(), rdf);
+						} else {
+							expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
+						}
 					}
 					paramList.add(expr);
 				} else if(STR.compareIgnoreCase(param.getType(), "param")) {
@@ -217,22 +242,42 @@ public class LinkParam {
 	protected Buffer hidden(List<Table> tables, List<Command> commands, int indent, boolean rdf) {
 		return this.hidden(tables, commands, true, indent, rdf);
 	}
+	protected Buffer hidden(String tabName, int indent, boolean rdf, boolean full) {
+		return this.hidden(null, null, tabName, true, indent, rdf, full);
+	}
 	protected Buffer hidden(List<Table> tables, List<Command> commands, boolean hideBlank, int indent, boolean rdf) {
+		return this.hidden(tables, commands, null, hideBlank, indent, rdf, true);
+	}
+	protected Buffer hidden(List<Table> tables, List<Command> commands, String tabName, boolean hideBlank, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
 		String expr = null;
 		if(STR.compareIgnoreCase(this.getType(), "query")) {
-			String ref = this.getRef();
-			if(!STR.valid(ref)) {
-				if(tables != null && tables.size() > 0) {
-					ref = ((Table)tables.get(0)).getName();
-				} else if(commands != null && commands.size() > 0) {
-					ref = ((Command)commands.get(0)).getName();
+			if(STR.valid(this.getValue()) && this.getValue().indexOf(".") > 0) {
+				expr = kr.graha.post.xml.GRow.childNodePath(
+					this.getValue().substring(0, this.getValue().indexOf(".")),
+					this.getValue().substring(this.getValue().indexOf(".") + 1),
+					rdf
+				);
+			} else if(tabName == null) {
+				String ref = this.getRef();
+				if(!STR.valid(ref)) {
+					if(tables != null && tables.size() > 0) {
+						ref = ((Table)tables.get(0)).getName();
+					} else if(commands != null && commands.size() > 0) {
+						ref = ((Command)commands.get(0)).getName();
+					}
 				}
-			}
-			if(STR.valid(ref)) {
-				expr = kr.graha.post.xml.GRow.childNodePath(ref, this.getValue(), rdf);
+				if(STR.valid(ref)) {
+					expr = kr.graha.post.xml.GRow.childNodePath(ref, this.getValue(), rdf);
+				} else {
+					expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
+				}
 			} else {
-				expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
+				if(full) {
+					expr = kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf);
+				} else {
+					expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
+				}
 			}
 		} else if(STR.vexistsIgnoreCase(this.getType(), "param", "prop", "result", "error")) {
 			expr = kr.graha.post.xml.GParam.childNodePath(this.getType(), this.getValue(), rdf);

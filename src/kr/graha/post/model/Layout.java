@@ -255,6 +255,8 @@ public class Layout {
 							this.loads(node, null);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "bottom")) {
 							this.loads(node, "bottom");
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

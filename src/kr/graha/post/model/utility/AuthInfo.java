@@ -33,4 +33,7 @@ public class AuthInfo {
 	protected String left;
 	protected String right;
 	protected int op;
+	
+	protected int leftType;
+	protected int rightType;
 }

@@ -24,6 +24,7 @@ package kr.graha.post.model.utility;
 import kr.graha.post.lib.Record;
 import kr.graha.post.lib.ParsingException;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 
 /**
  * Graha(그라하) 인증 관련 유틸리티 모음
@@ -44,11 +45,17 @@ public final class AuthUtility {
 	public static int GreaterThanOrEqualTo = 8;
 	public static int LessThan = 9;
 	public static int LessThanOrEqualTo = 10;
+	
+	protected static int TYPE_OF_RECORD = 91;
+	protected static int TYPE_OF_LITERAL = 92;
+	
 	private AuthUtility() {
 	}
 	public static AuthInfo parse(String auth) {
 		String right = null;
 		String left = null;
+		int rightType = 0;
+		int leftType = 0;
 		String op = null;
 		if(auth == null || auth.trim().equals("")) {
 			return null;
@@ -58,15 +65,19 @@ public final class AuthUtility {
 			if(auth.charAt(i) == '\'') {
 				if(right == null) {
 					right = auth.substring(i + 1, auth.indexOf("'", i + 1));
+					rightType = AuthUtility.TYPE_OF_LITERAL;
 				} else {
-					right = auth.substring(i + 1, auth.indexOf("'", i + 1));
+					left = auth.substring(i + 1, auth.indexOf("'", i + 1));
+					leftType = AuthUtility.TYPE_OF_LITERAL;
 				}
 				i = auth.indexOf("'", i + 1);
 			} else if(auth.charAt(i) == '$' && auth.charAt(i + 1) == '{') {
 				if(left == null) {
 					left = auth.substring(i + 2, auth.indexOf("}", i));
+					leftType = AuthUtility.TYPE_OF_RECORD;
 				} else {
 					right = auth.substring(i + 2, auth.indexOf("}", i));
+					rightType = AuthUtility.TYPE_OF_RECORD;
 				}
 				i = auth.indexOf("}", i);
 			} else {
@@ -83,6 +94,8 @@ public final class AuthUtility {
 		AuthInfo info = new AuthInfo();
 		info.left = left;
 		info.right = right;
+		info.leftType = leftType;
+		info.rightType = rightType;
 		info.op = parseOP(op);
 		if(info.op == 0) {
 			return null;
@@ -125,128 +138,218 @@ public final class AuthUtility {
 	}
 	public static boolean auth(AuthInfo info, Record param) {
 		if(info == null) {
-//			LOG.debug("info is null");
 			return true;
 		}
 		if(info.op == AuthUtility.IsEmpty) {
-//			LOG.debug(Boolean.toString(AuthUtility.isEmpty(info.left, param)));
-			return AuthUtility.isEmpty(info.left, param);
+			return AuthUtility.isEmpty(info, param);
 		} else if(info.op == AuthUtility.IsNotEmpty) {
-//			LOG.debug(Boolean.toString(!AuthUtility.isEmpty(info.left, param)));
-			return !AuthUtility.isEmpty(info.left, param);
+			return !AuthUtility.isEmpty(info, param);
 		} else {
 			if(info.right == null) {
-//				LOG.debug("info.right is null");
 				return false;
 			}
 			if(info.op == AuthUtility.In) {
-//				LOG.debug(Boolean.toString(AuthUtility.in(info.left, info.right, param)));
-				return AuthUtility.in(info.left, info.right, param);
+				return AuthUtility.in(info, param);
 			} else if(info.op == AuthUtility.NotIn) {
-//				LOG.debug(Boolean.toString(!AuthUtility.in(info.left, info.right, param)));
-				return !AuthUtility.in(info.left, info.right, param);
+				return !AuthUtility.in(info, param);
 			} else if(info.op == AuthUtility.Equals) {
-/*
-				LOG.debug(
-					info.left,
-					param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left)),
-					info.right,
-					Boolean.toString(AuthUtility.equals(info.left, info.right, param))
-				);
-*/
-				return AuthUtility.equals(info.left, info.right, param);
+				return AuthUtility.equals(info, param);
 			} else if(info.op == AuthUtility.NotEquals) {
-//				LOG.debug(Boolean.toString(!AuthUtility.equals(info.left, info.right, param)));
-				return !AuthUtility.equals(info.left, info.right, param);
+				return !AuthUtility.equals(info, param);
 			} else if(info.op == AuthUtility.GreaterThan) {
-//				LOG.debug(Boolean.toString(AuthUtility.gt(info.left, info.right, param)));
-				return AuthUtility.gt(info.left, info.right, param);
+				return AuthUtility.gt(info, param);
 			} else if(info.op == AuthUtility.GreaterThanOrEqualTo) {
-//				LOG.debug(Boolean.toString(AuthUtility.gteq(info.left, info.right, param)));
-				return AuthUtility.gteq(info.left, info.right, param);
+				return AuthUtility.gteq(info, param);
 			} else if(info.op == AuthUtility.LessThan) {
-//				LOG.debug(Boolean.toString(AuthUtility.lt(info.left, info.right, param)));
-				return AuthUtility.lt(info.left, info.right, param);
+				return AuthUtility.lt(info, param);
 			} else if(info.op == AuthUtility.LessThanOrEqualTo) {
-//				LOG.debug(Boolean.toString(AuthUtility.lteq(info.left, info.right, param)));
-				return AuthUtility.lteq(info.left, info.right, param);
+				return AuthUtility.lteq(info, param);
 			}
 		}
-//		LOG.debug("unknown");
 		return true;
 	}
-	private static boolean equals(String left, String right, Record param) {
-		return param.equals(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right);
-	}
-	private static boolean in(String left, String right, Record param) {
-		return param.in(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right);
-	}
-	private static boolean isEmpty(String left, Record param) {
-		return param.isempty(Record.key(Record.PREFIX_TYPE_UNKNOWN, left));
-	}
-	private static boolean gt(String left, String right, Record param) {
-		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.GreaterThan);
-	}
-	private static boolean gteq(String left, String right, Record param) {
-		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.GreaterThanOrEqualTo);
-	}
-	private static boolean lt(String left, String right, Record param) {
-		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThan);
-	}
-	private static boolean lteq(String left, String right, Record param) {
-		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThanOrEqualTo);
-	}
-/*
-	public static void debug(AuthInfo info) {
-		if(info != null) {
-			LOG.debug(
-				info.left,
-				Integer.toString(info.op),
-				info.right
-			);
+	private static boolean isEmpty(AuthInfo info, Record param) {
+		if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.isempty(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left));
+		} else {
+			return !STR.valid(info.left);
 		}
 	}
-*/
+	private static boolean in(AuthInfo info, Record param) {
+		String right = info.right;
+		if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			right = param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right));
+		}
+		if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.in(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), right);
+		} else {
+			return STR.compare(info.left, right);
+		}
+	}
+	private static boolean equals(AuthInfo info, Record param) {
+		String right = info.right;
+		if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			right = param.getString(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right));
+		}
+		if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.equals(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), right);
+		} else {
+			return STR.compare(info.left, right);
+		}
+	}
+	private static boolean gt(AuthInfo info, Record param) {
+		if(
+			info.rightType == AuthUtility.TYPE_OF_RECORD &&
+			info.leftType == AuthUtility.TYPE_OF_RECORD
+		) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.GreaterThan);
+		} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(info.left, Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.GreaterThan);
+		} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), info.right, AuthUtility.GreaterThan);
+		} else {
+			return param.check(info.left, info.right, AuthUtility.GreaterThan);
+		}
+	}
+	private static boolean gteq(AuthInfo info, Record param) {
+		if(
+			info.rightType == AuthUtility.TYPE_OF_RECORD &&
+			info.leftType == AuthUtility.TYPE_OF_RECORD
+		) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.GreaterThanOrEqualTo);
+		} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(info.left, Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.GreaterThanOrEqualTo);
+		} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), info.right, AuthUtility.GreaterThanOrEqualTo);
+		} else {
+			return param.check(info.left, info.right, AuthUtility.GreaterThanOrEqualTo);
+		}
+//		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.GreaterThanOrEqualTo);
+	}
+	private static boolean lt(AuthInfo info, Record param) {
+		if(
+			info.rightType == AuthUtility.TYPE_OF_RECORD &&
+			info.leftType == AuthUtility.TYPE_OF_RECORD
+		) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.LessThan);
+		} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(info.left, Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.LessThan);
+		} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), info.right, AuthUtility.LessThan);
+		} else {
+			return param.check(info.left, info.right, AuthUtility.LessThan);
+		}
+//		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThan);
+	}
+	private static boolean lteq(AuthInfo info, Record param) {
+		if(
+			info.rightType == AuthUtility.TYPE_OF_RECORD &&
+			info.leftType == AuthUtility.TYPE_OF_RECORD
+		) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.LessThanOrEqualTo);
+		} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(info.left, Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), AuthUtility.LessThanOrEqualTo);
+		} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+			return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), info.right, AuthUtility.LessThanOrEqualTo);
+		} else {
+			return param.check(info.left, info.right, AuthUtility.LessThanOrEqualTo);
+		}
+//		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThanOrEqualTo);
+	}
 	public static boolean testInServer(AuthInfo info, Record params) {
 		if(info == null) {
-//			LOG.debug("info is null");
 			return false;
 		} else if(info.left == null) {
-//			LOG.debug("left is null");
 			return false;
 		} else {
-			if(params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left))) {
-//				LOG.debug(info.left + " exists");
+			if(
+				info.rightType == AuthUtility.TYPE_OF_RECORD &&
+				info.leftType == AuthUtility.TYPE_OF_RECORD
+			) {
+				if(
+					!STR.startsWithIgnoreCase(info.left, "query.") &&
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left)) &&
+					!STR.startsWithIgnoreCase(info.right, "query.") &&
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right))
+				) {
+					return true;
+				}
+			} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+				if(
+					!STR.startsWithIgnoreCase(info.right, "query.") &&
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right))
+				) {
+					return true;
+				}
+			} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+				if(
+					!STR.startsWithIgnoreCase(info.left, "query.") &&
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left))
+				) {
+					return true;
+				}
+			} else {
 				return true;
 			}
 		}
-//		LOG.debug(info.left + " empty");
 		return false;
 	}
 	public static String testExpr(AuthInfo info, Record params, boolean rdf) {
+		return AuthUtility.testExpr(info, params, rdf, true);
+	}
+	public static String testExpr(AuthInfo info, Record params, boolean rdf, boolean full) {
 		String test = null;
 		String left = null;
+		String right = null;
 		if(info == null) {
 			test = "1";
 		} else if(info.left == null) {
 			test = "1";
 		} else {
 			if(
-				info.left.startsWith("param.") ||
-				info.left.startsWith("result.") ||
-				info.left.startsWith("prop.") ||
-				info.left.startsWith("error.") ||
-				info.left.startsWith("query.")
+				info.rightType == AuthUtility.TYPE_OF_LITERAL &&
+				info.leftType == AuthUtility.TYPE_OF_LITERAL
 			) {
-				left = XPathUtility.valueExpr(info.left, rdf);
-			} else if(info.left.startsWith("code.")) {
-				throw new ParsingException();
-			} else {
 				if(AuthUtility.auth(info, params)) {
 					test = "1";
 				} else {
 					test = "0";
 				}
+				return test;
+			}
+			if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+				if(
+					info.left.startsWith("param.") ||
+					info.left.startsWith("result.") ||
+					info.left.startsWith("prop.") ||
+					info.left.startsWith("error.") ||
+					info.left.startsWith("query.")
+				) {
+					left = XPathUtility.valueExpr(info.left, rdf);
+				} else if(info.left.startsWith("code.")) {
+					throw new ParsingException();
+				} else {
+					throw new ParsingException();
+				}
+			} else {
+				left = info.left;
+			}
+			if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+				if(
+					info.right.startsWith("param.") ||
+					info.right.startsWith("result.") ||
+					info.right.startsWith("prop.") ||
+					info.right.startsWith("error.") ||
+					info.right.startsWith("query.")
+				) {
+					right = XPathUtility.valueExpr(info.right, rdf);
+				} else if(info.right.startsWith("code.")) {
+					throw new ParsingException();
+				} else {
+					throw new ParsingException();
+				}
+			} else {
+				right = info.right;
 			}
 			if(test == null) {
 				if(info.op == AuthUtility.IsEmpty) {
@@ -261,17 +364,36 @@ public final class AuthUtility {
 				if(info.op == AuthUtility.In || info.op == AuthUtility.NotIn) {
 					throw new ParsingException();
 				} else if(info.op == AuthUtility.Equals) {
-					test = "" + left + " = '" + info.right + "'";
+					if(
+						info.rightType == AuthUtility.TYPE_OF_RECORD &&
+						info.leftType == AuthUtility.TYPE_OF_RECORD
+					) {
+						test = "" + left + " = " + right + "";
+					} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+						test = "" + left + " = '" + right + "'";
+					} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+						test = "'" + left + "' = " + right + "";
+					} 
 				} else if(info.op == AuthUtility.NotEquals) {
-					test = "" + left + " != '" + info.right + "'";
+					if(
+						info.rightType == AuthUtility.TYPE_OF_RECORD &&
+						info.leftType == AuthUtility.TYPE_OF_RECORD
+					) {
+						test = "" + left + " != " + right + "";
+					} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
+						test = "" + left + " != '" + right + "'";
+					} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
+						test = "'" + left + "' != " + right + "";
+					}
+//					test = "" + left + " != '" + right + "'";
 				} else if(info.op == AuthUtility.GreaterThan) {
-					test = "" + left + " > " + info.right + "";
+					test = "" + left + " > " + right + "";
 				} else if(info.op == AuthUtility.GreaterThanOrEqualTo) {
-					test = "" + left + " >= " + info.right + "";
+					test = "" + left + " >= " + right + "";
 				} else if(info.op == AuthUtility.LessThan) {
-					test = "" + left + " < " + info.right + "";
+					test = "" + left + " < " + right + "";
 				} else if(info.op == AuthUtility.LessThanOrEqualTo) {
-					test = "" + left + " <= " + info.right + "";
+					test = "" + left + " <= " + right + "";
 				}
 			}
 		}

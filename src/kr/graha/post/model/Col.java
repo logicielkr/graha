@@ -336,6 +336,8 @@ public class Col {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "options")) {
 							this.loads(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}
@@ -487,6 +489,7 @@ public class Col {
 		int indent,
 		boolean rdf,
 		boolean div,
+		boolean full,
 		int queryFuncType,
 		int viewType
 	) {
@@ -494,7 +497,7 @@ public class Col {
 			!STR.valid(this.getIslabel()) ||
 			!STR.falseValue(this.getIslabel())
 		) {
-			return tag(param, indent, null, null, null,"th", rdf, div, false, queryFuncType, viewType);
+			return tag(param, indent, null, null, null,"th", rdf, div, full, queryFuncType, viewType);
 		} {
 			return null;
 		}
@@ -538,7 +541,7 @@ public class Col {
 			}
 		}
 		if(authInfo != null) {
-			xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
+			xsl.appendL("<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf, full) + "\">");
 		}
 		if(div) {
 			xsl.appendL(indent, "<div>");
@@ -585,7 +588,7 @@ public class Col {
 			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + this.getRowspan() + "</xsl:attribute>");
 		}
 		if(STR.compareIgnoreCase(tagName, "th")) {
-			xsl.appendL(indent + 1, TextParser.parseForXSL(this.getLabel(), param, rdf));
+			xsl.appendL(indent + 1, TextParser.parseForXSL(this.getLabel(), param, rdf, full));
 		} else {
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 				if(cols != null) {
@@ -629,8 +632,11 @@ public class Col {
 		return xsl;
 	}
 	private Buffer value(int indent, String tabName, boolean rdf, boolean div, boolean full) {
+		if(!STR.valid(this.getName())) {
+			return null;
+		}
 		Buffer xsl = new Buffer();
-		String path = this.getPath(this.getName(), tabName, rdf, full);
+		String path = this.getXPath(this.getName(), tabName, rdf, full);
 		
 		boolean escape = true;
 		String escapeAttrValue = "";
@@ -675,7 +681,7 @@ public class Col {
 		}
 		return xsl;
 	}
-	private String getPath(String name, String tabName, boolean rdf, boolean full) {
+	private String getXPath(String name, String tabName, boolean rdf, boolean full) {
 		if(STR.valid(name)) {
 			String path = null;
 			if(STR.startsWithIgnoreCase(name, "param.")) {
@@ -703,8 +709,8 @@ public class Col {
 	}
 	private Buffer input(Record param, int indent, Table table, String tabName, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
-		String path = this.getPath(this.getValue(), tabName, rdf, full);
-		String defaultValuePath = this.getPath(this.getDefaultValue(), tabName, rdf, full);
+		String path = this.getXPath(this.getValue(), tabName, rdf, full);
+		String defaultValuePath = this.getXPath(this.getDefaultValue(), tabName, rdf, full);
 		if(STR.compareIgnoreCase(this.getType(), "radio")) {
 			if(STR.valid(this.getForName())) {
 				xsl.appendL(indent, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
@@ -813,7 +819,7 @@ public class Col {
 					}
 				} else {
 					if(authInfo != null) {
-						xsl.appendL(indent + 1, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
+						xsl.appendL(indent + 1, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf, full) + "\">");
 						xsl.append(1, "");
 					}
 					xsl.appendL(indent + 1, "<xsl:attribute name=\"readonly\">readonly</xsl:attribute>");
@@ -874,7 +880,7 @@ public class Col {
 					}
 				} else {
 					if(authInfo != null) {
-						xsl.appendL(indent + 1, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
+						xsl.appendL(indent + 1, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf, full) + "\">");
 						xsl.append(1, "");
 					}
 					xsl.appendL(indent + 1, "<xsl:attribute name=\"disabled\">" + this.getDisabled() + "</xsl:attribute>");

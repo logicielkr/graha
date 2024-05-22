@@ -87,7 +87,7 @@ public class QueryXSLImpl extends QueryImpl {
 			param.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "GET") ||
 			param.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "QUERY")
 		) {
-			this.before(param, request, indent, rdf, xsl);
+			this.before(param, super.getId(), request, indent, rdf, xsl);
 			if(super.getLayout() != null) {
 				xsl.append(super.getLayout().toXSL(super.getRootHeader(), super.getExtendHeader(), super.getHeader(), super.getTable(), super.getCommand(), super.getFiles(), param, indent, rdf, div, super.getId(), super.getQueryFuncType()));
 			}
@@ -97,7 +97,7 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		return xsl;
 	}
-	private void before(Record param, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
+	private void before(Record param, String queryId, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
 		this.html(param, request, indent, rdf, xsl);
 		this.head(param, indent, rdf, xsl);
 		xsl.appendL(indent, "<xsl:if test=\"" + kr.graha.post.xml.GMessage.nodePath(rdf) + "\">");
@@ -122,7 +122,7 @@ public class QueryXSLImpl extends QueryImpl {
 				} else {
 					xsl.appendL(indent + 1, "{");
 				}
-				xsl.append(((CalculatorParam)super.getCalculator().get(i)).toXSL(indent + 2));
+				xsl.append(((CalculatorParam)super.getCalculator().get(i)).toXSL(param, queryId, indent + 2, rdf));
 				xsl.appendL(indent + 1, "}");
 			}
 			xsl.appendL("];");

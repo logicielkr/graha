@@ -89,6 +89,8 @@ public class Row {
 					if(STR.valid(node.getNodeName())) {
 						if(STR.compareIgnoreCase(node.getNodeName(), "column")) {
 							this.load(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

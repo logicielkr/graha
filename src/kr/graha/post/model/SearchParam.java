@@ -132,6 +132,8 @@ public class SearchParam extends LinkParam {
 							this.load(node);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "options")) {
 							this.loads(node);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 						}

@@ -103,6 +103,8 @@ public class Validation {
 							this.load(node, null);
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "command")) {
 							this.load(node, null);
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+							this.loadElement(node);
 						} else {
 							LOG.warning("invalid nodeName(" + node.getNodeName() + ")"); 
 						}
@@ -159,7 +161,7 @@ public class Validation {
 				if(obj instanceof ValidationParam) {
 					xsl.append(((ValidationParam)obj).toXSL(param, indent, rdf));
 				} else if(obj instanceof ValidationCommand) {
-					xsl.append(((ValidationCommand)obj).toValidationXSL(indent));
+					xsl.append(((ValidationCommand)obj).toValidationXSL(param, indent, rdf));
 				}
 			}
 		}
