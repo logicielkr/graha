@@ -159,7 +159,7 @@ public final class LOG {
  * @return 보기 좋은 형태로 변경한 것
  */
 	private static String toString(HashMap data, String prefix) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = data.keySet().iterator();
 		if(prefix != null) {
 			sb.append(prefix);

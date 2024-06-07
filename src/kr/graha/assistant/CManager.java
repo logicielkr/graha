@@ -130,10 +130,10 @@ public class CManager {
 		}
 		return this._messges;
 	}
-	protected StringBuffer getPropertyList(String prefix) throws IOException {
+	protected StringBuilder getPropertyList(String prefix) throws IOException {
 		Properties messges = this.getMessages();
 		Enumeration names = messges.propertyNames();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		while(names.hasMoreElements()) {
 			String name = (String)names.nextElement();

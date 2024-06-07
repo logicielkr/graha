@@ -77,7 +77,7 @@ public class Command extends SQLExecutor {
 	
 	private Node sql = null;
 	private Node sqlCnt = null;
-	private List<Param> param = null;
+	private List param = null;
 	private List<Encrypt> encrypts = null;
 	private List<DecryptColumn> decrypt = null;
 	private List<PatternColumn> pattern = null;
@@ -148,9 +148,15 @@ public class Command extends SQLExecutor {
 	}
 	private void add(Param param) {
 		if(this.param == null) {
-			this.param = new ArrayList<Param>();
+			this.param = new ArrayList();
 		}
 		this.param.add(param);
+	}
+	private void add(Tile tile) {
+		if(this.param == null) {
+			this.param = new ArrayList();
+		}
+		this.param.add(tile);
 	}
 	private void add(Encrypt encrypt) {
 		if(this.encrypts == null) {
@@ -169,6 +175,12 @@ public class Command extends SQLExecutor {
 			this.pattern = new ArrayList<PatternColumn>();
 		}
 		this.pattern.add(pattern);
+	}
+	private int getParamSize(Record record) {
+		return Tile.getParamSize(this.param, record);
+	}
+	private Param getParam(int index, Record record) {
+		return Tile.getParam(this.param, index, record);
 	}
 	protected static String nodeName() {
 		return Command.nodeName;
@@ -200,6 +212,8 @@ public class Command extends SQLExecutor {
 			this.setSqlCnt(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "tile")) {
+			this.add(Tile.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
 			this.add(Encrypt.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "column")) {
@@ -294,7 +308,11 @@ public class Command extends SQLExecutor {
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
-				child.appendChild(((Param)this.param.get(i)).element());
+				if(this.param.get(i) instanceof Param) {
+					child.appendChild(((Param)this.param.get(i)).element());
+				} else {
+					child.appendChild(((Tile)this.param.get(i)).element());
+				}
 			}
 		}
 		if(this.encrypts != null && this.encrypts.size() > 0) {
@@ -326,7 +344,6 @@ public class Command extends SQLExecutor {
 		ConnectionFactory connectionFactory, 
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException {
-//		if(STR.valid(this.getCond()) && !AuthUtility.auth(this.getCond(), params)) {
 		if(!this.valid(params)) {
 			return 0;
 		}
@@ -347,12 +364,15 @@ public class Command extends SQLExecutor {
 		Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 		List<SQLParameter> parameters = new ArrayList();
 		if(STR.valid(this.param)) {
-			for(int x = 0; x < this.param.size(); x++) {
-				Param p = (Param)this.param.get(x);
+			for(int x = 0; x < this.getParamSize(params); x++) {
+				Param p = this.getParam(x, params);
 				if(STR.startsWithIgnoreCase(p.getValue(), "sequence.")) {
 					Integer nextSequenceValue = SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory());
 					SQLParameter parameter =  new SQLParameter(nextSequenceValue, p.getDataType());
 					parameters.add(parameter);
+				} else if(STR.startsWithIgnoreCase(p.getValue(), "generator.")) {
+						SQLParameter parameter =  new SQLParameter(SQLExecutor.getPKGeneratorValue(p.getValue(), p.getName(), p.getDataType(), params, super.getConnectionFactory()), p.getDataType());
+						parameters.add(parameter);
 				} else {
 					SQLParameter parameter =  p.getValue(
 						params,

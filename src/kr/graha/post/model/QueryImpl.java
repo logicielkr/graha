@@ -149,7 +149,17 @@ public class QueryImpl extends Query {
  * htmlType 속성값 이 정의되지 않았거나, div 가 아닌 다른 값으로 정의된 경우에는 fasle 를 반환한다.
  */
 	protected boolean div() {
+		return QueryImpl.div(super.getHtmltype());
+		/*
 		if(STR.valid(super.getHtmltype()) && STR.compareIgnoreCase(super.getHtmltype(), "div")) {
+			return true;
+		} else {
+			return false;
+		}
+		*/
+	}
+	protected static boolean div(String htmlType) {
+		if(STR.valid(htmlType) && STR.compareIgnoreCase(htmlType, "div")) {
 			return true;
 		} else {
 			return false;

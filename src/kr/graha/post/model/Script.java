@@ -50,6 +50,7 @@ public class Script {
 	private String charset = null;
 	private String cond = null;
 	private String textContent = null;
+	private String preload = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -79,6 +80,12 @@ public class Script {
 	}
 	private void setCond(String cond) {
 		this.cond = cond;
+	}
+	private String getPreload() {
+		return this.preload;
+	}
+	private void setPreload(String preload) {
+		this.preload = preload;
 	}
 	public String getTextContent() {
 		return this.textContent;
@@ -118,6 +125,8 @@ public class Script {
 							this.setCharset(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
 							this.setCond(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "preload")) {
+							this.setPreload(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -136,6 +145,7 @@ public class Script {
 		element.setAttribute("override", this.getOverride());
 		element.setAttribute("charset", this.getCharset());
 		element.setAttribute("cond", this.getCond());
+		element.setAttribute("preload", this.getPreload());
 		element.setTextContent(this.getTextContent());
 		return element;
 	}
@@ -159,6 +169,9 @@ public class Script {
 			internalIndent++;
 		}
 		if(STR.valid(this.getSrc())) {
+			if(STR.trueValue(this.getPreload())) {
+				xsl.appendL(internalIndent, "<link rel=\"preload\" href=\"" + this.getSrc() + "\" as=\"script\" />");
+			}
 			if(STR.valid(this.getCharset())) {
 				xsl.appendL(internalIndent, "<script src=\"" + this.getSrc() + "\" charset=\"" + this.getCharset() + "\" />");
 			} else {

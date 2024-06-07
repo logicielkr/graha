@@ -573,7 +573,7 @@ public final class XMLConfigGenerator {
 		File f = new File(dir.getPath() + File.separator + id + ".css");
 		LOG.finest(dir.getPath() + File.separator + id + ".css");
 		
-		StringBuffer css = new StringBuffer();
+		StringBuilder css = new StringBuilder();
 		java.util.List<String> hideMobileColumn = new java.util.ArrayList<String>();
 		for (Table tab2 : this.tables()) {
 			if(!this.multi(tab2)) {
@@ -937,7 +937,7 @@ public final class XMLConfigGenerator {
 		if(this.authentication()) {
 			bw.write("					where " + this.getAuthenticationColumnName(masterTable) + " = ?\n");
 		}
-		StringBuffer searchBuffer = new StringBuffer();
+		StringBuilder searchBuffer = new StringBuilder();
 		if(this.search()) {
 			index = 0;
 			for(Column col : masterTable.cols) {
@@ -1129,7 +1129,7 @@ public final class XMLConfigGenerator {
 		Table masterTable = this.getMasterTable();
 		int index = 0;
 		bw.write("	<query id=\"insert\" funcType=\"insert\" label=\"" + masterTable.getRemarksOrName() + "\">\n");
-		StringBuffer validationBuffer = new StringBuffer();
+		StringBuilder validationBuffer = new StringBuilder();
 		for (Table tab2 : this.tables()) {
 			boolean isMasterTable = isMasterTable(tab2);
 			for(Column col : tab2.cols) {
@@ -1146,7 +1146,7 @@ public final class XMLConfigGenerator {
 		if(index > 0) {
 			validationBuffer.append("		</validation>\n");
 		}
-		StringBuffer calculatorBuffer = new StringBuffer();
+		StringBuilder calculatorBuffer = new StringBuilder();
 		index = 0;
 		for (Table tab2 : this.tables()) {
 			boolean isMasterTable = isMasterTable(tab2);

@@ -43,6 +43,16 @@ public class Head {
 	protected static final int HEAD_TYPE_HEAD = 1;
 	protected static final int HEAD_TYPE_TOP = 2;
 	protected static final int HEAD_TYPE_BOTTOM = 3;
+	
+	protected static final int HEAD_POSITION_NONE = 10;
+	
+	protected static final int HEAD_POSITION_TOP = 11;	// top
+	protected static final int HEAD_POSITION_UNDER_THE_TITLE = 12;	// title
+	protected static final int HEAD_POSITION_ABOVE_THE_MULTITAB = 13;	//multitab
+	protected static final int HEAD_POSITION_ABOVE_THE_TABLE = 14;	//above
+	
+	protected static final int HEAD_POSITION_UNDER_THE_TABLE = 15;	//under
+	protected static final int HEAD_POSITION_BOTTOM = 16; //bottom
 
 	private Head() {
 	}
@@ -51,6 +61,7 @@ public class Head {
 	private String override = null;
 	private String cond = null;
 	private String textContent = null;
+	private Integer position = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -68,6 +79,58 @@ public class Head {
 	}
 	private void setCond(String cond) {
 		this.cond = cond;
+	}
+	protected int getPosition(int headType) {
+		if(this.position == null) {
+			if(headType == Head.HEAD_TYPE_TOP) {
+				return Head.HEAD_POSITION_TOP;
+			} else if(headType == Head.HEAD_TYPE_BOTTOM) {
+				return Head.HEAD_POSITION_BOTTOM;
+			}
+			return -1;
+		}
+		return this.position.intValue();
+	}
+	private String getPosition() {
+		if(this.position == null) {
+			return null;
+		}
+		if(this.position == Head.HEAD_POSITION_TOP) {
+			return "top";
+		}
+		if(this.position == Head.HEAD_POSITION_UNDER_THE_TITLE) {
+			return "title";
+		}
+		if(this.position == Head.HEAD_POSITION_ABOVE_THE_MULTITAB) {
+			return "multitab";
+		}
+		if(this.position == Head.HEAD_POSITION_ABOVE_THE_TABLE) {
+			return "above";
+		}
+		if(this.position == Head.HEAD_POSITION_UNDER_THE_TABLE) {
+			return "under";
+		}
+		if(this.position == Head.HEAD_POSITION_BOTTOM) {
+			return "bottom";
+		}
+		return null;
+	}
+	private void setPosition(String position) {
+		if(STR.compareIgnoreCase(position, "top")) {
+			this.position = Head.HEAD_POSITION_TOP;
+		} else if(STR.compareIgnoreCase(position, "title")) {
+			this.position = Head.HEAD_POSITION_UNDER_THE_TITLE;
+		} else if(STR.compareIgnoreCase(position, "multitab")) {
+			this.position = Head.HEAD_POSITION_ABOVE_THE_MULTITAB;
+		} else if(STR.compareIgnoreCase(position, "above")) {
+			this.position = Head.HEAD_POSITION_ABOVE_THE_TABLE;
+		} else if(STR.compareIgnoreCase(position, "under")) {
+			this.position = Head.HEAD_POSITION_UNDER_THE_TABLE;
+		} else if(STR.compareIgnoreCase(position, "bottom")) {
+			this.position = Head.HEAD_POSITION_BOTTOM;
+		} else {
+			LOG.warning("invalid position(" + position + ")");
+		}
 	}
 	public String getTextContent() {
 		return this.textContent;
@@ -110,6 +173,8 @@ public class Head {
 							this.setOverride(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
 							this.setCond(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "position")) {
+							this.setPosition(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -126,6 +191,7 @@ public class Head {
 		element.setAttribute("name", this.getName());
 		element.setAttribute("override", this.getOverride());
 		element.setAttribute("cond", this.getCond());
+		element.setAttribute("position", this.getPosition());
 		element.setTextContent(this.getTextContent());
 		return element;
 	}

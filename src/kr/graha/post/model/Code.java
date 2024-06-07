@@ -45,6 +45,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import kr.graha.post.model.utility.AuthUtility;
 
+
 /**
  * querys/query/header/codes/code
  * querys/header/codes/code
@@ -61,7 +62,7 @@ public class Code extends SQLExecutor {
 	private String name = null;
 	private String sqlAttr = null;
 	private String encrypt = null;
-	private List<Param> param = null;
+	private List param = null;
 	private List<Encrypt> encrypts = null;
 	private List<Option> option = null;
 	private Node sql = null;
@@ -98,9 +99,15 @@ public class Code extends SQLExecutor {
 	}
 	private void add(Param param) {
 		if(this.param == null) {
-			this.param = new ArrayList<Param>();
+			this.param = new ArrayList();
 		}
 		this.param.add(param);
+	}
+	private void add(Tile tile) {
+		if(this.param == null) {
+			this.param = new ArrayList();
+		}
+		this.param.add(tile);
 	}
 	private void add(Encrypt encrypt) {
 		if(this.encrypts == null) {
@@ -113,6 +120,12 @@ public class Code extends SQLExecutor {
 			this.option = new ArrayList<Option>();
 		}
 		this.option.add(option);
+	}
+	private int getParamSize(Record record) {
+		return Tile.getParamSize(this.param, record);
+	}
+	private Param getParam(int index, Record record) {
+		return Tile.getParam(this.param, index, record);
 	}
 	protected static String nodeName() {
 		return Code.nodeName;
@@ -142,6 +155,8 @@ public class Code extends SQLExecutor {
 			this.setSql(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "tile")) {
+			this.add(Tile.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
 			this.add(Encrypt.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "option")) {
@@ -220,7 +235,11 @@ public class Code extends SQLExecutor {
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
-				child.appendChild(((Param)this.param.get(i)).element());
+				if(this.param.get(i) instanceof Param) {
+					child.appendChild(((Param)this.param.get(i)).element());
+				} else {
+					child.appendChild(((Tile)this.param.get(i)).element());
+				}
 			}
 		}
 		if(this.encrypts != null && this.encrypts.size() > 0) {
@@ -235,18 +254,18 @@ public class Code extends SQLExecutor {
 		}
 		return element;
 	}
-	protected GCode execute(Record params, ConnectionFactory connectionFactory) throws NoSuchProviderException, SQLException {
+	protected GCode execute(Record params, int time, ConnectionFactory connectionFactory) throws NoSuchProviderException, SQLException {
 		if(STR.valid(this.getCond()) && !AuthUtility.auth(this.getCond(), params)) {
 			return null;
 		}
-		GCode code = new GCode(this.getName());
 		Buffer sql = new Buffer();
 		if(STR.valid(this.getSqlAttr())) {
 			sql.append(this.getSqlAttr());
 		} else {
 			sql = super.parseSQL(this.sql, params);
 		}
-		if(sql != null && sql.valid()) {
+		if(time > Prop.Before_Connection && sql != null && sql.valid()) {
+			GCode code = new GCode(this.getName());
 			super.setConnectionFactory(connectionFactory);
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
@@ -254,9 +273,9 @@ public class Code extends SQLExecutor {
 				Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 				List<SQLParameter> parameters = new ArrayList();
 				if(STR.valid(this.param)) {
-					for(int i = 0; i < this.param.size(); i++) {
-						Param p = (Param)this.param.get(i);
-							SQLParameter parameter =  p.getValue(
+					for(int i = 0; i < this.getParamSize(params); i++) {
+						Param p = (Param)this.getParam(i, params);
+						SQLParameter parameter =  p.getValue(
 							params,
 							encryptor
 						);
@@ -289,8 +308,10 @@ public class Code extends SQLExecutor {
 				DB.close(pstmt);
 				pstmt = null;
 			}
-		} else {
+			return code;
+		} else if(time == Prop.Before_Connection) {
 			if(STR.valid(this.option)) {
+				GCode code = new GCode(this.getName());
 				for(int i = 0; i < this.option.size(); i++) {
 					Option o = this.option.get(i);
 					code.add(o.getValue(), o.getLabel());
@@ -298,8 +319,9 @@ public class Code extends SQLExecutor {
 						params.put(Record.key(Record.PREFIX_TYPE_CODE, this.getName(), "firstValue"), o.getValue());
 					}
 				}
+				return code;
 			}
 		}
-		return code;
+		return null;
 	}
 }

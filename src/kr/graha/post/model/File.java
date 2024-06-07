@@ -250,7 +250,8 @@ public class File {
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 				xsl.appendL(indent2 + 1, "<input type=\"checkbox\" class=\"_deletefile_." + this.getName() + "\" name=\"_deletefile_." + this.getName() + ".{position()}\" value=\"{" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + "}\" />");
 			}
-			xsl.appendL(indent2 + 1, "<a href=\"" + Link.getPath(queryId, param) + "/download/" + this.getName() + "/{" + kr.graha.post.xml.GFile.childNodeName("name2", rdf) + "}?{$downloadparam}\">");
+			xsl.appendL(indent2 + 1, "<a>");
+			xsl.appendL(indent + 1, "<xsl:attribute name=\"href\">" + Link.getPath(queryId, param) + "/download/" + this.getName() + "/<xsl:value-of select=\"" + kr.graha.post.xml.GFile.childNodeName("name2", rdf) + "\" />?<xsl:value-of select=\"$downloadparam\" /></xsl:attribute>");
 			xsl.appendL(indent2 + 2, "<xsl:value-of select=\"" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + "\" />");
 			xsl.appendL(indent2 + 1, "</a>");
 			xsl.appendL(indent2, "</li>");
@@ -478,7 +479,6 @@ public class File {
 	protected void list(GDocument document, Record params) throws IOException {
 		if(STR.valid(this.getPath())) {
 			Record result = new Record();
-//			TextParser.parse(this.getPath(), params, result);
 			if(
 				params.hasKey(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) &&
 				params.getInt(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) > 0

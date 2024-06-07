@@ -228,14 +228,15 @@ public class Search {
 			xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
 			internalIndent++;
 		}
-		xsl.append(internalIndent, "<form action=\"" + Link.getPath(this.getPath(), param) + "\"");
+		xsl.appendL(internalIndent, "<form>");
+		xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param, rdf) + "</xsl:attribute>");
 		if(STR.valid(this.getName())) {
-			xsl.append(" name=\"" + this.getName() + "\" class=\"" + this.getName() + "\"");
+			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
 		}
 		if(STR.valid(this.getMethod())) {
-			xsl.append(" method=\"" + this.getMethod() + "\"");
+			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"method\">" + this.getMethod() + "</xsl:attribute>");
 		}
-		xsl.appendL(">");
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {
 				xsl.append(((SearchParam)this.param.get(i)).search(tables, commands, internalIndent + 1, rdf));

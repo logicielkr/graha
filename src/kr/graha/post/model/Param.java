@@ -248,7 +248,7 @@ public class Param {
 					params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "today"), d);
 					return new java.sql.Date(d.getTime());
 				} else {
-					return params.getDate(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today"));
+					return params.getDate(Record.key(Record.PREFIX_TYPE_SYSTEM, "today"));
 				}
 			} else {
 				if(STR.valid(this.getPattern())) {
@@ -265,7 +265,7 @@ public class Param {
 					params.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "today"), d);
 					return new java.sql.Timestamp(d.getTime());
 				} else {
-					return params.getTimestamp(Record.key(Record.PREFIX_TYPE_UNKNOWN, "today"));
+					return params.getTimestamp(Record.key(Record.PREFIX_TYPE_SYSTEM, "today"));
 				}
 			} else {
 				if(STR.valid(this.getPattern())) {
@@ -344,6 +344,8 @@ public class Param {
 					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_PARAM, this.getDefaultValue().substring(6)), encryptor);
 				} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "code.")) {
 					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_CODE, this.getDefaultValue().substring(5)), encryptor);
+				} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "att.")) {
+					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_CODE, this.getDefaultValue().substring(4)), encryptor);
 				} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "query.")) {
 					value = this.getValue(params, Record.key(Record.PREFIX_TYPE_QUERY, this.getDefaultValue().substring(6)), encryptor);
 				} else {

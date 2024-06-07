@@ -150,8 +150,6 @@ public class Column extends Param {
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
-//			LOG.debug(this.getCond());
-//			AuthUtility.debug(tabAuthInfo);
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
 					this.valid = false;
@@ -291,10 +289,21 @@ public class Column extends Param {
 					value = super.getValue(params, Record.key(Record.PREFIX_TYPE_SEQUENCE, key), encryptor);
 					return new SQLParameter(value, this.getDataType());
 				}
+			} else if(STR.startsWithIgnoreCase(this.getInsert(), "generator.")) {
+				if(sqlType == Table.SQL_TYPE_INSERT) {
+					if(!params.hasKey(Record.key(Record.PREFIX_TYPE_GENERATOR, key))) {
+						params.put(Record.key(Record.PREFIX_TYPE_GENERATOR, key), SQLExecutor.getPKGeneratorValue(this.getInsert(), this.getName(), this.getDataType(), params, connectionFactory));
+					}
+					value = super.getValue(params, Record.key(Record.PREFIX_TYPE_GENERATOR, key), encryptor);
+					return new SQLParameter(value, this.getDataType());
+				}
 			} else if(STR.trueValue(this.getForeign()) && STR.valid(tables)) {
 				if(sqlType == Table.SQL_TYPE_INSERT) {
 					if(params.hasKey(Record.key(Record.PREFIX_TYPE_SEQUENCE, this.getValue()))) {
 						value = super.getValue(params, Record.key(Record.PREFIX_TYPE_SEQUENCE, this.getValue()), encryptor);
+						return new SQLParameter(value, this.getDataType());
+					} else if(params.hasKey(Record.key(Record.PREFIX_TYPE_GENERATOR, this.getValue()))) {
+						value = super.getValue(params, Record.key(Record.PREFIX_TYPE_GENERATOR, this.getValue()), encryptor);
 						return new SQLParameter(value, this.getDataType());
 					} else {
 						Table table = null;
@@ -330,6 +339,12 @@ public class Column extends Param {
 								}
 								value = super.getValue(params, Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), encryptor);
 								return new SQLParameter(value, this.getDataType());
+							} else if(STR.startsWithIgnoreCase(column.getInsert(), "generator.")) {
+								if(!params.hasKey(Record.key(Record.PREFIX_TYPE_GENERATOR, column.getValue()))) {
+									params.put(Record.key(Record.PREFIX_TYPE_GENERATOR, column.getValue()), SQLExecutor.getPKGeneratorValue(column.getInsert(), column.getName(), column.getDataType(), params, connectionFactory));
+								}
+								value = super.getValue(params, Record.key(Record.PREFIX_TYPE_GENERATOR, column.getValue()), encryptor);
+								return new SQLParameter(value, this.getDataType());
 							} else if(STR.compareIgnoreCase(column.getInsert(), "generate")) {
 								value = super.getValue(params, Record.key(Record.PREFIX_TYPE_GENERATE, column.getValue()), encryptor);
 								return new SQLParameter(value, this.getDataType());
@@ -350,6 +365,8 @@ public class Column extends Param {
 				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_PARAM, this.getDefaultValue().substring(6)), encryptor);
 			} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "code.")) {
 				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_CODE, this.getDefaultValue().substring(5)), encryptor);
+			} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "att.")) {
+				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_CODE, this.getDefaultValue().substring(4)), encryptor);
 			} else if(STR.startsWithIgnoreCase(this.getDefaultValue(), "query.")) {
 				value = this.getValue(params, Record.key(Record.PREFIX_TYPE_QUERY, this.getDefaultValue().substring(6)), encryptor);
 			} else {

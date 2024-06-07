@@ -75,6 +75,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		if(STR.valid(super.getProcessor())) {
 			for(int i = 0; i < super.getProcessor().size(); i++) {
 				((Processor)super.getProcessor().get(i)).execute(document, param, request, response, super.getConnectionFactory(param), before);
+				if(param.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
+					return;
+				}
 			}
 		}
 	}
@@ -258,19 +261,19 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			super.getHeader().executeMessage(document, params);
 		}
 	}
-	private void executeCode(GDocument document, Record params) throws NoSuchProviderException, SQLException {
+	private void executeCode(GDocument document, Record params, int time) throws NoSuchProviderException, SQLException {
 		if(params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
 			return;
 		}
 		try {
 			if(super.getExtendHeader() != null) {
-				super.getExtendHeader().executeCode(document, params, super.getConnectionFactory(params), super.getRootHeader(), super.getHeader());
+				super.getExtendHeader().executeCode(document, params, time, super.getConnectionFactory(params), super.getRootHeader(), super.getHeader());
 			}
 			if(super.getRootHeader() != null) {
-				super.getRootHeader().executeCode(document, params, super.getConnectionFactory(params), super.getHeader());
+				super.getRootHeader().executeCode(document, params, time, super.getConnectionFactory(params), super.getHeader());
 			}
 			if(super.getHeader() != null) {
-				super.getHeader().executeCode(document, params, super.getConnectionFactory(params));
+				super.getHeader().executeCode(document, params, time, super.getConnectionFactory(params));
 			}
 		} catch (NoSuchProviderException | SQLException e) {
 			super.abort();
@@ -323,7 +326,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					}
 				}
 				if(params != null && !params.isEmpty()) {
-					StringBuffer xslParam = new StringBuffer();
+					StringBuilder xslParam = new StringBuilder();
 					Iterator<Key> it = params.keySet().iterator();
 					int index = 0;
 					if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "POST")) {
@@ -521,9 +524,17 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		int totalFetchCount = 0;
 		try {
 			this.executeMessage(document, params);
-			this.executeCode(document, params);
+			this.executeCode(document, params, Prop.Before_Connection);
 			super.executeProp(params, Prop.Before_Before_Processor);
+			this.executeCode(document, params, Prop.Before_Before_Processor);
+//			this.executeCode(document, params);
 			this.executeProcessor(document, params, request, response, true);
+			if(params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
+				super.abort();
+				this.setXslNameAndParam(document, params, queryFuncType);
+				document.add(params);
+				return document;
+			}
 			super.executeProp(params, Prop.After_Before_Processor);
 			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
 			totalFetchCount += this.executeTable(document, params, queryFuncType);
@@ -534,6 +545,12 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			}
 			super.executeProp(params, Prop.Before_After_Processor);
 			this.executeProcessor(document, params, request, response, false);
+			if(params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
+				super.abort();
+				this.setXslNameAndParam(document, params, queryFuncType);
+				document.add(params);
+				return document;
+			}
 			super.executeProp(params, Prop.After_After_Processor);
 			this.executeReport(request, response, params, document, queryFuncType);
 			this.setXslNameAndParam(document, params, queryFuncType);
@@ -598,7 +615,8 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/xml; charset=UTF-8");
 		try {
-			response.getWriter().append(document.toXML().toStringBuffer());
+//			response.getWriter().append(document.toXML().toStringBuffer());
+			response.getWriter().append(document.toXML().toCharSequence());
 		} catch (IOException e) {
 			LOG.severe(e);
 		}
@@ -619,7 +637,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				if(document == null) {
 					return HttpServletResponse.SC_NOT_FOUND;
 				}
-				if(queryFuncType == Query.QUERY_FUNC_TYPE_USER) {
+				if(queryFuncType == Query.QUERY_FUNC_TYPE_USER && !params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
 					this.sendUser(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {
 					this.sendXML(request, response, document);

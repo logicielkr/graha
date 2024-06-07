@@ -256,7 +256,14 @@ public final class AuthUtility {
 		}
 //		return param.check(Record.key(Record.PREFIX_TYPE_UNKNOWN, left), right, AuthUtility.LessThanOrEqualTo);
 	}
+	public static boolean testAtServer(AuthInfo info, Record params) {
+//		return AuthUtility.testInServer(info, params, false);
+		return AuthUtility.testInServer(info, params, false);
+	}
 	public static boolean testInServer(AuthInfo info, Record params) {
+		return AuthUtility.testInServer(info, params, true);
+	}
+	private static boolean testInServer(AuthInfo info, Record params, Boolean includeQuery) {
 		if(info == null) {
 			return false;
 		} else if(info.left == null) {
@@ -267,24 +274,20 @@ public final class AuthUtility {
 				info.leftType == AuthUtility.TYPE_OF_RECORD
 			) {
 				if(
-					!STR.startsWithIgnoreCase(info.left, "query.") &&
-					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left)) &&
-					!STR.startsWithIgnoreCase(info.right, "query.") &&
-					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right))
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), includeQuery) &&
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), includeQuery)
 				) {
 					return true;
 				}
 			} else if(info.rightType == AuthUtility.TYPE_OF_RECORD) {
 				if(
-					!STR.startsWithIgnoreCase(info.right, "query.") &&
-					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right))
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.right), includeQuery)
 				) {
 					return true;
 				}
 			} else if(info.leftType == AuthUtility.TYPE_OF_RECORD) {
 				if(
-					!STR.startsWithIgnoreCase(info.left, "query.") &&
-					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left))
+					params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, info.left), includeQuery)
 				) {
 					return true;
 				}

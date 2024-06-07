@@ -80,6 +80,7 @@ public class Col {
 	private String test = null;
 	private String xTest = null;
 	private String escape = null;
+	private String style = null;
 	
 	private String defaultValue = null;
 	private List<String[]> dataAttr = null;
@@ -267,6 +268,12 @@ public class Col {
 	private void setEscape(String escape) {
 		this.escape = escape;
 	}
+	private String getStyle() {
+		return this.style;
+	}
+	private void setStyle(String style) {
+		this.style = style;
+	}
 	private String getDefaultValue() {
 		return this.defaultValue;
 	}
@@ -418,6 +425,8 @@ public class Col {
 							this.setXTest(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "escape")) {
 							this.setEscape(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "style")) {
+							this.setStyle(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "default")) {
 							this.setDefaultValue(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
@@ -465,6 +474,7 @@ public class Col {
 		element.setAttribute("test", this.getTest());
 		element.setAttribute("xTest", this.getXTest());
 		element.setAttribute("escape", this.getEscape());
+		element.setAttribute("style", this.getStyle());
 		element.setAttribute("default", this.getDefaultValue());
 		if(this.dataAttr != null && this.dataAttr.size() > 0) {
 			for(int i = 0; i < this.dataAttr.size(); i++) {
@@ -545,47 +555,91 @@ public class Col {
 		}
 		if(div) {
 			xsl.appendL(indent, "<div>");
+			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName);
 			if(STR.valid(this.getName())) {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + " " + this.getName() + "</xsl:attribute>");
-			} else {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + "</xsl:attribute>");
+				xsl.append(" " + this.getName());
+//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + " " + this.getName() + "</xsl:attribute>");
+//			} else {
+//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + "</xsl:attribute>");
 			}
+			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
+				xsl.append(" " + this.getClassName());
+			}
+			xsl.appendL("</xsl:attribute>");
 		} else {
 			xsl.appendL(indent, "<" + tagName + ">");
+			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha");
 			if(STR.valid(this.getName())) {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
-			} else {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
+				xsl.append(" " + this.getName());
+//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
+//			} else {
+//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 			}
+			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
+				xsl.append(" " + this.getClassName());
+			}
+			xsl.appendL("</xsl:attribute>");
 		}
-		if(STR.compareIgnoreCase(tagName, "th") && STR.valid(this.getLabelWidth())) {
-			xsl.appendL(indent + 1, "<xsl:attribute name=\"style\">width:" + this.getLabelWidth() + ";</xsl:attribute>");
+		if(
+			STR.compareIgnoreCase(tagName, "th") &&
+			(
+				STR.valid(this.getLabelWidth()) ||
+				STR.valid(this.getStyle())
+			)
+		) {
+//			xsl.appendL(indent + 1, "<xsl:attribute name=\"style\">width:" + this.getLabelWidth() + ";</xsl:attribute>");
+//			xsl.appendL(indent + 1, "<xsl:attribute name=\"style\">width:" + TextParser.parseForXSL(this.getLabelWidth(), param, rdf, full) + ";</xsl:attribute>");
+			if(STR.valid(this.getLabelWidth())) {
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"width\">" + TextParser.parseForXSL(this.getLabelWidth(), param, rdf, full) + "</xsl:attribute>");
+			}
+			xsl.append(indent + 1, "<xsl:attribute name=\"style\">");
+			if(STR.valid(this.getLabelWidth())) {
+				xsl.append("width:" + TextParser.parseForXSL(this.getLabelWidth(), param, rdf, full) + ";");
+			}
+			if(STR.valid(this.getStyle())) {
+				xsl.append(TextParser.parseForXSL(this.getStyle(), param, rdf, full) + ";");
+			}
+			xsl.appendL("</xsl:attribute>");
 		} else {
-			if(STR.valid(this.getWidth()) || STR.valid(this.getHeight())) {
-				xsl.append(indent + 1, "<xsl:attribute name=\"style\">");
+			if(STR.valid(this.getWidth()) || STR.valid(this.getHeight()) || STR.valid(this.getStyle())) {
 				if(STR.valid(this.getWidth())) {
-						xsl.append("width:" + this.getWidth() + ";");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"width\">" + TextParser.parseForXSL(this.getWidth(), param, rdf, full) + "</xsl:attribute>");
 				}
 				if(STR.valid(this.getHeight())) {
-						xsl.append("height:" + this.getHeight() + ";");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"height\">" + TextParser.parseForXSL(this.getHeight(), param, rdf, full) + "</xsl:attribute>");
+				}
+				xsl.append(indent + 1, "<xsl:attribute name=\"style\">");
+				if(STR.valid(this.getWidth())) {
+//						xsl.append("width:" + this.getWidth() + ";");
+						xsl.append("width:" + TextParser.parseForXSL(this.getWidth(), param, rdf, full) + ";");
+				}
+				if(STR.valid(this.getHeight())) {
+//						xsl.append("height:" + this.getHeight() + ";");
+						xsl.append("height:" + TextParser.parseForXSL(this.getHeight(), param, rdf, full) + ";");
+				}
+				if(STR.valid(this.getStyle())) {
+					xsl.append(TextParser.parseForXSL(this.getStyle(), param, rdf, full) + ";");
 				}
 				xsl.appendL("</xsl:attribute>");
 			}
 		}
 		if(STR.compareIgnoreCase(tagName, "td") && STR.valid(this.getAlign())) {
-			xsl.appendL(indent + 1, "<xsl:attribute name=\"align\">" + this.getAlign() + "</xsl:attribute>");
+//			xsl.appendL(indent + 1, "<xsl:attribute name=\"align\">" + this.getAlign() + "</xsl:attribute>");
+			xsl.appendL(indent + 1, "<xsl:attribute name=\"align\">" + TextParser.parseForXSL(this.getAlign(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(
 			(viewType == Tab.VIEW_TYPE_LIST || STR.compareIgnoreCase(tagName, "td")) &&
 			STR.valid(this.getColspan())
 		) {
-			xsl.appendL(indent + 1, "<xsl:attribute name=\"colspan\">" + this.getColspan() + "</xsl:attribute>");
+//			xsl.appendL(indent + 1, "<xsl:attribute name=\"colspan\">" + this.getColspan() + "</xsl:attribute>");
+			xsl.appendL(indent + 1, "<xsl:attribute name=\"colspan\">" + TextParser.parseForXSL(this.getColspan(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(
 			(viewType == Tab.VIEW_TYPE_LIST || STR.compareIgnoreCase(tagName, "td")) &&
 			STR.valid(this.getRowspan())
 		) {
-			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + this.getRowspan() + "</xsl:attribute>");
+//			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + this.getRowspan() + "</xsl:attribute>");
+			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + TextParser.parseForXSL(this.getRowspan(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(STR.compareIgnoreCase(tagName, "th")) {
 			xsl.appendL(indent + 1, TextParser.parseForXSL(this.getLabel(), param, rdf, full));
@@ -597,7 +651,12 @@ public class Col {
 						if(STR.compareIgnoreCase(col.getType(), "hidden")) {
 							xsl.appendL(indent + 1, "<input>");
 							xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-							xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">" + col.getName() + "</xsl:attribute>");
+							xsl.append(indent + 2, "<xsl:attribute name=\"class\">");
+							xsl.append(col.getName());
+							if(STR.valid(col.getClassName()) && !STR.valid(col.getIcon())) {
+								xsl.append(" " + col.getClassName());
+							}
+							xsl.appendL("</xsl:attribute>");
 							if(full) {
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + col.getName() + "</xsl:attribute>");
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, col.getValue(), rdf) + "\" /></xsl:attribute>");
@@ -611,6 +670,13 @@ public class Col {
 				}
 				xsl.append(this.input(param, indent + 1, table, tabName, rdf, full));
 			} else {
+				if(this.dataAttr != null && this.dataAttr.size() > 0) {
+					for(int x = 0; x < this.dataAttr.size(); x++) {
+						String[] v = (String[])this.dataAttr.get(x);
+//						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
+					}
+				}
 				String value = this.value(indent + 1, tabName, rdf, div, full).toString();
 				if(this.link != null && this.link.size() > 0) {
 					for(int i = 0; i < this.link.size(); i++) {
@@ -720,7 +786,8 @@ public class Col {
 				if(this.dataAttr != null && this.dataAttr.size() > 0) {
 					for(int x = 0; x < this.dataAttr.size(); x++) {
 						String[] v = (String[])this.dataAttr.get(x);
-						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+//						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 					}
 				}
 				xsl.append(indent + 2, "<xsl:attribute name=\"value\">");
@@ -753,7 +820,8 @@ public class Col {
 						if(this.dataAttr != null && this.dataAttr.size() > 0) {
 							for(int x = 0; x < this.dataAttr.size(); x++) {
 								String[] v = (String[])this.dataAttr.get(x);
-								xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+//								xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+								xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 							}
 						}
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"value\">" + obj.getValue() + "</xsl:attribute>");
@@ -790,6 +858,9 @@ public class Col {
 			xsl.append(this.getName());
 			if(STR.trueValue(this.getReadonly()) || STR.compareIgnoreCase(this.getReadonly(), "readonly")) {
 				xsl.append(" readonly");
+			}
+			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
+				xsl.append(" " + this.getClassName());
 			}
 			xsl.appendL("</xsl:attribute>");
 			if(STR.vexistsIgnoreCase(this.getType(), "textarea", "select")) {
@@ -866,7 +937,8 @@ public class Col {
 			if(this.dataAttr != null && this.dataAttr.size() > 0) {
 				for(int x = 0; x < this.dataAttr.size(); x++) {
 					String[] v = (String[])this.dataAttr.get(x);
-					xsl.appendL(indent + 1, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+//					xsl.appendL(indent + 1, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 				}
 			}
 			if(STR.valid(this.getDisabled())) {

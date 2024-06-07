@@ -61,7 +61,8 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		try {
 			Buffer buffer = this.toXSL(params, request, 0);
-			response.getWriter().append(buffer.toStringBuffer());
+//			response.getWriter().append(buffer.toStringBuffer());
+			response.getWriter().append(buffer.toCharSequence());
 		} catch (IOException e) {
 			LOG.severe(e);
 		}
@@ -143,18 +144,21 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		xsl.appendL("</head>");
 		xsl.appendL("<body>");
-		if(super.getExtendHeader() != null) {
-			xsl.append(super.getExtendHeader().headToXSL(Head.HEAD_TYPE_TOP, param, rdf, super.getRootHeader(), super.getHeader()));
-		}
-		if(super.getRootHeader() != null) {
-			xsl.append(super.getRootHeader().headToXSL(Head.HEAD_TYPE_TOP, param, rdf, super.getHeader()));
-		}
+		Header.headToXSL(
+			super.getExtendHeader(),
+			super.getRootHeader(),
+			super.getHeader(),
+			Head.HEAD_TYPE_TOP,
+			Head.HEAD_POSITION_TOP,
+			param,
+			rdf,
+			xsl
+		);
 		if(super.getHeader() != null) {
-			xsl.append(super.getHeader().headToXSL(Head.HEAD_TYPE_TOP, param, rdf));
 			xsl.append(super.getHeader().labelToXSL(Label.LABEL_TYPE_LABEL, Label.LABEL_POSITION_BODY, param, super.getLabel(), super.getXLabel(), rdf));
-			xsl.append(super.getHeader().labelToXSL(Label.LABEL_TYPE_DESC, Label.LABEL_POSITION_BODY, param, super.getDesc(), super.getXDesc(), rdf));
 			xsl.append(super.getHeader().labelToXSL(Label.LABEL_TYPE_AUTHOR, Label.LABEL_POSITION_BODY, param, super.getAuthor(), super.getXAuthor(), rdf));
 			xsl.append(super.getHeader().labelToXSL(Label.LABEL_TYPE_KEYWORD, Label.LABEL_POSITION_BODY, param, super.getKeyword(), super.getXKeyword(), rdf));
+			xsl.append(super.getHeader().labelToXSL(Label.LABEL_TYPE_DESC, Label.LABEL_POSITION_BODY, param, super.getDesc(), super.getXDesc(), rdf));
 		}
 	}
 	private void post(Record param, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
@@ -271,7 +275,6 @@ public class QueryXSLImpl extends QueryImpl {
 		xsl.appendL("<xsl:output method=\"html\" encoding=\"utf-8\" indent=\"yes\" version=\"5.0\" omit-xml-declaration=\"no\" />");
 		xsl.appendL("<xsl:template match=\"/\">");
 		if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
-//			xsl.appendL("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>");
 			xsl.appendL("<xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;&#xa;</xsl:text>");
 		} else { 
 			xsl.appendL("<xsl:if test=\"system-property('xsl:vendor') = 'Microsoft'\">");
@@ -292,15 +295,16 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		xsl.appendL("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />");
 		xsl.appendL("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
-		if(super.getExtendHeader() != null) {
-			xsl.append(super.getExtendHeader().headToXSL(Head.HEAD_TYPE_HEAD, param, rdf, super.getRootHeader(), super.getHeader()));
-		}
-		if(super.getRootHeader() != null) {
-			xsl.append(super.getRootHeader().headToXSL(Head.HEAD_TYPE_HEAD, param, rdf, super.getHeader()));
-		}
-		if(super.getHeader() != null) {
-			xsl.append(super.getHeader().headToXSL(Head.HEAD_TYPE_HEAD, param, rdf));
-		}
+		Header.headToXSL(
+			super.getExtendHeader(),
+			super.getRootHeader(),
+			super.getHeader(),
+			Head.HEAD_TYPE_HEAD,
+			Head.HEAD_POSITION_NONE,
+			param,
+			rdf,
+			xsl
+		);
 	}
 	private void css(Record param, int indent, boolean rdf, Buffer xsl) {
 		if(super.getExtendHeader() != null) {
@@ -325,15 +329,16 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 	}
 	private void after(Record param, int indent, boolean rdf, Buffer xsl) {
-		if(super.getExtendHeader() != null) {
-			xsl.append(super.getExtendHeader().headToXSL(Head.HEAD_TYPE_BOTTOM, param, rdf, super.getRootHeader(), super.getHeader()));
-		}
-		if(super.getRootHeader() != null) {
-			xsl.append(super.getRootHeader().headToXSL(Head.HEAD_TYPE_BOTTOM, param, rdf, super.getHeader()));
-		}
-		if(super.getHeader() != null) {
-			xsl.append(super.getHeader().headToXSL(Head.HEAD_TYPE_BOTTOM, param, rdf));
-		}
+		Header.headToXSL(
+			super.getExtendHeader(),
+			super.getRootHeader(),
+			super.getHeader(),
+			Head.HEAD_TYPE_BOTTOM,
+			Head.HEAD_POSITION_BOTTOM,
+			param,
+			rdf,
+			xsl
+		);
 		xsl.appendL("</body>");
 		xsl.appendL("</html>");
 		xsl.appendL("</xsl:template>");

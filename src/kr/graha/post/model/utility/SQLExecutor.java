@@ -52,6 +52,9 @@ import kr.graha.post.xml.GRows;
  */
 
 public abstract class SQLExecutor {
+	private static int NODE_TYPE_SQL = 0;
+	private static int NODE_TYPE_ENTITY = 1;
+	private static int NODE_TYPE_TILE = 2;
 	private ConnectionFactory connectionFactory = null;
 	protected void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
@@ -87,6 +90,9 @@ public abstract class SQLExecutor {
 		return this.parseSQL((Element)node, params);
 	}
 	protected Buffer parseSQL(Element node, Record params) {
+		return this.parseSQL(node, params, SQLExecutor.NODE_TYPE_SQL);
+	}
+	private Buffer parseSQL(Element node, Record params, int nodeType) {
 		if(node == null) {
 			return null;
 		}
@@ -95,7 +101,14 @@ public abstract class SQLExecutor {
 		for(int i = 0; i < list.getLength(); i++) {
 			org.w3c.dom.Node n = (org.w3c.dom.Node)list.item(i);
 			if(n.getNodeType() == org.w3c.dom.Node.TEXT_NODE || n.getNodeType() == org.w3c.dom.Node.CDATA_SECTION_NODE ) {
-				sql.appendL(n.getNodeValue());
+				if(nodeType == SQLExecutor.NODE_TYPE_SQL || nodeType == SQLExecutor.NODE_TYPE_TILE) {
+					sql.appendL(n.getNodeValue());
+				} else {
+					String result  = TextParser.parse(n.getNodeValue(), params);
+					if(STR.valid(result)) {
+						sql.append(result);
+					}
+				}
 			} else if(n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
 					Element e = (Element)n;
 					if(!e.hasAttribute("cond") || AuthUtility.auth(e.getAttribute("cond"), params)) {
@@ -105,12 +118,14 @@ public abstract class SQLExecutor {
 사용자가 입력한 파라미터를 테이블이름 등으로 대체하는 것은
 원칙적으로 허용되지 않는 방식입니다.
 */
-							String result  = TextParser.parse(e.getFirstChild().getNodeValue(), params);
-							if(STR.valid(result)) {
-								sql.append(result);
-							}
+//							String result  = TextParser.parse(e.getFirstChild().getNodeValue(), params);
+//							if(STR.valid(result)) {
+//								sql.append(result);
+//							}
+							sql.append(this.parseSQL(e, params, SQLExecutor.NODE_TYPE_ENTITY));
 						} else if(n.getNodeName() != null && n.getNodeName().equals("tile")) {
-							sql.appendL(e.getFirstChild().getNodeValue());
+//							sql.appendL(e.getFirstChild().getNodeValue());
+							sql.append(this.parseSQL(e, params, SQLExecutor.NODE_TYPE_TILE));
 						}
 					}
 			} else {
@@ -273,6 +288,26 @@ public abstract class SQLExecutor {
 			cstmt = null;
 		}
 		return result;
+	}
+	public static Object getPKGeneratorValue(String generatorName, String name, int dataType, Record params, ConnectionFactory connectionFactory) {
+		String generatorClassName = null;
+		if(STR.startsWithIgnoreCase(generatorName, "generator.")) {
+			generatorClassName = generatorName.substring(10);
+		} else {
+			generatorClassName = generatorName;
+		}
+		try {
+			kr.graha.post.interfaces.PKGenerator generator = (kr.graha.post.interfaces.PKGenerator)Class.forName(generatorClassName).getConstructor().newInstance();
+			return generator.generate(
+				name,
+				dataType,
+				params,
+				connectionFactory
+			);
+		} catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			LOG.severe(e);
+		}
+		return null;
 	}
 	private static Object getNextSequenceValue(String sequenceName, ConnectionFactory connectionFactory, int dataType) throws SQLException {
 		Object result = null;

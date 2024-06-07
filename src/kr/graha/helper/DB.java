@@ -178,7 +178,7 @@ public final class DB {
  * @return 첫 번째 문자를 대문자로 변환한 문자열
  */
 	private static String initcap(String text, boolean firstLetter) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		StringTokenizer st = new StringTokenizer(text, "_");
 		int index = 0;
 		while (st.hasMoreTokens()) {
@@ -492,7 +492,7 @@ public final class DB {
  * @return 데이타베이스 컬럼 이름 형태의 문자열
  */
 	private static String getColumnName(String fieldName) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		if(fieldName != null) {
 			char[] charArray = fieldName.toCharArray();
 			if(charArray != null) {

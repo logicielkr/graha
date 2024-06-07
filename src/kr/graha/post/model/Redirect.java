@@ -200,7 +200,7 @@ public class Redirect {
 		xsl.appendL(indent, "<form>");
 		xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">get</xsl:attribute>");
 		xsl.appendL(indent + 1, "<xsl:attribute name=\"id\">_post</xsl:attribute>");
-		xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param) + "</xsl:attribute>");
+		xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param, rdf) + "</xsl:attribute>");
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {
 				xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));

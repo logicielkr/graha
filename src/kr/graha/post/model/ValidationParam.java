@@ -317,21 +317,6 @@ public class ValidationParam {
 			if(!exists) {
 				xsl.appendL(indent + 1, "break;");
 			}
-			/*
-			if(exists) {
-				xsl.appendL(indent + 4, "result = false;");
-				xsl.appendL(indent + 3, "} else {");
-				xsl.appendL(indent + 4, "alert(_getMessage(\"" + this.getMsg() + "\"));");
-				xsl.appendL(indent + 4, "if(typeof(_focus) == \"function\") {_focus(form, \"" + this.getName() + "\" + \".\" + index);}");
-				xsl.appendL(indent + 4, "return false;");
-				xsl.appendL(indent + 3, "}");
-				xsl.appendL(indent + 2, "}");
-				xsl.appendL(indent + 2, "index++;");
-				xsl.appendL(indent + 1, "} else {");
-				xsl.appendL(indent + 2, "break;");
-				xsl.appendL(indent + 1, "}");
-			}
-			*/
 			xsl.appendL(indent, "}");
 		} else {
 			if(STR.valid(this.getFormat())) {
@@ -382,17 +367,6 @@ public class ValidationParam {
 				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "number_format" + ":\"" + this.getNumberFormat() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
-			/*
-			if(exists) {
-				xsl.appendL(indent + 2, "result = false;");
-				xsl.appendL(indent + 1, "} else {");
-				xsl.appendL(indent + 2, "alert(_getMessage(\"" + this.getMsg() + "\"));");
-				xsl.appendL(indent + 2, "if(typeof(_focus) == \"function\") {_focus(form, \"" + this.getName() + "\");}");
-				xsl.appendL(indent + 2, "return false;");
-				xsl.appendL(indent + 1, "}");
-				xsl.appendL(indent, "}");
-			}
-			*/
 		}
 		if(authInfo != null) {
 			xsl.appendL(indent, "</xsl:if>");

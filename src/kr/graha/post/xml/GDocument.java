@@ -101,7 +101,8 @@ public class GDocument {
 						return row.containsKey(columnName);
 					}
 				}
-			} else {
+			} else if(this.rows.size() == 1 && STR.invalid(((GRows)this.rows.get(0)).getName())) {
+//			} else {
 				GRows row = (GRows)this.rows.get(0);
 				return row.containsKey(key.getKey());
 			}
@@ -119,7 +120,8 @@ public class GDocument {
 						return row.get(columnName);
 					}
 				}
-			} else {
+			} else if(this.rows.size() == 1 && STR.invalid(((GRows)this.rows.get(0)).getName())) {
+//			} else {
 				GRows row = (GRows)this.rows.get(0);
 				return row.get(key.getKey());
 			}
@@ -153,7 +155,7 @@ public class GDocument {
 	public void setXslParam(String xslParam) {
 		this.xslParam = xslParam;
 	}
-	public void appendXslParam(StringBuffer xslParam) {
+	public void appendXslParam(StringBuilder xslParam) {
 		if(this.xslParam == null) {
 			this.xslParam = xslParam.toString();
 		} else {

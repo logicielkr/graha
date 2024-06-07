@@ -130,6 +130,7 @@ public class Table extends SQLExecutor {
 						(
 							STR.startsWithIgnoreCase(columnNameOrValue, "param.") ||
 							STR.startsWithIgnoreCase(columnNameOrValue, "prop.") ||
+							STR.startsWithIgnoreCase(columnNameOrValue, "att.") ||
 							STR.startsWithIgnoreCase(columnNameOrValue, "result.")
 						) &&
 						STR.compareIgnoreCase(columnNameOrValue, ((Column)this.getColumn().get(i)).getValue())
@@ -428,12 +429,6 @@ public class Table extends SQLExecutor {
 							STR.trueValue(c.getSelect())
 						)
 					) {
-/*
-						LOG.debug(
-							Boolean.toString(c.valid(param)),
-							c.getName()
-						);
-*/
 						if(index > 0) {
 							sqlForSelect.append(", ");
 						}
@@ -1058,10 +1053,10 @@ public class Table extends SQLExecutor {
 				) {
 					sqlForWhere.append(1, "and ");
 					sqlForWhere.appendL(super.parseSQL(w.getSql(), params));
-					List<Param> param = w.getParam();
-					if(STR.valid(param)) {
-						for(int x = 0; x < param.size(); x++) {
-							Param p = (Param)param.get(x);
+					int whereParamSize = w.getParamSize(params);
+					if(whereParamSize > 0) {
+						for(int x = 0; x < whereParamSize; x++) {
+							Param p = w.getParam(x, params);
 								SQLParameter parameter =  p.getValue(
 								params,
 								encryptor

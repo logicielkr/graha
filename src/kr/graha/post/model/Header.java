@@ -40,6 +40,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.security.NoSuchProviderException;
 import java.sql.SQLException;
+import kr.graha.post.xml.GCode;
 
 /**
  * querys/query/header
@@ -413,7 +414,6 @@ public class Header {
 			for(int i = 0; i < this.keyword.size(); i++) {
 				child.appendChild(((Label)this.keyword.get(i)).element(Label.LABEL_TYPE_KEYWORD));
 			}
-			element.appendChild(child);
 		}
 		return element;
 	}
@@ -485,7 +485,6 @@ public class Header {
 					if(STR.valid(childScripts)) {
 						for(int x = 0; x < childScripts.size(); x++) {
 							Script childScript = (Script)childScripts.get(x);
-//							LOG.config(childScript.getName() + "\t" + childScript.getOverride() + "\t" + script.getName());
 							if(
 								childScript != null &&
 								STR.valid(childScript.getName()) &&
@@ -509,7 +508,6 @@ public class Header {
 			for(int i = 0; i < this.style.size(); i++) {
 				Style s = (Style)this.style.get(i);
 				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
-//				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && this.contains(s, childHeaders)) {
 				} else {
 					xsl.append(s.toXSL(param, rdf));
 				}
@@ -524,7 +522,6 @@ public class Header {
 			for(int i = 0; i < this.script.size(); i++) {
 				Script s = (Script)this.script.get(i);
 				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
-//				if(STR.valid(s.getName()) && STR.trueValue(s.getOverride()) && this.contains(s, childHeaders)) {
 				} else {
 					xsl.append(s.toXSL(param, rdf));
 				}
@@ -533,7 +530,24 @@ public class Header {
 		}
 		return null;
 	}
-	protected Buffer headToXSL(int headType, Record param, boolean rdf, Header... childHeaders) {
+	protected static void headToXSL(
+		Header extendHeader,
+		Header rootHeader,
+		Header header,
+		int headType, int headPosition, Record param, boolean rdf,
+		Buffer xsl
+	) {
+		if(extendHeader != null) {
+			xsl.append(extendHeader.headToXSL(headType, headPosition, param, rdf, rootHeader, header));
+		}
+		if(rootHeader != null) {
+			xsl.append(rootHeader.headToXSL(headType, headPosition, param, rdf, header));
+		}
+		if(header != null) {
+			xsl.append(header.headToXSL(headType, headPosition, param, rdf));
+		}
+	}
+	protected Buffer headToXSL(int headType, int headPosition, Record param, boolean rdf, Header... childHeaders) {
 		List<Head> heads = null;
 		if(headType == Head.HEAD_TYPE_HEAD) {
 			heads = this.head;
@@ -547,8 +561,7 @@ public class Header {
 			for(int i = 0; i < heads.size(); i++) {
 				Head head = (Head)heads.get(i);
 				if(STR.valid(head.getName()) && this.contains(headType, head, childHeaders)) {
-//				if(STR.valid(head.getName()) && STR.trueValue(head.getOverride()) && this.contains(headType, head, childHeaders)) {
-				} else {
+				} else if(headPosition == head.getPosition(headType)) {
 					xsl.append(head.toXSL(param, rdf));
 				}
 			}
@@ -789,14 +802,17 @@ public class Header {
 		}
 		return false;
 	}
-	protected void executeCode(GDocument document, Record params, ConnectionFactory connectionFactory, Header... childHeaders) throws NoSuchProviderException, SQLException {
+	protected void executeCode(GDocument document, Record params, int time, ConnectionFactory connectionFactory, Header... childHeaders) throws NoSuchProviderException, SQLException {
 		if(STR.valid(this.code)) {
 			for(int i = 0; i < this.code.size(); i++) {
 				Code c = this.code.get(i);
 				if(STR.valid(c.getName())) {
 					if(this.contains(c, childHeaders)) {
 					} else {
-						document.add(c.execute(params, connectionFactory));
+						GCode gcode = c.execute(params, time, connectionFactory);
+						if(gcode != null) {
+							document.add(gcode);
+						}
 					}
 				}
 			}

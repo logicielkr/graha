@@ -139,7 +139,9 @@ public class LinkParam {
 							param.getValue().substring(param.getValue().indexOf(".") + 1),
 							rdf
 						);
-					} else if(tabName == null) {
+					} else if(tabName == null || STR.valid(param.getRef())) {
+						expr = kr.graha.post.xml.GRow.childNodePath(param.getRef(), param.getValue(), rdf);
+						/*
 						String ref = param.getRef();
 						if(!STR.valid(ref)) {
 							if(tables != null && tables.size() > 0) {
@@ -153,6 +155,7 @@ public class LinkParam {
 						} else {
 							expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
 						}
+						*/
 					} else {
 						if(full) {
 							expr = kr.graha.post.xml.GRow.childNodePath(tabName, param.getValue(), rdf);
@@ -258,7 +261,9 @@ public class LinkParam {
 					this.getValue().substring(this.getValue().indexOf(".") + 1),
 					rdf
 				);
-			} else if(tabName == null) {
+			} else if(tabName == null || STR.valid(this.getRef())) {
+				expr = kr.graha.post.xml.GRow.childNodePath(this.getRef(), this.getValue(), rdf);
+				/*
 				String ref = this.getRef();
 				if(!STR.valid(ref)) {
 					if(tables != null && tables.size() > 0) {
@@ -272,6 +277,7 @@ public class LinkParam {
 				} else {
 					expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
 				}
+				*/
 			} else {
 				if(full) {
 					expr = kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf);

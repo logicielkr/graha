@@ -66,7 +66,7 @@ public class Processor extends SQLExecutor {
 	private String className = null;
 	private String encrypt = null;
 	private Node sql = null;
-	private List<Param> param = null;
+	private List param = null;
 	private List<Encrypt> encrypts = null;
 	private String getBefore() {
 		return this.before;
@@ -118,15 +118,27 @@ public class Processor extends SQLExecutor {
 	}
 	private void add(Param param) {
 		if(this.param == null) {
-			this.param = new ArrayList<Param>();
+			this.param = new ArrayList();
 		}
 		this.param.add(param);
+	}
+	private void add(Tile tile) {
+		if(this.param == null) {
+			this.param = new ArrayList();
+		}
+		this.param.add(tile);
 	}
 	private void add(Encrypt encrypt) {
 		if(this.encrypts == null) {
 			this.encrypts = new ArrayList<Encrypt>();
 		}
 		this.encrypts.add(encrypt);
+	}
+	private int getParamSize(Record record) {
+		return Tile.getParamSize(this.param, record);
+	}
+	private Param getParam(int index, Record record) {
+		return Tile.getParam(this.param, index, record);
 	}
 	protected static String nodeName() {
 		return Processor.nodeName;
@@ -156,6 +168,8 @@ public class Processor extends SQLExecutor {
 			this.setSql(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "tile")) {
+			this.add(Tile.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
 			this.add(Encrypt.load(node));
 		} else {
@@ -238,9 +252,12 @@ public class Processor extends SQLExecutor {
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
-				child.appendChild(((Param)this.param.get(i)).element());
+				if(this.param.get(i) instanceof Param) {
+					child.appendChild(((Param)this.param.get(i)).element());
+				} else {
+					child.appendChild(((Tile)this.param.get(i)).element());
+				}
 			}
-			element.appendChild(child);
 		}
 		if(this.encrypts != null && this.encrypts.size() > 0) {
 			for(int i = 0; i < this.encrypts.size(); i++) {
@@ -287,10 +304,13 @@ public class Processor extends SQLExecutor {
 			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 			List<SQLParameter> parameters = new ArrayList();
 			if(STR.valid(this.param)) {
-				for(int x = 0; x < this.param.size(); x++) {
-					Param p = (Param)this.param.get(x);
+				for(int x = 0; x < this.getParamSize(params); x++) {
+					Param p = (Param)this.getParam(x, params);
 					if(STR.startsWithIgnoreCase(p.getValue(), "sequence.")) {
 						SQLParameter parameter =  new SQLParameter(SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory()), p.getDataType());
+						parameters.add(parameter);
+					} else if(STR.startsWithIgnoreCase(p.getValue(), "generator.")) {
+						SQLParameter parameter =  new SQLParameter(SQLExecutor.getPKGeneratorValue(p.getValue(), p.getName(), p.getDataType(), params, super.getConnectionFactory()), p.getDataType());
 						parameters.add(parameter);
 					} else {
 						SQLParameter parameter =  p.getValue(

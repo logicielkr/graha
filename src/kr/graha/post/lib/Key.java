@@ -96,6 +96,8 @@ public class Key {
 				this._prefix = Record.PREFIX_TYPE_DEFAULT;
 			} else if(STR.startsWithIgnoreCase(key, "sequence.")) {
 				this._prefix = Record.PREFIX_TYPE_SEQUENCE;
+			} else if(STR.startsWithIgnoreCase(key, "generator.")) {
+				this._prefix = Record.PREFIX_TYPE_GENERATOR;
 			} else if(STR.startsWithIgnoreCase(key, "header.")) {
 				this._prefix = Record.PREFIX_TYPE_HEADER;
 			} else if(STR.startsWithIgnoreCase(key, "prop.")) {
@@ -154,6 +156,8 @@ public class Key {
 			return Record.PREFIX_TYPE_DEFAULT;
 		} else if(STR.compareIgnoreCase(prefix, "sequence")) {
 			return Record.PREFIX_TYPE_SEQUENCE;
+		} else if(STR.compareIgnoreCase(prefix, "generator")) {
+			return Record.PREFIX_TYPE_GENERATOR;
 		} else if(STR.compareIgnoreCase(prefix, "header")) {
 			return Record.PREFIX_TYPE_HEADER;
 		} else if(STR.compareIgnoreCase(prefix, "prop")) {
@@ -197,6 +201,8 @@ public class Key {
 			return "default";
 		} else if(this._prefix == Record.PREFIX_TYPE_SEQUENCE) {
 			return "sequence";
+		} else if(this._prefix == Record.PREFIX_TYPE_GENERATOR) {
+			return "generator";
 		} else if(this._prefix == Record.PREFIX_TYPE_HEADER) {
 			return "header";
 		} else if(this._prefix == Record.PREFIX_TYPE_PROP) {
@@ -243,6 +249,8 @@ public class Key {
 			return Record.PREFIX_TYPE_DEFAULT;
 		} else if(STR.compareIgnoreCase(prefix, "sequence.")) {
 			return Record.PREFIX_TYPE_SEQUENCE;
+		} else if(STR.compareIgnoreCase(prefix, "generator.")) {
+			return Record.PREFIX_TYPE_GENERATOR;
 		} else if(STR.compareIgnoreCase(prefix, "header.")) {
 			return Record.PREFIX_TYPE_HEADER;
 		} else if(STR.compareIgnoreCase(prefix, "prop.")) {

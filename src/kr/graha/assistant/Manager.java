@@ -186,7 +186,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=redirect\" ?>");
 		sb.append("<document>");
@@ -236,7 +236,7 @@ public class Manager extends HttpServlet {
 	}
 	private void list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Connection con = null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			LOG.warning("not found jndi config");
@@ -338,7 +338,7 @@ public class Manager extends HttpServlet {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			LOG.warning("not found jndi config");
@@ -473,7 +473,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=redirect\" ?>");
 		sb.append("<document>");
@@ -549,7 +549,7 @@ public class Manager extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		try {
 			con = cm.getConnection();
 			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
@@ -620,7 +620,7 @@ public class Manager extends HttpServlet {
 		if(columnName == null) {
 			return "";
 		}
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		StringTokenizer st = new StringTokenizer(columnName, "()-_, ");
 		int index = 0;
 		while (st.hasMoreTokens()) {
@@ -703,7 +703,7 @@ public class Manager extends HttpServlet {
 			}
 		}
 		
-		StringBuffer bw = new StringBuffer();
+		StringBuilder bw = new StringBuilder();
 		bw.append("	<query id=\"" + id + "\" funcType=\"" + funcType + "\" label=\"" + label + "\">\n");
 		bw.append("		<header>\n");
 		bw.append("		</header>\n");
@@ -763,7 +763,7 @@ public class Manager extends HttpServlet {
 		}
 		bw.append("	</query>\n");
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=gen_from_query\" ?>");
 		sb.append("<document>");
@@ -793,7 +793,7 @@ public class Manager extends HttpServlet {
 	private void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			LOG.warning("not found jndi config");
@@ -927,7 +927,7 @@ public class Manager extends HttpServlet {
 			return;
 		}
 		Connection con = null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		try {
 			con = cm.getConnection();
 			XMLConfigGenerator gen = new XMLConfigGenerator(
@@ -995,7 +995,7 @@ public class Manager extends HttpServlet {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
 			LOG.warning("not found jndi config");
@@ -1143,7 +1143,7 @@ public class Manager extends HttpServlet {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {

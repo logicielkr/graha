@@ -71,7 +71,7 @@ public class Prop extends SQLExecutor {
 	private String time = null;
 	private String override = null;
 	private Node sql = null;
-	private List<Param> param = null;
+	private List param = null;
 	private List<Encrypt> encrypts = null;
 	private Prop() {
 	}
@@ -125,15 +125,27 @@ public class Prop extends SQLExecutor {
 	}
 	private void add(Param param) {
 		if(this.param == null) {
-			this.param = new ArrayList<Param>();
+			this.param = new ArrayList();
 		}
 		this.param.add(param);
+	}
+	private void add(Tile tile) {
+		if(this.param == null) {
+			this.param = new ArrayList();
+		}
+		this.param.add(tile);
 	}
 	private void add(Encrypt encrypt) {
 		if(this.encrypts == null) {
 			this.encrypts = new ArrayList<Encrypt>();
 		}
 		this.encrypts.add(encrypt);
+	}
+	private int getParamSize(Record record) {
+		return Tile.getParamSize(this.param, record);
+	}
+	private Param getParam(int index, Record record) {
+		return Tile.getParam(this.param, index, record);
 	}
 	protected static String nodeName() {
 		return Prop.nodeName;
@@ -198,6 +210,8 @@ public class Prop extends SQLExecutor {
 			this.setSql(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "tile")) {
+			this.add(Tile.load(node));
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "encrypt")) {
 			this.add(Encrypt.load(node));
 		} else {
@@ -244,7 +258,11 @@ public class Prop extends SQLExecutor {
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
-				child.appendChild(((Param)this.param.get(i)).element());
+				if(this.param.get(i) instanceof Param) {
+					child.appendChild(((Param)this.param.get(i)).element());
+				} else {
+					child.appendChild(((Tile)this.param.get(i)).element());
+				}
 			}
 		}
 		if(this.encrypts != null && this.encrypts.size() > 0) {
@@ -291,16 +309,6 @@ public class Prop extends SQLExecutor {
 			if(!STR.valid(this.getTime()) && time >= Prop.Before_Before_Processor) {
 				return;
 			}
-			/*
-			String value = null;
-			if(STR.compareIgnoreCase(this.getValue(), "system.uuid")) {
-				value = java.util.UUID.randomUUID().toString();
-			} else if(STR.compareIgnoreCase(this.getValue(), "system.uuid2")) {
-				value = java.util.UUID.randomUUID().toString().replaceAll("-", "");
-			} else {
-				value = TextParser.parse(this.getValue(), params);
-			}
-			*/
 			String value = TextParser.parse(this.getValue(), params);
 			if(STR.valid(value)) {
 				params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName()), value);
@@ -317,8 +325,8 @@ public class Prop extends SQLExecutor {
 			try {
 				List<SQLParameter> parameters = new ArrayList();
 				if(STR.valid(this.param)) {
-					for(int i = 0; i < this.param.size(); i++) {
-						Param p = (Param)this.param.get(i);
+					for(int i = 0; i < this.getParamSize(params); i++) {
+						Param p = (Param)this.getParam(i, params);
 						SQLParameter parameter =  p.getValue(
 							params,
 							encryptor

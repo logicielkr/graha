@@ -58,6 +58,7 @@ public class Layout {
 	private List bottomLeft = null;
 	private List bottomCenter = null;
 	private List bottomRight = null;
+	private String htmltype = null;
 
 	protected String getTemplate() {
 		return this.template;
@@ -82,6 +83,18 @@ public class Layout {
 	}
 	private void setTextContent(String textContent) {
 		this.textContent = textContent;
+	}
+	private String getHtmltype() {
+		return this.htmltype;
+	}
+	private void setHtmltype(String htmltype) {
+		this.htmltype = htmltype;
+	}
+	private boolean div(boolean htmlType) {
+		if(STR.valid(this.htmltype)) {
+			return QueryImpl.div(this.getHtmltype());
+		}
+		return htmlType;
 	}
 	protected List<Tab> getTab() {
 		return this._tab;
@@ -283,6 +296,8 @@ public class Layout {
 							this.setHref(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "msg")) {
 							this.setMsg(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "htmltype")) {
+							this.setHtmltype(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -299,6 +314,7 @@ public class Layout {
 		element.setAttribute("template", this.getTemplate());
 		element.setAttribute("href", this.getHref());
 		element.setAttribute("msg", this.getMsg());
+		element.setAttribute("htmltype", this.getHtmltype());
 		if(
 			this.topLeft != null ||
 			this.topCenter != null ||
@@ -348,13 +364,17 @@ public class Layout {
 			xsl.appendL(indent, "<ul class=\"multitab\">");
 			for(int i = 0; i < this.getTab().size(); i++) {
 				if(((Tab)this.getTab().get(i)).valid(param)) {
+/*
 					if(files != null) {
 						xsl.append(files.beforeLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
 					}
-					xsl.append(((Tab)this.getTab().get(i)).li(param, indent, rdf));
+*/
+					xsl.append(((Tab)this.getTab().get(i)).li(files, param, indent, rdf));
+/*
 					if(files != null) {
 						xsl.append(files.afterLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
 					}
+*/
 				}
 			}
 			if(files != null) {
@@ -364,7 +384,7 @@ public class Layout {
 			xsl.appendL(indent, "<div class=\"space\" />");
 		}
 	}
-	private void hidden(List<Table> tables, List<Command> commands, int indent, boolean rdf, Buffer xsl) {
+	private void hidden(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf, Buffer xsl) {
 		Link fullLink = this.findFullLink();
 		if(fullLink != null) {
 			List<LinkParam> params = fullLink.getParam();
@@ -390,9 +410,11 @@ public class Layout {
 		if(this.getTab() != null && this.getTabSize(param) > 0) {
 			for(int i = 0; i < this.getTab().size(); i++) {
 				if(((Tab)this.getTab().get(i)).valid(param)) {
+/*
 					if(files != null) {
 						xsl.append(files.before(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
 					}
+*/
 					Table table = null;
 					Command command = null;
 					if(
@@ -416,10 +438,12 @@ public class Layout {
 							}
 						}
 					}
-					xsl.append(this.getTab().get(i).toXSL(param, indent, rdf, div, queryFuncType, table, command, (this.getTabSize(param) > 1)));
+					xsl.append(this.getTab().get(i).toXSL(files, param, indent, rdf, div, queryId, queryFuncType, table, command, (this.getTabSize(param) > 1)));
+/*
 					if(files != null) {
 						xsl.append(files.after(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
 					}
+*/
 				}
 			}
 			if(files != null) {
@@ -485,7 +509,7 @@ public class Layout {
 		Record param,
 		int indent,
 		boolean rdf,
-		boolean div,
+		boolean parentDiv,
 		String queryId,
 		int queryFuncType
 	) {
@@ -493,20 +517,64 @@ public class Layout {
 		if(STR.compareIgnoreCase(this.getTemplate(), "native")) {
 			xsl.append(this.getTextContent());
 		} else 	if(this.getTab() != null && this.getTabSize(param) > 0) {
+			Header.headToXSL(
+				extend,
+				root,
+				header,
+				Head.HEAD_TYPE_TOP,
+				Head.HEAD_POSITION_UNDER_THE_TITLE,
+				param,
+				rdf,
+				xsl
+			);
 			this.top(tables, commands, param, rdf, queryId, xsl);
+			Header.headToXSL(
+				extend,
+				root,
+				header,
+				Head.HEAD_TYPE_TOP,
+				Head.HEAD_POSITION_ABOVE_THE_MULTITAB,
+				param,
+				rdf,
+				xsl
+			);
 			this.multitab(files, param, indent, rdf, xsl);
+			Header.headToXSL(
+				extend,
+				root,
+				header,
+				Head.HEAD_TYPE_TOP,
+				Head.HEAD_POSITION_ABOVE_THE_TABLE,
+				param,
+				rdf,
+				xsl
+			);
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
-				xsl.append("<form");
+				xsl.appendL("<form>");
 				if(this.fileAllow(files, param)) {
-					xsl.append(" enctype=\"multipart/form-data\"");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"enctype\">multipart/form-data</xsl:attribute>");
 				}
-				xsl.appendL(" name=\"" + queryId + "\" id=\"" + queryId + "\" action=\"" + Link.getPath(queryId, param) + "\" method=\"post\" onsubmit=\"return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, '" + this.getMsg() + "');\">");
-				this.hidden(tables, commands, indent, rdf, xsl);
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + queryId + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"id\">" + queryId + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(queryId, param, rdf) + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+				this.hidden(tables, commands, param, indent, rdf, xsl);
 			}
-			this.table(tables, commands, files, param, indent, rdf, div, queryId, queryFuncType, xsl);
+			this.table(tables, commands, files, param, indent, rdf, this.div(parentDiv), queryId, queryFuncType, xsl);
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 				xsl.append("</form>");
 			}
+			Header.headToXSL(
+				extend,
+				root,
+				header,
+				Head.HEAD_TYPE_TOP,
+				Head.HEAD_POSITION_UNDER_THE_TABLE,
+				param,
+				rdf,
+				xsl
+			);
 			this.bottom(tables, commands, param, rdf, queryId, xsl);
 		}
 		return xsl;

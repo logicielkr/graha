@@ -150,7 +150,6 @@ public class Message {
 						label = tmp;
 					}
 				}
-//				params.put(Record.key(Record.PREFIX_TYPE_MESSAGE, this.getName()), label);
 			}
 		}
 		if(label == null) {

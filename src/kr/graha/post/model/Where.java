@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import kr.graha.post.element.XmlElement;
+import kr.graha.post.lib.Record;
 
 /**
  * Graha(그라하) where 정보
@@ -45,7 +46,7 @@ public class Where {
 	
 	private String method = null;
 	private Node sql = null;
-	private List<Param> param = null;
+	private List param = null;
 	protected String getMethod() {
 		return this.method;
 	}
@@ -58,14 +59,26 @@ public class Where {
 	private void setSql(Node sql) {
 		this.sql = sql;
 	}
-	protected List<Param> getParam() {
+	private List getParam() {
 		return this.param;
 	}
 	private void add(Param param) {
 		if(this.param == null) {
-			this.param = new ArrayList<Param>();
+			this.param = new ArrayList();
 		}
 		this.param.add(param);
+	}
+	private void add(Tile tile) {
+		if(this.param == null) {
+			this.param = new ArrayList();
+		}
+		this.param.add(tile);
+	}
+	protected int getParamSize(Record record) {
+		return Tile.getParamSize(this.param, record);
+	}
+	protected Param getParam(int index, Record record) {
+		return Tile.getParam(this.param, index, record);
 	}
 	protected static String nodeName() {
 		return Where.nodeName;
@@ -95,6 +108,8 @@ public class Where {
 			this.setSql(node);
 		} else if(STR.compareIgnoreCase(node.getNodeName(), "param")) {
 			this.add(Param.load(node));
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "tile")) {
+			this.add(Tile.load(node));
 		} else {
 			LOG.warning("invalid nodeName(" + node.getNodeName() + ")"); 
 		}
@@ -156,7 +171,11 @@ public class Where {
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
 			for(int i = 0; i < this.param.size(); i++) {
-				child.appendChild(((Param)this.param.get(i)).element());
+				if(this.param.get(i) instanceof Param) {
+					child.appendChild(((Param)this.param.get(i)).element());
+				} else {
+					child.appendChild(((Tile)this.param.get(i)).element());
+				}
 			}
 		}
 		return element;

@@ -48,7 +48,6 @@ import kr.graha.post.xml.GDocument;
  * @since 0.1
  */
 
-//public class Record extends HashMap {
 public class Record<K, V> {
 	public static int PREFIX_TYPE_NONE = 1;
 	public static int PREFIX_TYPE_UNKNOWN = 2;
@@ -76,6 +75,8 @@ public class Record<K, V> {
 	
 	public static int PREFIX_TYPE_UUID = 21;
 	
+	public static int PREFIX_TYPE_GENERATOR = 22;
+	
 	public static boolean FIND_GROWS = true;
 	public static boolean NOT_FIND_GROWS = false;
 	public static boolean DEFAULT_FIND_GROWS = false;
@@ -83,7 +84,6 @@ public class Record<K, V> {
 	private GDocument document = null;
 	public Record() {
 		this.map = new HashMap<Key, Object>();
-//		super();
 	}
 	public void setGDocument(GDocument document) {
 		this.document = document;
@@ -92,9 +92,12 @@ public class Record<K, V> {
 		return this.get(key);
 	}
 	public boolean containsKey(Key key) {
+		return this.containsKey(key, true);
+	}
+	public boolean containsKey(Key key, Boolean includeQuery) {
 		if(this.map.containsKey(key)) {
 			return true;
-		} else if(key.getPrefix() == Record.PREFIX_TYPE_QUERY) {
+		} else if(includeQuery && key.getPrefix() == Record.PREFIX_TYPE_QUERY) {
 			if(this.document == null) {
 				return false;
 			} else {
@@ -113,9 +116,12 @@ public class Record<K, V> {
 		return this.map.put(key, value);
 	}
 	private Object get(Key key) {
+		return this.get(key, true);
+	}
+	private Object get(Key key, Boolean includeQuery) {
 		if(this.map.containsKey(key)) {
 			return this.map.get(key);
-		} else if(key.getPrefix() == Record.PREFIX_TYPE_QUERY) {
+		} else if(includeQuery && key.getPrefix() == Record.PREFIX_TYPE_QUERY) {
 			if(this.document == null) {
 				return null;
 			} else {
@@ -575,6 +581,9 @@ public class Record<K, V> {
 		}
 		return result;
 	}
+	public boolean hasKey(Key key) {
+		return this.hasKey(key, true);
+	}
 /**
  * 키에 해당하는 값이 있는지 검사한다.
  * 이 메소드는 containsKey와 다르다.
@@ -582,16 +591,16 @@ public class Record<K, V> {
  * @param key 키
  * @return 키에 해당하는 값이 있는지 여부
  */
-	public boolean hasKey(Key key) {
+	public boolean hasKey(Key key, Boolean includeQuery) {
 		boolean result = false;
-		if(this.containsKey(key)) {
-			if(this.get(key) == null) {
+		if(this.containsKey(key, includeQuery)) {
+			if(this.get(key, includeQuery) == null) {
 				result = false;
-			} else if(this.get(key) instanceof String && ((String)this.get(key)).trim().equals("")) {
+			} else if(this.get(key, includeQuery) instanceof String && ((String)this.get(key, includeQuery)).trim().equals("")) {
 				result = false;
-			} else if(this.get(key) instanceof List) {
+			} else if(this.get(key, includeQuery) instanceof List) {
 				result = true;
-				List vv = (List)this.get(key);
+				List vv = (List)this.get(key, includeQuery);
 				for (Object v : vv) {
 					if(v instanceof String) {
 						if(!((String)v).trim().equals("")) {
@@ -680,22 +689,6 @@ public class Record<K, V> {
 				return false;
 			}
 			return this.check(this.getIntObject(key), this.intObject(value), check);
-			/*
-			Integer i1 = this.getIntObject(key);
-			Integer i2 = this.intObject(value);
-			if(i1 == null || i2 == null) {
-				return false;
-			}
-			if(check == AuthUtility.GreaterThan && i1.intValue() > i2.intValue()) {
-				return true;
-			} else if(check == AuthUtility.GreaterThanOrEqualTo && i1.intValue() >= i2.intValue()) {
-				return true;
-			} else if(check == AuthUtility.LessThan && i1.intValue() < i2.intValue()) {
-				return true;
-			} else if(check == AuthUtility.LessThanOrEqualTo && i1.intValue() <= i2.intValue()) {
-				return true;
-			}
-			*/
 		}
 		return false;
 	}

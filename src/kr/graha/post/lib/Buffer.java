@@ -29,9 +29,11 @@ package kr.graha.post.lib;
  */
 
 public class Buffer {
-	private StringBuffer sb;
+//	private StringBuffer sb;
+	private StringBuilder sb;
 	public Buffer() {
-		sb = new StringBuffer();
+//		sb = new StringBuffer();
+		sb = new StringBuilder();
 	}
 	public void append(String text) {
 		if(text != null) {
@@ -48,7 +50,8 @@ public class Buffer {
 	}
 	public void append(Buffer text) {
 		if(text != null) {
-			this.sb.append(text.toStringBuffer());
+//			this.sb.append(text.toStringBuffer());
+			this.sb.append(text.toStringBuilder());
 		}
 	}
 	public void appendL(String text) {
@@ -69,7 +72,8 @@ public class Buffer {
 	}
 	public void appendL(Buffer text) {
 		if(text != null) {
-			this.sb.append(text.toStringBuffer());
+//			this.sb.append(text.toStringBuffer());
+			this.sb.append(text.toStringBuilder());
 			this.sb.append("\n");
 		}
 	}
@@ -97,7 +101,8 @@ public class Buffer {
 	public void append(int indent, Buffer text) {
 		if(text != null) {
 			this.indent(indent);
-			this.sb.append(text.toStringBuffer());
+//			this.sb.append(text.toStringBuffer());
+			this.sb.append(text.toStringBuilder());
 		}
 	}
 	public void appendL(int indent, String text) {
@@ -122,7 +127,8 @@ public class Buffer {
 	public void appendL(int indent, Buffer text) {
 		if(text != null) {
 			this.indent(indent);
-			this.sb.append(text.toStringBuffer());
+//			this.sb.append(text.toStringBuffer());
+			this.sb.append(text.toStringBuilder());
 			this.sb.append("\n");
 		}
 	}
@@ -135,7 +141,13 @@ public class Buffer {
 	public String toString() {
 		return this.sb.toString();
 	}
-	public StringBuffer toStringBuffer() {
+//	public StringBuffer toStringBuffer() {
+//		return this.sb;
+//	}
+	public CharSequence toCharSequence() {
+		return this.sb;
+	}
+	private StringBuilder toStringBuilder() {
 		return this.sb;
 	}
 	public byte[] toByte() {
@@ -150,7 +162,8 @@ public class Buffer {
 	}
 	public void init() {
 		if(this.sb == null) {
-			this.sb = new StringBuffer();
+//			this.sb = new StringBuffer();
+			this.sb = new StringBuilder();
 		} else {
 			this.sb.setLength(0);
 		}

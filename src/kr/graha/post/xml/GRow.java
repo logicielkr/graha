@@ -236,7 +236,8 @@ public class GRow {
 			if(STR.valid(gRowsName)) {
 				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:" + gRowsName + "']/RDF:li/RDF:item/uc:" + childNodeName;
 			} else {
-				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data']/RDF:li/RDF:item/uc:" + childNodeName;
+//				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data']/RDF:li/RDF:item/uc:" + childNodeName;
+				return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/uc:" + childNodeName;
 			}
 		} else {
 			if(STR.valid(gRowsName)) {

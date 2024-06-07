@@ -50,6 +50,8 @@ public class Style {
 	private String cond = null;
 	private String only = null;
 	private String textContent = null;
+	private String media = null;
+	private String preload = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -74,11 +76,23 @@ public class Style {
 	private void setCond(String cond) {
 		this.cond = cond;
 	}
+	private String getPreload() {
+		return this.preload;
+	}
+	private void setPreload(String preload) {
+		this.preload = preload;
+	}
 	private String getOnly() {
 		return this.only;
 	}
 	private void setOnly(String only) {
 		this.only = only;
+	}
+	private String getMedia() {
+		return this.media;
+	}
+	private void setMedia(String media) {
+		this.media = media;
 	}
 	public String getTextContent() {
 		return this.textContent;
@@ -116,8 +130,12 @@ public class Style {
 							this.setOverride(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
 							this.setCond(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "preload")) {
+							this.setPreload(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "only")) {
 							this.setOnly(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "media")) {
+							this.setMedia(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")"); 
@@ -135,7 +153,9 @@ public class Style {
 		element.setAttribute("src", this.getSrc());
 		element.setAttribute("override", this.getOverride());
 		element.setAttribute("cond", this.getCond());
+		element.setAttribute("preload", this.getPreload());
 		element.setAttribute("only", this.getOnly());
+		element.setAttribute("media", this.getMedia());
 		element.setTextContent(this.getTextContent());
 		return element;
 	}
@@ -161,20 +181,46 @@ public class Style {
 		if(STR.valid(this.getSrc())) {
 			if(STR.compareIgnoreCase(this.getOnly(), "ie")) {
 				xsl.appendL(internalIndent, "<xsl:comment>[if IE]>");
-				xsl.appendL(internalIndent + 1, "&lt;link rel=\"stylesheet\" href=\"" + this.getSrc() + "\" type=\"text/css\" media=\"all\" />");
+				if(STR.trueValue(this.getPreload())) {
+					xsl.appendL(internalIndent, "&lt;link rel=\"preload\" href=\"" + this.getSrc() + "\" as=\"style\" />");
+				}
+				xsl.append(internalIndent + 1, "&lt;link rel=\"stylesheet\" href=\"" + this.getSrc() + "\" type=\"text/css\" media=\"");
+				if(STR.valid(this.getMedia())) {
+					xsl.append(this.getMedia());
+				} else {
+					xsl.append("all");
+				}
+				xsl.appendL("\" />");
 				xsl.appendL(internalIndent, "&lt;![endif]</xsl:comment>");
 			} else {
-				xsl.appendL(internalIndent, "<link rel=\"stylesheet\" href=\"" + this.getSrc() + "\" type=\"text/css\" media=\"all\" />");
+				if(STR.trueValue(this.getPreload())) {
+					xsl.appendL(internalIndent, "<link rel=\"preload\" href=\"" + this.getSrc() + "\" as=\"style\" />");
+				}
+				xsl.append(internalIndent, "<link rel=\"stylesheet\" href=\"" + this.getSrc() + "\" type=\"text/css\" media=\"");
+				if(STR.valid(this.getMedia())) {
+					xsl.append(this.getMedia());
+				} else {
+					xsl.append("all");
+				}
+				xsl.appendL("\" />");
 			}
 		} else if(STR.valid(this.getTextContent())){
 			if(STR.compareIgnoreCase(this.getOnly(), "ie")) {
 				xsl.appendL(internalIndent, "<xsl:comment>[if IE]>");
-				xsl.appendL(internalIndent + 1, "&lt;style>");
+				if(STR.valid(this.getMedia())) {
+					xsl.appendL(internalIndent + 1, "&lt;style type=\"text/css\">");
+				} else {
+					xsl.appendL(internalIndent + 1, "&lt;style type=\"text/css\" media=\"" + this.getMedia() + "\">");
+				}
 				xsl.appendL(this.getTextContent().trim());
 				xsl.appendL(internalIndent + 1, "&lt;/style>");
 				xsl.appendL(internalIndent, "&lt;![endif]</xsl:comment>");
 			} else {
-				xsl.appendL(internalIndent, "<style>");
+				if(STR.valid(this.getMedia())) {
+					xsl.appendL(internalIndent, "<style type=\"text/css\" media=\"" + this.getMedia() + "\">");
+				} else {
+					xsl.appendL(internalIndent, "<style type=\"text/css\">");
+				}
 				xsl.appendL(this.getTextContent().trim());
 				xsl.appendL(internalIndent, "</style>");
 			}
