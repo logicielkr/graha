@@ -263,11 +263,11 @@ public class Auth extends SQLExecutor {
 			LOG.finer("check : " + check);
 			if(STR.compareIgnoreCase(check, "exists")) {
 				check = "${result} exists";
-			} else if(STR.compare(check, "0")) {
+			} else if(STR.compare(check, "0") || STR.compare(check, "${result} = 0") || STR.compare(check, "${result} == 0") || STR.compare(check, "${result} equals 0")) {
 				check = "${result} = '0'";
-			} else if(STR.compare(check, ">0")) {
+			} else if(STR.compare(check, ">0") || STR.compare(check, "${result} > 0")) {
 				check = "${result} > '0'";
-			} else if(STR.compare(check, "<0")) {
+			} else if(STR.compare(check, "<0") || STR.compare(check, "${result} < 0")) {
 			} else if(check != null && check.equals("<0")) {
 				check = "${result} < '0'";
 			}

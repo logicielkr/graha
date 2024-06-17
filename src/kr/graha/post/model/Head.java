@@ -86,6 +86,8 @@ public class Head {
 				return Head.HEAD_POSITION_TOP;
 			} else if(headType == Head.HEAD_TYPE_BOTTOM) {
 				return Head.HEAD_POSITION_BOTTOM;
+			} else if(headType == Head.HEAD_TYPE_HEAD) {
+				return Head.HEAD_POSITION_NONE;
 			}
 			return -1;
 		}

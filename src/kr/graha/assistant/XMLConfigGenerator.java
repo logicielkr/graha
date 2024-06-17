@@ -1311,7 +1311,7 @@ public final class XMLConfigGenerator {
 			bw.write("\"\n");
 			bw.write("			/>\n");
 			if(this.authentication()) {
-				bw.write("			<auth check=\"${result} > 0\">\n");
+				bw.write("			<auth check=\"${result} > '0'\">\n");
 				bw.write("				<sql>select count(*) from " + getTName(masterTable) + " where " + this.getAuthenticationColumnName(masterTable) + " = ?");
 				for(Column col : masterTable.cols) {
 					if(col.isPk()) {
@@ -1698,7 +1698,7 @@ public final class XMLConfigGenerator {
 			bw.write("\"\n");
 			bw.write("			/>\n");
 			if(this.authentication()) {
-				bw.write("			<auth check=\"${result} > 0\">\n");
+				bw.write("			<auth check=\"${result} > '0'\">\n");
 				bw.write("				<sql>select count(*) from " + getTName(masterTable) + " where " + this.getAuthenticationColumnName(masterTable) + " = ?");
 				for(Column col : masterTable.cols) {
 					if(col.isPk()) {

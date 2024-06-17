@@ -290,9 +290,9 @@ public class Link {
 		} else {
 			if(href.startsWith("!")) {
 				if(href.endsWith("!")) {
-					return Link.hrefForXsl(href.substring(0, href.length() - 1), param, rdf, full);
+					return Link.hrefForXsl(href.substring(1, href.length() - 1), param, rdf, full);
 				} else {
-					return Link.hrefForXsl(href, param, rdf, full) + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"));
+					return Link.hrefForXsl(href.substring(1), param, rdf, full) + param.getString(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"));
 				}
 			} else if(href.startsWith("/")) {
 				if(href.endsWith("!")) {

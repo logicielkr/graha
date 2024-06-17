@@ -138,12 +138,17 @@ public class Querys {
 				QueryXMLImpl extendQuery = this.getQuery(q.getExtend());
 				q.setExtendQuery(extendQuery);
 			}
+		} else if(STR.compareIgnoreCase(node.getNodeName(), "envelop")) {
+			this.loads(node);
 		} else {
 			LOG.warning("invalid nodeName(" + node.getNodeName() + ")");
 		}
 	}
 	public void loadAll() {
-		NodeList nl = this.doc.getChildNodes();
+		this.loadAll(this.doc);
+	}
+	public void loadAll(Node element) {
+		NodeList nl = element.getChildNodes();
 		if(nl != null && nl.getLength() > 0) {
 			for(int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
@@ -208,7 +213,11 @@ public class Querys {
 			XPathExpression expr = xpath.compile(Query.nodePath(this) + "[@id = '" + id + "']");
 			Element element = (Element)expr.evaluate(this.doc, XPathConstants.NODE);
 			if(element == null) {
-				return;
+				expr = xpath.compile(this.nodePath() + "/envelop/" + Query.nodeName() + "[@id = '" + id + "']");
+				element = (Element)expr.evaluate(this.doc, XPathConstants.NODE);
+				if(element == null) {
+					return;
+				}
 			}
 			this.load(element);
 		} catch (XPathExpressionException e) {

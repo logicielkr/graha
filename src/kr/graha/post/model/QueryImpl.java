@@ -270,13 +270,13 @@ public class QueryImpl extends Query {
 			LOG.severe(e);
 			throw e;
 		}
+		this.userServletAdapter(request, servletConfig, params);
 		try {
 			this.executeProp(params, Prop.Before_Connection);
 		} catch (NoSuchProviderException | SQLException e) {
 			this.abort();
 			LOG.severe(e);
 		}
-		this.userServletAdapter(request, servletConfig, params);
 		return fields;
 	}
 	private void userServletAdapter(HttpServletRequest request, ServletConfig servletConfig, Record params) {
@@ -446,7 +446,12 @@ public class QueryImpl extends Query {
 		}
 		params.put(Record.key(Record.PREFIX_TYPE_HEADER, "method"), request.getMethod());
 		params.put(Record.key(Record.PREFIX_TYPE_HEADER, "remote_user"), request.getRemoteUser());
-		params.put(Record.key(Record.PREFIX_TYPE_HEADER, "remote_addr"), request.getRemoteAddr());
+		
+		if(STR.valid(request.getHeader("X-Forwarded-For"))) {
+			params.put(Record.key(Record.PREFIX_TYPE_HEADER, "remote_addr"), request.getHeader("X-Forwarded-For"));
+		} else {
+			params.put(Record.key(Record.PREFIX_TYPE_HEADER, "remote_addr"), request.getRemoteAddr());
+		}
 		params.put(Record.key(Record.PREFIX_TYPE_HEADER, "remote_host"), request.getRemoteHost());
 		params.put(Record.key(Record.PREFIX_TYPE_HEADER, "scheme"), request.getScheme());
 	}

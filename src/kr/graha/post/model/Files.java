@@ -249,10 +249,10 @@ public class Files {
 	}
 	protected boolean downloadable(Record params, ConnectionFactory connectionFactory) throws NoSuchProviderException, SQLException {
 		if(this.fileAllow(params)) {
-			if(auths == null) {
+			if(this.auths == null) {
 				return true;
 			} else {
-				return auths.check(params, connectionFactory);
+				return this.auths.check(params, connectionFactory);
 			}
 		} else {
 			return false;
