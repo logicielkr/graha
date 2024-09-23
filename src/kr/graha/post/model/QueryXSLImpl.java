@@ -30,6 +30,7 @@ import kr.graha.helper.STR;
 import kr.graha.post.lib.Buffer;
 import kr.graha.post.lib.Record;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
 /**
  * Graha(그라하) Query 정보
@@ -44,8 +45,8 @@ public class QueryXSLImpl extends QueryImpl {
 	}
 	public int xsl(
 		HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params
-	) throws UnsupportedEncodingException {
-		super.prepare(request, servletConfig, params);
+	) throws UnsupportedEncodingException, IOException, ServletException {
+		super.prepareUsingServletFileUpload(request, servletConfig, params);
 		if(!super.auth(params)) {
 			return HttpServletResponse.SC_FORBIDDEN;
 		}

@@ -37,6 +37,7 @@ import kr.graha.post.interfaces.Reporter;
 import kr.graha.post.lib.Key;
 import kr.graha.post.lib.Record;
 import kr.graha.post.xml.GDocument;
+import kr.graha.post.model.utility.FilePart;
 import javax.servlet.ServletConfig;
 import org.apache.commons.fileupload.FileItem;
 import java.net.URISyntaxException;
@@ -50,6 +51,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.OutputKeys;
 import java.io.StringReader;
+import javax.servlet.ServletException;
 
 /**
  * Graha(그라하) Query 정보
@@ -167,9 +169,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		return totalFetchCount;
 	}
-	private void executeFile(
+	private void executeFileUsingServletFileUpload(
 		GDocument document,
-		List<FileItem> fields,
+		List<FilePart> fields,
 		Record params,
 		int queryFuncType
 	) throws IOException, URISyntaxException {
@@ -180,7 +182,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			try {
 				if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 					if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "POST")) {
-						this.uploadFile(fields, params, queryFuncType);
+						this.uploadFileUsingServletFileUpload(fields, params, queryFuncType);
 					} else {
 						this.listFile(document, params);
 					}
@@ -382,8 +384,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			throw e;
 		}
 	}
-	public int download(HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params) throws IOException, NoSuchProviderException, SQLException {
-		super.prepare(request, servletConfig, params);
+	public int download(HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params)
+		throws IOException, NoSuchProviderException, SQLException, ServletException {
+		super.prepareUsingServletFileUpload(request, servletConfig, params);
 		if(!super.auth(params) || !this.downloadable(params)) {
 			super.clear();
 			return HttpServletResponse.SC_FORBIDDEN;
@@ -403,8 +406,8 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			throw e;
 		}
 	}
-	private void uploadFile(
-		List<FileItem> fields,
+	private void uploadFileUsingServletFileUpload(
+		List<FilePart> fields,
 		Record params,
 		int queryFuncType
 	) throws IOException, URISyntaxException {
@@ -419,7 +422,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					super.getFiles().fileAllow(params)
 				) {
 					try {
-						super.getFiles().upload(fields, params);
+						super.getFiles().uploadUsingServletFileUpload(fields, params);
 					} catch (IOException | URISyntaxException e) {
 						super.abort();
 						throw e;
@@ -509,7 +512,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 	public GDocument document(
 		HttpServletRequest request,
 		HttpServletResponse response,
-		List<FileItem> fields,
+		List<FilePart> fields,
 		Record params,
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException, IOException, URISyntaxException {
@@ -538,7 +541,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			super.executeProp(params, Prop.After_Before_Processor);
 			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
 			totalFetchCount += this.executeTable(document, params, queryFuncType);
-			this.executeFile(document, fields, params, queryFuncType);
+			this.executeFileUsingServletFileUpload(document, fields, params, queryFuncType);
 			if(this.empty(params, queryFuncType)) {
 				super.clear();
 				return null;
@@ -623,9 +626,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 	}
 	public int execute(
 		HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params
-	) throws IOException, NoSuchProviderException, SQLException, URISyntaxException {
+	) throws IOException, NoSuchProviderException, SQLException, URISyntaxException, ServletException {
 		try {
-			List<FileItem> fields = super.prepare(request, servletConfig, params);
+			List<FilePart> fields = super.prepareUsingServletFileUpload(request, servletConfig, params);
 			if(!super.auth(params)) {
 				super.clear();
 				return HttpServletResponse.SC_FORBIDDEN;

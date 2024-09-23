@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.FilePart;
 import kr.graha.post.element.XmlElement;
 import kr.graha.post.interfaces.ConnectionFactory;
 import java.security.NoSuchProviderException;
@@ -47,6 +48,7 @@ import java.nio.file.Paths;
 import java.net.URI;
 import java.net.URISyntaxException;
 import kr.graha.post.xml.GDocument;
+import kr.graha.post.lib.Key;
 
 /**
  * Graha(그라하) files 정보
@@ -309,9 +311,9 @@ param. 이 아니라, query. 으로 처리됨.
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		return;
 	}
-	protected void upload(List<FileItem> fields, Record params) throws IOException, URISyntaxException {
-		this.deleteFile(fields, params);
-		this.saveFile(fields, params);
+	protected void uploadUsingServletFileUpload(List<FilePart> parts, Record params) throws IOException, URISyntaxException {
+		this.deleteFileUsingServletFileUpload(params);
+		this.saveFileUsingServletFileUpload(parts, params);
 	}
 	private File getFile(String fileName) {
 		if(STR.valid(this.file)) {
@@ -324,43 +326,41 @@ param. 이 아니라, query. 으로 처리됨.
 		}
 		return null;
 	}
-	private void saveFile(List<FileItem> fields, Record params) throws IOException, URISyntaxException {
-		Iterator<FileItem> it = fields.iterator();
+	private void saveFileUsingServletFileUpload(List<FilePart> parts, Record params) throws IOException, URISyntaxException {
+		Iterator<FilePart> it = parts.iterator();
 		int idx = 0;
 		while (it.hasNext()) {
-			FileItem fileItem = it.next();
-			boolean isFormField = fileItem.isFormField();
-			if(!isFormField) {
-				LOG.finer(fileItem.getFieldName());
-				if(fileItem.getSize() == 0) {
-					continue;
-				}
-				String fileName = fileItem.getFieldName();
-				if(fileName.lastIndexOf(".") >= 0) {
-					fileName = fileName.substring(0, fileName.lastIndexOf("."));
-				}
-				File file = this.getFile(fileName);
-				URI uri = file.saveFile(fileItem, params);
-				if(uri != null) {
-					params.put(Record.key(Record.PREFIX_TYPE_NONE, "uploaded.file.path." + idx), Paths.get(uri).toString());
-					idx++;
-				}
+			FilePart filePart = it.next();
+			LOG.finer(filePart.getFieldName());
+			if(filePart.getSize() == 0) {
+				continue;
+			}
+			String fieldName = filePart.getFieldName();
+			if(fieldName.lastIndexOf(".") >= 0) {
+				fieldName = fieldName.substring(0, fieldName.lastIndexOf("."));
+			}
+			File file = this.getFile(fieldName);
+			URI uri = file.saveFileUsingServletFileUpload(filePart, params);
+			if(uri != null) {
+				params.put(Record.key(Record.PREFIX_TYPE_NONE, "uploaded.file.path." + idx), Paths.get(uri).toString());
+				idx++;
 			}
 		}
 	}
-	private void deleteFile(List<FileItem> fields, Record params) throws IOException, URISyntaxException {
-		Iterator<FileItem> it = fields.iterator();
-		while (it.hasNext()) {
-			FileItem fileItem = it.next();
-			boolean isFormField = fileItem.isFormField();
-			if(isFormField) {
-				if(fileItem.getFieldName().startsWith("_deletefile_.")) {
-					String fileName = fileItem.getFieldName().substring("_deletefile_.".length());
-					if(fileName.lastIndexOf(".") >= 0) {
-						fileName = fileName.substring(0, fileName.lastIndexOf("."));
+	private void deleteFileUsingServletFileUpload(Record params) throws IOException, URISyntaxException {
+		if(params != null && !params.isEmpty()) {
+			Iterator<Key> it = params.keySet().iterator();
+			while(it.hasNext()) {
+				Key key = (Key)it.next();
+				if(key.getPrefix() == Record.PREFIX_TYPE_PARAM) {
+					if(STR.startsWithIgnoreCase(key.getKey(), "_deletefile_.")) {
+						String fieldName = key.getKey().substring("_deletefile_.".length());
+						if(fieldName.lastIndexOf(".") >= 0) {
+							fieldName = fieldName.substring(0, fieldName.lastIndexOf("."));
+						}
+						File file = this.getFile(fieldName);
+						file.deleteFile(params.getString(key), params);
 					}
-					File file = this.getFile(fileName);
-					file.deleteFile(fileItem, params);
 				}
 			}
 		}

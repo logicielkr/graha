@@ -45,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import kr.graha.post.xml.GDocument;
 import kr.graha.post.xml.GFile;
+import kr.graha.post.model.utility.FilePart;
 
 /**
  * Graha(그라하) file 정보
@@ -345,15 +346,13 @@ public class File {
 		}
 	}
 	
-	protected void deleteFile(FileItem fileItem, Record params) throws IOException, URISyntaxException {
+	protected void deleteFile(String fileName, Record params) throws IOException, URISyntaxException {
 		if(STR.valid(this.getPath())) {
 			String basePath = TextParser.parse(this.getPath(), params);
-			String fileName = fileItem.getString(StandardCharsets.UTF_8.name());
 			this.deleteFile(basePath, fileName);
 		}
 		if(STR.valid(this.getBackup())) {
 			String basePath = TextParser.parse(this.getBackup(), params);
-			String fileName = fileItem.getString(StandardCharsets.UTF_8.name());
 			this.deleteFile(basePath, fileName);
 		}
 	}
@@ -412,9 +411,9 @@ public class File {
 		}
 		return uri;
 	}
-	protected URI saveFile(FileItem fileItem, Record params) throws IOException, URISyntaxException {
+	protected URI saveFileUsingServletFileUpload(FilePart filePart, Record params) throws IOException, URISyntaxException {
 		URI uri = null;
-		String fileName = fileItem.getName().substring(Math.max(fileItem.getName().lastIndexOf('/'), fileItem.getName().lastIndexOf('\\')) + 1);
+		String fileName = filePart.getFileName();
 		if(STR.valid(this.getPath())) {
 			String basePath = TextParser.parse(this.getPath(), params);
 			if(STR.valid(basePath)) {
@@ -422,10 +421,15 @@ public class File {
 					Files.createDirectories(Paths.get(basePath));
 				}
 				uri = this.getUniqueFileURI(basePath, fileName);
-				if(fileItem.isInMemory()) {
-					Files.write(Paths.get(uri), fileItem.get());
-				} else {
-					Files.move(((DiskFileItem)fileItem).getStoreLocation().toPath(), Paths.get(uri));
+				if(filePart.getItem() != null) {
+					if(filePart.getItem().isInMemory()) {
+						Files.write(Paths.get(uri), filePart.getItem().get());
+					} else {
+						Files.move(((DiskFileItem)filePart.getItem()).getStoreLocation().toPath(), Paths.get(uri));
+					}
+				} else if(filePart.getPart() != null && filePart.getPart().getInputStream() != null) {
+					Files.copy(filePart.getPart().getInputStream(), Paths.get(uri));
+					filePart.getPart().delete();
 				}
 			}
 		}

@@ -284,7 +284,11 @@ public class Key {
 			}
 		}
 		if(this._key == null) {
-			return this._suffix;
+			if(this._suffix == null) {
+				return null;
+			} else {
+				return this._suffix;
+			}
 		}
 		return this._key + "." + this._suffix;
 	}

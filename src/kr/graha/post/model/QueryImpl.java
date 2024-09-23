@@ -35,6 +35,7 @@ import kr.graha.helper.STR;
 import kr.graha.post.interfaces.ConnectionFactory;
 import kr.graha.post.lib.Record;
 import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.FilePart;
 import java.util.Enumeration;
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +47,10 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletConfig;
 import kr.graha.post.interfaces.ServletAdapter;
+import java.util.Collection;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import javax.servlet.ServletException;
 
 /**
  * Graha(그라하) Query 정보
@@ -250,11 +255,11 @@ public class QueryImpl extends Query {
 		}
 		return this.connectionFactory;
 	}
-	protected List<FileItem> prepare(
+	protected List<FilePart> prepareUsingServletFileUpload(
 		HttpServletRequest request,
 		ServletConfig servletConfig,
 		Record params
-	) throws UnsupportedEncodingException {
+	) throws UnsupportedEncodingException, IOException, ServletException {
 		this.system(request, params);
 		this.header(request, params);
 		this.session(request, params);
@@ -262,9 +267,9 @@ public class QueryImpl extends Query {
 		if(System.getProperties().containsKey("catalina.home")) {
 			this.userRole(request, params);
 		}
-		List<FileItem> fields = null;
+		List<FilePart> fields = null;
 		try {
-			fields = this.parameter(request, params, this.getFiles());
+			fields = this.parameterUsingServletFileUpload(request, params, this.getFiles(), servletConfig.getInitParameter("FileUploadLibrary"));
 		} catch (UnsupportedEncodingException e) {
 			this.abort();
 			LOG.severe(e);
@@ -303,7 +308,8 @@ public class QueryImpl extends Query {
 			this.getHeader().executeProp(params, time, this.getConnectionFactory(params));
 		}
 	}
-	private List<FileItem> parameter(HttpServletRequest request, Record params, Files files) throws UnsupportedEncodingException {
+	private List<FilePart> parameterUsingServletFileUpload(HttpServletRequest request, Record params, Files files, String fileUploadLibrary)
+		throws UnsupportedEncodingException, IOException, ServletException {
 		ServletContext c = request.getServletContext();
 		if(c != null) {
 			Enumeration<String> p = c.getInitParameterNames();
@@ -312,86 +318,95 @@ public class QueryImpl extends Query {
 				params.puts(Record.key(Record.PREFIX_TYPE_INIT_PARAM, key), c.getInitParameter(key));
 			}
 		}
-		ServletRequestContext src = new ServletRequestContext(request);
-		boolean isMultipartContent = ServletFileUpload.isMultipartContent(src);
-		List<FileItem> fields = null;
-		if(isMultipartContent) {
-			request.setCharacterEncoding("UTF-8");
-			Iterator<FileItem> it = null;
-			DiskFileItemFactory factory = new DiskFileItemFactory();
-			if(files != null) {
-				if(STR.valid(files.getMaxMemorySize())) {
-					factory.setSizeThreshold(Integer.valueOf(files.getMaxMemorySize()));
+		boolean legacyServletAPI = FilePart.legacyServletAPI(request);
+		List<FilePart> fileParts = null;
+		if(fileUploadLibrary != null && STR.compareIgnoreCase(fileUploadLibrary, "Servlet30FileUpload")) {
+			if(STR.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
+				if(legacyServletAPI) {
+					request.setCharacterEncoding("ISO-8859-1");
+				} else {
+					request.setCharacterEncoding("UTF-8");
 				}
-				if(STR.valid(files.getTempDirectory())) {
-					java.io.File f = new java.io.File(files.getTempDirectory());
-					if(f.exists() && f.isDirectory()) {
-						factory.setRepository(f);
+				Collection<Part> parts = request.getParts();
+				if(parts != null && parts.size() > 0) {
+					for(Part part : parts) {
+						if(FilePart.isFormField(part, request)) {
+						} else {
+							if(fileParts == null) {
+								fileParts = new ArrayList<FilePart>();
+							}
+							fileParts.add(new FilePart(part, legacyServletAPI));
+						}
 					}
-				}
-			}
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			if(files != null && STR.valid(files.getMaxRequestSize())) {
-				upload.setSizeMax(Long.valueOf(files.getMaxRequestSize()));
-			}
-			upload.setHeaderEncoding(request.getCharacterEncoding());
-			try {
-				fields = upload.parseRequest(src);
-			} catch (FileUploadException e1) {
-				LOG.severe(e1);
-			}
-			if(fields != null) {
-				int uploadFieldCount = 0;
-				it = fields.iterator();
-				while (it.hasNext()) {
-					FileItem fileItem = it.next();
-					boolean isFormField = fileItem.isFormField();
-					if(isFormField) {
-						params.puts(Record.key(Record.PREFIX_TYPE_PARAM, fileItem.getFieldName()), fileItem.getString(StandardCharsets.UTF_8.name()));
-					} else {
-						uploadFieldCount++;
-					}
-				}
-				if(uploadFieldCount == 0) {
-					fields = null;
 				}
 			}
 		} else {
-			if(
-				request.getServletContext().getMajorVersion() < 3
-				|| (
-					request.getServletContext().getMajorVersion() == 3
-					&& request.getServletContext().getMinorVersion() == 0
-				)
-			) {
-				request.setCharacterEncoding("ISO-8859-1");
-			} else {
+			ServletRequestContext src = new ServletRequestContext(request);
+			boolean isMultipartContent = ServletFileUpload.isMultipartContent(src);
+			List<FileItem> fields = null;
+			if(isMultipartContent) {
 				request.setCharacterEncoding("UTF-8");
-			}
-			Enumeration<String> e = request.getParameterNames();
-			
-			while (e.hasMoreElements()) {
-				String key = e.nextElement();
-				String[] values = request.getParameterValues(key);
-				if(values != null) {
-					for (String value : values) {
-						if(value == null) {continue;}
-						if(
-							request.getServletContext().getMajorVersion() < 3
-							|| (
-								request.getServletContext().getMajorVersion() == 3
-								&& request.getServletContext().getMinorVersion() == 0
-							)
-						) {
-							params.puts(Record.key(Record.PREFIX_TYPE_PARAM, key), new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
+				Iterator<FileItem> it = null;
+				DiskFileItemFactory factory = new DiskFileItemFactory();
+				if(files != null) {
+					if(STR.valid(files.getMaxMemorySize())) {
+						factory.setSizeThreshold(Integer.valueOf(files.getMaxMemorySize()));
+					}
+					if(STR.valid(files.getTempDirectory())) {
+						java.io.File f = new java.io.File(files.getTempDirectory());
+						if(f.exists() && f.isDirectory()) {
+							factory.setRepository(f);
+						}
+					}
+				}
+				ServletFileUpload upload = new ServletFileUpload(factory);
+				if(files != null && STR.valid(files.getMaxRequestSize())) {
+					upload.setSizeMax(Long.valueOf(files.getMaxRequestSize()));
+				}
+				upload.setHeaderEncoding(request.getCharacterEncoding());
+				try {
+					fields = upload.parseRequest(src);
+				} catch (FileUploadException e1) {
+					LOG.severe(e1);
+				}
+				if(fields != null) {
+					it = fields.iterator();
+					while (it.hasNext()) {
+						FileItem fileItem = it.next();
+						boolean isFormField = fileItem.isFormField();
+						if(isFormField) {
+							params.puts(Record.key(Record.PREFIX_TYPE_PARAM, fileItem.getFieldName()), fileItem.getString(StandardCharsets.UTF_8.name()));
 						} else {
-							params.puts(Record.key(Record.PREFIX_TYPE_PARAM, key), value);
+							if(fileParts == null) {
+								fileParts = new ArrayList<FilePart>();
+							}
+							fileParts.add(new FilePart(fileItem));
 						}
 					}
 				}
 			}
 		}
-		return fields;
+		if(legacyServletAPI) {
+			request.setCharacterEncoding("ISO-8859-1");
+		} else {
+			request.setCharacterEncoding("UTF-8");
+		}
+		Enumeration<String> e = request.getParameterNames();
+		while (e.hasMoreElements()) {
+			String key = e.nextElement();
+			String[] values = request.getParameterValues(key);
+			if(values != null) {
+				for (String value : values) {
+					if(value == null) {continue;}
+					if(legacyServletAPI) {
+						params.puts(Record.key(Record.PREFIX_TYPE_PARAM, key), new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
+					} else {
+						params.puts(Record.key(Record.PREFIX_TYPE_PARAM, key), value);
+					}
+				}
+			}
+		}
+		return fileParts;
 	}
 	private void userRole(HttpServletRequest request, Record params) {
 		if(request.getUserPrincipal() instanceof org.apache.catalina.realm.GenericPrincipal) {
