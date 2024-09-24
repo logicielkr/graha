@@ -7,14 +7,28 @@
 * JDK 1.7 or above
 * Apache Tomcat 7.x or above (혹은 Servlet API 3.1 이상을 지원하는 Web Application Server)
 * 데이타베이스(lastest version) 및 JDBC 드라이버(4.1 or above)
+
+파일 업로드를 위해 Apache Commons File Upload 를 이용하는 경우 관련 라이브러리도 필요하다.
+
 * commons-fileupload-1.3.3.jar
-* commons-io-1.1.jar
+* commons-io-2.8.0.jar
+
+> Apache Commons IO 는 2.7 이전 버전(before 2.7) 에서 취약점이 보고되었다(CVE-2021-29425).
+
+> CVE-2021-29425 를 요약하면, FileNameUtils.normalize 메소드에 "//../foo", 혹은 "\\..\foo" 와 같은 형태의 파라미터 값이 입력되면, 상위디렉토리를 리턴하는 대신, 입력값 그대로 리턴한다는 내용이다.
+
+> Commons IO 2.8 부터는 JDK 1.8 이상을 요구한다.
+
+> JDK 1.7 이하에서 Graha 라이브러리를 사용하려면, CVE-2021-29425 취약점을 감수하고, Commons IO 2.6 (requires Java 7) 이하 버전을 사용해야 한다.
+
 
 ### 1.2. 데이타베이스 테이블에 물리적 구조에 대한 제약(입력/수정 기능에서만 적용)
 
 * 테이블은 1개의 컬럼으로 구성된 Primary Key를 가져야 한다.
 * Primary Key 컬럼은 시퀀스를 사용한다(sqlite 예외).
-* 시퀀스의 이름은 테이블이름**$**컬럼이름 과 같은 형태이어야 한다(Graha가 제공하는 Manager 프로그램 사용시).
+* 시퀀스의 이름은 "테이블이름<strong>$</strong>컬럼이름" 과 같은 형태이어야 한다(Graha가 제공하는 Manager 프로그램 사용시).
+
+Graha 응용프로그램 중 [테이블 정의서](https://github.com/logicielkr/table) 를 사용하면, 테이블 및 시퀀스 생성을 위한 ddl 구문을 얻을 수 있다.
 
 ### 1.3. Graha를 이용한 프로그램 개발 절차
 
@@ -44,13 +58,19 @@
 ### 2.3. lib/ 디렉토리에 다음 파일을 복사
 
 * jdbc 드라이버(derby.jar)
-* xdbc jdbc 드라이버(<https://xdbc.kr>)
+* xdbc 드라이버(https://xdbc.kr)
+
+> xdbc 드라이버는 필수는 아니다.
+> xdbc 드라이버를 사용하면 sql 로그를 확인할 수 있다(log4jdbc 유사).
 
 ### 2.4. WEB-INF/lib 디렉토리에 Graha 라이브러리 및 의존성 라이브러리 복사
 
-* graha.0.5.0.0.jar (Graha 라이브러리)
+* graha.0.5.1.310.jar (Graha 라이브러리)
+
+파일 업로드를 위해 Apache Commons File Upload 를 이용하는 경우 관련 라이브러리도 필요하다.
+
 * commons-fileupload-1.3.3.jar
-* commons-io-1.1.jar
+* commons-io-2.8.0.jar
 
 ### 2.5. WEB-INF/web.xml 파일 설정
 
@@ -58,6 +78,16 @@
 <servlet>
 	<servlet-name>GrahaServlet</servlet-name>
 	<servlet-class>kr.graha.post.servlet.PostGeneratorServlet</servlet-class>
+	<multipart-config>
+		<location>/tmp</location>
+		<max-file-size>-1</max-file-size>
+		<max-request-size>-1</max-request-size>
+		<file-size-threshold>1048576</file-size-threshold>
+	</multipart-config>
+	<init-param>
+		<param-name>FileUploadLibrary</param-name>
+		<param-value>Servlet30FileUpload</param-value>
+	</init-param>
 </servlet>
 <servlet-mapping>
 	<servlet-name>GrahaServlet</servlet-name>
@@ -77,25 +107,34 @@
 </servlet-mapping>
 ```
 
+```<servlet>``` / ```<multipart-config>``` / ```<location>/tmp</location>``` 의 "/tmp" 는 적절한 경로로 수정한다.
+
+만약 Apache Commons File Upload 라이브러리를 사용한다면,
+```<multipart-config>``` 및 ```<init-param>``` 부분을 지우고,
+WEB-INF/lib 디렉토리에 관련 라이브러리를 복사한다.
+
 ### 2.6. WEB-INF/graha 디렉토리 생성
 
-매끈한 화면으로 확인하기 위해서 <https://github.com/logicielkr/graha> 에서 sample/base 에서 _base.xml 파일을 WEB-INF/graha/ 에 다운로드 받는다.
-_base.xml은 css/javascript로 구성된 읿종의 화면 template 과 같은 것이다.
+매끈한 화면을 위해 GitHub의 Graha 프로젝트 (https://github.com/logicielkr/graha) 에서 sample/base 에서 _base.xml 파일( https://github.com/logicielkr/graha/blob/master/sample/base/_base.xml )을 WEB-INF/graha/ 에 다운로드 받는다.
+
+> _base.xml은 css/javascript로 구성된 일종의 화면 template 과 같은 것인데, 업무용 프로그램과 같이 화면의 기본적인 형태가 크게 변경되지 않는 경우에 적합하다.
+
+_base.xml 에서 참조하는 css/javascript 파일들은 https://github.com/logicielkr/client_lib/tree/master/graha_base_library 에서 다운로드 할 수 있다.
 
 ## 3. GrahaManager
 
 GrahaManager는 자동으로 Graha xml 정의 파일을 생성하는 기능을 제공하는데,
 부수적으로 SQL 실행기, Table 목록, Table Column 정보 조회, Table 데이타 조회(30건 제한) 및 Table, Column 에 comment 를 추가/변경하는 기능을 제공한다.
 
-Graha는 전문적인 데이타베이스 관리 도구가 아니기 때문에 기본적인 기능만 제공하고 특별한 상황에서 오류가 발생할 가능성도 있다.
+Graha는 전문적인 데이타베이스 관리 도구가 아니기 때문에 기본적인 기능만 제공하고 특별한 상황에서는 오류가 발생할 가능성을 배제할 수는 없다.
 
 ### 3.1. SQL Runner
 
 SQL Runner는 Web 기반의 sql 실행기이다.
 
-웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 //${SERVER_NAME}:${PORT}/${CONTEXT_ROOT}/graha-manager/query 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```//localhost/graha-manager/query``` 와 같은 식이다.
+예를 들면 "//localhost:8080/graha-manager/query" 와 같은 식이다.
 
 데이타베이스 설정에 문제가 없다면, 다음과 같은 화면을 볼 수 있을 것이다.
 
@@ -123,17 +162,17 @@ start with 1
 
 ```sql
 create table memo (
-memo_id integer not null,
-title varchar(1000),
-contents long varchar,
-marked bool,
-insert_date timestamp,
-insert_id varchar(50),
-insert_ip varchar(15),
-update_date timestamp,
-update_id varchar(50),
-update_ip varchar(15),
-PRIMARY KEY (memo_id)
+	memo_id integer not null,
+	title varchar(1000),
+	contents long varchar,
+	marked bool,
+	insert_date timestamp,
+	insert_id varchar(50),
+	insert_ip varchar(15),
+	update_date timestamp,
+	update_id varchar(50),
+	update_ip varchar(15),
+	PRIMARY KEY (memo_id)
 )
 ```
 
@@ -160,8 +199,9 @@ table과 column의 comment를 모두 저장하고 나면, ❸ 테이블을 선�
 
 ![Graha Master 테이블 선택 화면](http://graha.kr/static-contents/images/manager.select.png)
 
-> 1개의 테이블을 선택한 경우 Generation 버튼을 클릭하면 된다.
-> 여러개의 테이블을 선택한 경우 1개의 master 테이블을 선택해야 한다.  이 경우 나머지 테이블에는 master 테이블의 primary key와 동일한 이름을 갖는 column을 가지고 있어야 하고, 물리적으로 foreign 키 설정과는 관련이 없다.
+1개의 테이블을 선택한 경우 Generation 버튼을 클릭하면 된다.
+
+여러개의 테이블을 선택한 경우 1개의 master 테이블을 선택해야 한다.  이 경우 나머지 테이블에는 master 테이블의 primary key와 동일한 이름을 갖는 column을 가지고 있어야 하고, 물리적으로 foreign 키 설정과는 관련이 없다.
 
 ## 4. Graha 를 이용한 프로그램 개발
 
@@ -222,11 +262,14 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 		</header>
 		<tables>
 			<table tableName="MEMO" name="memo" label="메모">
-				<column name="memo_id" value="param.memo_id" datatype="int"  primary="true"  insert="sequence.NEXT VALUE FOR &quot;memo$memo_id&quot;" />
+				<column name="memo_id" value="param.memo_id" datatype="int"  
+					primary="true"  
+					insert="sequence.NEXT VALUE FOR &quot;memo$memo_id&quot;" />
 				<column name="title" value="param.title" datatype="varchar" />
 				<column name="contents" value="param.contents" datatype="varchar" />
 				<column name="marked" value="param.marked" datatype="boolean" />
-				<column name="insert_date" only="insert" value="sql.current_timestamp" datatype="timestamp" />
+				<column name="insert_date" only="insert" 
+					value="sql.current_timestamp" datatype="timestamp" />
 				<column name="insert_id" only="insert" value="header.remote_user" datatype="varchar" />
 				<column name="insert_ip" only="insert" value="header.remote_addr" datatype="varchar" />
 				<column name="update_date" value="sql.current_timestamp" datatype="timestamp" />
@@ -240,7 +283,8 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 				<center />
 				<right>
 					<link name="list" label="목록" path="/memo/list" />
-					<link name="save" label="저장" path="/memo/insert" method="post" type="submit" full="true">
+					<link name="save" label="저장" path="/memo/insert" method="post" 
+						type="submit" full="true">
 						<params>
 							<param name="memo_id" type="query" value="memo_id" />
 						</params>
@@ -305,6 +349,7 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 						<column label="제목" name="title" />
 					</row>
 					<row>
+
 						<column label="내용" name="contents" />
 					</row>
 					<row>
@@ -314,14 +359,14 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 			</middle>
 			<bottom>
 				<left>
-					<link label="삭제" path="/memo/delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
+					<link label="삭제" path="/memo/delete" method="post" type="submit" 
+						msg="정말로 삭제하시겠습니까?">
 						<params>
 							<param name="memo_id" type="query" value="memo_id" />
 						</params>
 					</link>
 				</left>
 			</bottom>
-			
 		</layout>
 	</query>
 	<query id="delete" funcType="delete" label="메모">
@@ -337,9 +382,9 @@ WEB-INF/graha/ 디렉토리로 가면 memo.xml 혹은 memo.xml 파일이 이미 
 
 ### 4.2. 화면에서 확인하고 쓸모있게 변경하기
 
-웹브라우저 주소창에 //${SERVER_NAME}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
+웹브라우저 주소창에 //${SERVER_NAME}:${PORT}/${CONTEXT_ROOT}/graha/${확장자를 제외한 XML 파일이름}/${query 요소의 id 속성값}.xml 와 같은 형식의 URL을 입력한다. 
 
-예를 들면 ```//localhost/graha/memo/list.xml``` 와 같은 식이다.
+예를 들면 "//localhost:8080/graha/memo/list.xml" 와 같은 식이다.
 
 #### 4.2.1 목록 화면
 
@@ -371,7 +416,8 @@ from MEMO
 select
 	MEMO_ID
 	, TITLE
-	, cast(cast(update_date as date) as varchar(10)) || ' ' || cast(cast(update_date as time) as varchar(8)) as last_update_date
+	, cast(cast(update_date as date) as varchar(10)) || ' ' || 
+		cast(cast(update_date as time) as varchar(8)) as last_update_date
 from MEMO
 order by memo_id desc
 </sql>
@@ -520,8 +566,10 @@ th.title {
 		, TITLE
 		, CONTENTS
 		, MARKED
-		, cast(cast(insert_date as date) as varchar(10)) || ' ' || cast(cast(insert_date as time) as varchar(8)) as last_insert_date
-		, cast(cast(update_date as date) as varchar(10)) || ' ' || cast(cast(update_date as time) as varchar(8)) as last_update_date
+		, cast(cast(insert_date as date) as varchar(10)) || ' ' || 
+			cast(cast(insert_date as time) as varchar(8)) as last_insert_date
+		, cast(cast(update_date as date) as varchar(10)) || ' ' || 
+			cast(cast(update_date as time) as varchar(8)) as last_update_date
 	from MEMO
 		where MEMO_ID = ?
 </sql>
@@ -584,7 +632,6 @@ td.contents {
 	</style>
 </header>
 ```
-
 ![개선된 상세보기 화면](http://graha.kr/static-contents/images/memo002.detail.png)
 
 ## 5. 결어
@@ -599,4 +646,4 @@ Graha Manager가 자동으로 생성한 Graha xml 정의 파일을 원문 그대
 
 저자가 생각하는 Graha 가장 큰 장점은 Graha xml 정의 파일이 프로그램 명세서 수준으로 간결하고 구조적이라는 것이다.
 
-이 글을 쓰고 있는 현재 시점에서는 Graha에 관한 문서들이 부족하기 때문에 이 글을 넘어서는 사용법을 익히는 것이 쉽지 않은 일이지만, 앞으로 시간이 날 때마다 사례를 중심으로 문서화 작업을 진행할 예정이다.
+이 글을 쓰고 있는 현재 시점에서는 Graha에 관한 문서들이 절대적으로 부족하기 때문에 이 글을 넘어서는 사용법을 익히는 것이 쉽지 않은 일이지만, 앞으로 시간이 날 때마다 사례를 중심으로 문서화 작업을 진행할 예정이다.
