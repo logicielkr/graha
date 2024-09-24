@@ -36,19 +36,14 @@ import kr.graha.post.interfaces.ConnectionFactory;
 import kr.graha.post.lib.Record;
 import kr.graha.post.model.utility.AuthUtility;
 import kr.graha.post.model.utility.FilePart;
+import kr.graha.post.model.utility.FileUploadByApacheCommons;
+import kr.graha.post.model.utility.FileUploadByServlet30;
 import java.util.Enumeration;
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletConfig;
 import kr.graha.post.interfaces.ServletAdapter;
-import java.util.Collection;
-import javax.servlet.http.Part;
 import java.io.IOException;
 import javax.servlet.ServletException;
 
@@ -321,70 +316,9 @@ public class QueryImpl extends Query {
 		boolean legacyServletAPI = FilePart.legacyServletAPI(request);
 		List<FilePart> fileParts = null;
 		if(fileUploadLibrary != null && STR.compareIgnoreCase(fileUploadLibrary, "Servlet30FileUpload")) {
-			if(STR.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
-				if(legacyServletAPI) {
-					request.setCharacterEncoding("ISO-8859-1");
-				} else {
-					request.setCharacterEncoding("UTF-8");
-				}
-				Collection<Part> parts = request.getParts();
-				if(parts != null && parts.size() > 0) {
-					for(Part part : parts) {
-						if(FilePart.isFormField(part, request)) {
-						} else {
-							if(fileParts == null) {
-								fileParts = new ArrayList<FilePart>();
-							}
-							fileParts.add(new FilePart(part, legacyServletAPI));
-						}
-					}
-				}
-			}
+			fileParts = FileUploadByServlet30.getFileParts(request, legacyServletAPI);
 		} else {
-			ServletRequestContext src = new ServletRequestContext(request);
-			boolean isMultipartContent = ServletFileUpload.isMultipartContent(src);
-			List<FileItem> fields = null;
-			if(isMultipartContent) {
-				request.setCharacterEncoding("UTF-8");
-				Iterator<FileItem> it = null;
-				DiskFileItemFactory factory = new DiskFileItemFactory();
-				if(files != null) {
-					if(STR.valid(files.getMaxMemorySize())) {
-						factory.setSizeThreshold(Integer.valueOf(files.getMaxMemorySize()));
-					}
-					if(STR.valid(files.getTempDirectory())) {
-						java.io.File f = new java.io.File(files.getTempDirectory());
-						if(f.exists() && f.isDirectory()) {
-							factory.setRepository(f);
-						}
-					}
-				}
-				ServletFileUpload upload = new ServletFileUpload(factory);
-				if(files != null && STR.valid(files.getMaxRequestSize())) {
-					upload.setSizeMax(Long.valueOf(files.getMaxRequestSize()));
-				}
-				upload.setHeaderEncoding(request.getCharacterEncoding());
-				try {
-					fields = upload.parseRequest(src);
-				} catch (FileUploadException e1) {
-					LOG.severe(e1);
-				}
-				if(fields != null) {
-					it = fields.iterator();
-					while (it.hasNext()) {
-						FileItem fileItem = it.next();
-						boolean isFormField = fileItem.isFormField();
-						if(isFormField) {
-							params.puts(Record.key(Record.PREFIX_TYPE_PARAM, fileItem.getFieldName()), fileItem.getString(StandardCharsets.UTF_8.name()));
-						} else {
-							if(fileParts == null) {
-								fileParts = new ArrayList<FilePart>();
-							}
-							fileParts.add(new FilePart(fileItem));
-						}
-					}
-				}
-			}
+			fileParts = FileUploadByApacheCommons.getFileParts(request, params, files);
 		}
 		if(legacyServletAPI) {
 			request.setCharacterEncoding("ISO-8859-1");
