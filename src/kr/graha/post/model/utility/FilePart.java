@@ -24,6 +24,7 @@ package kr.graha.post.model.utility;
 import org.apache.commons.fileupload.FileItem;
 import javax.servlet.http.Part;
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Graha(그라하) FilePart
@@ -44,6 +45,9 @@ public class FilePart {
 	public FilePart(Part part, boolean legacyServletAPI) {
 		this.part = part;
 		this.legacyServletAPI = legacyServletAPI;
+	}
+	private boolean legacyServletAPI() {
+		return this.legacyServletAPI;
 	}
 	public static boolean isFormField(Part part, HttpServletRequest request) {
 		if(part.getHeader("Content-Disposition").indexOf("filename=") > 0) {
@@ -104,7 +108,11 @@ public class FilePart {
 							if(p.lastIndexOf("\\") > 0) {
 								p = p.substring(p.lastIndexOf("\\"));
 							}
-							this.fileName = p;
+							if(legacyServletAPI()) {
+								this.fileName = new String(p.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+							} else {
+								this.fileName = p;
+							}
 						} else if(p.startsWith("name=")) {
 							p = p.substring("name=".length()).trim();
 							if(p.startsWith("\"")) {
@@ -113,7 +121,11 @@ public class FilePart {
 							if(p.endsWith("\"")) {
 								p = p.substring(0, p.length() - 1);
 							}
-							this.fieldName = p;
+							if(legacyServletAPI()) {
+								this.fieldName = new String(p.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+							} else {
+								this.fieldName = p;
+							}
 						}
 					}
 				}
