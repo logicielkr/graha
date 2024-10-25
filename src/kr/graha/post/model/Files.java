@@ -373,11 +373,11 @@ param. 이 아니라, query. 으로 처리됨.
 			}
 		}
 	}
-	protected void list(GDocument document, Record params) throws IOException {
+	protected void list(GDocument document, Record params, int queryFuncType) throws IOException {
 		if(STR.valid(this.file)) {
 			for(int i = 0; i < this.file.size(); i++) {
 				File f = this.file.get(i);
-				f.list(document, params);
+				f.list(document, params, queryFuncType);
 			}
 		}
 	}

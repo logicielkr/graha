@@ -163,14 +163,28 @@ public class ValidationCommand extends Auth {
 			if(authInfo != null) {
 				xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, params, rdf) + "\">");
 			}
-			xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form, \"" + this.getName() + "\");");
+			if(STR.valid(this.getName())) {
+				xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form, \"" + this.getName() + "\");");
+			} else {
+				xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form);");
+			}
+			xsl.append(indent, "var _msg = " + this.getFunc() + "(form");
+			if(STR.valid(this.getName())) {
+				xsl.append(", \"" + this.getName() + "\"");
+			}
+			if(STR.valid(this.getMsg())) {
+				xsl.append(", \"" + this.getMsg() + "\"");
+			}
+			xsl.appendL(");");
 			xsl.appendL(indent, "if(_msg != null) {");
 			xsl.appendL(indent + 1, "if(arguments.length > 1) {");
 			xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_msg, not_null:true});");
 			xsl.appendL(indent + 2, "result = false;");
 			xsl.appendL(indent + 1, "} else {");
 			xsl.appendL(indent + 2, "alert(_getMessage(_msg));");
-			xsl.appendL(indent + 2, "if(typeof(_focus) == \"function\") {_focus(form, \"" + this.getName() + "\");}");
+			if(STR.valid(this.getName())) {
+				xsl.appendL(indent + 2, "if(typeof(_focus) == \"function\") {_focus(form, \"" + this.getName() + "\");}");
+			}
 			xsl.appendL(indent + 2, "return false;");
 			xsl.appendL(indent + 1, "}");
 			xsl.appendL(indent, "}");

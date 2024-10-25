@@ -184,14 +184,14 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "POST")) {
 						this.uploadFileUsingServletFileUpload(fields, params, queryFuncType);
 					} else {
-						this.listFile(document, params);
+						this.listFile(document, params, queryFuncType);
 					}
 				} else if(queryFuncType == Query.QUERY_FUNC_TYPE_DELETE) {
 					if(params.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "POST")) {
 						this.deleteFile(document, params);
 					}
 				} else if(queryFuncType == Query.QUERY_FUNC_TYPE_DETAIL) {
-					this.listFile(document, params);
+					this.listFile(document, params, queryFuncType);
 				}
 			} catch (IOException | URISyntaxException e) {
 				super.abort();
@@ -199,14 +199,14 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			}
 		}
 	}
-	private void listFile(GDocument document, Record params) throws IOException {
+	private void listFile(GDocument document, Record params, int queryFuncType) throws IOException {
 		if(super.getFiles() != null) {
 			if(super.getFiles().fileAllow(params)) {
 				if(
 						!params.hasKey(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) ||
 						params.getInt(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")) > 0
 				) {
-					super.getFiles().list(document, params);
+					super.getFiles().list(document, params, queryFuncType);
 				} else {
 					LOG.warning("hasKey : " + params.hasKey(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")));
 					LOG.warning("getInt : " + params.getInt(Record.key(Record.PREFIX_TYPE_QUERY_ROW, "total_fetch_count")));

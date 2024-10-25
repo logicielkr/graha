@@ -480,7 +480,7 @@ public class File {
 			this.delete(basePath);
 		}
 	}
-	protected void list(GDocument document, Record params) throws IOException {
+	protected void list(GDocument document, Record params, int queryFuncType) throws IOException {
 		if(STR.valid(this.getPath())) {
 			Record result = new Record();
 			if(
@@ -493,12 +493,14 @@ public class File {
 				result = null;
 			}
 			GFile gfile = GFile.load(this.getName(), result, params);
-			if(STR.valid(this.getTotal()) && Integer.parseInt(this.getTotal()) > 0) {
-				gfile.setTotal(Integer.parseInt(this.getTotal()));
-			} else if(STR.valid(this.getAppend()) && Integer.parseInt(this.getAppend()) > 0) {
-				gfile.setAppend(Integer.parseInt(this.getAppend()));
-			} else {
-				LOG.warning("total : " + this.getTotal() + ", append : " + this.getAppend());
+			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
+				if(STR.valid(this.getTotal()) && Integer.parseInt(this.getTotal()) > 0) {
+					gfile.setTotal(Integer.parseInt(this.getTotal()));
+				} else if(STR.valid(this.getAppend()) && Integer.parseInt(this.getAppend()) > 0) {
+					gfile.setAppend(Integer.parseInt(this.getAppend()));
+				} else {
+					LOG.warning("total : " + this.getTotal() + ", append : " + this.getAppend());
+				}
 			}
 			document.add(gfile);
 		}

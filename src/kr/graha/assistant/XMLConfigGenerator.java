@@ -725,7 +725,8 @@ public final class XMLConfigGenerator {
 			File grahaCssBaseDirectory = getUniqueFile(this._cm.getRealPath("/graha_css"), "base", null, "_", true);
 			File grahaJsBaseDirectory = getUniqueFile(this._cm.getRealPath("/graha_js"), "base", null, "_", true);
 			File grahaFormulaJsDirectory = getUniqueFile(this._cm.getRealPath("/graha_js"), "formula", null, "_", true);
-			File dateParserJsDirectory = getUniqueFile(this._cm.getRealPath("/graha_js"), "date_parser", null, "_", true);
+//			File dateParserJsDirectory = getUniqueFile(this._cm.getRealPath("/graha_js"), "date_parser", null, "_", true);
+			File dateParserJsDirectory = getUniqueFile(this._cm.getRealPath("/graha_js"), "parser", null, "_", true);
 			BufferedWriter bw = null;
 			try {
 				java.util.List fileLst = getFileLst();

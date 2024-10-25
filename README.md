@@ -21,17 +21,38 @@ Graha는 데이타베이스에 기반한 웹 프로그램의 개발 생산성을
 * 소스코드 : GitHub Graha 프로젝트 (https://github.com/logicielkr/graha)
 * 웹사이트 : Graha 홈페이지 (https://graha.kr)
 
-### 1.2. Graha의 목표
+### 1.2. 요구사항
+
+#### 1.2.1. 운영환경에서 최소한의 요구사항
+
+* JRE 7 이상
+* Servlet 3.0 이상을 지원하는 Web Application Server (Apache Tomcat 7.x 이상)
+* JDBC 를 지원하는 RDBMS
+
+#### 1.2.2. 운영환경에서 권장하는 사양
+
+* JRE 11
+* Apache Tomcat 9.x
+* PostgreSQL
+
+#### 1.2.3. 컴파일을 위한 요구사항
+
+* JDK 8 이상
+* Servlet 3.1 이상 (Apache Tomcat 8.x 이상)
+* Apache Commons FileUpload : 운영환경에서는 Servlet 3.0 이상에서 지원하는 File Upload 기능을 사용할 수 있음.
+* Apache Ant 혹은 Apache Maven (Apache Ant 추천)
+
+### 1.3. Graha의 목표
 
 설계서를 작성하듯 프로그램을 개발한다.
 
-### 1.3. Graha의 특징
+### 1.4. Graha의 특징
 
 * Graha는 sql과 화면 레이아웃에 대한 정보를 xml 정의 파일에 기술하는 방식으로 서버 쪽 프로그램을 완성한다.
 * 서버 쪽 프로그램을 작성하는데 Java 코드는 필요없다.
 * javascript와 css는 프로그래머의 몫이다.
 
-### 1.4. Graha의 장점
+### 1.5. Graha의 장점
 
 * Graha의 xml 정의 파일은 프로그램 동작에 대한 정보를 논리적으로 기술함으로써, 결과적으로 xml 파일로 프로그램 명세서를 작성하는 수준에서 프로그램을 완성할 수 있도록 한다.
 * 논리적인 Graha의 xml 정의 파일은 프로그램의 유지보수를 쉽게 해주고, 유연하게 변경 할 수 있도록 해준다.
@@ -39,7 +60,7 @@ Graha는 데이타베이스에 기반한 웹 프로그램의 개발 생산성을
 * Graha를 사용하는 프로그래머는 copy & paste와 같이 프로그래머를 손목터널증후근으로 인도하는 단순 반복적인 작업으로부터 벗어날 수 있다.
 * 암호화나 부득이하게 Java 코드가 필요하면, Graha가 제공하는 Java Interface를 구현하면 된다.
 
-### 1.5. 지원하는 데이타베이스
+### 1.6. 지원하는 데이타베이스
 
 * org.postgresql.Driver
 * oracle.jdbc.driver.OracleDriver
