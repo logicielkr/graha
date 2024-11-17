@@ -195,7 +195,7 @@ public class ValidationParam {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(ValidationParam.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("not-null", this.getNotNull());
 		element.setAttribute("msg", this.getMsg());

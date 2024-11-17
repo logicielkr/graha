@@ -206,9 +206,11 @@ public class Record<K, V> {
 		}
 		this.puts(key, null);
 	}
+	/*
 	private int intValue(String value) {
 		return this.intValue(value, 0);
 	}
+	*/
 	private Integer intObject(String value) {
 		if(value == null) {
 			return null;

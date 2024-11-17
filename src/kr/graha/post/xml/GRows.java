@@ -34,7 +34,6 @@ import java.text.DateFormat;
 import java.util.Locale;
 import java.util.Date;
 import java.security.NoSuchProviderException;
-import kr.graha.post.lib.Record;
 import kr.graha.post.lib.Buffer;
 import kr.graha.post.interfaces.ConnectionFactory;
 import kr.graha.post.interfaces.Encryptor;
@@ -135,7 +134,7 @@ public class GRows {
 	) throws SQLException {
 		GRows rows = new GRows(commandOrTableName);
 		rows.columnAuto = columnAuto;
-		int index = 0;
+//		int index = 0;
 		ResultSetMetaData rsmd = rs.getMetaData();
 		for(int x = 1; x <= rsmd.getColumnCount(); x++) {
 			rows.add(new GColumn(rsmd, x));
@@ -195,7 +194,7 @@ public class GRows {
 				row.add(value);
 			}
 			rows.add(row);
-			index++;
+//			index++;
 		}
 		return rows;
 	}

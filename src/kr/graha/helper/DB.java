@@ -28,7 +28,6 @@ import java.sql.CallableStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
-import java.sql.Types;
 import javax.naming.NamingException;
 import java.util.StringTokenizer;
 import java.sql.ResultSetMetaData;

@@ -96,7 +96,7 @@ public class Option {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Option.nodeName());
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("label", this.getLabel());
 		return element;

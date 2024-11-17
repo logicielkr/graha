@@ -139,7 +139,7 @@ public class Script {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Script.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("src", this.getSrc());
 		element.setAttribute("override", this.getOverride());

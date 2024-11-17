@@ -358,7 +358,7 @@ public class Table extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Table.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("tableName", this.getTableName(null));
 		element.setAttribute("label", this.getLabel());
@@ -609,8 +609,6 @@ public class Table extends SQLExecutor {
 		List<Tab> tabs
 	) throws NoSuchProviderException, SQLException {
 		if(STR.valid(this.getColumn())) {
-			int sqlType = Table.SQL_TYPE_UPDATE;
-			boolean next = false;
 			Tab tab = Table.getTab(tabs, this.getName(), params);
 			int idx = 1;
 			int updateCount = 0;
@@ -1017,7 +1015,7 @@ public class Table extends SQLExecutor {
 						queryFuncType == Query.QUERY_FUNC_TYPE_DELETE && 
 						!params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, c.getValue()))
 					) {
-						throw new ParsingException();
+						throw new ParsingException("delete func type must contains all column values");
 					}
 					if(index > 0) {
 						sqlForWhere.append(1, "and ");
@@ -1057,7 +1055,7 @@ public class Table extends SQLExecutor {
 					if(whereParamSize > 0) {
 						for(int x = 0; x < whereParamSize; x++) {
 							Param p = w.getParam(x, params);
-								SQLParameter parameter =  p.getValue(
+							SQLParameter parameter =  p.getValue(
 								params,
 								encryptor
 							);

@@ -217,7 +217,7 @@ public class Tab {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Tab.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("label", this.getLabel());
 		element.setAttribute("single", this.getSingle());

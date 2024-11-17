@@ -125,7 +125,7 @@ public class Row {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Row.nodeName());
 		element.setAttribute("cond", this.getCond());
 		if(this.col != null && this.col.size() > 0) {
 			for(int i = 0; i < this.col.size(); i++) {

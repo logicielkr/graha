@@ -117,7 +117,7 @@ public class Message {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Message.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("code", this.getCode());
 		element.setAttribute("ref", this.getRef());

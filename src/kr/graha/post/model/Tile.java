@@ -197,7 +197,7 @@ public class Tile {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Tile.nodeName());
 		element.setAttribute("cond", this.getCond());
 		if(this.param != null && this.param.size() > 0) {
 			for(int i = 0; i < this.param.size(); i++) {

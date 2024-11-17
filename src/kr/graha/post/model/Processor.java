@@ -239,7 +239,7 @@ public class Processor extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Processor.nodeName());
 		element.setAttribute("before", this.getBefore());
 			element.setAttribute("after", this.getAfter());
 			element.setAttribute("method", this.getMethod());

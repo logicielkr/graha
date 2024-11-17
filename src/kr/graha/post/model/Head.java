@@ -189,7 +189,7 @@ public class Head {
 		}
 	}
 	protected XmlElement element(int headType) {
-		XmlElement element = new XmlElement(this.nodeName(headType));
+		XmlElement element = new XmlElement(Head.nodeName(headType));
 		element.setAttribute("name", this.getName());
 		element.setAttribute("override", this.getOverride());
 		element.setAttribute("cond", this.getCond());

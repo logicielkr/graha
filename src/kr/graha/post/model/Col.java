@@ -443,7 +443,7 @@ public class Col {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Col.nodeName());
 		element.setAttribute("label", this.getLabel());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("value", this.getValue());
@@ -704,10 +704,10 @@ public class Col {
 		Buffer xsl = new Buffer();
 		String path = this.getXPath(this.getName(), tabName, rdf, full);
 		
-		boolean escape = true;
+//		boolean escape = true;
 		String escapeAttrValue = "";
 		if(STR.falseValue(this.getEscape())) {
-			escape = false;
+//			escape = false;
 			escapeAttrValue = " disable-output-escaping=\"yes\"";
 		}
 		if(STR.trueValue(this.getCode())) {

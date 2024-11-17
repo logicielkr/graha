@@ -226,7 +226,7 @@ public class Code extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Code.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("sql", this.getSqlAttr());
 		element.setAttribute("encrypt", this.getEncrypt());

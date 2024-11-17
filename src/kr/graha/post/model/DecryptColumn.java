@@ -90,7 +90,7 @@ public class DecryptColumn {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(DecryptColumn.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("encrypt", this.getEncrypt());
 		return element;

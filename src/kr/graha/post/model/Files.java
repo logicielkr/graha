@@ -42,7 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.fileupload.FileItem;
 import java.util.Iterator;
 import java.nio.file.Paths;
 import java.net.URI;
@@ -186,7 +185,7 @@ public class Files {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Files.nodeName());
 		element.setAttribute("maxMemorySize", this.getMaxMemorySize());
 		element.setAttribute("tempDirectory", this.getTempDirectory());
 		element.setAttribute("maxRequestSize", this.getMaxRequestSize());

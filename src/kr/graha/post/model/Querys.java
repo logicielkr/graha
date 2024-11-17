@@ -64,7 +64,7 @@ public class Querys {
 	protected static String nodeName() {
 		return Querys.nodeName;
 	}
-	protected static String nodePath() {
+	protected String nodePath() {
 		return Querys.nodeName;
 	}
 	private void loadHeader() {
@@ -225,7 +225,7 @@ public class Querys {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Querys.nodeName());
 		if(this.header != null) {
 			element.appendChild(this.header.element());
 		}

@@ -39,8 +39,6 @@ import java.nio.file.Files;
 import java.io.InputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.fileupload.FileItem;
-import java.nio.charset.StandardCharsets;
 import java.io.UnsupportedEncodingException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import kr.graha.post.xml.GDocument;
@@ -164,7 +162,7 @@ public class File {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(File.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("label", this.getLabel());
 		element.setAttribute("path", this.getPath());

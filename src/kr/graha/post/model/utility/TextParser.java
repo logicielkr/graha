@@ -23,7 +23,6 @@ package kr.graha.post.model.utility;
 
 import kr.graha.post.lib.Buffer;
 import kr.graha.helper.STR;
-import kr.graha.helper.LOG;
 import kr.graha.post.lib.Record;
 
 /**

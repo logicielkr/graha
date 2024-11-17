@@ -337,7 +337,7 @@ public class Header {
 		return header;
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Header.nodeName());
 		element.setAttribute("extends", this.getExtend());
 		if(this.jndi != null) {
 			element.appendChild(this.jndi.element());
@@ -677,17 +677,17 @@ public class Header {
 				LOG.severe(e);
 			}
 			if(factory != null) {
-				if(this.jndi != null) {
-					factory.setJndi(this.jndi);
-				} else 	if(this.jdbc != null) {
-					factory.setJdbc(this.jdbc, params);
+				if(this.getJndi() != null) {
+					factory.setJndi(this.getJndi());
+				} else 	if(this.getJdbc() != null) {
+					factory.setJdbc(this.getJdbc(), params);
 				}
 				return factory;
 			}
-		} else 	if(this.jndi != null) {
-			return new GrahaConnectionFactoryImpl(this.jndi);
-		} else 	if(this.jdbc != null) {
-			return new GrahaConnectionFactoryImpl(this.jdbc, params);
+		} else 	if(this.getJndi() != null) {
+			return new GrahaConnectionFactoryImpl(this.getJndi());
+		} else 	if(this.getJdbc() != null) {
+			return new GrahaConnectionFactoryImpl(this.getJdbc(), params);
 		}
 		return null;
 	}

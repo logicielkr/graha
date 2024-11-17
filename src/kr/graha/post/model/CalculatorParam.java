@@ -140,7 +140,7 @@ public class CalculatorParam {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(CalculatorParam.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("expr", this.getExpr());
 		element.setAttribute("func", this.getFunc());

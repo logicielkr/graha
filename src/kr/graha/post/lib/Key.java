@@ -21,7 +21,6 @@
 
 package kr.graha.post.lib;
 
-import kr.graha.helper.LOG;
 import kr.graha.helper.STR;
 
 /**

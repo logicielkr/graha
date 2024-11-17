@@ -45,6 +45,7 @@ import kr.graha.post.interfaces.Encryptor;
 import kr.graha.helper.LOG;
 import kr.graha.post.model.utility.SQLParameter;
 import java.sql.ResultSetMetaData;
+import kr.graha.post.lib.ParsingException;
 
 /**
  * querys/query/header/prop
@@ -246,7 +247,7 @@ public class Prop extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Prop.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("cond", this.getCond());
@@ -319,6 +320,10 @@ public class Prop extends SQLExecutor {
 		} else if(time > Prop.Before_Connection) {
 			super.setConnectionFactory(connectionFactory);
 			Buffer sql = super.parseSQL(this.sql, params);
+			if(sql == null) {
+				LOG.severe("prop(" + this.getName() + ") must be defined value or sql");
+				throw new ParsingException("prop(" + this.getName() + ") must be defined value or sql");
+			}
 			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;

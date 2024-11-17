@@ -178,7 +178,7 @@ public class Redirect {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Redirect.nodeName());
 		element.setAttribute("path", this.getPath());
 		element.setAttribute("cond", this.getCond());
 		element.setAttribute("autoredirect", this.getAutoredirect());

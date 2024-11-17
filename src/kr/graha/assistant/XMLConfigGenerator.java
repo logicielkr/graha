@@ -23,7 +23,6 @@ package kr.graha.assistant;
 
 import java.io.BufferedWriter;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.util.Properties;
 import kr.graha.helper.LOG;
 import kr.graha.helper.STR;
@@ -36,7 +35,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Hashtable;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Graha(그라하) XML Config 파일을 생성한다.
@@ -281,9 +279,11 @@ public final class XMLConfigGenerator {
 		}
 		return columnName;
 	}
+	/*
 	private boolean supportDatabaseDateFormat() {
 		return this._db.supportBultinDateFormatFunction();
 	}
+	*/
 	private String getFormat(Table table, String columnName) {
 		return this.getFormat(table.schema, table.name, columnName);
 	}
@@ -321,9 +321,11 @@ public final class XMLConfigGenerator {
 			return "";
 		}
 	}
+	/*
 	private boolean readonly(Table table, String columnName) {
 		return this.readonly(table.schema, table.name, columnName);
 	}
+	*/
 	private boolean readonly(String schemaName, String tableName, String columnName) {
 		return this.equals("insert_readonly_column_" + Table.getNameWithSchema(schemaName, tableName) + "___" + columnName + "", columnName);
 	}

@@ -120,7 +120,7 @@ public class Label {
 		}
 	}
 	protected XmlElement element(int labelType) {
-		XmlElement element = new XmlElement(this.nodeName(labelType));
+		XmlElement element = new XmlElement(Label.nodeName(labelType));
 		element.setAttribute("cond", this.getCond());
 		element.setAttribute("text", this.getText());
 		element.setAttribute("xText", this.getXText());

@@ -133,7 +133,7 @@ public class ValidationCommand extends Auth {
 	}
 	
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(ValidationCommand.nodeName());
 		super.element(element);
 		element.setAttribute("name", this.getName());
 		element.setAttribute("type", this.getType());

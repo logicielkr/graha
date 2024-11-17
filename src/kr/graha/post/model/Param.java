@@ -33,7 +33,6 @@ import java.util.Map;
 import kr.graha.post.interfaces.Encryptor;
 import java.security.NoSuchProviderException;
 import kr.graha.post.model.utility.SQLParameter;
-import kr.graha.post.interfaces.ConnectionFactory;
 
 /**
  * Graha(그라하) param 정보
@@ -180,7 +179,7 @@ public class Param {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Param.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("datatype", this.getDatatype());
 		element.setAttribute("value", this.getValue());

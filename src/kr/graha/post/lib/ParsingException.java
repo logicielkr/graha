@@ -30,5 +30,7 @@ package kr.graha.post.lib;
  */
 
 public class ParsingException extends RuntimeException {
-	
+	public ParsingException(String message) {
+		super(message);
+	}
 }

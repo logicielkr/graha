@@ -23,7 +23,6 @@ package kr.graha.post.model.utility;
 
 import kr.graha.post.lib.Record;
 import kr.graha.post.lib.ParsingException;
-import kr.graha.helper.LOG;
 import kr.graha.helper.STR;
 
 /**
@@ -263,12 +262,60 @@ public final class AuthUtility {
 	public static boolean testInServer(AuthInfo info, Record params) {
 		return AuthUtility.testInServer(info, params, true);
 	}
+	private static boolean testInServer(String part, int type, Record params, Boolean includeQuery) {
+		if(type == AuthUtility.TYPE_OF_RECORD) {
+			if(STR.startsWithIgnoreCase(part, "param.")) {
+			} else if(STR.startsWithIgnoreCase(part, "result.")) {
+			} else if(STR.startsWithIgnoreCase(part, "prop.")) {
+			} else if(STR.startsWithIgnoreCase(part, "error.")) {
+			} else if(STR.startsWithIgnoreCase(part, "query.")) {	
+			} else if(STR.startsWithIgnoreCase(part, "query.row.")) {
+			} else if(STR.startsWithIgnoreCase(part, "code.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "system.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "_system.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "messages.code.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "message.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "generate.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "default.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "sequence.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "generator.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "header.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "session.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "att.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "init-param.")) {
+				return true;
+			} else if(STR.startsWithIgnoreCase(part, "uuid.")) {
+				return true;
+			} else {
+				return true;
+			}
+			return params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, part), includeQuery);
+		} else {
+			return true;
+		}
+	}
 	private static boolean testInServer(AuthInfo info, Record params, Boolean includeQuery) {
 		if(info == null) {
 			return false;
 		} else if(info.left == null) {
 			return false;
 		} else {
+			if(AuthUtility.testInServer(info.left, info.leftType, params, includeQuery) && AuthUtility.testInServer(info.right, info.rightType, params, includeQuery)) {
+				return true;
+			}
+			/*
 			if(
 				info.rightType == AuthUtility.TYPE_OF_RECORD &&
 				info.leftType == AuthUtility.TYPE_OF_RECORD
@@ -294,6 +341,7 @@ public final class AuthUtility {
 			} else {
 				return true;
 			}
+			*/
 		}
 		return false;
 	}
@@ -330,9 +378,9 @@ public final class AuthUtility {
 				) {
 					left = XPathUtility.valueExpr(info.left, rdf, full);
 				} else if(info.left.startsWith("code.")) {
-					throw new ParsingException();
+					throw new ParsingException("auth(cond) expression(" + info.left + ") not allow starts with code.");
 				} else {
-					throw new ParsingException();
+					throw new ParsingException("auth(cond) expression(" + info.left + ") must be starts with param. or result. or prop. or error. or query.");
 				}
 			} else {
 				left = info.left;
@@ -347,9 +395,9 @@ public final class AuthUtility {
 				) {
 					right = XPathUtility.valueExpr(info.right, rdf, full);
 				} else if(info.right.startsWith("code.")) {
-					throw new ParsingException();
+					throw new ParsingException("auth(cond) expression(" + info.right + ") not allow starts with code.");
 				} else {
-					throw new ParsingException();
+					throw new ParsingException("auth(cond) expression(" + info.right + ") must be starts with param. or result. or prop. or error. or query.");
 				}
 			} else {
 				right = info.right;
@@ -365,7 +413,7 @@ public final class AuthUtility {
 					}
 				}
 				if(info.op == AuthUtility.In || info.op == AuthUtility.NotIn) {
-					throw new ParsingException();
+					throw new ParsingException("auth(cond) expression not allow in and not in");
 				} else if(info.op == AuthUtility.Equals) {
 					if(
 						info.rightType == AuthUtility.TYPE_OF_RECORD &&

@@ -148,7 +148,7 @@ public class Style {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Style.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("src", this.getSrc());
 		element.setAttribute("override", this.getOverride());

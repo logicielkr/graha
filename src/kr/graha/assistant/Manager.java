@@ -21,7 +21,6 @@
 
 package kr.graha.assistant;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -30,8 +29,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.Properties;
 import javax.naming.NamingException;
 import kr.graha.helper.LOG;
 import kr.graha.helper.DB;
@@ -53,7 +50,7 @@ import java.util.StringTokenizer;
  */
 
 public class Manager extends HttpServlet {
-	private String[] TYPES = {"TABLE", "VIEW"};
+//	private String[] TYPES = {"TABLE", "VIEW"};
 	public Manager() {
 	}
 	
@@ -336,8 +333,8 @@ public class Manager extends HttpServlet {
 		}
 		
 		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
 		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
@@ -690,9 +687,9 @@ public class Manager extends HttpServlet {
 		}
 
 		String redirectPath = cm.param("redirect_path");
-		String print = cm.param("print");
-		String file = cm.param("file");
-		String filePath = cm.param("file_path");
+//		String print = cm.param("print");
+//		String file = cm.param("file");
+//		String filePath = cm.param("file_path");
 		String sql = cm.param("sql");
 		int columnCount = 0;
 		if(!cm.param("column_count").trim().equals("")) {
@@ -805,7 +802,7 @@ public class Manager extends HttpServlet {
 		try {
 			con = cm.getConnection();
 			DBUtil db = DBUtil.getDBUtil(con, cm.getDef(), cm.getMapping());
-			java.util.List<Column> cols = null;
+//			java.util.List<Column> cols = null;
 			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=select\" ?>");
 			sb.append("<document><params>");
@@ -1137,7 +1134,7 @@ public class Manager extends HttpServlet {
 	}
 	
 	private void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
+//		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
 		
 		Connection con = null;

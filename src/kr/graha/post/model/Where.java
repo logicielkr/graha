@@ -75,10 +75,10 @@ public class Where {
 		this.param.add(tile);
 	}
 	protected int getParamSize(Record record) {
-		return Tile.getParamSize(this.param, record);
+		return Tile.getParamSize(this.getParam(), record);
 	}
 	protected Param getParam(int index, Record record) {
-		return Tile.getParam(this.param, index, record);
+		return Tile.getParam(this.getParam(), index, record);
 	}
 	protected static String nodeName() {
 		return Where.nodeName;
@@ -165,7 +165,7 @@ public class Where {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Where.nodeName());
 		element.setAttribute("method", this.getMethod());
 		element.appendChild(this.getSql());
 		if(this.param != null && this.param.size() > 0) {

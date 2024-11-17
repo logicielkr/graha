@@ -21,16 +21,7 @@
 
 package kr.graha.assistant;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import kr.graha.helper.LOG;
-import java.util.Hashtable;
-import java.util.Properties;
 import java.io.IOException;
 
 /**

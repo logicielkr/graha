@@ -26,11 +26,9 @@ import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.io.IOException;
 import java.util.Set;
 
@@ -42,7 +40,7 @@ import java.util.Set;
  */
 
 public class DBUtilMariaDBImpl extends DBUtil {
-	private Hashtable<String, Integer> map = null;
+//	private Hashtable<String, Integer> map = null;
 	private boolean existsTableCommentTable = false;
 	private boolean existsColumnCommentTable = false;
 	protected DBUtilMariaDBImpl() throws IOException {
@@ -329,10 +327,9 @@ public class DBUtilMariaDBImpl extends DBUtil {
 	}
 	protected List<Column> getColumns(Connection con, String schemaName, String tableName) throws SQLException {
 		List<Column> cols = super.getColumns(con, schemaName, tableName);
-		Hashtable<String, String> comment = getColumnComments(con, schemaName, tableName);
-		
-		for(Column col : cols){
-			if(comment != null || !comment.isEmpty()) {
+		Hashtable<String, String> comment = this.getColumnComments(con, schemaName, tableName);
+		if(comment != null && !comment.isEmpty()) {		
+			for(Column col : cols){
 				if(comment.containsKey(schemaName + "." + tableName + "." + col.name)) {
 					col.remarks = comment.get(schemaName + "." + tableName + "." + col.name);
 				}

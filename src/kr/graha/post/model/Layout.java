@@ -310,7 +310,7 @@ public class Layout {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Layout.nodeName());
 		element.setAttribute("template", this.getTemplate());
 		element.setAttribute("href", this.getHref());
 		element.setAttribute("msg", this.getMsg());

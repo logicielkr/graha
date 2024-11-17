@@ -89,7 +89,7 @@ public class Msg {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Msg.nodeName());
 		element.setAttribute("value", this.getValue());
 		element.setTextContent(this.getTextContent());
 		return element;

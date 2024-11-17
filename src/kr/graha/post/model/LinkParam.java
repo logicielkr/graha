@@ -113,7 +113,7 @@ public class LinkParam {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(LinkParam.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("type", this.getType());
@@ -291,7 +291,7 @@ public class LinkParam {
 			expr = kr.graha.post.xml.GParam.childNodePath("param", this.getValue(), rdf);
 		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
 		} else {
-			throw new ParsingException();
+			throw new ParsingException("type is empty or query, param, prop, result, error, default, const");
 		}
 		if(!STR.valid(this.getType()) || STR.vexistsIgnoreCase(this.getType(), "query", "param", "prop", "result", "error")) {
 			if(hideBlank) {

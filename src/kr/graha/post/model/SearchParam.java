@@ -178,7 +178,7 @@ public class SearchParam extends LinkParam {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(SearchParam.nodeName());
 		element.setAttribute("hidden", this.getHidden());
 		element.setAttribute("type", this.getType());
 		element.setAttribute("ref", this.getRef());

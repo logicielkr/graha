@@ -30,7 +30,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import kr.graha.helper.LOG;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.io.IOException;
 import java.util.Set;
 
@@ -205,7 +204,7 @@ public class DBUtilOracleImpl extends DBUtil {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			DatabaseMetaData m = con.getMetaData();
+//			DatabaseMetaData m = con.getMetaData();
 			pstmt = con.prepareStatement("select a.column_name, a.data_type, a.nullable, b.comments from user_tab_columns a, user_col_comments b where a.table_name = b.table_name and a.column_name = b.column_name and a.table_name = ? order by a.column_id");
 			pstmt.setString(1, tableName);
 			rs = pstmt.executeQuery();

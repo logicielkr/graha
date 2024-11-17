@@ -152,7 +152,7 @@ public class XmlAttr {
 				}
 				buffer.append(this.name);
 				buffer.append("\">");
-				int index = 0;
+//				int index = 0;
 				for(int i = 0; i < this.values.length; i++) {
 					Object value = this.values[i];
 					if(i > 0 && STR.compareIgnoreCase(this.name, "class")) {
@@ -160,11 +160,11 @@ public class XmlAttr {
 					}
 					if(value instanceof XmlElement) {
 						((XmlElement)value).println(buffer, indent + 1);
-						index++;
+//						index++;
 					} else if(value instanceof String) {
 						if(STR.valid((String)value)) {
 							buffer.appendL(indent + 1, value);
-							index++;
+//							index++;
 						}
 					}
 				}

@@ -90,7 +90,7 @@ public class Encrypt {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Encrypt.nodeName());
 		element.setAttribute("key", this.getKey());
 		element.setAttribute("name", this.getName());
 		return element;

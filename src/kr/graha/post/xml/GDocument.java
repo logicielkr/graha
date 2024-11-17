@@ -29,7 +29,6 @@ import kr.graha.post.lib.Record;
 import kr.graha.post.lib.Key;
 import kr.graha.helper.STR;
 import kr.graha.helper.XML;
-import kr.graha.helper.LOG;
 import java.util.List;
 import java.util.Iterator;
 
@@ -148,6 +147,9 @@ public class GDocument {
 	public void setXslName(String xslName) {
 		this.xslName = xslName;
 		this.xslPath = xslName + ".xsl";
+	}
+	public String getXslName() {
+		return this.xslName;
 	}
 	private String getXslParam() {
 		return this.xslParam;

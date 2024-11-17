@@ -149,7 +149,7 @@ public class Jdbc {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Jdbc.nodeName());
 		element.setAttribute("driverClassName", this.getDriverClassName());
 		element.setAttribute("url", this.getUrl());
 		element.setAttribute("username", this.getUsername());

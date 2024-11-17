@@ -69,9 +69,7 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		return HttpServletResponse.SC_OK;
 	}
-	protected Buffer toXSL(Record param, HttpServletRequest request, int indent) {
-		boolean div = super.div();
-		boolean rdf = super.rdf();
+	protected void params(Record param, boolean div, boolean rdf) {
 		if(rdf) {
 			param.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "output"), "rdf");
 		} else {
@@ -82,6 +80,16 @@ public class QueryXSLImpl extends QueryImpl {
 		} else {
 			param.put(Record.key(Record.PREFIX_TYPE_SYSTEM, "htmltype"), "table");
 		}
+	}
+	protected void params(Record param) {
+		boolean div = super.div();
+		boolean rdf = super.rdf();
+		this.params(param, div, rdf);
+	}
+	protected Buffer toXSL(Record param, HttpServletRequest request, int indent) {
+		boolean div = super.div();
+		boolean rdf = super.rdf();
+		this.params(param, div, rdf);
 		Buffer xsl = new Buffer();
 		if(param.equals(Record.key(Record.PREFIX_TYPE_HEADER, "method"), "ERROR")) {
 			this.error(param, request, indent, rdf, xsl);

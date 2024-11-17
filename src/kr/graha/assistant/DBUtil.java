@@ -78,10 +78,12 @@ public class DBUtil {
 	protected boolean supportSequence() {
 		return true;
 	}
+	/*
 	private String prefixSchema(Connection con, String schemaName) throws SQLException {
 		DatabaseMetaData m = con.getMetaData();
 		return "";
 	}
+	*/
 	protected String getNextval(Connection con, Table table, String columnName, String defaultSchema) {
 		return getNextval(con, table.name, columnName, table.schema, defaultSchema);
 	}

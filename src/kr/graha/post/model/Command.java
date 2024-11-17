@@ -52,7 +52,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import kr.graha.post.model.utility.AuthUtility;
 import kr.graha.post.model.utility.AuthInfo;
 
 /**
@@ -295,7 +294,7 @@ public class Command extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Command.nodeName());
 		element.setAttribute("encrypt", this.getEncrypt());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("multi", this.getMulti());

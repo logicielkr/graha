@@ -24,7 +24,6 @@ package kr.graha.post.element;
 import java.util.List;
 import java.util.ArrayList;
 import kr.graha.helper.STR;
-import kr.graha.helper.LOG;
 import kr.graha.post.lib.Buffer;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;

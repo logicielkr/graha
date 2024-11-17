@@ -21,9 +21,6 @@
 
 package kr.graha.post.interfaces;
 
-import java.sql.Connection;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import kr.graha.post.lib.Record;
 
 /**

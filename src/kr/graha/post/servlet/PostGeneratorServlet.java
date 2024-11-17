@@ -30,9 +30,6 @@ import java.io.IOException;
 import kr.graha.helper.LOG;
 import javax.servlet.ServletException;
 import kr.graha.post.lib.Record;
-import java.security.NoSuchProviderException;
-import java.sql.SQLException;
-import java.net.URISyntaxException;
 
 /**
  * Graha(그라하) 서블릿
@@ -45,11 +42,9 @@ import java.net.URISyntaxException;
 public class PostGeneratorServlet extends HttpServlet {
 	public void init() {
 	}
-	@SuppressWarnings("unchecked")
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
 	}
-	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.execute(request, response);
 	}

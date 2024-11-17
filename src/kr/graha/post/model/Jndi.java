@@ -106,7 +106,7 @@ public class Jndi {
 		return jndi;
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Jndi.nodeName());
 		element.setAttribute("sql_list_template", this.getSqlListTemplate());
 		element.setAttribute("sql_cnt_template", this.getSqlCntTemplate());
 		element.setAttribute("sql_sequence_template", this.getSqlSequenceTemplate());

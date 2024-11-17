@@ -244,7 +244,7 @@ public class Link {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Link.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("path", this.getPath());
 		element.setAttribute("type", this.getType());

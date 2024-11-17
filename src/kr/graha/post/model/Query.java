@@ -431,7 +431,7 @@ public class Query {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Query.nodeName());
 		element.setAttribute("extends", this.getExtend());
 		element.setAttribute("id", this.getId());
 		element.setAttribute("funcType", this.getFuncType());

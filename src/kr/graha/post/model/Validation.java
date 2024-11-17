@@ -139,7 +139,7 @@ public class Validation {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Validation.nodeName());
 		element.setAttribute("method", this.getMethod());
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {

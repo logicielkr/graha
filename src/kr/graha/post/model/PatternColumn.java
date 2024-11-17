@@ -90,7 +90,7 @@ public class PatternColumn {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(PatternColumn.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("pattern", this.getPattern());
 		return element;

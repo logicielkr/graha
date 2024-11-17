@@ -61,12 +61,9 @@ public final class LOG {
 			e.printStackTrace(pw);
 			if(sw != null) {
 				return sw.toString();
-			} else {
-				return null;
 			}
 		} catch(Exception e1) {
 			e1.printStackTrace();
-			return null;
 		} finally {
 			if(sw != null) {
 				try {
@@ -79,6 +76,7 @@ public final class LOG {
 				pw.close();
 			}
 		}
+		return null;
 	}
 /**
  * 예외(Exception) 가 발생한 StackTrace 를 반환한다.

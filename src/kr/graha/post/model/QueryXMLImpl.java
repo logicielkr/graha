@@ -39,7 +39,6 @@ import kr.graha.post.lib.Record;
 import kr.graha.post.xml.GDocument;
 import kr.graha.post.model.utility.FilePart;
 import javax.servlet.ServletConfig;
-import org.apache.commons.fileupload.FileItem;
 import java.net.URISyntaxException;
 import java.io.ByteArrayInputStream;
 import javax.xml.transform.stream.StreamResult;
@@ -524,7 +523,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		GDocument document = this.getDocument(request);
 		params.setGDocument(document);
-		int totalFetchCount = 0;
+//		int totalFetchCount = 0;
 		try {
 			this.executeMessage(document, params);
 			this.executeCode(document, params, Prop.Before_Connection);
@@ -539,8 +538,10 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				return document;
 			}
 			super.executeProp(params, Prop.After_Before_Processor);
-			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
-			totalFetchCount += this.executeTable(document, params, queryFuncType);
+//			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
+//			totalFetchCount += this.executeTable(document, params, queryFuncType);
+			this.executeCommand(document, params, request, response, queryFuncType);
+			this.executeTable(document, params, queryFuncType);
 			this.executeFileUsingServletFileUpload(document, fields, params, queryFuncType);
 			if(this.empty(params, queryFuncType)) {
 				super.clear();
@@ -627,6 +628,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 	public int execute(
 		HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params
 	) throws IOException, NoSuchProviderException, SQLException, URISyntaxException, ServletException {
+		super.params(params);
 		try {
 			List<FilePart> fields = super.prepareUsingServletFileUpload(request, servletConfig, params);
 			if(!super.auth(params)) {

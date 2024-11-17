@@ -193,7 +193,7 @@ public class Search {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Search.nodeName());
 		element.setAttribute("path", this.getPath());
 		element.setAttribute("label", this.getLabel());
 		element.setAttribute("icon", this.getIcon());

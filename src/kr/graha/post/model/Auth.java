@@ -26,9 +26,7 @@ import java.util.ArrayList;
 import kr.graha.post.lib.Record;
 import kr.graha.helper.STR;
 import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import kr.graha.post.element.XmlElement;
 import kr.graha.helper.DB;
@@ -44,7 +42,6 @@ import java.util.Map;
 import kr.graha.post.lib.Buffer;
 import kr.graha.post.interfaces.ConnectionFactory;
 import java.security.NoSuchProviderException;
-import kr.graha.post.model.utility.AuthUtility;
 import kr.graha.post.model.utility.AuthInfo;
 
 /**
@@ -244,7 +241,7 @@ public class Auth extends SQLExecutor {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Auth.nodeName());
 		this.element(element);
 		return element;
 	}

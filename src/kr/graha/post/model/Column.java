@@ -225,7 +225,7 @@ public class Column extends Param {
 		}
 	}
 	protected XmlElement element() {
-		XmlElement element = new XmlElement(this.nodeName());
+		XmlElement element = new XmlElement(Column.nodeName());
 		element.setAttribute("name", this.getName());
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("primary", this.getPrimary());
@@ -308,10 +308,12 @@ public class Column extends Param {
 					} else {
 						Table table = null;
 						Column column = null;
-						for(int i = 0; i < tables.size(); i++) {
-							table = (Table)tables.get(i);
+						if(tables != null && tables.size() > 0) {
+//						for(int i = 0; i < tables.size(); i++) {
+//							table = (Table)tables.get(i);
+							table = (Table)tables.get(0);
 							column = table.getPrimaryColumnByValue(this.getValue(), params);
-							break;
+//							break;
 						}
 						if(column != null) {
 							if(
