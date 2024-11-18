@@ -264,7 +264,7 @@ public class QueryImpl extends Query {
 		}
 		List<FilePart> fields = null;
 		try {
-			fields = this.parameterUsingServletFileUpload(request, params, this.getFiles(), servletConfig.getInitParameter("FileUploadLibrary"));
+			fields = this.parameterUsingServletFileUpload(request, params, this.getFiles(), servletConfig);
 		} catch (UnsupportedEncodingException e) {
 			this.abort();
 			LOG.severe(e);
@@ -303,14 +303,26 @@ public class QueryImpl extends Query {
 			this.getHeader().executeProp(params, time, this.getConnectionFactory(params));
 		}
 	}
-	private List<FilePart> parameterUsingServletFileUpload(HttpServletRequest request, Record params, Files files, String fileUploadLibrary)
+	private List<FilePart> parameterUsingServletFileUpload(HttpServletRequest request, Record params, Files files, ServletConfig servletConfig)
 		throws UnsupportedEncodingException, IOException, ServletException {
+		String fileUploadLibrary = servletConfig.getInitParameter("FileUploadLibrary");
 		ServletContext c = request.getServletContext();
 		if(c != null) {
 			Enumeration<String> p = c.getInitParameterNames();
 			while (p.hasMoreElements()) {
 				String key = p.nextElement();
-				params.puts(Record.key(Record.PREFIX_TYPE_INIT_PARAM, key), c.getInitParameter(key));
+				params.puts(Record.key(Record.PREFIX_TYPE_CONTEXT_PARAM, key), c.getInitParameter(key));
+			}
+		}
+		if(servletConfig != null) {
+			Enumeration<String> p = servletConfig.getInitParameterNames();
+			if(p != null) {
+				while (p.hasMoreElements()) {
+					String key = p.nextElement();
+					if(key != null && !key.equals("UserServletAdapter")) {
+						params.puts(Record.key(Record.PREFIX_TYPE_INIT_PARAM, key), servletConfig.getInitParameter(key));
+					}
+				}
 			}
 		}
 		boolean legacyServletAPI = FilePart.legacyServletAPI(request);

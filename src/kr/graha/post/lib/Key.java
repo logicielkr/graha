@@ -107,6 +107,8 @@ public class Key {
 				this._prefix = Record.PREFIX_TYPE_ATT;
 			} else if(STR.startsWithIgnoreCase(key, "init-param.")) {
 				this._prefix = Record.PREFIX_TYPE_INIT_PARAM;
+			} else if(STR.startsWithIgnoreCase(key, "context-param.")) {
+				this._prefix = Record.PREFIX_TYPE_CONTEXT_PARAM;
 			} else if(STR.startsWithIgnoreCase(key, "result.")) {
 				this._prefix = Record.PREFIX_TYPE_RESULT;
 			} else if(STR.startsWithIgnoreCase(key, "uuid.")) {
@@ -167,6 +169,8 @@ public class Key {
 			return Record.PREFIX_TYPE_ATT;
 		} else if(STR.compareIgnoreCase(prefix, "init-param")) {
 			return Record.PREFIX_TYPE_INIT_PARAM;
+		} else if(STR.compareIgnoreCase(prefix, "context-param")) {
+			return Record.PREFIX_TYPE_CONTEXT_PARAM;
 		} else if(STR.compareIgnoreCase(prefix, "result")) {
 			return Record.PREFIX_TYPE_RESULT;
 		} else if(STR.compareIgnoreCase(prefix, "uuid")) {
@@ -212,6 +216,8 @@ public class Key {
 			return "att";
 		} else if(this._prefix == Record.PREFIX_TYPE_INIT_PARAM) {
 			return "init-param";
+		} else if(this._prefix == Record.PREFIX_TYPE_CONTEXT_PARAM) {
+			return "context-param";
 		} else if(this._prefix == Record.PREFIX_TYPE_RESULT) {
 			return "result";
 		} else if(this._prefix == Record.PREFIX_TYPE_UUID) {
@@ -260,6 +266,8 @@ public class Key {
 			return Record.PREFIX_TYPE_ATT;
 		} else if(STR.compareIgnoreCase(prefix, "init-param.")) {
 			return Record.PREFIX_TYPE_INIT_PARAM;
+		} else if(STR.compareIgnoreCase(prefix, "context-param.")) {
+			return Record.PREFIX_TYPE_CONTEXT_PARAM;
 		} else if(STR.compareIgnoreCase(prefix, "result.")) {
 			return Record.PREFIX_TYPE_RESULT;
 		} else if(STR.compareIgnoreCase(prefix, "uuid.")) {

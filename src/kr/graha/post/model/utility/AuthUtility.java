@@ -296,6 +296,8 @@ public final class AuthUtility {
 				return true;
 			} else if(STR.startsWithIgnoreCase(part, "init-param.")) {
 				return true;
+			} else if(STR.startsWithIgnoreCase(part, "context-param.")) {
+				return true;
 			} else if(STR.startsWithIgnoreCase(part, "uuid.")) {
 				return true;
 			} else {

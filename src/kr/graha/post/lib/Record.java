@@ -70,6 +70,7 @@ public class Record<K, V> {
 	public static int PREFIX_TYPE_SESSION = 17;
 	public static int PREFIX_TYPE_ATT = 18;
 	public static int PREFIX_TYPE_INIT_PARAM = 19;
+	public static int PREFIX_TYPE_CONTEXT_PARAM = 23;
 	
 	public static int PREFIX_TYPE_RESULT = 20;
 	
