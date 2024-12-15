@@ -556,9 +556,16 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				return document;
 			}
 			super.executeProp(params, Prop.After_After_Processor);
-			this.executeReport(request, response, params, document, queryFuncType);
+			if(queryFuncType == Query.QUERY_FUNC_TYPE_REPORT) {
+				document.add(params);
+				this.executeReport(request, response, params, document, queryFuncType);
+			}
 			this.setXslNameAndParam(document, params, queryFuncType);
-			document.add(params);
+			if(queryFuncType == Query.QUERY_FUNC_TYPE_REPORT) {
+				document.replace(params);
+			} else {
+				document.add(params);
+			}
 			super.clear();
 		} catch (NoSuchProviderException | SQLException | IOException | URISyntaxException e) {
 			super.abort();

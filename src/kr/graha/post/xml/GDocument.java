@@ -374,6 +374,29 @@ public class GDocument {
 		toXML(xml);
 		return xml;
 	}
+	public void replace(Record params) {
+		if(this.params != null) {
+			this.params.clear();
+			this.params = null;
+		}
+		if(this.props != null) {
+			this.props.clear();
+			this.props = null;
+		}
+		if(this.results != null) {
+			this.results.clear();
+			this.results = null;
+		}
+		if(this.errors != null) {
+			this.errors.clear();
+			this.errors = null;
+		}
+		if(this.messages != null) {
+			this.messages.clear();
+			this.messages = null;
+		}
+		this.add(params);
+	}
 	public void add(Record params) {
 		if(params != null && !params.isEmpty()) {
 			Iterator<Key> it = params.keySet().iterator();
