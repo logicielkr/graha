@@ -33,7 +33,7 @@ import kr.graha.post.model.Jdbc;
 import kr.graha.helper.LOG;
 
 /**
- * Graha(그라하) ConnectionFactory 인터페이스
+ * Graha(그라하) ConnectionFactory 인터페이스 구현체
 
  * @author HeonJik, KIM
  * @version 0.5

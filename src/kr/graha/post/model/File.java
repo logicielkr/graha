@@ -44,6 +44,9 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import kr.graha.post.xml.GDocument;
 import kr.graha.post.xml.GFile;
 import kr.graha.post.model.utility.FilePart;
+import kr.graha.post.interfaces.FilePathTranslator;
+import kr.graha.post.interfaces.FilePathTranslatorImpl;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Graha(그라하) file 정보
@@ -65,6 +68,7 @@ public class File {
 	private String before = null;
 	private String after = null;
 	private String backup = null;
+	private String translator = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -113,6 +117,12 @@ public class File {
 	private void setBackup(String backup) {
 		this.backup = backup;
 	}
+	private String getTranslator() {
+		return this.translator;
+	}
+	private void setTranslator(String translator) {
+		this.translator = translator;
+	}
 	protected static String nodeName() {
 		return File.nodeName;
 	}
@@ -150,6 +160,8 @@ public class File {
 							this.setAfter(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "backup")) {
 							this.setBackup(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "translator")) {
+							this.setTranslator(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -171,6 +183,7 @@ public class File {
 		element.setAttribute("before", this.getBefore());
 		element.setAttribute("after", this.getAfter());
 		element.setAttribute("backup", this.getBackup());
+		element.setAttribute("translator", this.getTranslator());
 		return element;
 	}
 	private boolean print(String before, String after) {
@@ -264,12 +277,31 @@ public class File {
 		}
 		return null;
 	}
+	private Path getFilePath(String basePath, String fileName) {
+		FilePathTranslator translator = null;
+		if(STR.valid(this.getTranslator())) {
+			try {
+				translator = (FilePathTranslator) Class.forName(this.getTranslator()).getConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+				LOG.severe(e);
+				translator = null;
+			}
+		} else {
+			translator = new FilePathTranslatorImpl();
+		}
+		if(translator != null) {
+			return translator.getFilePath(basePath, fileName);
+		}
+		return null;
+	}
 	protected void download(String filePath, HttpServletRequest request, HttpServletResponse response, Record params) throws IOException {
 		String basePath = null;
 		if(STR.valid(this.getPath())) {
 			basePath = TextParser.parse(this.getPath(), params);
 			String fileName = filePath.substring(filePath.indexOf("/") + 1);
 			LOG.finer(basePath + java.io.File.separator + fileName);
+			Path path = this.getFilePath(basePath, fileName);
+			/*
 			Path path = null;
 			try {
 				path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
@@ -278,6 +310,7 @@ public class File {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
+			*/
 			if(path != null && Files.exists(path)) {
 				LOG.config("File Path = " + path.toUri().getPath());
 				response.setContentLength((int)Files.size(path));
