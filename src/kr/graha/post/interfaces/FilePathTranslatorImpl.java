@@ -27,6 +27,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.UnsupportedEncodingException;
 import kr.graha.helper.LOG;
+import javax.servlet.http.HttpServletRequest;
+import kr.graha.post.lib.Record;
 
 /**
  * Graha(그라하) File Path Translator 표준구현체
@@ -40,7 +42,9 @@ import kr.graha.helper.LOG;
 public class FilePathTranslatorImpl implements FilePathTranslator {
 	public Path getFilePath(
 		String basePath,
-		String fileName
+		String fileName,
+		HttpServletRequest request,
+		Record params
 	) {
 		Path path = null;
 		try {

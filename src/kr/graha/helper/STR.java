@@ -119,6 +119,36 @@ public final class STR {
 		return false;
 	}
 /**
+ * 첫번째 문자열이 두번째 문자열로 끝나는지 검사한다.
+ * @param s1
+ * @param s2
+ * @return 첫번째 문자열이 두번째 문자열로 끝나면 true를 리턴한다.
+ */
+	public static boolean endsWithIgnoreCase(String s1, String s2) {
+		if(s1 == null || s2 == null) {
+			return false;
+		}
+		if(s1.toLowerCase().endsWith(s2.toLowerCase())) {
+			return true;
+		}
+		return false;
+	}
+/**
+ * 첫번째 문자열이 두번째 문자열로 끝나는지 검사한다.
+ * @param s1
+ * @param s2
+ * @return 첫번째 문자열이 두번째 문자열로 끝나면 true를 리턴한다.
+ */
+	public static boolean endsWith(String s1, String s2) {
+		if(s1 == null || s2 == null) {
+			return false;
+		}
+		if(s1.endsWith(s2)) {
+			return true;
+		}
+		return false;
+	}
+/**
  * 첫 번째 파라미터로 공급된 문자열이, 2 번째 파라미터로 공급된 문자열 배열에 있는지 검사한다.
  * s2 에 null 이 포함되고 있고, s1 이 null 이라면 true 를 리턴함에 주의한다.
  * 문자열 비교는 compare 메소드를 호출한다.

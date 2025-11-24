@@ -22,15 +22,15 @@
 package kr.graha.post.lib;
 
 /**
- * Graha(그라하) 내부에서 사용하는 Exception
+ * Graha(그라하) 실행과정에서 발생하는 Exception
 
  * @author HeonJik, KIM
  * @version 0.5
  * @since 0.1
  */
 
-public class ParsingException extends RuntimeException {
-	public ParsingException(String message) {
+public class GrahaRuntimeException extends RuntimeException {
+	public GrahaRuntimeException(String message) {
 		super(message);
 	}
 }

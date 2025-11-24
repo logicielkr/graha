@@ -47,7 +47,7 @@ import kr.graha.post.interfaces.Encryptor;
 import java.util.Map;
 import java.security.NoSuchProviderException;
 import java.sql.ResultSet;
-import kr.graha.post.lib.ParsingException;
+import kr.graha.post.lib.GrahaParsingException;
 import kr.graha.post.model.utility.TextParser;
 import kr.graha.post.model.utility.AuthUtility;
 import kr.graha.post.model.utility.AuthInfo;
@@ -1015,7 +1015,7 @@ public class Table extends SQLExecutor {
 						queryFuncType == Query.QUERY_FUNC_TYPE_DELETE && 
 						!params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, c.getValue()))
 					) {
-						throw new ParsingException("delete func type must contains all column values");
+						throw new GrahaParsingException("delete func type must contains all column values");
 					}
 					if(index > 0) {
 						sqlForWhere.append(1, "and ");

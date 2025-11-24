@@ -19,26 +19,18 @@
  */
 
 
-package kr.graha.post.interfaces;
-
-import java.nio.file.Path;
-import javax.servlet.http.HttpServletRequest;
-import kr.graha.post.lib.Record;
+package kr.graha.post.lib;
 
 /**
- * Graha(그라하) File Path Translator
+ * Graha(그라하) 설정 파일 구문 오류와 관련된 Exception
 
  * @author HeonJik, KIM
  * @version 0.5
  * @since 0.1
  */
 
-
-public interface FilePathTranslator {
-	Path getFilePath(
-		String basePath,
-		String fileName,
-		HttpServletRequest request,
-		Record params
-	);
+public class GrahaParsingException extends RuntimeException {
+	public GrahaParsingException(String message) {
+		super(message);
+	}
 }

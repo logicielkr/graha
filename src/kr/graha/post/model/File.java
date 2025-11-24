@@ -47,6 +47,7 @@ import kr.graha.post.model.utility.FilePart;
 import kr.graha.post.interfaces.FilePathTranslator;
 import kr.graha.post.interfaces.FilePathTranslatorImpl;
 import java.lang.reflect.InvocationTargetException;
+import kr.graha.post.lib.GrahaRuntimeException;
 
 /**
  * Graha(그라하) file 정보
@@ -277,7 +278,7 @@ public class File {
 		}
 		return null;
 	}
-	private Path getFilePath(String basePath, String fileName) {
+	private Path getFilePath(String basePath, String fileName, HttpServletRequest request, Record params) {
 		FilePathTranslator translator = null;
 		if(STR.valid(this.getTranslator())) {
 			try {
@@ -290,7 +291,7 @@ public class File {
 			translator = new FilePathTranslatorImpl();
 		}
 		if(translator != null) {
-			return translator.getFilePath(basePath, fileName);
+			return translator.getFilePath(basePath, fileName, request, params);
 		}
 		return null;
 	}
@@ -300,7 +301,7 @@ public class File {
 			basePath = TextParser.parse(this.getPath(), params);
 			String fileName = filePath.substring(filePath.indexOf("/") + 1);
 			LOG.finer(basePath + java.io.File.separator + fileName);
-			Path path = this.getFilePath(basePath, fileName);
+			Path path = this.getFilePath(basePath, fileName, request, params);
 			/*
 			Path path = null;
 			try {
@@ -437,10 +438,26 @@ public class File {
 			}
 			if(Files.notExists(Paths.get(uri))) {
 				break;
+			} else if(Files.isReadable(Paths.get(uri))) {
+			} else {
+				LOG.warning(Paths.get(uri).toString());
+				throw new GrahaRuntimeException(basePath + " (Permission denied)");
 			}
 			index++;
 		}
 		return uri;
+	}
+	private boolean checkPermission(String basePath) throws URISyntaxException {
+		URI uri = null;
+		uri = new URI("file://" + basePath);
+		Path parent = Paths.get(uri);
+		while(!Files.exists(parent)) {
+			parent = parent.getParent();
+		}
+		if(Files.isWritable(parent)) {
+			return true;
+		}
+		return false;
 	}
 	protected URI saveFileUsingServletFileUpload(FilePart filePart, Record params) throws IOException, URISyntaxException {
 		URI uri = null;
@@ -448,19 +465,23 @@ public class File {
 		if(STR.valid(this.getPath())) {
 			String basePath = TextParser.parse(this.getPath(), params);
 			if(STR.valid(basePath)) {
-				if(!Files.exists(Paths.get(basePath))) {
-					Files.createDirectories(Paths.get(basePath));
-				}
-				uri = this.getUniqueFileURI(basePath, fileName);
-				if(filePart.getItem() != null) {
-					if(filePart.getItem().isInMemory()) {
-						Files.write(Paths.get(uri), filePart.getItem().get());
-					} else {
-						Files.move(((DiskFileItem)filePart.getItem()).getStoreLocation().toPath(), Paths.get(uri));
+				if(checkPermission(basePath)) {
+					if(!Files.exists(Paths.get(basePath))) {
+						Files.createDirectories(Paths.get(basePath));
 					}
-				} else if(filePart.getPart() != null && filePart.getPart().getInputStream() != null) {
-					Files.copy(filePart.getPart().getInputStream(), Paths.get(uri));
-					filePart.getPart().delete();
+					uri = this.getUniqueFileURI(basePath, fileName);
+					if(filePart.getItem() != null) {
+						if(filePart.getItem().isInMemory()) {
+							Files.write(Paths.get(uri), filePart.getItem().get());
+						} else {
+							Files.move(((DiskFileItem)filePart.getItem()).getStoreLocation().toPath(), Paths.get(uri));
+						}
+					} else if(filePart.getPart() != null && filePart.getPart().getInputStream() != null) {
+						Files.copy(filePart.getPart().getInputStream(), Paths.get(uri));
+						filePart.getPart().delete();
+					}
+				} else {
+					throw new GrahaRuntimeException(basePath + " (Permission denied)");
 				}
 			}
 		}

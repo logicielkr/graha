@@ -207,12 +207,16 @@ public class Redirect {
 			}
 		}
 		if(!STR.valid(this.getAutoredirect()) || !STR.falseValue(this.getAutoredirect())) {
+			xsl.appendL(indent + 1, "<noscript>Javascript is disabled in your web browser. Please click \"Confirm\" to continue</noscript>");
 //			xsl.appendL(indent + 1, "<noscript>웹브라우저에서 Javascript 가 동작하지 않도록 설정되어 있습니다.  다음으로 이동하려면 확인 버튼을 클릭하시기 바랍니다.</noscript>");
 		}
 		if(STR.valid(this.msgs)) {
 			for(int i = 0; i < this.msgs.size(); i++) {
 				xsl.append(((Msg)this.msgs.get(i)).toXSL(indent + 1));
 			}
+		}
+		if(STR.falseValue(this.getAutoredirect())) {
+			xsl.appendL(indent, "<div class=\"autoredirect\">Please click \"Confirm\" to continue</div>");
 		}
 		xsl.appendL(indent + 1, "<input type=\"submit\" value=\"Confirm\" />");
 		xsl.appendL(indent, "</form>");

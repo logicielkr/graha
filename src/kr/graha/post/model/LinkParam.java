@@ -30,7 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import kr.graha.post.element.XmlElement;
-import kr.graha.post.lib.ParsingException;
+import kr.graha.post.lib.GrahaParsingException;
 
 /**
  * Graha(그라하) LinkParam 정보
@@ -291,7 +291,7 @@ public class LinkParam {
 			expr = kr.graha.post.xml.GParam.childNodePath("param", this.getValue(), rdf);
 		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
 		} else {
-			throw new ParsingException("type is empty or query, param, prop, result, error, default, const");
+			throw new GrahaParsingException("type is empty or query, param, prop, result, error, default, const");
 		}
 		if(!STR.valid(this.getType()) || STR.vexistsIgnoreCase(this.getType(), "query", "param", "prop", "result", "error")) {
 			if(hideBlank) {

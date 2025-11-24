@@ -205,41 +205,53 @@ public class SearchParam extends LinkParam {
 				} else {
 					valueExpr = kr.graha.post.xml.GParam.childNodePath("param", this.getValue(), rdf);
 				}
-			} else {
-				valueExpr = "";
+			} else if(STR.valid(this.getName())) {
+				valueExpr = kr.graha.post.xml.GParam.childNodePath("param", this.getName(), rdf);
 			}
 			Buffer xsl = new Buffer();
 			if(STR.compareIgnoreCase(this.getType(), "select")) {
 				xsl.appendL(indent, "<select name=\"" + this.getName() + "\" class=\"" + this.getName() + "\" value=\"{" + valueExpr + "}\">");
 				if(STR.valid(this.getForName())) {
 					xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
-					xsl.appendL(indent + 2, "<xsl:choose>");
-					xsl.appendL(indent + 3, "<xsl:when test=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + " = " + valueExpr  + "\">");
-					xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
-					xsl.appendL(indent + 3, "</xsl:when>");
-					xsl.appendL(indent + 3, "<xsl:otherwise>");
-					xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
-					xsl.appendL(indent + 3, "</xsl:otherwise>");
-					xsl.appendL(indent + 2, "</xsl:choose>");
+					if(valueExpr == null) {
+						xsl.appendL(indent + 2, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+					} else {
+						xsl.appendL(indent + 2, "<xsl:choose>");
+						xsl.appendL(indent + 3, "<xsl:when test=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + " = " + valueExpr  + "\">");
+						xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+						xsl.appendL(indent + 3, "</xsl:when>");
+						xsl.appendL(indent + 3, "<xsl:otherwise>");
+						xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+						xsl.appendL(indent + 3, "</xsl:otherwise>");
+						xsl.appendL(indent + 2, "</xsl:choose>");
+					}
 					xsl.appendL(indent + 1, "</xsl:for-each>");
 				} else {
 					if(STR.valid(this.option)) {
 						for(int i = 0; i < this.option.size(); i++) {
 							Option obj = (Option)this.option.get(i);
-							xsl.appendL(indent + 1, "<xsl:choose>");
-							xsl.appendL(indent + 2, "<xsl:when test=\"" + valueExpr + " = '" + obj.getValue() + "'\">");
-							xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\" selected=\"selected\">" + obj.getLabel() + "</option>");
-							xsl.appendL(indent + 2, "</xsl:when>");
-							xsl.appendL(indent + 2, "<xsl:otherwise>");
-							xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
-							xsl.appendL(indent + 2, "</xsl:otherwise>");
-							xsl.appendL(indent + 1, "</xsl:choose>");
+							if(valueExpr == null) {
+								xsl.appendL(indent + 1, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
+							} else {
+								xsl.appendL(indent + 1, "<xsl:choose>");
+								xsl.appendL(indent + 2, "<xsl:when test=\"" + valueExpr + " = '" + obj.getValue() + "'\">");
+								xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\" selected=\"selected\">" + obj.getLabel() + "</option>");
+								xsl.appendL(indent + 2, "</xsl:when>");
+								xsl.appendL(indent + 2, "<xsl:otherwise>");
+								xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
+								xsl.appendL(indent + 2, "</xsl:otherwise>");
+								xsl.appendL(indent + 1, "</xsl:choose>");
+							}
 						}
 					}
 				}
 				xsl.appendL(indent, "</select>");
 			} else {
-				xsl.appendL(indent, "<input type=\"text\" class=\""+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
+				if(valueExpr == null) {
+					xsl.appendL(indent, "<input type=\"text\" class=\""+ this.getName() + "\" name=\""+ this.getName() + "\" />");
+				} else {
+					xsl.appendL(indent, "<input type=\"text\" class=\""+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
+				}
 				
 			}
 			return xsl;

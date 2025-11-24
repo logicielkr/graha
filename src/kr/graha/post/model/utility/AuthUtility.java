@@ -22,7 +22,7 @@
 package kr.graha.post.model.utility;
 
 import kr.graha.post.lib.Record;
-import kr.graha.post.lib.ParsingException;
+import kr.graha.post.lib.GrahaParsingException;
 import kr.graha.helper.STR;
 
 /**
@@ -380,9 +380,9 @@ public final class AuthUtility {
 				) {
 					left = XPathUtility.valueExpr(info.left, rdf, full);
 				} else if(info.left.startsWith("code.")) {
-					throw new ParsingException("auth(cond) expression(" + info.left + ") not allow starts with code.");
+					throw new GrahaParsingException("auth(cond) expression(" + info.left + ") not allow starts with code.");
 				} else {
-					throw new ParsingException("auth(cond) expression(" + info.left + ") must be starts with param. or result. or prop. or error. or query.");
+					throw new GrahaParsingException("auth(cond) expression(" + info.left + ") must be starts with param. or result. or prop. or error. or query.");
 				}
 			} else {
 				left = info.left;
@@ -397,9 +397,9 @@ public final class AuthUtility {
 				) {
 					right = XPathUtility.valueExpr(info.right, rdf, full);
 				} else if(info.right.startsWith("code.")) {
-					throw new ParsingException("auth(cond) expression(" + info.right + ") not allow starts with code.");
+					throw new GrahaParsingException("auth(cond) expression(" + info.right + ") not allow starts with code.");
 				} else {
-					throw new ParsingException("auth(cond) expression(" + info.right + ") must be starts with param. or result. or prop. or error. or query.");
+					throw new GrahaParsingException("auth(cond) expression(" + info.right + ") must be starts with param. or result. or prop. or error. or query.");
 				}
 			} else {
 				right = info.right;
@@ -415,7 +415,7 @@ public final class AuthUtility {
 					}
 				}
 				if(info.op == AuthUtility.In || info.op == AuthUtility.NotIn) {
-					throw new ParsingException("auth(cond) expression not allow in and not in");
+					throw new GrahaParsingException("auth(cond) expression not allow in and not in");
 				} else if(info.op == AuthUtility.Equals) {
 					if(
 						info.rightType == AuthUtility.TYPE_OF_RECORD &&

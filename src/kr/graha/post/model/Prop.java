@@ -45,7 +45,7 @@ import kr.graha.post.interfaces.Encryptor;
 import kr.graha.helper.LOG;
 import kr.graha.post.model.utility.SQLParameter;
 import java.sql.ResultSetMetaData;
-import kr.graha.post.lib.ParsingException;
+import kr.graha.post.lib.GrahaParsingException;
 
 /**
  * querys/query/header/prop
@@ -322,7 +322,7 @@ public class Prop extends SQLExecutor {
 			Buffer sql = super.parseSQL(this.sql, params);
 			if(sql == null) {
 				LOG.severe("prop(" + this.getName() + ") must be defined value or sql");
-				throw new ParsingException("prop(" + this.getName() + ") must be defined value or sql");
+				throw new GrahaParsingException("prop(" + this.getName() + ") must be defined value or sql");
 			}
 			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
 			PreparedStatement pstmt = null;
