@@ -36,8 +36,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import kr.graha.helper.LOG;
 import java.nio.file.Files;
-import java.io.InputStream;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -46,6 +44,8 @@ import kr.graha.post.xml.GFile;
 import kr.graha.post.model.utility.FilePart;
 import kr.graha.post.interfaces.FilePathTranslator;
 import kr.graha.post.interfaces.FilePathTranslatorImpl;
+import kr.graha.post.interfaces.FileDownloader;
+import kr.graha.post.interfaces.FileDownloaderImpl;
 import java.lang.reflect.InvocationTargetException;
 import kr.graha.post.lib.GrahaRuntimeException;
 
@@ -70,6 +70,7 @@ public class File {
 	private String after = null;
 	private String backup = null;
 	private String translator = null;
+	private String downloader = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -124,6 +125,12 @@ public class File {
 	private void setTranslator(String translator) {
 		this.translator = translator;
 	}
+	private String getDownloader() {
+		return this.downloader;
+	}
+	private void setDownloader(String downloader) {
+		this.downloader = downloader;
+	}
 	protected static String nodeName() {
 		return File.nodeName;
 	}
@@ -163,6 +170,8 @@ public class File {
 							this.setBackup(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "translator")) {
 							this.setTranslator(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "downloader")) {
+							this.setDownloader(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -185,6 +194,7 @@ public class File {
 		element.setAttribute("after", this.getAfter());
 		element.setAttribute("backup", this.getBackup());
 		element.setAttribute("translator", this.getTranslator());
+		element.setAttribute("downloader", this.getDownloader());
 		return element;
 	}
 	private boolean print(String before, String after) {
@@ -302,58 +312,24 @@ public class File {
 			String fileName = filePath.substring(filePath.indexOf("/") + 1);
 			LOG.finer(basePath + java.io.File.separator + fileName);
 			Path path = this.getFilePath(basePath, fileName, request, params);
-			/*
-			Path path = null;
-			try {
-				path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
-			} catch (URISyntaxException e) {
-				LOG.severe(e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return;
-			}
-			*/
 			if(path != null && Files.exists(path)) {
-				LOG.config("File Path = " + path.toUri().getPath());
-				response.setContentLength((int)Files.size(path));
-				response.setDateHeader("Last-Modified", Files.getLastModifiedTime(path).toMillis());
-				response.setHeader("Accept-Ranges", "bytes");
-				String mimeType = request.getServletContext().getMimeType(fileName);
-				if(mimeType != null && !mimeType.equals("")) {
-					response.setContentType(request.getServletContext().getMimeType(fileName));
+				FileDownloader downloader = null;
+				if(STR.valid(this.getDownloader())) {
+					try {
+						downloader = (FileDownloader) Class.forName(this.getDownloader()).getConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+						LOG.severe(e);
+						downloader = null;
+					}
+				} else {
+					downloader = new FileDownloaderImpl();
 				}
-				ServletOutputStream out = null;
-				InputStream fis = null;
-				try {
-					out = response.getOutputStream();
-					fis = Files.newInputStream(path);
-					byte[] buffer = new byte[8192];
-					int len = 0;
-					while((len = fis.read(buffer)) >= 0) {
-						out.write(buffer, 0, len);
-					}
-					out.flush();
-					out.close();
-					out = null;
-					fis.close();
-					fis = null;
-				} catch(IOException e) {
-					LOG.severe(e);
-					throw e;
-				} finally {
-					if(out != null) {
-						try {
-							out.close();
-						} catch (IOException e) {
-							LOG.severe(e);
-						}
-					}
-					if(fis != null) {
-						try {
-							fis.close();
-						} catch (IOException e) {
-							LOG.severe(e);
-						}
-					}
+				if(downloader != null) {
+					downloader.execute(path, fileName, request, response, params);
+				} else {
+					LOG.config("[SC_NOT_FOUND]FileDownloader = " + this.getDownloader());
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
 				}
 			} else {
 				LOG.config("[SC_NOT_FOUND]File Path = " + path.toString());
