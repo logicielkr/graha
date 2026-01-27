@@ -409,5 +409,19 @@ public final class STR {
 		}
 		return null;
 	}
+/**
+ * 문자열이 null 이거나 공백으로 이루어진 경우 defaultValue 를 반환하고,
+ * 문자열이 null 도 아니고 공백이 아닌 다른 문자가 포함된 경우 문자열을 반환한다.
+
+ * @param value 문자열
+ * @param defaultValue value 가 null 등 일 때 반환할 문자열
+ * @return value 하지만 value 가 null 등 이라면 defaultValue
+ */
+	public static String nvl(String value, String defaultValue) {
+		if(STR.valid(value)) {
+			return value;
+		}
+		return defaultValue;
+	}
 }
 

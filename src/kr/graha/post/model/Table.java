@@ -67,6 +67,8 @@ public class Table extends SQLExecutor {
 	public static int SQL_TYPE_WHERE = 4;
 	private Table() {
 	}
+	private String iso8601TimestampzPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private String iso8601DatePattern = "yyyy-MM-dd";
 	
 	private String name = null;
 	private String _tableName = null;
@@ -803,11 +805,11 @@ public class Table extends SQLExecutor {
 				key = this.getName() + "." + column.getName() + "." + idx;
 			}
 			if(parameter.getDataType() == Param.DATA_TYPE_TIMESTAMP && parameter.getValue() instanceof java.sql.Timestamp) {
-				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.sql.Timestamp)parameter.getValue(), column.getPattern()));
+				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.sql.Timestamp)parameter.getValue(), STR.nvl(column.getPattern(), this.iso8601TimestampzPattern)));
 			} else if(parameter.getDataType() == Param.DATA_TYPE_DATE && parameter.getValue() instanceof java.sql.Date) {
-				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.sql.Date)parameter.getValue(), column.getPattern()));
+				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.sql.Date)parameter.getValue(), STR.nvl(column.getPattern(), this.iso8601DatePattern)));
 			} else if(parameter.getValue() instanceof java.util.Date) {
-				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.util.Date)parameter.getValue(), column.getPattern()));
+				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), STR.formatDate((java.util.Date)parameter.getValue(), STR.nvl(column.getPattern(), this.iso8601TimestampzPattern)));
 			} else {
 				params.put(Record.key(Record.PREFIX_TYPE_QUERY, key), parameter.getValue());
 			}

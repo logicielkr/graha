@@ -48,22 +48,149 @@ public final class XML {
 		document = dbf.newDocumentBuilder().newDocument();
 		return document;
 	}
+
 /**
- * CDATA 에 허용되지 않는 문자들을 처리한다.
- * xml 1.0 에서 cdata 내에서도 허용되지 않는 문자는 ""로 변경해서 없애버리고,
- * CDATA를 닫는 태그는 CDATA 태그를 닫았다가 다시 여는 방식으로 처리한다.
+ * CDATA 에서 허용되지 않는 2가지 유형의 문자들을 처리한다.
+ 
+ * 1. CDATA Section 을 닫는 문자열("]]>") 이 포함되어 있는 경우,
+ * "]]>" 를 "]]]]><![CDATA[>" 으로 replace 해서,
+ * CDATA Section 을 닫았다가 다시 여는 방식으로 처리한다. 
+ 
+ * Unicode: 0xc 같은 문자가 포함되어 있다면,
+ * An invalid XML character (Unicode: 0xc) 예외가 발생하므로,
+ * XML 1.0 의 Character Range 를 벗어나는 문자는 "" 으로 replace 한다.
+ 
+ * XML 1.0 의 Character Range 는 다음과 같다.
+ 
+ * https://www.w3.org/TR/xml/#charsets
+ * Character Range
+ * Char	   ::=   	#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+ 
+ * XML 1.1 의 Character Range 는 다음과 같은데, Char 와 RestrictedChar 가 분리되어 있을 뿐 XML 1.0 과 동일하다.
+ 
+ * https://www.w3.org/TR/xml11/#charsets
+ * Character Range
+ * Char	   ::=   	[#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+ * RestrictedChar	   ::=   	[#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+ 
+ * @see XML.fixUsingCodePoint
+ * @see XML.fixUsingCharacterRange
+ * @see XML.fixUsingRestrictedChar
  * @param input CDATA에 들어갈 원본 데이타
- * @return CDATA 에 허용되지 않는 문자들을 적절히 처리한 결과
+ * @return CDATA 에 허용되지 않는 문자들을 처리한 문자열
  */
 	public static String fix(String input) {
+		return XML.fixUsingCodePoint(input);
+//		return XML.fixUsingCharacterRange(input);
+//		return XML.fixUsingRestrictedChar(input);
+	}
+
+/**
+ * CDATA 에서 허용되지 않는 2가지 유형의 문자들을 처리한다.
+ 
+ * XML.fix() 에서 호출된다.
+ 
+ * 문자열을 탐색하면서, 유효한 문자인 경우 StringBuffer 에 담은 후에 StringBuffer.toString() 을 리턴한다.
+ 
+ * 1. CDATA Section 을 닫는 문자열("]]>") 을 만나면, ">" 대신 "]]><![CDATA[>" 을 추가한다.
+ * 2. String.codePointAt 으로 구한 codePoint 가 XML 에서 허용하는 문자가 아닌 경우 반환하는 문자열에서 제외한다.
+ 
+ * @param input CDATA에 들어갈 원본 데이타
+ * @return CDATA 에 허용되지 않는 문자들을 처리한 문자열
+ */
+	public static String fixUsingCodePoint(String input) {
 		if(input == null || input.equals("")) {
 			return input;
 		}
-/*
-https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc-was-found
-*/
-		java.util.regex.Pattern p = java.util.regex.Pattern.compile("[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFF]+"); 
-		return p.matcher(input).replaceAll("").replace("]]>", "]]]]><![CDATA[>");
+		boolean modified = false;
+		StringBuffer sb = new StringBuffer();
+		int length = input.length();
+		for(int index = 0; index < length; index++) {
+			if(index > 1 && input.charAt(index) == '>' && input.charAt(index - 1) == ']' && input.charAt(index - 2) == ']') {
+				sb.append("]]><![CDATA[>");
+				modified = true;
+			} else {
+				int codePoint = input.codePointAt(index);
+				if(
+					codePoint == 0x9 ||
+					codePoint == 0xA ||
+					codePoint == 0xD ||
+					(codePoint >= 0x20 && codePoint <= 0xD7FF) ||
+					(codePoint >= 0xE000 && codePoint <= 0xFFFD) ||
+					(codePoint >= 0x10000 && codePoint <= 0x10FFFF)
+				) {
+					sb.appendCodePoint(codePoint);
+				} else {
+					modified = true;
+				}
+			}
+			if(input.codePointCount(index, Math.min(index + 2, length)) == 1) {
+				index++;
+			}
+		}
+		if(modified) {
+			return sb.toString();
+		} else {
+			if(input.equals(sb.toString())) {
+				return sb.toString();
+			} else {
+				throw new RuntimeException("result not equals input(result = /" + sb.toString() + "/, input = /" + input + "/)");
+			}
+		}
+	}
+	
+	public static String regexp = "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD" + String.valueOf(new char[]{(char)0xD800, (char)0xDC00}) + "-" + String.valueOf(new char[]{(char)0xDBFF, (char)0xDFFF}) + "]+";
+/**
+ * CDATA 에서 허용되지 않는 2가지 유형의 문자들을 처리한다.
+ 
+ * 종전의 XML.fix() 함수의 버그를 수정한 method 이다.
+ 
+ * 종전에 XML 에서 허용하지 않는 문자를 제거하기 위한 정규표현식은 다음과 같았다.
+ 
+ * "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+"
+ 
+ * 출처 : https://stackoverflow.com/questions/5742543/an-invalid-xml-character-unicode-0xc-was-found
+ 
+ * U+1F150 내지 U+1F168 (음각 원문자)와 U+1F170 내지 U+1F188 (음각 네모문자) 의 경우
+ * [#x10000-#x10FFFF] 범위내에 있음에도 불구하고,
+ * U+1F150 는 55356(0xD83C) 와 56656(0xDD50) 의 char array 로 구성되므로 [\\x{D800}-\\x{DFFF}] 의 범위에 들어가는 것으로 오인되어 제거되는 버그가 있었다.
+ 
+ * 정규식을 다음과 같이 해도 마찬가지였다.
+ 
+ * "[\\x{0}-\\x{8}]|[\\x{B}-\\x{C}]|[\\x{E}-\\x{1F}]|[\\x{D800}-\\x{DFFF}]|[\\x{FFFE}-\\x{FFFF}]"
+ 
+ * 정규식을 다음과 같이 수정했다.
+ 
+ * "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD" + String.valueOf(new char[]{(char)0xD800, (char)0xDC00}) + "-" + String.valueOf(new char[]{(char)0xDBFF, (char)0xDFFF}) + "]+"
+ 
+ * @param input CDATA에 들어갈 원본 데이타
+ * @return CDATA 에 허용되지 않는 문자들을 처리한 문자열
+ */
+	public static String fixUsingCharacterRange(String input) {
+		if(input == null || input.equals("")) {
+			return input;
+		}
+		java.util.regex.Pattern p = java.util.regex.Pattern.compile(XML.regexp, java.util.regex.Pattern.UNICODE_CHARACTER_CLASS);
+		return p.matcher(input).replaceAll("").replaceAll("]]>", "]]]]><![CDATA[>");
+	}
+
+/**
+ * CDATA 에서 허용되지 않는 2가지 유형의 문자들을 처리한다.
+ 
+ * XML 1.1 의 RestrictedChar 만 제거한다.
+ * XML 에서 허용하지 않는 U+D800 부터 U+DFFF 까지, U+FFFE 부터 U_FFFF 까지의 문자는 처리하지 않는다.
+ 
+ * 구현이 정확하지 않으므로 추후에 삭제할 예정이다. 
+ 
+ * @param input CDATA에 들어갈 원본 데이타
+ * @return CDATA 에 허용되지 않는 문자들을 처리한 문자열
+ */
+	public static String fixUsingRestrictedChar(String input) {
+		if(input == null || input.equals("")) {
+			return input;
+		}
+		java.util.regex.Pattern p = java.util.regex.Pattern.compile("[\\u0001-\\u0008]|[\\u000B-\\u000C]|[\\u000E-\\u001F]|[\\u007F-\\u0084]|[\\u0086-\\u009F]", java.util.regex.Pattern.UNICODE_CHARACTER_CLASS);
+		return p.matcher(input).replaceAll("").replaceAll("]]>", "]]]]><![CDATA[>");
 	}
 /**
  * 속성값이 true 인지 검사한다.

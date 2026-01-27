@@ -156,7 +156,7 @@ public abstract class SQLExecutor {
 		}
 		return sql;
 	}
-	protected java.util.Map<String, Encryptor> getEncryptor(String encrypt, List<Encrypt> encrypts) {
+	protected Map<String, Encryptor> getEncryptor(String encrypt, List<Encrypt> encrypts) {
 		Map<String, Encryptor> encryptor = null;
 		if(STR.valid(encrypt)) {
 			encryptor = new HashMap();
@@ -221,8 +221,8 @@ public abstract class SQLExecutor {
 		SQLInfo info,
 		String commandOrTableName,
 		Map<String, Encryptor> encryptor,
-		java.util.Map<String, String> encrypted,
-		java.util.Map<String, String> pattern,
+		Map<String, String> encrypted,
+		Map<String, String> pattern,
 		boolean multi,
 		boolean columnAuto
 	) throws SQLException {

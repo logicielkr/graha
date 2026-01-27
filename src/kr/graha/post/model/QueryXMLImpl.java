@@ -610,7 +610,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			StreamSource style = new StreamSource(reader);
 			TransformerFactory factory = TransformerFactory.newInstance();
 			Transformer transformer = factory.newTransformer(style);
-			Source text = new StreamSource(new ByteArrayInputStream(document.toXML().toString().getBytes(StandardCharsets.UTF_8)));
+			Source text = new StreamSource(new StringReader(document.toXML().toString()));
 			transformer.setOutputProperty(OutputKeys.METHOD, "html");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
 			transformer.setOutputProperty(OutputKeys.INDENT, "no");

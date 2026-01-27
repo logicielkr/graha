@@ -371,7 +371,7 @@ public class GDocument {
 	}
 	public Buffer toXML() throws IOException {
 		Buffer xml = new Buffer();
-		toXML(xml);
+		this.toXML(xml);
 		return xml;
 	}
 	public void replace(Record params) {
