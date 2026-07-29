@@ -198,7 +198,18 @@ public class SearchParam extends LinkParam {
 		} else {
 			String valueExpr = null;
 			if(STR.valid(this.getValue())) {
-				if(STR.startsWithIgnoreCase(this.getValue(), "prop.")) {
+				if(STR.startsWithIgnoreCase(this.getValue(), "query.")) {
+					String value = this.getValue().substring(6);
+					if(STR.valid(value) && value.indexOf(".") > 0) {
+						valueExpr = kr.graha.post.xml.GRow.childNodePath(
+							value.substring(0, value.indexOf(".")),
+							value.substring(value.indexOf(".") + 1),
+							rdf
+						);
+					} else {
+						valueExpr = kr.graha.post.xml.GRow.childNodePath(null, value, rdf);
+					}
+				} else if(STR.startsWithIgnoreCase(this.getValue(), "prop.")) {
 					valueExpr = kr.graha.post.xml.GParam.childNodePath("prop", this.getValue().substring(5), rdf);
 				} else if(STR.startsWithIgnoreCase(this.getValue(), "param.")) {
 					valueExpr = kr.graha.post.xml.GParam.childNodePath("param", this.getValue().substring(6), rdf);

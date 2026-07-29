@@ -107,9 +107,7 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		return xsl;
 	}
-	private void before(Record param, String queryId, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
-		this.html(param, request, indent, rdf, xsl);
-		this.head(param, indent, rdf, xsl);
+	private void message(int indent, boolean rdf, Buffer xsl) {
 		xsl.appendL(indent, "<xsl:if test=\"" + kr.graha.post.xml.GMessage.nodePath(rdf) + "\">");
 		xsl.appendL(indent + 2, "<script>");
 		xsl.appendL(indent + 3, "var _messages = new Array();");
@@ -121,6 +119,11 @@ public class QueryXSLImpl extends QueryImpl {
 		xsl.appendL(indent + 3, "</xsl:for-each>");
 		xsl.appendL(indent + 2, "</script>");
 		xsl.appendL(indent, "</xsl:if>");
+	}
+	private void before(Record param, String queryId, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
+		this.html(param, request, indent, rdf, xsl);
+		this.head(param, indent, rdf, xsl);
+		this.message(indent, rdf, xsl);
 		this.css(param, indent, rdf, xsl);
 		this.script(param, indent, rdf, xsl);
 		if(STR.valid(super.getCalculator())) {
@@ -173,64 +176,109 @@ public class QueryXSLImpl extends QueryImpl {
 	private void post(Record param, HttpServletRequest request, int indent, boolean rdf, Buffer xsl) {
 		this.html(param, request, indent, rdf, xsl);
 		this.head(param, indent, rdf, xsl);
-		xsl.appendL(indent, "<style type=\"text/css\">");
-		xsl.appendL(indent, "body {");
-		xsl.appendL(indent + 1, "height:100%;");
-		xsl.appendL(indent + 1, "text-align:center;");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "form {");
-		xsl.appendL(1, "position: absolute;");
-		xsl.appendL(1, "top: 50%;");
-		xsl.appendL(1, "transform: translateY(-50%);");
-		xsl.appendL(1, "width:100%;");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "form div.msg {");
-		xsl.appendL(1, "margin-bottom:10px;");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "noscript {");
-		xsl.appendL(1, "width:100%;");
-		xsl.appendL(1, "display:block;");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "</style>");
-		xsl.appendL(indent, "</head>");
-		xsl.appendL(indent, "<body>");
-		if(STR.valid(super.getRedirect())) {
-			xsl.appendL(indent + 1, "<xsl:choose>");
-			for(int i = 0; i < super.getRedirect().size(); i++) {
-				xsl.append(((Redirect)super.getRedirect().get(i)).toXSL(super.getTable(), super.getCommand(), param, indent + 2, rdf));
-			}
-			xsl.appendL(indent + 1, "</xsl:choose>");
-		}
-		xsl.appendL(indent, "<script>");
-		xsl.appendL(indent, "function _getMessage(msg) {");
-		xsl.appendL(indent + 1, "if(typeof(_messages) != \"undefined\" &amp;&amp; msg.indexOf(\"message.\") == 0) {");
-		xsl.appendL(indent + 2, "for(var i = 0; i &lt; _messages.length; i++) {");
-		xsl.appendL(indent + 3, "if(\"message.\" + _messages[i].name == msg) {");
-		xsl.appendL(indent + 4, "return _messages[i].label;");
-		xsl.appendL(indent + 3, "}");
-		xsl.appendL(indent + 2, "}");
+		this.message(indent, rdf, xsl);
+		xsl.appendL(indent, "<xsl:if test=\"count(" + kr.graha.post.xml.GRedirect.nodePath(rdf) + ") > 1 or " + kr.graha.post.xml.GRedirect.nodePath(rdf) + "/" + kr.graha.post.xml.GRedirect.childNodeName("autoredirect", rdf) + " = 'false'\">");
+		xsl.appendL(indent + 1, "<style type=\"text/css\">");
+		xsl.appendL(indent + 1, "body {");
+		xsl.appendL(indent + 2, "height:100%;");
+		xsl.appendL(indent + 2, "text-align:center;");
 		xsl.appendL(indent + 1, "}");
-		xsl.appendL(indent + 1, "return msg;");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "if(document.getElementById(\"_post\") &amp;&amp; document.getElementById(\"_post\").getElementsByClassName(\"autoredirect\").length == 0) {");
-		xsl.appendL(indent + 1, "if(document.getElementsByClassName(\"msg\")) {");
-		xsl.appendL(indent + 2, "for(var i = 0; i &lt; document.getElementsByClassName(\"msg\").length; i++) {");
-		xsl.appendL(indent + 3, "if(document.getElementsByClassName(\"msg\")[i].innerText) {");
-		xsl.appendL(indent + 4, "alert(_getMessage(document.getElementsByClassName(\"msg\")[i].innerText));");
-		xsl.appendL(indent + 3, "} else {");
-		xsl.appendL(indent + 4, "var msg = \"\";");
-		xsl.appendL(indent + 4, "for(var x = 0; x &lt; document.getElementsByClassName(\"msg\")[i].childNodes.length; i++) {");
-		xsl.appendL(indent + 5, "msg += _getMessage(document.getElementsByClassName(\"msg\")[i].childNodes[x].nodeValue);");
-		xsl.appendL(indent + 4, "}");
+		xsl.appendL(indent + 1, "form {");
+		xsl.appendL(indent + 2, "position: absolute;");
+		xsl.appendL(indent + 2, "top: 50%;");
+		xsl.appendL(indent + 2, "transform: translateY(-50%);");
+		xsl.appendL(indent + 2, "width:100%;");
+		xsl.appendL(indent + 1, "}");
+		xsl.appendL(indent + 1, "form div.msg {");
+		xsl.appendL(indent + 2, "margin-bottom:10px;");
+		xsl.appendL(indent + 1, "}");
+		xsl.appendL(indent + 1, "noscript {");
+		xsl.appendL(indent + 2, "width:100%;");
+		xsl.appendL(indent + 2, "display:block;");
+		xsl.appendL(indent + 1, "}");
+		xsl.appendL(indent + 1, "</style>");
+		xsl.appendL(indent, "</xsl:if>");
+		
+		xsl.appendL(indent, "<xsl:if test=\"count(" + kr.graha.post.xml.GRedirect.nodePath(rdf) + ") = 1 and " + kr.graha.post.xml.GRedirect.nodePath(rdf) + "/" + kr.graha.post.xml.GRedirect.childNodeName("autoredirect", rdf) + " = 'true'\">");
+
+		xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.nodePath(rdf) + "\">");
+		xsl.appendL(indent + 2, "<xsl:if test=\"" + kr.graha.post.xml.GRedirect.childNodeName("autoredirect", rdf) + " = 'true'\">");
+		xsl.append(indent + 3, "<xsl:variable name=\"fullurl\">");
+		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("path", rdf) + "\" />");
+		xsl.append("<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_PARAM, rdf) + "\">");
+		xsl.append("<xsl:choose>");
+		xsl.append("<xsl:when test=\"position() = 1\">");
+		xsl.append("?");
+		xsl.append("</xsl:when>");
+		xsl.append("<xsl:otherwise>");
+		xsl.append("&amp;");
+		xsl.append("</xsl:otherwise>");
+		xsl.append("</xsl:choose>");
+		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" />");
+		xsl.append("=");
+		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("value", rdf) + "\" />");
+		xsl.append("</xsl:for-each>");
+		xsl.appendL("</xsl:variable>");
+		xsl.appendL(indent + 3, "<noscript><meta http-equiv=\"refresh\" content=\"0;url={$fullurl}\" /></noscript>");
+		xsl.appendL(indent + 3, "<script>");
+		xsl.appendL(indent + 3, "var msg = \"\";");
+		xsl.appendL(indent + 3, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_MSG, rdf) + "\">");
+		xsl.appendL(indent + 3, "msg += \"<xsl:value-of select=\".\" />\";");
+		xsl.appendL(indent + 3, "</xsl:for-each>");
+		xsl.appendL(indent + 3, "if(msg != null &amp;&amp; msg != \"\") {");
 		xsl.appendL(indent + 4, "alert(msg);");
 		xsl.appendL(indent + 3, "}");
-		xsl.appendL(indent + 2, "}");
-		xsl.appendL(indent + 1, "}");
-		xsl.appendL(indent + 1, "setTimeout(function() {");
-		xsl.appendL(indent + 2, "document.getElementById(\"_post\").submit();");
-		xsl.appendL(indent + 1, "}, 0);");
-		xsl.appendL(indent, "}");
-		xsl.appendL(indent, "</script>");
+		
+		xsl.appendL(indent + 3, "setTimeout(function() {");
+		xsl.appendL(indent + 4, "location.replace(\"<xsl:value-of select=\"$fullurl\" />\");");
+		xsl.appendL(indent + 3, "}, 0);");
+		
+		xsl.appendL(indent + 3, "</script>");
+		xsl.appendL(indent + 2, "</xsl:if>");
+		xsl.appendL(indent + 1, "</xsl:for-each>");
+		xsl.appendL(indent, "</xsl:if>");
+		
+		xsl.appendL(indent, "</head>");
+		xsl.appendL(indent, "<body>");
+		
+		xsl.appendL(indent, "<xsl:if test=\"count(" + kr.graha.post.xml.GRedirect.nodePath(rdf) + ") > 1 or " + kr.graha.post.xml.GRedirect.nodePath(rdf) + "/" + kr.graha.post.xml.GRedirect.childNodeName("autoredirect", rdf) + " = 'false'\">");
+		xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.nodePath(rdf) + "\">");
+		
+		xsl.appendL(indent + 2, "<form>");
+		xsl.appendL(indent + 3, "<xsl:attribute name=\"method\">get</xsl:attribute>");
+		xsl.appendL(indent + 3, "<xsl:attribute name=\"id\">_post</xsl:attribute>");
+		xsl.appendL(indent + 3, "<xsl:attribute name=\"action\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("path", rdf) + "\" /></xsl:attribute>");
+		xsl.appendL(indent + 3, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_PARAM, rdf) + "\">");
+		xsl.appendL(indent + 4, "<input>");
+		xsl.appendL(indent + 5, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
+		xsl.appendL(indent + 5, "<xsl:attribute name=\"class\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" /></xsl:attribute>");
+		xsl.appendL(indent + 5, "<xsl:attribute name=\"name\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" /></xsl:attribute>");
+		xsl.appendL(indent + 5, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("value", rdf) + "\" /></xsl:attribute>");
+		xsl.appendL(indent + 4, "</input>");
+		xsl.appendL(indent + 3, "</xsl:for-each>");
+
+		xsl.appendL(indent + 3, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_MSG, rdf) + "\">");
+		xsl.appendL(indent + 4, "<div class=\"msg\"><xsl:value-of select=\".\" /></div>");
+		xsl.appendL(indent + 3, "</xsl:for-each>");
+
+		xsl.appendL(indent + 3, "<input>");
+		xsl.appendL(indent + 4, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+		xsl.append(indent + 4, "<xsl:choose>");
+		xsl.append(indent + 5, "<xsl:when test=\"" + kr.graha.post.xml.GRedirect.childNodeName("label", rdf) + " and " + kr.graha.post.xml.GRedirect.childNodeName("label", rdf) + " != ''\">");
+		xsl.appendL(indent + 6, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("label", rdf) + "\" /></xsl:attribute>");
+		xsl.append(indent + 5, "</xsl:when>");
+		xsl.append(indent + 5, "<xsl:otherwise>");
+		xsl.appendL(indent + 6, "<xsl:attribute name=\"value\">Confirm</xsl:attribute>");
+		xsl.append(indent + 5, "</xsl:otherwise>");
+		xsl.append(indent + 4, "</xsl:choose>");
+		
+		
+		xsl.appendL(indent + 3, "</input>");
+		xsl.appendL(indent + 2, "</form>");
+		
+		xsl.appendL(indent + 1, "</xsl:for-each>");
+		xsl.appendL(indent, "</xsl:if>");
+
 		xsl.appendL(indent, "</body>");
 		xsl.appendL(indent, "</html>");
 		xsl.appendL(indent, "</xsl:template>");

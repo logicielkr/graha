@@ -92,7 +92,7 @@ public class PostGeneratorServlet extends HttpServlet {
 		} else {
 			try {
 				int result = query.execute(request, response, this.getServletConfig(), params);
-				if(result != HttpServletResponse.SC_OK) {
+				if(result != HttpServletResponse.SC_OK && result != HttpServletResponse.SC_MOVED_TEMPORARILY) {
 					this.sendError(response, result);
 					return;
 				}

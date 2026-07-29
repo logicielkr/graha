@@ -56,13 +56,15 @@ public class GPages {
 		int totalPage = (int)(Math.ceil((double)totalCount/(double)pageSize));
 		if(totalPage > 0) {
 			if(((Math.floor(((double)currentPage - 1)/(double)pageGroupSize) * (double)pageGroupSize) + 1) >= pageGroupSize) {
-				pages.add(new GPage((int)((Math.floor(((double)currentPage-1) / (double)pageGroupSize) * (double)pageGroupSize) + 1) - 1, "◀"));
+				pages.add(new GPage(1, "≪", GPage.TYPE_OF_FIRST_PAGE));
+				pages.add(new GPage((int)((Math.floor(((double)currentPage-1) / (double)pageGroupSize) * (double)pageGroupSize) + 1) - 1, "◀", GPage.TYPE_OF_PREV_GROUP));
 			}
 			for(int i = (int)((Math.floor(((double)currentPage - 1)/(double)pageGroupSize) * (double)pageGroupSize) + 1); i <= Math.min(totalPage, ((Math.floor((currentPage - 1)/pageGroupSize) * pageGroupSize) + pageGroupSize)); i++) {
 				pages.add(new GPage(i));
 			}
 			if(totalPage >= ((Math.floor((currentPage - 1)/pageGroupSize) * pageGroupSize) + pageGroupSize + 1)) {
-				pages.add(new GPage((int)((Math.floor((currentPage - 1)/pageGroupSize) * pageGroupSize) + pageGroupSize + 1), "▶"));
+				pages.add(new GPage((int)((Math.floor((currentPage - 1)/pageGroupSize) * pageGroupSize) + pageGroupSize + 1), "▶", GPage.TYPE_OF_NEXT_GROUP));
+				pages.add(new GPage(totalPage, "≫", GPage.TYPE_OF_LAST_PAGE));
 			}
 		}
 		return pages;

@@ -102,7 +102,7 @@ public class Record<K, V> {
 			if(this.document == null) {
 				return false;
 			} else {
-				return this.document.containsKey(key);
+				return this.document.containsQueryValue(key);
 			}
 		}
 		return false;
@@ -126,7 +126,7 @@ public class Record<K, V> {
 			if(this.document == null) {
 				return null;
 			} else {
-				return this.document.get(key);
+				return this.document.getQueryValue(key);
 			}
 		}
 		return null;
@@ -177,28 +177,28 @@ public class Record<K, V> {
 		String minute, 
 		String second
 	) {
-		int y = this.intValue(year, -1);
-		int m = this.intValue(month, -1);
-		int d = this.intValue(day, -1);
+		int y = STR.intValue(year, -1);
+		int m = STR.intValue(month, -1);
+		int d = STR.intValue(day, -1);
 		if(y > 0 && m > 0 && m <= 12 && d > 0 && d <= 31) {
 			Calendar cal = Calendar.getInstance();
 			cal.set(Calendar.YEAR, y);
 			cal.set(Calendar.MONTH, m);
 			cal.set(Calendar.DAY_OF_MONTH, d);
 			if(hour != null && !hour.equals("")) {
-				int x = this.intValue(hour, -1);
+				int x = STR.intValue(hour, -1);
 				if(x >= 0 && x <= 24) {
 					cal.set(Calendar.HOUR_OF_DAY, x);
 				}
 			}
 			if(minute != null && !minute.equals("")) {
-				int x = this.intValue(minute, -1);
+				int x = STR.intValue(minute, -1);
 				if(x >= 0 && x <= 60) {
 					cal.set(Calendar.MINUTE, x);
 				}
 			}
 			if(second != null && !second.equals("")) {
-				int x = this.intValue(second, -1);
+				int x = STR.intValue(second, -1);
 				if(x >= 0 && x <= 60) {
 					cal.set(Calendar.SECOND, x);
 				}
@@ -206,41 +206,6 @@ public class Record<K, V> {
 			this.puts(key, new Date(cal.getTime().getTime()));
 		}
 		this.puts(key, null);
-	}
-	/*
-	private int intValue(String value) {
-		return this.intValue(value, 0);
-	}
-	*/
-	private Integer intObject(String value) {
-		if(value == null) {
-			return null;
-		}
-		value = value.replace(" ", "");
-		value = value.replace(",", "");
-		if(value != null && value.equals("")) {
-			return null;
-		}
-		try {
-			return Integer.valueOf(value);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-	private int intValue(String value, int defaultValue) {
-		if(value == null) {
-			return defaultValue;
-		}
-		value = value.replace(" ", "");
-		value = value.replace(",", "");
-		if(value != null && value.equals("")) {
-			return defaultValue;
-		}
-		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) {
-			return defaultValue;
-		}
 	}
 	public int getInt(Key key) {
 		return this.getInt(key, 0);
@@ -691,7 +656,7 @@ public class Record<K, V> {
 			if(this.get(key) == null) {
 				return false;
 			}
-			return this.check(this.getIntObject(key), this.intObject(value), check);
+			return this.check(this.getIntObject(key), STR.intObject(value), check);
 		}
 		return false;
 	}
@@ -709,7 +674,7 @@ public class Record<K, V> {
 			if(this.get(value) == null) {
 				return false;
 			}
-			return this.check(this.intObject(key), this.getIntObject(value), check);
+			return this.check(STR.intObject(key), this.getIntObject(value), check);
 		}
 		return false;
 	}
@@ -729,7 +694,7 @@ public class Record<K, V> {
 		return false;
 	}
 	public boolean check(String key, String value, int check) {
-		return this.check(this.intObject(key), this.intObject(value), check);
+		return this.check(STR.intObject(key), STR.intObject(value), check);
 	}
 /**
  * ValidationParam 에서 사용

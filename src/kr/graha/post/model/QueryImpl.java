@@ -21,7 +21,6 @@
 
 package kr.graha.post.model;
 
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchProviderException;
@@ -150,13 +149,6 @@ public class QueryImpl extends Query {
  */
 	protected boolean div() {
 		return QueryImpl.div(super.getHtmltype());
-		/*
-		if(STR.valid(super.getHtmltype()) && STR.compareIgnoreCase(super.getHtmltype(), "div")) {
-			return true;
-		} else {
-			return false;
-		}
-		*/
 	}
 	protected static boolean div(String htmlType) {
 		if(STR.valid(htmlType) && STR.compareIgnoreCase(htmlType, "div")) {
@@ -262,6 +254,8 @@ public class QueryImpl extends Query {
 		if(System.getProperties().containsKey("catalina.home")) {
 			this.userRole(request, params);
 		}
+		this.contextParam(request, params);
+		this.initParam(servletConfig, params);
 		List<FilePart> fields = null;
 		try {
 			fields = this.parameterUsingServletFileUpload(request, params, this.getFiles(), servletConfig);
@@ -303,9 +297,7 @@ public class QueryImpl extends Query {
 			this.getHeader().executeProp(params, time, this.getConnectionFactory(params));
 		}
 	}
-	private List<FilePart> parameterUsingServletFileUpload(HttpServletRequest request, Record params, Files files, ServletConfig servletConfig)
-		throws UnsupportedEncodingException, IOException, ServletException {
-		String fileUploadLibrary = servletConfig.getInitParameter("FileUploadLibrary");
+	private void contextParam(HttpServletRequest request, Record params) {
 		ServletContext c = request.getServletContext();
 		if(c != null) {
 			Enumeration<String> p = c.getInitParameterNames();
@@ -314,6 +306,8 @@ public class QueryImpl extends Query {
 				params.puts(Record.key(Record.PREFIX_TYPE_CONTEXT_PARAM, key), c.getInitParameter(key));
 			}
 		}
+	}
+	private void initParam(ServletConfig servletConfig, Record params) {
 		if(servletConfig != null) {
 			Enumeration<String> p = servletConfig.getInitParameterNames();
 			if(p != null) {
@@ -325,6 +319,11 @@ public class QueryImpl extends Query {
 				}
 			}
 		}
+	}
+	private List<FilePart> parameterUsingServletFileUpload(HttpServletRequest request, Record params, Files files, ServletConfig servletConfig)
+		throws UnsupportedEncodingException, IOException, ServletException {
+		String fileUploadLibrary = servletConfig.getInitParameter("FileUploadLibrary");
+		
 		boolean legacyServletAPI = FilePart.legacyServletAPI(request);
 		List<FilePart> fileParts = null;
 		if(fileUploadLibrary != null && STR.compareIgnoreCase(fileUploadLibrary, "Servlet30FileUpload")) {

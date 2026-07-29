@@ -18,7 +18,6 @@
  *
  */
 
-
 package kr.graha.post.model;
 
 import java.util.List;
@@ -364,17 +363,7 @@ public class Layout {
 			xsl.appendL(indent, "<ul class=\"multitab\">");
 			for(int i = 0; i < this.getTab().size(); i++) {
 				if(((Tab)this.getTab().get(i)).valid(param)) {
-/*
-					if(files != null) {
-						xsl.append(files.beforeLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
-					}
-*/
 					xsl.append(((Tab)this.getTab().get(i)).li(files, param, indent, rdf));
-/*
-					if(files != null) {
-						xsl.append(files.afterLi(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf));
-					}
-*/
 				}
 			}
 			if(files != null) {
@@ -410,11 +399,6 @@ public class Layout {
 		if(this.getTab() != null && this.getTabSize(param) > 0) {
 			for(int i = 0; i < this.getTab().size(); i++) {
 				if(((Tab)this.getTab().get(i)).valid(param)) {
-/*
-					if(files != null) {
-						xsl.append(files.before(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
-					}
-*/
 					Table table = null;
 					Command command = null;
 					if(
@@ -439,11 +423,6 @@ public class Layout {
 						}
 					}
 					xsl.append(this.getTab().get(i).toXSL(files, param, indent, rdf, div, queryId, queryFuncType, table, command, (this.getTabSize(param) > 1)));
-/*
-					if(files != null) {
-						xsl.append(files.after(param, indent, ((Tab)this.getTab().get(i)).getName(), rdf, queryId, queryFuncType, (this.getTabSize(param) > 1)));
-					}
-*/
 				}
 			}
 			if(files != null) {
@@ -657,7 +636,10 @@ public class Layout {
 		xsl.appendL("</li>");
 		xsl.appendL(indent + 3, "</xsl:when>");
 		xsl.appendL(indent + 3, "<xsl:otherwise>");
-		xsl.appendL(indent + 4, "<li class=\"page\">");
+		xsl.appendL(indent + 4, "<li>");
+		xsl.append(indent + 5, "<xsl:attribute name=\"class\">");
+		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("type", rdf) + "\" />");
+		xsl.appendL("</xsl:attribute>");
 		xsl.appendL(indent + 5, "<a>");
 		xsl.append(indent + 6, "<xsl:attribute name=\"href\">?page=");
 		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("no", rdf) + "\" />");

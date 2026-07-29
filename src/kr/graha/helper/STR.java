@@ -339,6 +339,32 @@ public final class STR {
 		return false;
 	}
 /**
+ * 문자열이 유효한 경우,
+ * 문자열이 null 이 아니고,
+ * 문자열이 비어있지 않은 경우,
+ * true 를 리턴한다.
+ 
+ * str 을 숫자(Integer, Double, Float, Long) 로 cast 할 수 있다면, true 를 반환한다.
+ 
+ * @param str 문자열
+ * @return 문자열이 유효한 경우 true 를 리턴한다.
+ */
+	public static boolean nonempty(Object str) {
+		if(str == null) {
+			return false;
+		}
+		if(str instanceof Integer) {
+			return true;
+		} else if(str instanceof Double) {
+			return true;
+		} else if(str instanceof Float) {
+			return true;
+		} else if(str instanceof Long) {
+			return true;
+		}
+		return STR.nonempty(str.toString());
+	}
+/**
  * 문자열이 유효하지 않은 경우,
  * 문자열이 null 이거나,
  * 문자열이 비어있는 경우,
@@ -422,6 +448,91 @@ public final class STR {
 			return value;
 		}
 		return defaultValue;
+	}
+/**
+ * 문자열을 숫자(Integer)로 변환한다.
+ * 공백(" ") 과 쉼표(",")을 제거하고 변환한다.
+ 
+ * 다음과 같은 경우에는 null 을 반환한다.
+ * - value 가 null 인 경우
+ * - value 에서 공백(" ") 과 쉼표(",")을 제거한 후에 비어있는 문자열인 경우,
+ * - value 를 숫자로 변환(Integer.valueOf(value))할 때, NumberFormatException이 발생한 경우
+ 
+ * @param value 문자열
+ * @return value 를 숫자(Integer)로 변환한 값
+ */
+	public static Integer intObject(String value) {
+		if(value == null) {
+			return null;
+		}
+		value = value.replace(" ", "");
+		value = value.replace(",", "");
+		if(value != null && value.equals("")) {
+			return null;
+		}
+		try {
+			return Integer.valueOf(value);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+/**
+ * 문자열을 숫자(Integer)로 변환한다.
+ * 공백(" ") 과 쉼표(",")을 제거하고 변환한다.
+ 
+ * 다음과 같은 경우에는 defaultValue 를 반환한다.
+ * - value 가 null 인 경우
+ * - value 에서 공백(" ") 과 쉼표(",")을 제거한 후에 비어있는 문자열인 경우,
+ * - value 를 숫자로 변환(Integer.valueOf(value))할 때, NumberFormatException이 발생한 경우
+
+ * @param value 문자열
+ * @param defaultValue 문자열이 유효한 숫자가 아닌 경우 반환할 값
+ * @return value 를 숫자(Integer)로 변환한 값 or defaultValue
+ */
+	public static int intValue(String value, int defaultValue) {
+		if(value == null) {
+			return defaultValue;
+		}
+		value = value.replace(" ", "");
+		value = value.replace(",", "");
+		if(value != null && value.equals("")) {
+			return defaultValue;
+		}
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+/**
+ * 문자열을 숫자(Integer)로 변환한다.
+ * 공백(" ") 과 쉼표(",")을 제거하고 변환한다.
+ 
+ * value 를 숫자(Integer, Double, Float, Long) 로 cast 할 수 있다면, 숫자형으로 변환하여 intValue() 를 반환한다.
+ 
+ * 다음과 같은 경우에는 defaultValue 를 반환한다.
+ * - value 가 null 인 경우
+ * - value 에서 공백(" ") 과 쉼표(",")을 제거한 후에 비어있는 문자열인 경우,
+ * - value 를 숫자로 변환(Integer.valueOf(value))할 때, NumberFormatException이 발생한 경우
+
+ * @param value 문자열
+ * @param defaultValue 문자열이 유효한 숫자가 아닌 경우 반환할 값
+ * @return value 를 숫자(Integer)로 변환한 값 or defaultValue
+ */
+	public static int intValue(Object value, int defaultValue) {
+		if(value == null) {
+			return defaultValue;
+		}
+		if(value instanceof Integer) {
+			return ((Integer)value).intValue();
+		} else if(value instanceof Double) {
+			return ((Double)value).intValue();
+		} else if(value instanceof Float) {
+			return ((Float)value).intValue();
+		} else if(value instanceof Long) {
+			return ((Long)value).intValue();
+		}
+		return STR.intValue(value.toString(), defaultValue);
 	}
 }
 

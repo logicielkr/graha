@@ -37,6 +37,7 @@ import kr.graha.post.interfaces.Reporter;
 import kr.graha.post.lib.Key;
 import kr.graha.post.lib.Record;
 import kr.graha.post.xml.GDocument;
+import kr.graha.post.xml.GRedirect;
 import kr.graha.post.model.utility.FilePart;
 import javax.servlet.ServletConfig;
 import java.net.URISyntaxException;
@@ -260,6 +261,13 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		if(super.getHeader() != null) {
 			super.getHeader().executeMessage(document, params);
+		}
+	}
+	private void executeRedirect(GDocument document, Record params) {
+		if(super.getRedirect() != null) {
+			for(int i = 0; i < super.getRedirect().size(); i++) {
+				(super.getRedirect().get(i)).execute(document, params);
+			}
 		}
 	}
 	private void executeCode(GDocument document, Record params, int time) throws NoSuchProviderException, SQLException {
@@ -523,13 +531,11 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		GDocument document = this.getDocument(request);
 		params.setGDocument(document);
-//		int totalFetchCount = 0;
 		try {
 			this.executeMessage(document, params);
 			this.executeCode(document, params, Prop.Before_Connection);
 			super.executeProp(params, Prop.Before_Before_Processor);
 			this.executeCode(document, params, Prop.Before_Before_Processor);
-//			this.executeCode(document, params);
 			this.executeProcessor(document, params, request, response, true);
 			if(params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
 				super.abort();
@@ -538,8 +544,6 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				return document;
 			}
 			super.executeProp(params, Prop.After_Before_Processor);
-//			totalFetchCount += this.executeCommand(document, params, request, response, queryFuncType);
-//			totalFetchCount += this.executeTable(document, params, queryFuncType);
 			this.executeCommand(document, params, request, response, queryFuncType);
 			this.executeTable(document, params, queryFuncType);
 			this.executeFileUsingServletFileUpload(document, fields, params, queryFuncType);
@@ -566,6 +570,9 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			} else {
 				document.add(params);
 			}
+			if(this.post(params, queryFuncType)) {
+				this.executeRedirect(document, params);
+			}
 			super.clear();
 		} catch (NoSuchProviderException | SQLException | IOException | URISyntaxException e) {
 			super.abort();
@@ -576,7 +583,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 		}
 		return document;
 	}
-	private void sendUser(HttpServletRequest request, HttpServletResponse response, GDocument document) {
+	private int sendUser(HttpServletRequest request, HttpServletResponse response, GDocument document) throws IOException, TransformerException {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType(super.getContentType());
 		try {
@@ -585,11 +592,16 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			Transformer transformer = factory.newTransformer(style);
 			Source text = new StreamSource(new ByteArrayInputStream(document.toXML().toString().getBytes(StandardCharsets.UTF_8)));
 			transformer.transform(text, new StreamResult(response.getWriter()));
+			return HttpServletResponse.SC_OK;
 		} catch (IOException | TransformerException e) {
 			LOG.severe(e);
+			throw e;
 		}
 	}
-	private void sendHTML(HttpServletRequest request, HttpServletResponse response, Record params, GDocument document, int queryFuncType) {
+	private int sendHTML(HttpServletRequest request, HttpServletResponse response, Record params, GDocument document, int queryFuncType) throws IOException, TransformerException {
+		if(document.getRedirect() != null) {
+			return this.sendRedirect(request, response, document);
+		}
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html; charset=UTF-8");
 		if(params.getBoolean(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "resultset"))) {
@@ -618,23 +630,59 @@ public class QueryXMLImpl extends QueryXSLImpl {
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 //			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
 			transformer.transform(text, new StreamResult(response.getWriter()));
+			return HttpServletResponse.SC_OK;
 		} catch (IOException | TransformerException e) {
 			LOG.severe(e);
+			throw e;
 		}
 	}
-	private void sendXML(HttpServletRequest request, HttpServletResponse response, GDocument document) {
+	private int sendRedirect(HttpServletRequest request, HttpServletResponse response, GDocument document) throws IOException {
+		GRedirect redirect = document.getRedirect();
+		if(redirect != null) {
+			String redirectURI = redirect.getRedirectURI();
+			if(redirectURI != null) {
+				response.setCharacterEncoding("UTF-8");
+				try {
+					String label = redirect.getLabel();
+					if(STR.nonempty(label)) {
+						response.addHeader("X-graha-redirect-label", label);
+					}
+					List<String> msgs = redirect.getMsgs();
+					if(STR.valid(msgs)) {
+						for(int i = 0; i < msgs.size(); i++) {
+							if(STR.nonempty((String)msgs.get(i))) {
+								response.addHeader("X-graha-redirect-msg", (String)msgs.get(i));
+							}
+						}
+					}
+					response.sendRedirect(request.getRequestURL().substring(0, request.getRequestURL().indexOf("/", request.getScheme().length() + 3)) + redirectURI);
+					return HttpServletResponse.SC_MOVED_TEMPORARILY;
+				} catch (IOException e) {
+					LOG.severe(e);
+					throw e;
+				}
+			}
+		}
+		return HttpServletResponse.SC_OK;
+	}
+	private int sendXML(HttpServletRequest request, HttpServletResponse response, GDocument document) throws IOException {
+		if(document.getRedirect() != null) {
+			return this.sendRedirect(request, response, document);
+		}
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/xml; charset=UTF-8");
 		try {
 //			response.getWriter().append(document.toXML().toStringBuffer());
 			response.getWriter().append(document.toXML().toCharSequence());
+			return HttpServletResponse.SC_OK;
 		} catch (IOException e) {
 			LOG.severe(e);
+			throw e;
 		}
 	}
 	public int execute(
 		HttpServletRequest request, HttpServletResponse response, ServletConfig servletConfig, Record params
-	) throws IOException, NoSuchProviderException, SQLException, URISyntaxException, ServletException {
+	) throws IOException, NoSuchProviderException, SQLException, URISyntaxException, ServletException, TransformerException {
 		super.params(params);
 		try {
 			List<FilePart> fields = super.prepareUsingServletFileUpload(request, servletConfig, params);
@@ -650,11 +698,11 @@ public class QueryXMLImpl extends QueryXSLImpl {
 					return HttpServletResponse.SC_NOT_FOUND;
 				}
 				if(queryFuncType == Query.QUERY_FUNC_TYPE_USER && !params.containsKey(Record.key(Record.PREFIX_TYPE_ERROR, "error"))) {
-					this.sendUser(request, response, document);
+					return this.sendUser(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {
-					this.sendXML(request, response, document);
+					return this.sendXML(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_HTML) {
-					this.sendHTML(request, response, params, document, queryFuncType);
+					return this.sendHTML(request, response, params, document, queryFuncType);
 				}
 			} else {
 				document = this.getDocument(request);
@@ -662,15 +710,15 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				this.setXslNameAndParam(document, params, queryFuncType);
 				document.add(params);
 				if(super.getRequestType() == QueryImpl.REQUEST_TYPE_XML) {
-					this.sendXML(request, response, document);
+					return this.sendXML(request, response, document);
 				} else if(super.getRequestType() == QueryImpl.REQUEST_TYPE_HTML) {
-					this.sendHTML(request, response, params, document, queryFuncType);
+					return this.sendHTML(request, response, params, document, queryFuncType);
 				}
 			}
 		} catch (Exception e) {
 			this.abort();
 			throw e;
 		}
-		return HttpServletResponse.SC_OK;
+		return HttpServletResponse.SC_BAD_REQUEST;
 	}
 }

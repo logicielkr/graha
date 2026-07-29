@@ -65,6 +65,7 @@ public class GDocument {
 	private List<GMessage> messages = null;
 	private List<GFile> files = null;
 	private List<GRows> rows = null;
+	private List<GRedirect> redirects = null;
 /**
  * 확장자를 제외한 xsl 파일이름
  * 이 값에 .xsl 을 붙여서 xslPath 를 조합한다.
@@ -89,7 +90,7 @@ public class GDocument {
 	private void setOutput(String output) {
 		this.output = output;
 	}
-	public boolean containsKey(Key key) {
+	public boolean containsQueryValue(Key key) {
 		if(STR.valid(this.rows)) {
 			if(key.getKey() != null && key.getKey().indexOf(".") > 0) {
 				String rowName = key.getKey().substring(0, key.getKey().indexOf("."));
@@ -101,14 +102,13 @@ public class GDocument {
 					}
 				}
 			} else if(this.rows.size() == 1 && STR.invalid(((GRows)this.rows.get(0)).getName())) {
-//			} else {
 				GRows row = (GRows)this.rows.get(0);
 				return row.containsKey(key.getKey());
 			}
 		}
 		return false;
 	}
-	public Object get(Key key) {
+	public Object getQueryValue(Key key) {
 		if(STR.valid(this.rows)) {
 			if(key.getKey() != null && key.getKey().indexOf(".") > 0) {
 				String rowName = key.getKey().substring(0, key.getKey().indexOf("."));
@@ -120,7 +120,6 @@ public class GDocument {
 					}
 				}
 			} else if(this.rows.size() == 1 && STR.invalid(((GRows)this.rows.get(0)).getName())) {
-//			} else {
 				GRows row = (GRows)this.rows.get(0);
 				return row.get(key.getKey());
 			}
@@ -210,6 +209,12 @@ public class GDocument {
 			this.files = new ArrayList<GFile>();
 		}
 		this.files.add(file);
+	}
+	public void add(GRedirect redirect) {
+		if(this.redirects == null) {
+			this.redirects = new ArrayList<GRedirect>();
+		}
+		this.redirects.add(redirect);
 	}
 	public void clear() {
 		if(this.files != null) {
@@ -363,11 +368,37 @@ public class GDocument {
 				page.toXML(xml, rdf);
 			}
 		}
+		if(this.redirects != null && this.redirects.size() > 0) {
+			if(rdf) {
+				xml.appendL(1, "<RDF:Seq RDF:about=\"urn:root:redirects\">");
+			} else {
+				xml.appendL(1, "<redirects>");
+			}
+			for(int i = 0; i < this.redirects.size(); i++) {
+				GRedirect redirect = (GRedirect)this.redirects.get(i);
+				redirect.toXML(xml, rdf);
+			}
+			if(rdf) {
+				xml.appendL(1, "</RDF:Seq>");
+			} else {
+				xml.appendL(1, "</redirects>");
+			}
+		}
 		if(rdf) {
 			xml.appendL("</RDF:RDF>");
 		} else {
 			xml.appendL("</document>");
 		}
+	}
+	public GRedirect getRedirect() {
+		if(this.redirects != null && this.redirects.size() == 1) {
+			if(((GRedirect)this.redirects.get(0)).forRedirect()) {
+				return ((GRedirect)this.redirects.get(0));
+			} else {
+				return null;
+			}
+		}
+		return null;
 	}
 	public Buffer toXML() throws IOException {
 		Buffer xml = new Buffer();

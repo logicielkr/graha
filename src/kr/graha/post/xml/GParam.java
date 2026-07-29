@@ -18,12 +18,12 @@
  *
  */
 
-
 package kr.graha.post.xml;
 
 import kr.graha.post.lib.Buffer;
 import kr.graha.helper.STR;
 import kr.graha.post.lib.Key;
+import kr.graha.post.lib.Record;
 
 /**
  * GParam
@@ -112,6 +112,20 @@ public class GParam {
 				return "/document/" + paramPrefix + "s/" + childNodeName;
 			}
 		}
+	}
+	public static String childNodeValue(String paramPrefix, String childNodeName, Record param) {
+		if(!STR.valid(paramPrefix)) {
+			return param.getString(Record.key(Record.PREFIX_TYPE_PARAM, childNodeName));
+		} else if(STR.compareIgnoreCase(paramPrefix, "param")) {
+			return param.getString(Record.key(Record.PREFIX_TYPE_PARAM, childNodeName));
+		} else if(STR.compareIgnoreCase(paramPrefix, "prop")) {
+			return param.getString(Record.key(Record.PREFIX_TYPE_PROP, childNodeName));
+		} else if(STR.compareIgnoreCase(paramPrefix, "result")) {
+			return param.getString(Record.key(Record.PREFIX_TYPE_RESULT, childNodeName));
+		} else if(STR.compareIgnoreCase(paramPrefix, "error")) {
+			return param.getString(Record.key(Record.PREFIX_TYPE_ERROR, childNodeName));
+		}
+		return null;
 	}
 	public static String nodePathForFileParam(String fileName, boolean rdf) {
 		if(rdf) {

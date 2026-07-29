@@ -31,6 +31,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import kr.graha.post.element.XmlElement;
 import kr.graha.post.lib.GrahaParsingException;
+import kr.graha.post.xml.GRedirect;
+import kr.graha.post.xml.GRedirectParam;
+import kr.graha.post.xml.GDocument;
+import kr.graha.post.lib.Record;
 
 /**
  * Graha(그라하) LinkParam 정보
@@ -141,21 +145,6 @@ public class LinkParam {
 						);
 					} else if(tabName == null || STR.valid(param.getRef())) {
 						expr = kr.graha.post.xml.GRow.childNodePath(param.getRef(), param.getValue(), rdf);
-						/*
-						String ref = param.getRef();
-						if(!STR.valid(ref)) {
-							if(tables != null && tables.size() > 0) {
-								ref = ((Table)tables.get(0)).getName();
-							} else if(commands != null && commands.size() > 0) {
-								ref = ((Command)commands.get(0)).getName();
-							}
-						}
-						if(STR.valid(ref)) {
-							expr = kr.graha.post.xml.GRow.childNodePath(ref, param.getValue(), rdf);
-						} else {
-							expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
-						}
-						*/
 					} else {
 						if(full) {
 							expr = kr.graha.post.xml.GRow.childNodePath(tabName, param.getValue(), rdf);
@@ -261,23 +250,8 @@ public class LinkParam {
 					this.getValue().substring(this.getValue().indexOf(".") + 1),
 					rdf
 				);
-			} else if(tabName == null || STR.valid(this.getRef())) {
+			} else if(STR.valid(this.getRef())) {
 				expr = kr.graha.post.xml.GRow.childNodePath(this.getRef(), this.getValue(), rdf);
-				/*
-				String ref = this.getRef();
-				if(!STR.valid(ref)) {
-					if(tables != null && tables.size() > 0) {
-						ref = ((Table)tables.get(0)).getName();
-					} else if(commands != null && commands.size() > 0) {
-						ref = ((Command)commands.get(0)).getName();
-					}
-				}
-				if(STR.valid(ref)) {
-					expr = kr.graha.post.xml.GRow.childNodePath(ref, this.getValue(), rdf);
-				} else {
-					expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
-				}
-				*/
 			} else {
 				if(full) {
 					expr = kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf);
@@ -307,14 +281,71 @@ public class LinkParam {
 					xsl.appendL(indent, "<xsl:if test=\"" + expr + " and " + expr + " != ''\">");
 				}
 			}
-			xsl.appendL(indent + 1, "<input type=\"hidden\" class=\"" + this.getName() + "\" name=\"" + this.getName() + "\" value=\"{" + expr + "}\" />");
+			xsl.appendL(indent + 1, "<input>");
+			if(STR.valid(this.getRef())) {
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-ref\">" + this.getRef() + "</xsl:attribute>");
+			}
+			if(STR.valid(this.getType())) {
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-type\">" + this.getType() + "</xsl:attribute>");
+			}
+			if(STR.valid(this.getValue())) {
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+			}
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + expr + "\" /></xsl:attribute>");
+			xsl.appendL(indent + 1, "</input>");
 			if(hideBlank) {
 				xsl.appendL(indent, "</xsl:if>");
 			}
 		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
-			xsl.appendL(indent, "<input type=\"hidden\" class=\"" + this.getName() + "\" name=\"" + this.getName() + "\" value=\"" + this.getValue() + "\" />");
+			xsl.appendL(indent + 1, "<input>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\">" + this.getValue() + "</xsl:attribute>");
+			xsl.appendL(indent + 1, "</input>");
 		}
 		return xsl;
 	}
-	
+	protected void execute(GRedirect redirect, GDocument document, Record param) {
+		GRedirectParam redirectParam = new GRedirectParam(this.getName());
+		if(STR.compareIgnoreCase(this.getType(), "query")) {
+			if(STR.valid(this.getValue()) && this.getValue().indexOf(".") > 0) {
+				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(
+					this.getValue().substring(0, this.getValue().indexOf(".")),
+					this.getValue().substring(this.getValue().indexOf(".") + 1),
+					document
+				));
+			} else if(STR.valid(this.getRef())) {
+				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(this.getRef(), this.getValue(), document));
+			} else {
+				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(null, this.getValue(), document));
+			}
+		} else if(STR.vexistsIgnoreCase(this.getType(), "param", "prop", "result", "error")) {
+			redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(this.getType(), this.getValue(), param));
+		} else if(!STR.valid(this.getType())) {
+			redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(null, this.getValue(), param));
+		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
+			redirectParam.setValue(this.getValue());
+		} else {
+			throw new GrahaParsingException("type is empty or query, param, prop, result, error, default, const");
+		}
+		if(STR.nonempty(redirectParam.getValue())) {
+			if(
+				(
+					!STR.valid(this.getType()) ||
+					STR.compareIgnoreCase(this.getType(), "param")
+				) &&
+				STR.compareIgnoreCase(this.getValue(), "page")
+			) {
+				if(STR.intValue(redirectParam.getValue(), 0) > 1) {
+					redirect.add(redirectParam);
+				}
+			} else {
+				redirect.add(redirectParam);
+			}
+		}
+	}
 }

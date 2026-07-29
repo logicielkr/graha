@@ -23,7 +23,6 @@ package kr.graha.post.model;
 
 import java.util.List;
 import java.util.ArrayList;
-import kr.graha.post.lib.Buffer;
 import kr.graha.post.lib.Record;
 import kr.graha.helper.STR;
 import kr.graha.helper.LOG;
@@ -34,6 +33,9 @@ import org.w3c.dom.NodeList;
 import kr.graha.post.element.XmlElement;
 import kr.graha.post.model.utility.AuthUtility;
 import kr.graha.post.model.utility.AuthInfo;
+import kr.graha.post.xml.GDocument;
+import kr.graha.post.xml.GRedirect;
+import kr.graha.post.model.utility.TextParser;
 
 /**
  * Graha(그라하) redirect 정보
@@ -53,6 +55,9 @@ public class Redirect {
 	private List<LinkParam> param = null;
 	private List<Msg> msgs = null;
 	private String msg = null;
+	private String label = null;
+	private String type = null;
+	
 	private String getPath() {
 		return this.path;
 	}
@@ -76,6 +81,18 @@ public class Redirect {
 	}
 	private void setMsg(String msg) {
 		this.msg = msg;
+	}
+	private String getLabel() {
+		return this.label;
+	}
+	private void setLabel(String label) {
+		this.label = label;
+	}
+	private String getType() {
+		return this.type;
+	}
+	private void setType(String type) {
+		this.type = type;
 	}
 	private void add(LinkParam param) {
 		if(this.param == null) {
@@ -166,6 +183,10 @@ public class Redirect {
 							this.setAutoredirect(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "msg")) {
 							this.setMsg(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "label")) {
+							this.setLabel(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "type")) {
+							this.setType(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -182,6 +203,8 @@ public class Redirect {
 		element.setAttribute("path", this.getPath());
 		element.setAttribute("cond", this.getCond());
 		element.setAttribute("autoredirect", this.getAutoredirect());
+		element.setAttribute("label", this.getLabel());
+		element.setAttribute("type", this.getType());
 		element.setAttribute("msg", this.getMsg());
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
@@ -196,52 +219,31 @@ public class Redirect {
 		}
 		return element;
 	}
-	private void form(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf, Buffer xsl) {
-		xsl.appendL(indent, "<form>");
-		xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">get</xsl:attribute>");
-		xsl.appendL(indent + 1, "<xsl:attribute name=\"id\">_post</xsl:attribute>");
-		xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param, rdf) + "</xsl:attribute>");
-		if(STR.valid(this.param)) {
-			for(int i = 0; i < this.param.size(); i++) {
-				xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));
-			}
-		}
-		if(!STR.valid(this.getAutoredirect()) || !STR.falseValue(this.getAutoredirect())) {
-			xsl.appendL(indent + 1, "<noscript>Javascript is disabled in your web browser. Please click \"Confirm\" to continue</noscript>");
-//			xsl.appendL(indent + 1, "<noscript>웹브라우저에서 Javascript 가 동작하지 않도록 설정되어 있습니다.  다음으로 이동하려면 확인 버튼을 클릭하시기 바랍니다.</noscript>");
-		}
-		if(STR.valid(this.msgs)) {
-			for(int i = 0; i < this.msgs.size(); i++) {
-				xsl.append(((Msg)this.msgs.get(i)).toXSL(indent + 1));
-			}
-		}
-		if(STR.falseValue(this.getAutoredirect())) {
-			xsl.appendL(indent, "<div class=\"autoredirect\">Please click \"Confirm\" to continue</div>");
-		}
-		xsl.appendL(indent + 1, "<input type=\"submit\" value=\"Confirm\" />");
-		xsl.appendL(indent, "</form>");
-	}
-	protected Buffer toXSL(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf) {
-		Buffer xsl = new Buffer();
+	protected void execute(GDocument document, Record param) {
 		AuthInfo authInfo = null;
 		if(STR.valid(this.getCond())) {
 			authInfo = AuthUtility.parse(this.getCond());
 		}
-		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
-			if(AuthUtility.auth(authInfo, param)) {
-				xsl.appendL(indent, "<xsl:when test=\"1\">");
-				this.form(tables, commands, param, indent + 1, rdf, xsl);
-				xsl.appendL(indent, "</xsl:when>");
+		if(authInfo == null || AuthUtility.auth(authInfo, param)) {
+			String label = null;
+			if(STR.valid(this.getLabel())) {
+				label = TextParser.parse(this.getLabel(), param);
 			}
-		} else {
-			if(authInfo != null) {
-				xsl.appendL(indent, "<xsl:when test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
-			} else {
-				xsl.appendL(indent, "<xsl:when test=\"1\">");
+			GRedirect redirect = new GRedirect(Link.getPath(this.getPath(), param), !STR.falseValue(this.getAutoredirect()), label, this.getType());
+			if(STR.valid(this.param)) {
+				for(int i = 0; i < this.param.size(); i++) {
+					((LinkParam)this.param.get(i)).execute(redirect, document, param);
+				}
 			}
-			this.form(tables, commands, param, indent + 1, rdf, xsl);
-			xsl.appendL(indent, "</xsl:when>");
+			if(STR.valid(this.getMsg())) {
+				redirect.add(TextParser.parse(this.getMsg(), param));
+			}
+			if(STR.valid(this.msgs)) {
+				for(int i = 0; i < this.msgs.size(); i++) {
+					((Msg)this.msgs.get(i)).execute(redirect, param);
+				}
+			}
+			document.add(redirect);
 		}
-		return xsl;
 	}
 }

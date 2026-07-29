@@ -236,7 +236,6 @@ public class GRow {
 			if(STR.valid(gRowsName)) {
 				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data:" + gRowsName + "']/RDF:li/RDF:item/uc:" + childNodeName;
 			} else {
-//				return "/RDF:RDF/RDF:Seq[@RDF:about='urn:root:data']/RDF:li/RDF:item/uc:" + childNodeName;
 				return "/RDF:RDF/RDF:Seq/RDF:li/RDF:item/uc:" + childNodeName;
 			}
 		} else {
@@ -247,7 +246,27 @@ public class GRow {
 			}
 		}
 	}
-	
+	public static Object childNodeValue(String gRowsName, String childNodeName, GDocument document) {
+		List<GRows> list = document.getRows();
+		if(STR.valid(list)) {
+			GRows rows = null;
+			for(int i = 0; i < list.size(); i++) {
+				if(STR.valid(gRowsName)) {
+					if(STR.compareIgnoreCase(((GRows)list.get(i)).getName(), gRowsName)) {
+						rows = list.get(i);
+						break;
+					}
+				} else {
+					rows = list.get(i);
+					break;
+				}
+			}
+			if(rows != null) {
+				return rows.get(childNodeName);
+			}
+		}
+		return null;
+	}
 	public static String childNodeName(String childNodeName, boolean rdf) {
 		if(rdf) {
 			if(STR.compareIgnoreCase(childNodeName, "position()")) {

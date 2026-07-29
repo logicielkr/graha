@@ -558,9 +558,6 @@ public class Col {
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName);
 			if(STR.valid(this.getName())) {
 				xsl.append(" " + this.getName());
-//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + " " + this.getName() + "</xsl:attribute>");
-//			} else {
-//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName + "</xsl:attribute>");
 			}
 			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
 				xsl.append(" " + this.getClassName());
@@ -571,9 +568,6 @@ public class Col {
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha");
 			if(STR.valid(this.getName())) {
 				xsl.append(" " + this.getName());
-//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
-//			} else {
-//				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 			}
 			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
 				xsl.append(" " + this.getClassName());
@@ -587,8 +581,6 @@ public class Col {
 				STR.valid(this.getStyle())
 			)
 		) {
-//			xsl.appendL(indent + 1, "<xsl:attribute name=\"style\">width:" + this.getLabelWidth() + ";</xsl:attribute>");
-//			xsl.appendL(indent + 1, "<xsl:attribute name=\"style\">width:" + TextParser.parseForXSL(this.getLabelWidth(), param, rdf, full) + ";</xsl:attribute>");
 			if(STR.valid(this.getLabelWidth())) {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"width\">" + TextParser.parseForXSL(this.getLabelWidth(), param, rdf, full) + "</xsl:attribute>");
 			}
@@ -610,12 +602,10 @@ public class Col {
 				}
 				xsl.append(indent + 1, "<xsl:attribute name=\"style\">");
 				if(STR.valid(this.getWidth())) {
-//						xsl.append("width:" + this.getWidth() + ";");
-						xsl.append("width:" + TextParser.parseForXSL(this.getWidth(), param, rdf, full) + ";");
+					xsl.append("width:" + TextParser.parseForXSL(this.getWidth(), param, rdf, full) + ";");
 				}
 				if(STR.valid(this.getHeight())) {
-//						xsl.append("height:" + this.getHeight() + ";");
-						xsl.append("height:" + TextParser.parseForXSL(this.getHeight(), param, rdf, full) + ";");
+					xsl.append("height:" + TextParser.parseForXSL(this.getHeight(), param, rdf, full) + ";");
 				}
 				if(STR.valid(this.getStyle())) {
 					xsl.append(TextParser.parseForXSL(this.getStyle(), param, rdf, full) + ";");
@@ -624,21 +614,18 @@ public class Col {
 			}
 		}
 		if(STR.compareIgnoreCase(tagName, "td") && STR.valid(this.getAlign())) {
-//			xsl.appendL(indent + 1, "<xsl:attribute name=\"align\">" + this.getAlign() + "</xsl:attribute>");
 			xsl.appendL(indent + 1, "<xsl:attribute name=\"align\">" + TextParser.parseForXSL(this.getAlign(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(
 			(viewType == Tab.VIEW_TYPE_LIST || STR.compareIgnoreCase(tagName, "td")) &&
 			STR.valid(this.getColspan())
 		) {
-//			xsl.appendL(indent + 1, "<xsl:attribute name=\"colspan\">" + this.getColspan() + "</xsl:attribute>");
 			xsl.appendL(indent + 1, "<xsl:attribute name=\"colspan\">" + TextParser.parseForXSL(this.getColspan(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(
 			(viewType == Tab.VIEW_TYPE_LIST || STR.compareIgnoreCase(tagName, "td")) &&
 			STR.valid(this.getRowspan())
 		) {
-//			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + this.getRowspan() + "</xsl:attribute>");
 			xsl.appendL(indent + 1, "<xsl:attribute name=\"rowspan\">" + TextParser.parseForXSL(this.getRowspan(), param, rdf, full) + "</xsl:attribute>");
 		}
 		if(STR.compareIgnoreCase(tagName, "th")) {
@@ -650,6 +637,9 @@ public class Col {
 						Col col = (Col)cols.get(i);
 						if(STR.compareIgnoreCase(col.getType(), "hidden")) {
 							xsl.appendL(indent + 1, "<input>");
+							if(STR.valid(col.getValue())) {
+								xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + col.getValue() + "</xsl:attribute>");
+							}
 							xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
 							xsl.append(indent + 2, "<xsl:attribute name=\"class\">");
 							xsl.append(col.getName());
@@ -673,7 +663,6 @@ public class Col {
 				if(this.dataAttr != null && this.dataAttr.size() > 0) {
 					for(int x = 0; x < this.dataAttr.size(); x++) {
 						String[] v = (String[])this.dataAttr.get(x);
-//						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
 						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 					}
 				}
@@ -704,10 +693,8 @@ public class Col {
 		Buffer xsl = new Buffer();
 		String path = this.getXPath(this.getName(), tabName, rdf, full);
 		
-//		boolean escape = true;
 		String escapeAttrValue = "";
 		if(STR.falseValue(this.getEscape())) {
-//			escape = false;
 			escapeAttrValue = " disable-output-escaping=\"yes\"";
 		}
 		if(STR.trueValue(this.getCode())) {
@@ -781,12 +768,14 @@ public class Col {
 			if(STR.valid(this.getForName())) {
 				xsl.appendL(indent, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
 				xsl.appendL(indent + 1, "<input>");
+				if(STR.valid(this.getValue())) {
+					xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+				}
 				xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
 				xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">radio</xsl:attribute>");
 				if(this.dataAttr != null && this.dataAttr.size() > 0) {
 					for(int x = 0; x < this.dataAttr.size(); x++) {
 						String[] v = (String[])this.dataAttr.get(x);
-//						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
 						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 					}
 				}
@@ -815,12 +804,14 @@ public class Col {
 					for(int i = 0; i < this.option.size(); i++) {
 						Option obj = (Option)this.option.get(i);
 						xsl.appendL(indent, "<input>");
+						if(STR.valid(this.getValue())) {
+							xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+						}
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"type\">radio</xsl:attribute>");
 						if(this.dataAttr != null && this.dataAttr.size() > 0) {
 							for(int x = 0; x < this.dataAttr.size(); x++) {
 								String[] v = (String[])this.dataAttr.get(x);
-//								xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 							}
 						}
@@ -853,6 +844,9 @@ public class Col {
 				xsl.appendL(indent, "<button>");
 			} else {
 				xsl.appendL(indent, "<input>");
+			}
+			if(STR.valid(this.getValue())) {
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 			}
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
 			xsl.append(this.getName());
@@ -937,7 +931,6 @@ public class Col {
 			if(this.dataAttr != null && this.dataAttr.size() > 0) {
 				for(int x = 0; x < this.dataAttr.size(); x++) {
 					String[] v = (String[])this.dataAttr.get(x);
-//					xsl.appendL(indent + 1, "<xsl:attribute name=\"" + v[0] + "\">" + v[1] + "</xsl:attribute>");
 					xsl.appendL(indent + 1, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 				}
 			}

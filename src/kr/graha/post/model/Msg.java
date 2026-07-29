@@ -21,12 +21,14 @@
 
 package kr.graha.post.model;
 
-import kr.graha.post.lib.Buffer;
 import kr.graha.helper.STR;
 import kr.graha.helper.LOG;
 import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import kr.graha.post.element.XmlElement;
+import kr.graha.post.xml.GRedirect;
+import kr.graha.post.model.utility.TextParser;
+import kr.graha.post.lib.Record;
 
 /**
  * Graha(그라하) Msg 정보
@@ -94,14 +96,12 @@ public class Msg {
 		element.setTextContent(this.getTextContent());
 		return element;
 	}
-	protected Buffer toXSL(int indent) {
-		Buffer xsl = new Buffer();
+	protected void execute(GRedirect redirect, Record param) {
 		if(STR.valid(this.getValue())) {
-			xsl.appendL(indent, "<div class=\"msg\">" + this.getValue() + "</div>");
+			redirect.add(TextParser.parse(this.getValue(), param));
 		}
 		if(STR.valid(this.getTextContent())) {
-			xsl.appendL(indent, "<div class=\"msg\">" + this.getTextContent() + "</div>");
+			redirect.add(TextParser.parse(this.getTextContent(), param));
 		}
-		return xsl;
 	}
 }

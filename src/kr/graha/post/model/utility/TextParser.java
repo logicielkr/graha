@@ -36,11 +36,17 @@ public class TextParser {
 	private TextParser() {
 	}
 	public static String parse(String text, Record param) {
+		if(text == null) {
+			return null;
+		}
 		Record result = new Record();
 		TextParser.parse(text, param, result);
 		return result.getString(Record.key(Record.PREFIX_TYPE_U_SYSTEM, "filepath"));
 	}
 	public static void parse(String text, Record param, Record result) {
+		if(text == null) {
+			return;
+		}
 		String path = new String(text);
 		Buffer sb = new Buffer();
 		while(true) {
