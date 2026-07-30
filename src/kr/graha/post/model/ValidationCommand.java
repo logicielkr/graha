@@ -163,11 +163,6 @@ public class ValidationCommand extends Auth {
 			if(authInfo != null) {
 				xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, params, rdf) + "\">");
 			}
-			if(STR.valid(this.getName())) {
-				xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form, \"" + this.getName() + "\");");
-			} else {
-				xsl.appendL(indent, "var _msg = " + this.getFunc() + "(form);");
-			}
 			xsl.append(indent, "var _msg = " + this.getFunc() + "(form");
 			if(STR.valid(this.getName())) {
 				xsl.append(", \"" + this.getName() + "\"");

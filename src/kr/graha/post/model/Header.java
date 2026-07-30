@@ -622,13 +622,13 @@ public class Header {
 				}
 			} else {
 				if(labelType == Label.LABEL_TYPE_LABEL) {
-					xsl.append(internalIndent, "<h2 class=\"title\">");
+					xsl.append(internalIndent, "<h2 class=\"graha title\">");
 				} else if(labelType == Label.LABEL_TYPE_DESC) {
-					xsl.append(internalIndent, "<div class=\"description\">");
+					xsl.append(internalIndent, "<div class=\"graha description\">");
 				} else if(labelType == Label.LABEL_TYPE_AUTHOR) {
-					xsl.append(internalIndent, "<div class=\"author\">");
+					xsl.append(internalIndent, "<div class=\"graha author\">");
 				} else if(labelType == Label.LABEL_TYPE_KEYWORD) {
-					xsl.append(internalIndent, "<div class=\"keyword\">");
+					xsl.append(internalIndent, "<div class=\"graha keyword\">");
 				}
 			}
 			if(rdf && STR.valid(xText)) {

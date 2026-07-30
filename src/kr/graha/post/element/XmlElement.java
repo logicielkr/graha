@@ -41,6 +41,10 @@ public class XmlElement {
 	private String tagName;
 	private List childNodes = null;
 	private List<XmlAttr> attrs = null;
+	
+	private Boolean attribute = null;
+	private Boolean classAttr = null;
+	
 	public XmlElement(String prefixName, String tagName) {
 		this.prefixName = prefixName;
 		this.tagName = tagName;
@@ -48,6 +52,40 @@ public class XmlElement {
 	public XmlElement(String tagName) {
 		this.prefixName = null;
 		this.tagName = tagName;
+	}
+	public XmlElement(String prefixName, String tagName, XmlAttr attr) {
+		this.prefixName = prefixName;
+		this.tagName = tagName;
+		if(attr != null) {
+				this.add(attr);
+		}
+	}
+	public XmlElement(String tagName, XmlAttr attr) {
+		this.prefixName = null;
+		this.tagName = tagName;
+		if(attrs != null) {
+			if(attr != null) {
+				this.add(attr);
+			}
+		}
+	}
+	public XmlElement(String prefixName, String tagName, XmlAttr... attrs) {
+		this.prefixName = prefixName;
+		this.tagName = tagName;
+		if(attrs != null) {
+			for(int i = 0; i < attrs.length; i++) {
+				this.add(attrs[i]);
+			}
+		}
+	}
+	public XmlElement(String tagName, XmlAttr... attrs) {
+		this.prefixName = null;
+		this.tagName = tagName;
+		if(attrs != null) {
+			for(int i = 0; i < attrs.length; i++) {
+				this.add(attrs[i]);
+			}
+		}
 	}
 	public void clear() {
 		if(this.childNodes != null) {
@@ -69,7 +107,22 @@ public class XmlElement {
 			this.childNodes.add(element);
 		}
 	}
+	public void add(HTMLElement element) {
+		if(element != null) {
+			if(this.childNodes == null) {
+				this.childNodes = new ArrayList();
+			}
+			this.childNodes.add(element);
+		}
+	}
 	public void add(XmlElement... elements) {
+		if(elements != null) {
+			for(int i = 0; i < elements.length; i++) {
+				this.add(elements[i]);
+			}
+		}
+	}
+	public void add(HTMLElement... elements) {
 		if(elements != null) {
 			for(int i = 0; i < elements.length; i++) {
 				this.add(elements[i]);
@@ -162,6 +215,41 @@ public class XmlElement {
 	public void appendChild(String element) {
 		this.add(element);
 	}
+	public void appendChild(int indent, XmlElement element) {
+		this.appendChild(indent, element, false);
+	}
+	public void appendChild(int indent, Node element) {
+		this.appendChild(indent, element, false);
+	}
+	public void appendChild(int indent, String element) {
+		this.appendChild(indent, element, false);
+	}
+	private void indent(int indent) {
+		for(int i = 0; i < indent; i++) {
+			this.add("\t");
+		}
+	}
+	public void appendChild(int indent, XmlElement element, boolean lineBreak) {
+		this.indent(indent);
+		this.add(element);
+		if(lineBreak) {
+			this.add("\n");
+		}
+	}
+	public void appendChild(int indent, Node element, boolean lineBreak) {
+		this.indent(indent);
+		this.add(element);
+		if(lineBreak) {
+			this.add("\n");
+		}
+	}
+	public void appendChild(int indent, String element, boolean lineBreak) {
+		this.indent(indent);
+		this.add(element);
+		if(lineBreak) {
+			this.add("\n");
+		}
+	}
 	public XmlElement createElement(String tagName) {
 		XmlElement element = new XmlElement(tagName);
 		this.add(element);
@@ -169,6 +257,39 @@ public class XmlElement {
 	}
 	public XmlElement createElement(String tagName, XmlAttr... attrs) {
 		XmlElement element = new XmlElement(tagName);
+		element.add(attrs);
+		this.add(element);
+		return element;
+	}
+	public XmlElement createElement(String prefixName, String tagName) {
+		XmlElement element = new XmlElement(prefixName, tagName);
+		this.add(element);
+		return element;
+	}
+	public XmlElement createElement(String prefixName, String tagName, XmlAttr... attrs) {
+		XmlElement element = new XmlElement(prefixName, tagName);
+		element.add(attrs);
+		this.add(element);
+		return element;
+	}
+	public XslElement createXslElement(String tagName) {
+		XslElement element = new XslElement(tagName);
+		this.add(element);
+		return element;
+	}
+	public XslElement createXslElement(String tagName, XmlAttr... attrs) {
+		XslElement element = new XslElement(tagName);
+		element.add(attrs);
+		this.add(element);
+		return element;
+	}
+	public HTMLElement createHTMLElement(String tagName) {
+		HTMLElement element = new HTMLElement(tagName);
+		this.add(element);
+		return element;
+	}
+	public HTMLElement createHTMLElement(String tagName, XmlAttr... attrs) {
+		HTMLElement element = new HTMLElement(tagName);
 		element.add(attrs);
 		this.add(element);
 		return element;
@@ -203,6 +324,37 @@ public class XmlElement {
 	public void print(Buffer buffer) {
 		this.print(buffer, 0);
 	}
+	private boolean attribute() {
+		if(this.attribute == null) {
+			this.attribute = Boolean.valueOf((this instanceof XslElement && STR.compareIgnoreCase(this.tagName, "attribute")));
+		}
+		return (this.attribute).booleanValue();
+	}
+	private boolean style() {
+		return (this instanceof HTMLElement && STR.compareIgnoreCase(this.tagName, "style"));
+	}
+	private boolean script() {
+		return (this instanceof HTMLElement && STR.compareIgnoreCase(this.tagName, "script"));
+	}
+	private boolean classAttr(XmlAttr attr) {
+		return (STR.compareIgnoreCase(attr.getName(), "name") && STR.compareIgnoreCase(attr.getValue(), "class"));
+	}
+	private boolean classAttr() {
+		if(this.classAttr == null) {
+			this.classAttr = Boolean.valueOf(false);
+			if(this.attribute()) {
+				if(this.attrs != null && this.attrs.size() > 0) {
+					for(int i = 0; i < this.attrs.size(); i++) {
+						if(this.classAttr((XmlAttr)this.attrs.get(i))) {
+							this.classAttr = Boolean.valueOf(true);
+							break;
+						}
+					}
+				}
+			}
+		}
+		return (this.classAttr).booleanValue();
+	}
 	public void print(Buffer buffer, int indent) {
 		buffer.append(indent, "<");
 		if(STR.valid(this.prefixName)) {
@@ -227,7 +379,11 @@ public class XmlElement {
 			exists ||
 			(this.childNodes != null && this.childNodes.size() > 0)
 		) {
-			buffer.appendL(">");
+			if(this.attribute()) {
+				buffer.append(">");
+			} else {
+				buffer.appendL(">");
+			}
 			if(this.attrs != null && this.attrs.size() > 0) {
 				for(int i = 0; i < this.attrs.size(); i++) {
 					XmlAttr attr = (XmlAttr)this.attrs.get(i);
@@ -239,18 +395,39 @@ public class XmlElement {
 				}
 			}
 			if(this.childNodes != null && this.childNodes.size() > 0) {
+				int index = 0;
 				for(int i = 0; i < this.childNodes.size(); i++) {
 					Object childNode = this.childNodes.get(i);
-					if(childNode instanceof XmlElement) {
-						((XmlElement)childNode).println(buffer, indent + 1);
-					} else if(childNode instanceof Buffer) {
-						buffer.appendL(indent + 1, (Buffer)childNode);
-					} else if(childNode instanceof String) {
-						buffer.appendL(indent + 1, (String)childNode);
+					if(this.attribute() || this.script() || this.style()) {
+						if(index > 0 && this.classAttr()) {
+							buffer.append(" ");
+						}
+						if(childNode instanceof XmlElement) {
+							((XmlElement)childNode).print(buffer);
+							index++;
+						} else if(childNode instanceof Buffer) {
+							buffer.append((Buffer)childNode);
+							index++;
+						} else if(childNode instanceof String) {
+							buffer.append((String)childNode);
+							index++;
+						}
+					} else {
+						if(childNode instanceof XmlElement) {
+							((XmlElement)childNode).println(buffer, indent + 1);
+						} else if(childNode instanceof Buffer) {
+							buffer.appendL(indent + 1, (Buffer)childNode);
+						} else if(childNode instanceof String) {
+							buffer.appendL(indent + 1, (String)childNode);
+						}
 					}
 				}
 			}
-			buffer.append(indent, "</");
+			if(this.attribute()) {
+				buffer.append("</");
+			} else {
+				buffer.append(indent, "</");
+			}
 			if(STR.valid(this.prefixName)) {
 				buffer.append(this.prefixName);
 				buffer.append(":");

@@ -116,7 +116,7 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/props/data.button.search.label" /></xsl:attribute>
 	</input>
 </form>
-<form action="list" style="float:right">
+<form action="list.html" style="float:right">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -132,7 +132,7 @@ table tbody td a {
 
 
 </form>
-<form action="query" style="float:right">
+<form action="query.html" style="float:right">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>

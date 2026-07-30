@@ -251,14 +251,14 @@ public class QueryXSLImpl extends QueryImpl {
 		xsl.appendL(indent + 3, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_PARAM, rdf) + "\">");
 		xsl.appendL(indent + 4, "<input>");
 		xsl.appendL(indent + 5, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-		xsl.appendL(indent + 5, "<xsl:attribute name=\"class\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" /></xsl:attribute>");
+		xsl.appendL(indent + 5, "<xsl:attribute name=\"class\">graha <xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" /></xsl:attribute>");
 		xsl.appendL(indent + 5, "<xsl:attribute name=\"name\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("name", rdf) + "\" /></xsl:attribute>");
 		xsl.appendL(indent + 5, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRedirect.childNodeName("value", rdf) + "\" /></xsl:attribute>");
 		xsl.appendL(indent + 4, "</input>");
 		xsl.appendL(indent + 3, "</xsl:for-each>");
 
 		xsl.appendL(indent + 3, "<xsl:for-each select=\"" + kr.graha.post.xml.GRedirect.childNodePath(kr.graha.post.xml.GRedirect.NODE_OF_MSG, rdf) + "\">");
-		xsl.appendL(indent + 4, "<div class=\"msg\"><xsl:value-of select=\".\" /></div>");
+		xsl.appendL(indent + 4, "<div class=\"graha msg\"><xsl:value-of select=\".\" /></div>");
 		xsl.appendL(indent + 3, "</xsl:for-each>");
 
 		xsl.appendL(indent + 3, "<input>");

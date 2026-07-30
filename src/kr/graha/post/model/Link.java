@@ -347,6 +347,7 @@ public class Link {
 		if(STR.valid(this.getAppearance()) && STR.vexistsIgnoreCase(this.getAppearance(), "button", "submit")) {
 			if(this.isValidHref()) {
 				xsl.appendL(indent, "<form>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 				xsl.append(indent + 1, "<xsl:attribute name=\"action\">");
 				if(STR.compareIgnoreCase(this.getType(), "query")) {
 					if(full) {
@@ -369,13 +370,13 @@ public class Link {
 				}
 /*
 				if(STR.valid(this.getName())) {
-					xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
+					xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
 					xsl.append(this.getName());
 					xsl.appendL("</xsl:attribute>");
 				}
 */
 				if(STR.valid(this.getName()) || (STR.valid(this.getClassName()) && !STR.valid(this.getIcon()))) {
-					xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
+					xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
 					if(STR.valid(this.getName())) {
 						xsl.append(this.getName());
 					}
@@ -397,9 +398,9 @@ public class Link {
 			if(STR.valid(this.getIcon())) {
 				xsl.appendL(indent + 1, "<button type=\"submit\">");
 				if(STR.valid(this.getClassName())) {
-					xsl.appendL(indent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 2, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 				} else {
-					xsl.appendL(indent + 2, "<i>" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 2, "<i class=\"graha\">" + this.getIcon() + "</i>");
 				}
 				xsl.append(indent + 2, "<span>");
 				if(this.getLabel() != null) {
@@ -467,7 +468,7 @@ public class Link {
 				xsl.appendL(indent, "<span>");
 			}
 			if(STR.valid(this.getName()) || (STR.valid(this.getClassName()) && !STR.valid(this.getIcon()))) {
-				xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
+				xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
 				if(STR.valid(this.getName())) {
 					xsl.append(this.getName());
 				}
@@ -478,19 +479,21 @@ public class Link {
 					xsl.append(this.getClassName());
 				}
 				xsl.appendL("</xsl:attribute>");
+			} else {
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 			}
 			/*
 			if(STR.valid(this.getName())) {
-				xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
+				xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
 				xsl.append(this.getName());
 				xsl.appendL("</xsl:attribute>");
 			}
 			*/
 			if(STR.valid(this.getIcon())) {
 				if(STR.valid(this.getClassName())) {
-					xsl.appendL(indent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 1, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 				} else {
-					xsl.appendL(indent + 1, "<i>" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 1, "<i class=\"graha\">" + this.getIcon() + "</i>");
 				}
 			}
 			if(this.getLabel() != null) {
@@ -552,7 +555,7 @@ public class Link {
 					xsl.append(internalIndent, "<span>");
 				}
 				if(STR.valid(this.getName()) || (STR.valid(this.getClassName()) && !STR.valid(this.getIcon()))) {
-					xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">");
+					xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">graha ");
 					if(STR.valid(this.getName())) {
 						xsl.append(this.getName());
 					}
@@ -566,16 +569,16 @@ public class Link {
 				}
 				/*
 				if(STR.valid(this.getName())) {
-					xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">");
+					xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">graha ");
 					xsl.append(this.getName());
 					xsl.appendL("</xsl:attribute>");
 				}
 				*/
 				if(STR.valid(this.getIcon())) {
 					if(STR.valid(this.getClassName())) {
-						xsl.appendL(indent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+						xsl.appendL(indent + 1, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 					} else {
-						xsl.appendL(indent + 1, "<i>" + this.getIcon() + "</i>");
+						xsl.appendL(indent + 1, "<i class=\"graha\">" + this.getIcon() + "</i>");
 					}
 				}
 				xsl.append(internalIndent + 1, TextParser.parseForXSL(this.getLabel(), param, rdf));
@@ -597,13 +600,13 @@ public class Link {
 					}
 /*
 					if(STR.valid(this.getName())) {
-						xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">");
+						xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">graha ");
 						xsl.append(this.getName());
 						xsl.appendL("</xsl:attribute>");
 					}
 */
 					if(STR.valid(this.getName()) || (STR.valid(this.getClassName()) && !STR.valid(this.getIcon()))) {
-						xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">");
+						xsl.append(internalIndent + 1, "<xsl:attribute name=\"class\">graha ");
 						if(STR.valid(this.getName())) {
 							xsl.append(this.getName());
 						}
@@ -614,6 +617,8 @@ public class Link {
 							xsl.append(this.getClassName());
 						}
 						xsl.appendL("</xsl:attribute>");
+					} else {
+						xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 					}
 					if(STR.valid(this.param)) {
 						for(int i = 0; i < this.param.size(); i++) {
@@ -622,17 +627,18 @@ public class Link {
 					}
 				}
 				if(STR.valid(this.getIcon())) {
-					xsl.appendL(internalIndent + 1, "<button type=\"submit\">");
+					xsl.appendL(internalIndent + 1, "<button type=\"submit\" class=\"graha\">");
 					if(STR.valid(this.getClassName())) {
-						xsl.appendL(internalIndent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+						xsl.appendL(internalIndent + 2, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 					} else {
-						xsl.appendL(internalIndent + 2, "<i>" + this.getIcon() + "</i>");
+						xsl.appendL(internalIndent + 2, "<i class=\"graha\">" + this.getIcon() + "</i>");
 					}
-					xsl.appendL(internalIndent + 2, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
+					xsl.appendL(internalIndent + 2, "<span class=\"graha\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
 					xsl.appendL(internalIndent + 1, "</button>");
 				} else {
 					xsl.appendL(internalIndent + 1, "<input>");
 					xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+					xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 					xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
 					xsl.appendL(internalIndent + 1, "</input>");
 				}
@@ -642,10 +648,11 @@ public class Link {
 			}
 		} else {
 			if(STR.valid(this.getIcon())) {
-				xsl.appendL(internalIndent, "<button type=\"submit\" form=\"" + queryId + "\" id=\"" + queryId + "_submit\">");
+				xsl.appendL(internalIndent, "<button type=\"submit\" class=\"graha\" form=\"" + queryId + "\" id=\"" + queryId + "_submit\">");
 			} else {
 				xsl.appendL(internalIndent, "<input>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"form\">" + queryId + "</xsl:attribute>");
 				xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"id\">" + queryId + "_submit</xsl:attribute>");
@@ -671,11 +678,11 @@ public class Link {
 			}
 			if(STR.valid(this.getIcon())) {
 				if(STR.valid(this.getClassName())) {
-					xsl.appendL(internalIndent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+					xsl.appendL(internalIndent + 1, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 				} else {
-					xsl.appendL(internalIndent + 1, "<i>" + this.getIcon() + "</i>");
+					xsl.appendL(internalIndent + 1, "<i class=\"graha\">" + this.getIcon() + "</i>");
 				}
-				xsl.appendL(internalIndent + 1, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
+				xsl.appendL(internalIndent + 1, "<span class=\"graha\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
 			}
 			if(STR.valid(this.getIcon())) {
 				xsl.appendL(internalIndent, "</button>");

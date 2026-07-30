@@ -795,7 +795,7 @@ function isNumberic(v) {
 </script>
 </head>
 <body>
-<form action="gen" method="post" class="conf" onsubmit="return check();">
+<form action="gen.html" method="post" class="conf" onsubmit="return check();">
 	<xsl:for-each select="/document/params/table">
 		<xsl:sort select="@master" order="descending" />
 		<input type="hidden" name="tables" value="{@name}" />

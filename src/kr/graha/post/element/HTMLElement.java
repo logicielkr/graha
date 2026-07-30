@@ -37,6 +37,12 @@ public class HTMLElement extends XmlElement {
 	public HTMLElement(String tagName) {
 		super(null, tagName);
 	}
+	public HTMLElement(String tagName, HtmlAttr attr) {
+		super(null, tagName, attr);
+	}
+	public HTMLElement(String tagName, HtmlAttr... attrs) {
+		super(null, tagName, attrs);
+	}
 	public void clear() {
 		super.clear();
 	}
@@ -79,6 +85,9 @@ public class HTMLElement extends XmlElement {
 	public void appendChild(HTMLElement element) {
 		super.appendChild(element);
 	}
+	public void appendChild(XslElement element) {
+		super.appendChild(element);
+	}
 	public void appendChild(Node element) {
 		super.appendChild(element);
 	}
@@ -86,10 +95,16 @@ public class HTMLElement extends XmlElement {
 		super.appendChild(element);
 	}
 	public HTMLElement createElement(String tagName) {
-		return (HTMLElement)super.createElement(tagName);
+		return super.createHTMLElement(tagName);
 	}
 	public HTMLElement createElement(String tagName, XmlAttr... attrs) {
-		return (HTMLElement)super.createElement(tagName, attrs);
+		return super.createHTMLElement(tagName, attrs);
+	}
+	public XslElement createXslElement(String tagName) {
+		return super.createXslElement(tagName);
+	}
+	public XslElement createXslElement(String tagName, XmlAttr... attrs) {
+		return super.createXslElement(tagName, attrs);
 	}
 	public void println(Buffer buffer) {
 		super.println(buffer);

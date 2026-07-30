@@ -292,7 +292,7 @@ public class LinkParam {
 				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 			}
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + expr + "\" /></xsl:attribute>");
 			xsl.appendL(indent + 1, "</input>");
@@ -302,7 +302,7 @@ public class LinkParam {
 		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
 			xsl.appendL(indent + 1, "<input>");
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
 			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\">" + this.getValue() + "</xsl:attribute>");
 			xsl.appendL(indent + 1, "</input>");

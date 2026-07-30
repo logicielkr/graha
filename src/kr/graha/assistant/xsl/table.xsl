@@ -64,7 +64,7 @@ table tbody td a {
 </style>
 </head>
 <body>
-<form style="float:left;" action="table">
+<form style="float:left;" action="table.html">
 	<select name="table">
 		<xsl:for-each select="/document/rows[@id='tables']/row">
 			<xsl:choose>
@@ -116,7 +116,7 @@ table tbody td a {
 		<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.search.label" /></xsl:attribute>
 	</input>
 </form>
-<form action="list" style="float:right">
+<form action="list.html" style="float:right">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -129,7 +129,7 @@ table tbody td a {
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.table_list.label" /></xsl:attribute>
 </input>
 </form>
-<form action="query" style="float:right">
+<form action="query.html" style="float:right">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -142,7 +142,7 @@ table tbody td a {
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/table.button.sql_runner.label" /></xsl:attribute>
 </input>
 </form>
-<form method="post" action="table">
+<form method="post" action="table.html">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>

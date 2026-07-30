@@ -96,7 +96,7 @@ function changeLabel(obj) {
 </script>
 </head>
 <body>
-<form action="gen_from_query" method="post" onsubmit="return check(this);" id="gen_from_query">
+<form action="gen_from_query.html" method="post" onsubmit="return check(this);" id="gen_from_query">
 	<h3 class="basic">1. <xsl:value-of select="/document/props/options.document.basic.label" /></h3>
 	<table class="basic">
 		<tr class="query_id">

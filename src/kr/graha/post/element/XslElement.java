@@ -32,13 +32,26 @@ import org.w3c.dom.Node;
  */
 
 public class XslElement extends XmlElement {
+	protected static String XslPrefixName = "xsl";
 	public XslElement(String tagName) {
-		super("xsl", tagName);
+		super(XslElement.XslPrefixName, tagName);
+	}
+	public XslElement(String tagName, XmlAttr attr) {
+		super(XslElement.XslPrefixName, tagName, attr);
+	}
+	public XslElement(String tagName, XmlAttr... attrs) {
+		super(XslElement.XslPrefixName, tagName, attrs);
 	}
 	public void clear() {
 		super.clear();
 	}
 	public void add(XmlElement element) {
+		super.add(element);
+	}
+	public void add(HTMLElement... elements) {
+		super.add(elements);
+	}
+	public void add(HTMLElement element) {
 		super.add(element);
 	}
 	public void add(XmlElement... elements) {
@@ -84,10 +97,16 @@ public class XslElement extends XmlElement {
 		super.appendChild(element);
 	}
 	public XslElement createElement(String tagName) {
-		return (XslElement)super.createElement(tagName);
+		return super.createXslElement(tagName);
 	}
 	public XslElement createElement(String tagName, XmlAttr... attrs) {
-		return (XslElement)super.createElement(tagName, attrs);
+		return super.createXslElement(tagName, attrs);
+	}
+	public HTMLElement createHTMLElement(String tagName) {
+		return super.createHTMLElement(tagName);
+	}
+	public HTMLElement createHTMLElement(String tagName, XmlAttr... attrs) {
+		return super.createHTMLElement(tagName, attrs);
 	}
 	public void println(Buffer buffer) {
 		super.println(buffer);

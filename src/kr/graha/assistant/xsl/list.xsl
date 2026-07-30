@@ -96,7 +96,7 @@ function gen() {
 	if(!isChecked) {
 		alert("<xsl:value-of select="/document/props/list.message.generation.no_selected_table.error.msg" />");
 	} else if(!isError) {
-		document.getElementById("list_frm").action = "select";
+		document.getElementById("list_frm").action = "select.html";
 		document.getElementById("list_frm").submit();
 	}
 }
@@ -104,7 +104,7 @@ function gen() {
 </head>
 <body>
 <xsl:if test="/document/rows[@id='jndi']">
-	<form style="float:left;" action="list">
+	<form style="float:left;" action="list.html">
 		<select name="jndi">
 			<xsl:for-each select="/document/rows[@id='jndi']/row">
 				<xsl:choose>
@@ -130,7 +130,7 @@ function gen() {
 		</input>
 	</form>
 </xsl:if>
-<form action="list" style="float:right" method="post">
+<form action="list.html" style="float:right" method="post">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -148,7 +148,7 @@ function gen() {
 
 
 </form>
-<form action="query" style="float:right">
+<form action="query.html" style="float:right">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>
@@ -161,7 +161,7 @@ function gen() {
 	<xsl:attribute name="value"><xsl:value-of select="/document/props/list.button.sql_runner.label" /></xsl:attribute>
 </input>
 </form>
-<form method="post" id="list_frm" action="list">
+<form method="post" id="list_frm" action="list.html">
 <xsl:if test="/document/params/param/jndi">
 	<input>
 		<xsl:attribute name="name">jndi</xsl:attribute>

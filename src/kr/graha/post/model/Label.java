@@ -162,13 +162,13 @@ public class Label {
 			}
 		} else {
 			if(labelType == Label.LABEL_TYPE_LABEL) {
-				xsl.append(indent + 1, "<h2 class=\"title\">");
+				xsl.append(indent + 1, "<h2 class=\"graha title\">");
 			} else if(labelType == Label.LABEL_TYPE_DESC) {
-				xsl.append(indent + 1, "<div class=\"description\">");
+				xsl.append(indent + 1, "<div class=\"graha description\">");
 			} else if(labelType == Label.LABEL_TYPE_AUTHOR) {
-				xsl.append(indent + 1, "<div class=\"author\">");
+				xsl.append(indent + 1, "<div class=\"graha author\">");
 			} else if(labelType == Label.LABEL_TYPE_KEYWORD) {
-				xsl.append(indent + 1, "<div class=\"keyword\">");
+				xsl.append(indent + 1, "<div class=\"graha keyword\">");
 			}
 		}
 		if(rdf && STR.valid(this.getXText())) {

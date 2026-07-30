@@ -111,14 +111,14 @@ function bodyload() {
 	}
 }
 function gen(obj) {
-	document.getElementById("graha_xml_config").action = "options";
+	document.getElementById("graha_xml_config").action = "options.html";
 	document.getElementById("graha_xml_config").sql.value = document.getElementById("sql").value;
 	document.getElementById("graha_xml_config").submit();
 }
 </script>
 </head>
 <body onload="bodyload()">
-<form action="list" style="float:right">
+<form action="list.html" style="float:right">
 <input>
 	<xsl:attribute name="type">submit</xsl:attribute>
 	<xsl:attribute name="style">display:inline-block;float:right</xsl:attribute>
@@ -133,7 +133,7 @@ function gen(obj) {
 	</input>
 </xsl:if>
 </form>
-<form style="width:100%;text-align:left;" method="post" id="query" action="query">
+<form style="width:100%;text-align:left;" method="post" id="query" action="query.html">
 	<xsl:if test="/document/rows[@id='jndi']">
 		<select name="jndi">
 			<xsl:for-each select="/document/rows[@id='jndi']/row">

@@ -232,7 +232,9 @@ public class Search {
 		xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param, rdf) + "</xsl:attribute>");
 		if(STR.valid(this.getName())) {
 			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
-			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
+		} else {
+			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 		}
 		if(STR.valid(this.getMethod())) {
 			xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"method\">" + this.getMethod() + "</xsl:attribute>");
@@ -243,17 +245,18 @@ public class Search {
 			}
 		}
 		if(STR.valid(this.getIcon())) {
-			xsl.appendL(internalIndent + 1, "<button type=\"submit\">");
+			xsl.appendL(internalIndent + 1, "<button type=\"submit\" class=\"graha\">");
 			if(STR.valid(this.getClassName())) {
-				xsl.appendL(internalIndent + 2, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+				xsl.appendL(internalIndent + 2, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 			} else {
-				xsl.appendL(internalIndent + 2, "<i>" + this.getIcon() + "</i>");
+				xsl.appendL(internalIndent + 2, "<i class=\"graha\">" + this.getIcon() + "</i>");
 			}
-			xsl.appendL(internalIndent + 2, "<span>" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
+			xsl.appendL(internalIndent + 2, "<span class=\"graha\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</span>");
 			xsl.appendL(internalIndent + 1, "</button>");
 		} else {
 			xsl.appendL(internalIndent + 1, "<input>");
 			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">submit</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</xsl:attribute>");
 			xsl.appendL(internalIndent + 1, "</input>");
 		}

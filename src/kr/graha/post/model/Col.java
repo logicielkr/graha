@@ -641,7 +641,7 @@ public class Col {
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + col.getValue() + "</xsl:attribute>");
 							}
 							xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-							xsl.append(indent + 2, "<xsl:attribute name=\"class\">");
+							xsl.append(indent + 2, "<xsl:attribute name=\"class\">graha ");
 							xsl.append(col.getName());
 							if(STR.valid(col.getClassName()) && !STR.valid(col.getIcon())) {
 								xsl.append(" " + col.getClassName());
@@ -805,7 +805,7 @@ public class Col {
 						Option obj = (Option)this.option.get(i);
 						xsl.appendL(indent, "<input>");
 						if(STR.valid(this.getValue())) {
-							xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+							xsl.appendL(indent + 1, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 						}
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"type\">radio</xsl:attribute>");
@@ -846,9 +846,9 @@ public class Col {
 				xsl.appendL(indent, "<input>");
 			}
 			if(STR.valid(this.getValue())) {
-				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 			}
-			xsl.append(indent + 1, "<xsl:attribute name=\"class\">");
+			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
 			xsl.append(this.getName());
 			if(STR.trueValue(this.getReadonly()) || STR.compareIgnoreCase(this.getReadonly(), "readonly")) {
 				xsl.append(" readonly");
@@ -1076,11 +1076,11 @@ public class Col {
 			}
 			if(STR.compareIgnoreCase(this.getType(), "button") && STR.valid(this.getIcon())) {
 				if(STR.valid(this.getClassName())) {
-					xsl.appendL(indent + 1, "<i class=\"" + this.getClassName() + "\">" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 1, "<i class=\"graha " + this.getClassName() + "\">" + this.getIcon() + "</i>");
 				} else {
-					xsl.appendL(indent + 1, "<i>" + this.getIcon() + "</i>");
+					xsl.appendL(indent + 1, "<i class=\"graha\">" + this.getIcon() + "</i>");
 				}
-				xsl.appendL(indent + 1, "<span>" + this.getValue() + "</span>");
+				xsl.appendL(indent + 1, "<span class=\"graha\">" + this.getValue() + "</span>");
 			}
 			if(STR.compareIgnoreCase(this.getType(), "textarea")) {
 				xsl.appendL(indent, "</textarea>");

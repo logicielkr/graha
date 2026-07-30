@@ -360,7 +360,7 @@ public class Layout {
 	}
 	private void multitab(Files files, Record param, int indent, boolean rdf, Buffer xsl) {
 		if(this.getTab() != null && this.getTabSize(param) > 1) {
-			xsl.appendL(indent, "<ul class=\"multitab\">");
+			xsl.appendL(indent, "<ul class=\"graha multitab\">");
 			for(int i = 0; i < this.getTab().size(); i++) {
 				if(((Tab)this.getTab().get(i)).valid(param)) {
 					xsl.append(((Tab)this.getTab().get(i)).li(files, param, indent, rdf));
@@ -370,7 +370,7 @@ public class Layout {
 				xsl.append(files.li(param, indent, rdf));
 			}
 			xsl.appendL(indent, "</ul>");
-			xsl.appendL(indent, "<div class=\"space\" />");
+			xsl.appendL(indent, "<div class=\"graha space\" />");
 		}
 	}
 	private void hidden(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf, Buffer xsl) {
@@ -535,6 +535,7 @@ public class Layout {
 				}
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + queryId + "</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"id\">" + queryId + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + queryId + "</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(queryId, param, rdf) + "</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
@@ -560,53 +561,53 @@ public class Layout {
 	}
 	private void top(List<Table> tables, List<Command> commands, Record param, boolean rdf, String queryId, Buffer xsl) {
 		int indent = 0;
-		xsl.appendL(indent, "<div class=\"nav top\">");
+		xsl.appendL(indent, "<div class=\"graha nav top\">");
 		if(STR.valid(this.topLeft)) {
-			xsl.appendL(indent + 1, "<div class=\"box left\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box left\">");
 			this.buttons(tables, commands, param, this.topLeft, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box left\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box left\" />");
 		}
 		if(STR.valid(this.topCenter)) {
-			xsl.appendL(indent + 1, "<div class=\"box center\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box center\">");
 			this.buttons(tables, commands, param, this.topCenter, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box center\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box center\" />");
 		}
 		if(STR.valid(this.topRight)) {
-			xsl.appendL(indent + 1, "<div class=\"box right\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box right\">");
 			this.buttons(tables, commands, param, this.topRight, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box right\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box right\" />");
 		}
 		xsl.appendL(indent, "</div>");
 	}
 	private void bottom(List<Table> tables, List<Command> commands, Record param, boolean rdf, String queryId, Buffer xsl) {
 		int indent = 0;
-		xsl.appendL(indent, "<div class=\"nav bottom\">");
+		xsl.appendL(indent, "<div class=\"graha nav bottom\">");
 		if(STR.valid(this.bottomLeft)) {
-			xsl.appendL(indent + 1, "<div class=\"box left\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box left\">");
 			this.buttons(tables, commands, param, this.bottomLeft, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box left\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box left\" />");
 		}
 		if(STR.valid(this.bottomCenter)) {
-			xsl.appendL(indent + 1, "<div class=\"box center\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box center\">");
 			this.buttons(tables, commands, param, this.bottomCenter, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box center\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box center\" />");
 		}
 		if(STR.valid(this.bottomRight)) {
-			xsl.appendL(indent + 1, "<div class=\"box right\">");
+			xsl.appendL(indent + 1, "<div class=\"graha box right\">");
 			this.buttons(tables, commands, param, this.bottomRight, indent + 2, rdf, queryId, xsl);
 			xsl.appendL(indent + 1, "</div>");
 		} else {
-			xsl.appendL(indent + 1, "<div class=\"box right\" />");
+			xsl.appendL(indent + 1, "<div class=\"graha box right\" />");
 		}
 		xsl.appendL(indent, "</div>");
 	}
@@ -627,20 +628,21 @@ public class Layout {
 		}
 	}
 	private void page(Record param, int indent, boolean rdf, Buffer xsl) {
-		xsl.appendL(indent, "<ul class=\"pages\">");
+		xsl.appendL(indent, "<ul class=\"graha pages\">");
 		xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GPages.nodePath(rdf) + "\">");
 		xsl.appendL(indent + 2, "<xsl:choose>");
 		xsl.appendL(indent + 3, "<xsl:when test=\"" + kr.graha.post.xml.GParam.childNodePath("param", "page", rdf) + " = " + kr.graha.post.xml.GPages.childNodeName("no", rdf) + "\">");
-		xsl.append(indent + 4, "<li class=\"page selected\">");
+		xsl.append(indent + 4, "<li class=\"graha page selected\">");
 		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("text", rdf) + "\" />");
 		xsl.appendL("</li>");
 		xsl.appendL(indent + 3, "</xsl:when>");
 		xsl.appendL(indent + 3, "<xsl:otherwise>");
 		xsl.appendL(indent + 4, "<li>");
-		xsl.append(indent + 5, "<xsl:attribute name=\"class\">");
+		xsl.append(indent + 5, "<xsl:attribute name=\"class\">graha ");
 		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("type", rdf) + "\" />");
 		xsl.appendL("</xsl:attribute>");
 		xsl.appendL(indent + 5, "<a>");
+		xsl.appendL(indent + 6, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
 		xsl.append(indent + 6, "<xsl:attribute name=\"href\">?page=");
 		xsl.append("<xsl:value-of select=\"" + kr.graha.post.xml.GPages.childNodeName("no", rdf) + "\" />");
 		if(param != null && !param.isEmpty()) {

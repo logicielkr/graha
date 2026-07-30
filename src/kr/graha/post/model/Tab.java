@@ -421,7 +421,7 @@ public class Tab {
 			if(files != null) {
 				xsl.append(files.beforeLi(param, indent, this.getName(), rdf));
 			}
-			xsl.appendL("<li class=\"" + this.getName()+ "\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</li>");
+			xsl.appendL("<li class=\"graha " + this.getName()+ "\">" + TextParser.parseForXSL(this.getLabel(), param, rdf) + "</li>");
 			if(files != null) {
 				xsl.append(files.afterLi(param, indent, this.getName(), rdf));
 			}
@@ -439,9 +439,9 @@ public class Tab {
 	) {
 		if(STR.valid(this.getLabel())) {
 			if(STR.valid(this.getName())) {
-				xsl.append(indent, "<h3 class=\"" + this.getName() + "\">");
+				xsl.append(indent, "<h3 class=\"graha " + this.getName() + "\">");
 			} else {
-				xsl.append(indent, "<h3>");
+				xsl.append(indent, "<h3 class=\"graha\">");
 			}
 			xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf));
 			xsl.appendL("</h3>");

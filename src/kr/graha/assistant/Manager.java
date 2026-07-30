@@ -40,6 +40,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
 
 /**
  * Graha(그라하) XML 자동생성기
@@ -92,21 +102,42 @@ public class Manager extends HttpServlet {
 			&& !path.equals("/data")
 			&& !path.equals("/xsl")
 			&& !path.equals("/query")
+			
+			&& !path.equals("/list.xml")
+			&& !path.equals("/table.xml")
+			&& !path.equals("/data.xml")
+			&& !path.equals("/xsl.xsl")
+			&& !path.equals("/query.xml")
+			
+			&& !path.equals("/list.html")
+			&& !path.equals("/table.html")
+			&& !path.equals("/data.html")
+			&& !path.equals("/query.html")
 		) {
 			LOG.warning("not found path : " + path);
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		if(path != null && path.equals("/list")) {
-			list(request, response);
-		} else if(path != null && path.equals("/table")) {
-			table(request, response);
-		} else if(path != null && path.equals("/data")) {
-			data(request, response);
-		} else if(path != null && path.equals("/xsl")) {
-			xsl(request, response);
-		} else if(path != null && path.equals("/query")) {
-			query(request, response);
+		if(path != null) {
+			if(path.equals("/list") || path.equals("/list.html")) {
+				list(request, response, true);
+			} else if(path.equals("/list.xml")) {
+				list(request, response, false);
+			} else if(path.equals("/table") || path.equals("/table.html")) {
+				table(request, response, true);
+			} else if(path.equals("/table.xml")) {
+				table(request, response, false);
+			} else if(path.equals("/data") || path.equals("/data.html")) {
+				data(request, response, true);
+			} else if(path.equals("/data.xml")) {
+				data(request, response, false);
+			} else if(path.equals("/xsl") || path.equals("/xsl.xsl")) {
+				xsl(request, response);
+			} else if(path.equals("/query") || path.equals("/query.html")) {
+				query(request, response, true);
+			} else if(path.equals("/query.xml")) {
+				query(request, response, false);
+			}
 		}
 	}
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -121,26 +152,112 @@ public class Manager extends HttpServlet {
 			&& !path.equals("/query")
 			&& !path.equals("/options")
 			&& !path.equals("/gen_from_query")
+			
+			&& !path.equals("/list.html")
+			&& !path.equals("/gen.html")
+			&& !path.equals("/select.html")
+			&& !path.equals("/table.html")
+			&& !path.equals("/query.html")
+			&& !path.equals("/options.html")
+			&& !path.equals("/gen_from_query.html")
+			
+			&& !path.equals("/list.xml")
+			&& !path.equals("/gen.xml")
+			&& !path.equals("/select.xml")
+			&& !path.equals("/table.xml")
+			&& !path.equals("/query.xml")
+			&& !path.equals("/options.xml")
+			&& !path.equals("/gen_from_query.xml")
 		) {
 			LOG.warning("not found path : " + path);
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-
-		if(path != null && path.equals("/list")) {
-			_list(request, response);
-		} else if(path != null && path.equals("/gen")) {
-			_gen(request, response);
-		} else if(path != null && path.equals("/select")) {
-			_select(request, response);
-		} else if(path != null && path.equals("/table")) {
-			_table(request, response);
-		} else if(path != null && path.equals("/query")) {
-			query(request, response);
-		} else if(path != null && path.equals("/options")) {
-			_options(request, response);
-		} else if(path != null && path.equals("/gen_from_query")) {
-			_gen_from_query(request, response);
+		if(path != null) {
+			if(path.equals("/list") || path.equals("/list.html")) {
+				_list(request, response, true);
+			} else if(path.equals("/list.xml")) {
+				_list(request, response, false);
+			} else if(path.equals("/gen") || path.equals("/gen.html")) {
+				_gen(request, response, true);
+			} else if(path.equals("/gen.xml")) {
+				_gen(request, response, false);
+			} else if(path.equals("/select") || path.equals("/select.html")) {
+				_select(request, response, true);
+			} else if(path.equals("/select.xml")) {
+				_select(request, response, false);
+			} else if(path.equals("/table") || path.equals("/table.html")) {
+				_table(request, response, true);
+			} else if(path.equals("/table.xml")) {
+				_table(request, response, false);
+			} else if(path.equals("/query") || path.equals("/query.html")) {
+				query(request, response, true);
+			} else if(path.equals("/query.xml")) {
+				query(request, response, false);
+			} else if(path.equals("/options") || path.equals("/options.html")) {
+				_options(request, response, true);
+			} else if(path.equals("/options.xml")) {
+				_options(request, response, false);
+			} else if(path.equals("/gen_from_query") || path.equals("/gen_from_query.html")) {
+				_gen_from_query(request, response, true);
+			} else if(path.equals("/gen_from_query.xml")) {
+				_gen_from_query(request, response, false);
+			}
+		}
+	}
+	private String xsl(String xid) throws FileNotFoundException, IOException {
+		ByteArrayOutputStream out = null;
+		java.io.InputStream in = null;
+		String xslPath = this.getServletConfig().getInitParameter("xsl_path");
+		try {
+			out = new ByteArrayOutputStream();
+			if(xslPath != null && !xslPath.equals("")) {
+				if(!xslPath.endsWith("/") && !xslPath.endsWith(java.io.File.separator)) {
+					xslPath = xslPath + java.io.File.separator;
+				}
+				in = new java.io.FileInputStream(xslPath + xid + ".xsl");
+			} else {
+				in = this.getClass().getResourceAsStream("/kr/graha/assistant/xsl/" + xid + ".xsl");
+			}
+			if(in == null) {
+				LOG.warning("not found xsl file : " + xid);
+				throw new FileNotFoundException("not found xsl file : " + xid);
+				
+			}
+			byte[] buffer = new byte[8192];
+			int len = 0;
+			while((len = in.read(buffer)) >= 0) {
+				out.write(buffer, 0, len);
+			}
+		} finally {
+			in.close();
+			out.flush();
+			out.close();
+		}
+		
+		return out.toString(StandardCharsets.UTF_8);
+	}
+	private int sendHTML(HttpServletRequest request, HttpServletResponse response, StringBuilder xml, String xid) {
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		
+		try {
+			StringReader reader = new StringReader(this.xsl(xid));
+			StreamSource style = new StreamSource(reader);
+			TransformerFactory factory = TransformerFactory.newInstance();
+			Transformer transformer = factory.newTransformer(style);
+			Source text = new StreamSource(new StringReader(xml.toString()));
+			transformer.setOutputProperty(OutputKeys.METHOD, "html");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+			transformer.setOutputProperty(OutputKeys.INDENT, "no");
+			transformer.setOutputProperty(OutputKeys.VERSION, "5.0");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+//			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
+			transformer.transform(text, new StreamResult(response.getWriter()));
+			return HttpServletResponse.SC_OK;
+		} catch (IOException | TransformerException e) {
+			LOG.severe(e);
+			return HttpServletResponse.SC_BAD_REQUEST;
 		}
 	}
 	private void xsl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -175,7 +292,7 @@ public class Manager extends HttpServlet {
 			out.close();
 		}
 	}
-	private void _list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _list(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		Connection con = null;
 		CManager cm = new CManager(this.getServletConfig(), request);
 		if(!cm.valid()) {
@@ -225,13 +342,19 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "redirect") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private void list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void list(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		Connection con = null;
 		StringBuilder sb = new StringBuilder();
 		CManager cm = new CManager(this.getServletConfig(), request);
@@ -315,13 +438,19 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "list") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private void table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void table(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		String table = value(request.getParameter("table"));
 		String schemaName = null;
 		String tableName = null;
@@ -454,13 +583,19 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "table") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private void _table(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _table(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		
 		Connection con = null;
 		
@@ -530,13 +665,19 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "redirect") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private void _options(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _options(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		Connection con = null;
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
@@ -607,8 +748,14 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "options") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
@@ -632,7 +779,7 @@ public class Manager extends HttpServlet {
 		}
 		return result.toString();
 	}
-	private void _gen_from_query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _gen_from_query(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
 		CManager cm = new CManager(this.getServletConfig(), request);
@@ -781,13 +928,19 @@ public class Manager extends HttpServlet {
 		}
 
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "gen_from_query") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
-	private void _select(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _select(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		request.setCharacterEncoding(charset);
 		StringBuilder sb = new StringBuilder();
@@ -900,14 +1053,20 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "select") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
 	
-	private void _gen(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void _gen(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		String schemaAndTableName = value(request.getParameter("table"));
 		Table masterTable = null;
 		if(schemaAndTableName != null) {
@@ -938,11 +1097,11 @@ public class Manager extends HttpServlet {
 			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"xsl?xsl=redirect\" ?>");
 			sb.append("<document>");
-			sb.append("<params><param type=\"s\"><path>list</path><auto_redirect>false</auto_redirect></param>");
+			sb.append("<params><param type=\"s\"><path>list.html</path><auto_redirect>false</auto_redirect></param>");
 			java.util.List grahaAppRootPath = cm.getGrahaAppRootPath();
 			if(grahaAppRootPath != null && grahaAppRootPath.size() > 0) {
 				for(int i = 0; i < grahaAppRootPath.size(); i++) {
-					sb.append("<param type=\"a\"><path>" + grahaAppRootPath.get(i) + xmlName + "/list.xml" + "</path><auto_redirect>false</auto_redirect></param>");
+					sb.append("<param type=\"a\"><path>" + grahaAppRootPath.get(i) + xmlName + "/list.html" + "</path><auto_redirect>false</auto_redirect></param>");
 				}
 			}
 			java.util.List files = gen.getFiles();
@@ -971,14 +1130,20 @@ public class Manager extends HttpServlet {
 			
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "redirect") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
 	
-	private void data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void data(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 		String table = value(request.getParameter("table"));
 		String schemaName = null;
 		String tableName = null;
@@ -1126,14 +1291,20 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "data") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}
 	}
 	
-	private void query(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void query(HttpServletRequest request, HttpServletResponse response, boolean forceHTML) throws ServletException, IOException {
 //		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		String sql = value(request.getParameter("sql"));
 		
@@ -1308,8 +1479,14 @@ public class Manager extends HttpServlet {
 			}
 		}
 		if(sb.length() > 0) {
-			response.setContentType("text/xml; charset=UTF-8");
-			response.getWriter().append(sb);
+			if(forceHTML) {
+				if(this.sendHTML(request, response, sb, "query") != HttpServletResponse.SC_OK) {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+				}
+			} else {
+				response.setContentType("text/xml; charset=UTF-8");
+				response.getWriter().append(sb);
+			}
 		} else {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
 		}

@@ -49,7 +49,7 @@ table tbody td a {
 <body>
 <h3><xsl:value-of select="/document/props/gen_from_query.document.title.label" /></h3>
 <textarea name="gen" id="gen" style="width:100%;height:500px;"><xsl:value-of select="/document/rows[@id='gen']/row/gen" /></textarea>
-<form method="get" action="query">
+<form method="get" action="query.html">
 <xsl:if test="/document/params/param[@name='jndi']">
 	<input>
 		<xsl:attribute name="type">hidden</xsl:attribute>

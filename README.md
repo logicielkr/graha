@@ -2,15 +2,14 @@
 
 ## 0. notice
 
-최근에 Graha 소스코드는 새롭게 작성되었다.
+최근 Graha (0.7.1.0) 는 사소하지만,
+Graha 응용프로그램을 변경해야 할지도 모르는 수정이 있었다.
 
-모든 기능을 동일하게 구현하는 것을 목표로 했지만,
-전형적인 [리팩터링(refactoring)](https://ko.wikipedia.org/wiki/%EB%A6%AC%ED%8C%A9%ED%84%B0%EB%A7%81) 방식을 따르지 않았기 때문에 약간의 버그가 있을 수 있고,
-그런 것들은 발견하는대로 수정해 나갈 계획이다.
+Graha 가 자동으로 생성하는 html tag 는 class 속성 값이 항상 "graha" 가 포함되도록 변경하였다.
 
-다만 Java Interface 들은 package 경로가 수정되었고,
-Record 객체 등이 변경되었으므로,
-이를 반영하는 수정작업이 있어야 한다.
+Graha 응용프로그램의 css 나 javascript 에서
+class 속성 값과 문자열 비교하는 등의 코드가 포함되어 있다면,
+새로운 버전에 따라 수정 작업을 해야 한다.
 
 ## 1. about
 

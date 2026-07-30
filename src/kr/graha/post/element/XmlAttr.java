@@ -172,13 +172,16 @@ public class XmlAttr {
 			}
 		}
 	}
+	protected boolean classAttr() {
+		return STR.compareIgnoreCase(this.name, "class");
+	}
 	protected String getValue() {
 		if(this.valid()) {
 			Buffer buffer = new Buffer();
 			int index = 0;
 			for(int i = 0; i < this.values.length; i++) {
 				Object value = this.values[i];
-				if(index > 0 && STR.compareIgnoreCase(this.name, "class")) {
+				if(index > 0 && this.classAttr()) {
 					buffer.append(" ");
 				}
 				if(value instanceof String) {

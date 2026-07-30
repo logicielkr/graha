@@ -221,7 +221,7 @@ public class SearchParam extends LinkParam {
 			}
 			Buffer xsl = new Buffer();
 			if(STR.compareIgnoreCase(this.getType(), "select")) {
-				xsl.appendL(indent, "<select name=\"" + this.getName() + "\" class=\"" + this.getName() + "\" value=\"{" + valueExpr + "}\">");
+				xsl.appendL(indent, "<select name=\"" + this.getName() + "\" class=\"graha " + this.getName() + "\" value=\"{" + valueExpr + "}\">");
 				if(STR.valid(this.getForName())) {
 					xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
 					if(valueExpr == null) {
@@ -259,9 +259,9 @@ public class SearchParam extends LinkParam {
 				xsl.appendL(indent, "</select>");
 			} else {
 				if(valueExpr == null) {
-					xsl.appendL(indent, "<input type=\"text\" class=\""+ this.getName() + "\" name=\""+ this.getName() + "\" />");
+					xsl.appendL(indent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" />");
 				} else {
-					xsl.appendL(indent, "<input type=\"text\" class=\""+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
+					xsl.appendL(indent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
 				}
 				
 			}

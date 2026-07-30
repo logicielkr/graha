@@ -229,7 +229,7 @@ public class CManager {
 		while(keys.hasNext()) {
 			String key = (String)keys.next();
 			ServletRegistration sr = (ServletRegistration)map.get(key);
-			if(sr.getClassName().equals("kr.graha.servlet.GeneratorServlet")) {
+			if(sr.getClassName().equals("kr.graha.post.servlet.PostGeneratorServlet")) {
 				java.util.Iterator it = sr.getMappings().iterator();
 				while(it.hasNext()) {
 					String path = (String)it.next();

@@ -224,9 +224,9 @@ public class File {
 			if(STR.valid(this.getLabel())) {
 				Buffer xsl = new Buffer();
 				if(STR.valid(this.getName())) {
-					xsl.appendL(indent, "<li class=\"" + this.getName() + "\">");
+					xsl.appendL(indent, "<li class=\"graha " + this.getName() + "\">");
 				} else {
-					xsl.appendL(indent, "<li>");
+					xsl.appendL(indent, "<li class=\"graha\">");
 				}
 				xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf));
 				xsl.append("</li>");
@@ -241,18 +241,18 @@ public class File {
 			if(title) {
 				if(STR.valid(this.getLabel())) {
 					if(STR.valid(this.getName())) {
-						xsl.append(indent, "<h3 class=\"" + this.getName() + "\">");
+						xsl.append(indent, "<h3 class=\"graha " + this.getName() + "\">");
 					} else {
-						xsl.append(indent, "<h3>");
+						xsl.append(indent, "<h3 class=\"graha\">");
 					}
 					xsl.append(TextParser.parseForXSL(this.getLabel(), param, rdf));
 					xsl.appendL("</h3>");
 				}
 			}
 			if(STR.valid(this.getName())) {
-				xsl.appendL(indent, "<ul id=\"" + this.getName() + "\">");
+				xsl.appendL(indent, "<ul id=\"" + this.getName() + "\" class=\"graha\">");
 			} else {
-				xsl.appendL(indent, "<ul>");
+				xsl.appendL(indent, "<ul class=\"graha\">");
 			}
 			xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GFile.nodePath(this.getName(), rdf) + "\">");
 			xsl.appendL(indent + 2, "<xsl:sort select=\"node() = false()\"/>");
@@ -261,7 +261,7 @@ public class File {
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 				xsl.appendL(indent2, "<xsl:choose>");
 				xsl.appendL(indent2 + 1, "<xsl:when test=\"not(" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + ")\">");
-				xsl.appendL(indent2 + 2, "<li><input type=\"file\" class=\"" + this.getName() + "\" name=\"" + this.getName() + ".{position()}\"  multiple=\"multiple\" /></li>");
+				xsl.appendL(indent2 + 2, "<li class=\"graha\"><input type=\"file\" class=\"graha " + this.getName() + "\" name=\"" + this.getName() + ".{position()}\"  multiple=\"multiple\" /></li>");
 				xsl.appendL(indent2 + 1, "</xsl:when>");
 				xsl.appendL(indent2 + 1, "<xsl:otherwise>");
 				indent2 = indent2 + 2;
@@ -269,12 +269,13 @@ public class File {
 			xsl.appendL(indent2, "<xsl:variable name=\"downloadparam\">");
 			xsl.appendL(indent2 + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GParam.nodePathForFileParam(this.getName(), rdf) + "\"><xsl:value-of select=\"" + kr.graha.post.xml.GParam.childNodeNameForFileParam("key", rdf) + "\" /><xsl:text>=</xsl:text><xsl:value-of select=\"" + kr.graha.post.xml.GParam.childNodeNameForFileParam("value", rdf) + "\" /><xsl:text>&amp;</xsl:text></xsl:for-each>");
 			xsl.appendL(indent2, "</xsl:variable>");
-			xsl.appendL(indent2, "<li length=\"{" + kr.graha.post.xml.GFile.childNodeName("length", rdf) + "}\" lastModified=\"{" + kr.graha.post.xml.GFile.childNodeName("lastModified", rdf) + "}\">");
+			xsl.appendL(indent2, "<li class=\"graha\" length=\"{" + kr.graha.post.xml.GFile.childNodeName("length", rdf) + "}\" lastModified=\"{" + kr.graha.post.xml.GFile.childNodeName("lastModified", rdf) + "}\">");
 			if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
-				xsl.appendL(indent2 + 1, "<input type=\"checkbox\" class=\"_deletefile_." + this.getName() + "\" name=\"_deletefile_." + this.getName() + ".{position()}\" value=\"{" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + "}\" />");
+				xsl.appendL(indent2 + 1, "<input type=\"checkbox\" class=\"graha _deletefile_." + this.getName() + "\" name=\"_deletefile_." + this.getName() + ".{position()}\" value=\"{" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + "}\" />");
 			}
 			xsl.appendL(indent2 + 1, "<a>");
-			xsl.appendL(indent + 1, "<xsl:attribute name=\"href\">" + Link.getPath(queryId, param) + "/download/" + this.getName() + "/<xsl:value-of select=\"" + kr.graha.post.xml.GFile.childNodeName("name2", rdf) + "\" />?<xsl:value-of select=\"$downloadparam\" /></xsl:attribute>");
+			xsl.appendL(indent2 + 2, "<xsl:attribute name=\"class\">graha</xsl:attribute>");
+			xsl.appendL(indent2 + 2, "<xsl:attribute name=\"href\">" + Link.getPath(queryId, param) + "/download/" + this.getName() + "/<xsl:value-of select=\"" + kr.graha.post.xml.GFile.childNodeName("name2", rdf) + "\" />?<xsl:value-of select=\"$downloadparam\" /></xsl:attribute>");
 			xsl.appendL(indent2 + 2, "<xsl:value-of select=\"" + kr.graha.post.xml.GFile.childNodeName("name", rdf) + "\" />");
 			xsl.appendL(indent2 + 1, "</a>");
 			xsl.appendL(indent2, "</li>");
