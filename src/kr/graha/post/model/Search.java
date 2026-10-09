@@ -241,7 +241,7 @@ public class Search {
 		}
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {
-				xsl.append(((SearchParam)this.param.get(i)).search(tables, commands, internalIndent + 1, rdf));
+				xsl.append(((SearchParam)this.param.get(i)).search(tables, commands, param, internalIndent + 1, rdf));
 			}
 		}
 		if(STR.valid(this.getIcon())) {

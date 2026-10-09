@@ -45,7 +45,8 @@ public class Tile {
 
 	private String cond = null;
 	private List param = null;
-	private Boolean valid = null;
+	private Boolean validForXml = null;
+//	private Boolean validForXsl = null;
 	private Integer paramSize = null;
 	protected Tile() {
 	}
@@ -74,7 +75,7 @@ public class Tile {
 		if(tile == null) {
 			return null;
 		}
-		if(tile.valid(record)) {
+		if(tile.validForXml(record)) {
 			return Tile.getParam(tile.param, index, record);
 		} else {
 			return null;
@@ -99,7 +100,7 @@ public class Tile {
 			return 0;
 		}
 		if(tile.paramSize == null) {
-			if(tile.valid(record)) {
+			if(tile.validForXml(record)) {
 				tile.paramSize = Tile.getParamSize(tile.param, record);
 			} else {
 				tile.paramSize = 0;
@@ -107,20 +108,36 @@ public class Tile {
 		}
 		return tile.paramSize;
 	}
-	private boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+/*
+	private boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+*/
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	public String getCond() {            
 		return this.cond;

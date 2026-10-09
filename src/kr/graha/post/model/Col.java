@@ -93,7 +93,14 @@ public class Col {
 	private void setLabel(String label) {
 		this.label = label;
 	}
-	protected String getName() {
+	protected String getLowerName() {
+		if(this.name == null) {
+			return this.name;
+		} else {
+			return this.name.toLowerCase();
+		}
+	}
+	private String getName() {
 		return this.name;
 	}
 	private void setName(String name) {
@@ -556,8 +563,8 @@ public class Col {
 		if(div) {
 			xsl.appendL(indent, "<div>");
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha " + tagName);
-			if(STR.valid(this.getName())) {
-				xsl.append(" " + this.getName());
+			if(STR.valid(this.getLowerName())) {
+				xsl.append(" " + this.getLowerName());
 			}
 			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
 				xsl.append(" " + this.getClassName());
@@ -566,8 +573,8 @@ public class Col {
 		} else {
 			xsl.appendL(indent, "<" + tagName + ">");
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha");
-			if(STR.valid(this.getName())) {
-				xsl.append(" " + this.getName());
+			if(STR.valid(this.getLowerName())) {
+				xsl.append(" " + this.getLowerName());
 			}
 			if(STR.valid(this.getClassName()) && !STR.valid(this.getIcon())) {
 				xsl.append(" " + this.getClassName());
@@ -642,16 +649,16 @@ public class Col {
 							}
 							xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
 							xsl.append(indent + 2, "<xsl:attribute name=\"class\">graha ");
-							xsl.append(col.getName());
+							xsl.append(col.getLowerName());
 							if(STR.valid(col.getClassName()) && !STR.valid(col.getIcon())) {
 								xsl.append(" " + col.getClassName());
 							}
 							xsl.appendL("</xsl:attribute>");
 							if(full) {
-								xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + col.getName() + "</xsl:attribute>");
+								xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + col.getLowerName() + "</xsl:attribute>");
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodePath(tabName, col.getValue(), rdf) + "\" /></xsl:attribute>");
 							} else {
-								xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + col.getName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
+								xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + col.getLowerName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
 								xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + kr.graha.post.xml.GRow.childNodeName(col.getValue(), rdf) + "\" /></xsl:attribute>");
 							}
 							xsl.appendL(indent + 1, "</input>");
@@ -687,11 +694,11 @@ public class Col {
 		return xsl;
 	}
 	private Buffer value(int indent, String tabName, boolean rdf, boolean div, boolean full) {
-		if(!STR.valid(this.getName())) {
+		if(!STR.valid(this.getLowerName())) {
 			return null;
 		}
 		Buffer xsl = new Buffer();
-		String path = this.getXPath(this.getName(), tabName, rdf, full);
+		String path = this.getXPath(this.getLowerName(), tabName, rdf, full);
 		
 		String escapeAttrValue = "";
 		if(STR.falseValue(this.getEscape())) {
@@ -699,8 +706,8 @@ public class Col {
 		}
 		if(STR.trueValue(this.getCode())) {
 			if(STR.valid(this.getForName())) {
-				xsl.appendL(indent, "<xsl:variable name=\"" + this.getName() + "\" select=\"" + path + "\" />");
-				xsl.appendL(indent, "<xsl:value-of select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "[@" + kr.graha.post.xml.GCode.valueAttrName(rdf) + " = $" + this.getName() + "]/@" + kr.graha.post.xml.GCode.labelAttrName(rdf) + "\"" + escapeAttrValue + " />");
+				xsl.appendL(indent, "<xsl:variable name=\"" + this.getLowerName() + "\" select=\"" + path + "\" />");
+				xsl.appendL(indent, "<xsl:value-of select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "[@" + kr.graha.post.xml.GCode.valueAttrName(rdf) + " = $" + this.getLowerName() + "]/@" + kr.graha.post.xml.GCode.labelAttrName(rdf) + "\"" + escapeAttrValue + " />");
 			} else {
 				if(this.option != null && this.option.size() > 0) {
 					xsl.appendL(indent, "<xsl:choose>");
@@ -771,7 +778,7 @@ public class Col {
 				if(STR.valid(this.getValue())) {
 					xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 				}
-				xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+				xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getLowerName() + "</xsl:attribute>");
 				xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">radio</xsl:attribute>");
 				if(this.dataAttr != null && this.dataAttr.size() > 0) {
 					for(int x = 0; x < this.dataAttr.size(); x++) {
@@ -807,7 +814,7 @@ public class Col {
 						if(STR.valid(this.getValue())) {
 							xsl.appendL(indent + 1, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 						}
-						xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+						xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getLowerName() + "</xsl:attribute>");
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"type\">radio</xsl:attribute>");
 						if(this.dataAttr != null && this.dataAttr.size() > 0) {
 							for(int x = 0; x < this.dataAttr.size(); x++) {
@@ -849,7 +856,7 @@ public class Col {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
 			}
 			xsl.append(indent + 1, "<xsl:attribute name=\"class\">graha ");
-			xsl.append(this.getName());
+			xsl.append(this.getLowerName());
 			if(STR.trueValue(this.getReadonly()) || STR.compareIgnoreCase(this.getReadonly(), "readonly")) {
 				xsl.append(" readonly");
 			}
@@ -869,9 +876,9 @@ public class Col {
 				}
 			}
 			if(full) {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getLowerName() + "</xsl:attribute>");
 			} else {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getLowerName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
 			}
 			if(STR.trueValue(this.getReadonly()) || STR.compareIgnoreCase(this.getReadonly(), "readonly")) {
 				AuthInfo authInfo = null;
@@ -1069,9 +1076,9 @@ public class Col {
 			}
 			if(STR.compareIgnoreCase(this.getType(), "datalist")) {
 				if(full) {
-					xsl.appendL(indent + 1, "<xsl:attribute name=\"list\">" + this.getName() + "</xsl:attribute>");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"list\">" + this.getLowerName() + "</xsl:attribute>");
 				} else {
-					xsl.appendL(indent + 1, "<xsl:attribute name=\"list\">" + this.getName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"list\">" + this.getLowerName() + ".<xsl:value-of select=\"position()\" /></xsl:attribute>");
 				}
 			}
 			if(STR.compareIgnoreCase(this.getType(), "button") && STR.valid(this.getIcon())) {
@@ -1093,9 +1100,9 @@ public class Col {
 			}
 			if(STR.compareIgnoreCase(this.getType(), "datalist")) {
 				if(full) {
-					xsl.appendL(indent, "<datalist id=\"" + this.getName() + "\">");
+					xsl.appendL(indent, "<datalist id=\"" + this.getLowerName() + "\">");
 				} else {
-					xsl.appendL(indent, "<datalist  id=\"" + this.getName() + ".{position()}\">");
+					xsl.appendL(indent, "<datalist  id=\"" + this.getLowerName() + ".{position()}\">");
 				}
 				if(STR.valid(this.getForName())) {
 					xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");

@@ -351,7 +351,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 										xslParam.append("&amp;");
 									}
 									try {
-										xslParam.append(key.getKey() + "=" + java.net.URLEncoder.encode(item, "UTF-8"));
+										xslParam.append(key.getKey() + "=" + STR.encodeURIComponent(item));
 									} catch (UnsupportedEncodingException e) {
 										xslParam.append(key.getKey() + "=" + item);
 										LOG.severe(e);
@@ -363,7 +363,7 @@ public class QueryXMLImpl extends QueryXSLImpl {
 									xslParam.append("&amp;");
 								}
 								try {
-									xslParam.append(key.getKey() + "=" + java.net.URLEncoder.encode(params.getString(key), "UTF-8"));
+									xslParam.append(key.getKey() + "=" + STR.encodeURIComponent(params.getString(key)));
 								} catch (UnsupportedEncodingException e) {
 									xslParam.append(key.getKey() + "=" + params.getString(key));
 									LOG.severe(e);
@@ -645,17 +645,23 @@ public class QueryXMLImpl extends QueryXSLImpl {
 				try {
 					String label = redirect.getLabel();
 					if(STR.nonempty(label)) {
-						response.addHeader("X-graha-redirect-label", label);
+						response.addHeader("x-graha-redirect-label", STR.encodeURIComponent(label));
 					}
 					List<String> msgs = redirect.getMsgs();
 					if(STR.valid(msgs)) {
 						for(int i = 0; i < msgs.size(); i++) {
 							if(STR.nonempty((String)msgs.get(i))) {
-								response.addHeader("X-graha-redirect-msg", (String)msgs.get(i));
+								response.addHeader("x-graha-redirect-msg", STR.encodeURIComponent((String)msgs.get(i)));
 							}
 						}
 					}
-					response.sendRedirect(request.getRequestURL().substring(0, request.getRequestURL().indexOf("/", request.getScheme().length() + 3)) + redirectURI);
+					if(STR.compare(request.getHeader("x-graha-requested-with"), "XMLHttpRequest")) {
+//						response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+						response.setStatus(HttpServletResponse.SC_RESET_CONTENT);
+						response.addHeader("x-graha-location", STR.encodeURIComponent(redirectURI));
+					} else {
+						response.sendRedirect(request.getRequestURL().substring(0, request.getRequestURL().indexOf("/", request.getScheme().length() + 3)) + redirectURI);
+					}
 					return HttpServletResponse.SC_MOVED_TEMPORARILY;
 				} catch (IOException e) {
 					LOG.severe(e);

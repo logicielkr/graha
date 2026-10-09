@@ -102,7 +102,7 @@ public class Layout {
 		int result = 0;
 		if(this.getTab() != null) {
 			for(int i = 0; i < this.getTab().size(); i++) {
-				if(((Tab)this.getTab().get(i)).valid(params)) {
+				if(((Tab)this.getTab().get(i)).validForXsl(params)) {
 					result++;
 				}
 			}
@@ -362,7 +362,7 @@ public class Layout {
 		if(this.getTab() != null && this.getTabSize(param) > 1) {
 			xsl.appendL(indent, "<ul class=\"graha multitab\">");
 			for(int i = 0; i < this.getTab().size(); i++) {
-				if(((Tab)this.getTab().get(i)).valid(param)) {
+				if(((Tab)this.getTab().get(i)).validForXsl(param)) {
 					xsl.append(((Tab)this.getTab().get(i)).li(files, param, indent, rdf));
 				}
 			}
@@ -379,7 +379,7 @@ public class Layout {
 			List<LinkParam> params = fullLink.getParam();
 			if(params != null) {
 				for(int i = 0; i < params.size(); i++) {
-					xsl.append(((LinkParam)params.get(i)).hidden(tables, commands, false, indent + 1, rdf));
+					xsl.append(((LinkParam)params.get(i)).hidden(tables, commands, param, false, indent + 1, rdf));
 				}
 			}
 		}
@@ -398,7 +398,7 @@ public class Layout {
 	) {
 		if(this.getTab() != null && this.getTabSize(param) > 0) {
 			for(int i = 0; i < this.getTab().size(); i++) {
-				if(((Tab)this.getTab().get(i)).valid(param)) {
+				if(((Tab)this.getTab().get(i)).validForXsl(param)) {
 					Table table = null;
 					Command command = null;
 					if(
@@ -408,7 +408,7 @@ public class Layout {
 					) {
 						if(commands != null && commands.size() > 0) {
 							for(int x = 0; x < commands.size(); x++) {
-								if(((Command)commands.get(x)).valid(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Command)commands.get(x)).getName())) {
+								if(((Command)commands.get(x)).validForXsl(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Command)commands.get(x)).getName())) {
 									command = (Command)commands.get(x);
 								}
 							}
@@ -416,7 +416,7 @@ public class Layout {
 					} else if(queryFuncType == Query.QUERY_FUNC_TYPE_INSERT) {
 						if(tables != null && tables.size() > 0) {
 							for(int x = 0; x < tables.size(); x++) {
-								if(((Table)tables.get(x)).valid(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Table)tables.get(x)).getName())) {
+								if(((Table)tables.get(x)).validForXsl(param) && STR.compareIgnoreCase(((Tab)this.getTab().get(i)).getName(), ((Table)tables.get(x)).getName())) {
 									table = (Table)tables.get(x);
 								}
 							}
@@ -538,7 +538,11 @@ public class Layout {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"class\">graha " + queryId + "</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(queryId, param, rdf) + "</xsl:attribute>");
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+				if(STR.valid(this.getMsg())) {
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+				} else {
+					xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return (document.getElementById('" + queryId + "_submit').form == null) || check_submit(this, null);</xsl:attribute>");
+				}
 				this.hidden(tables, commands, param, indent, rdf, xsl);
 			}
 			this.table(tables, commands, files, param, indent, rdf, this.div(parentDiv), queryId, queryFuncType, xsl);

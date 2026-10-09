@@ -35,6 +35,8 @@ import kr.graha.post.xml.GRedirect;
 import kr.graha.post.xml.GRedirectParam;
 import kr.graha.post.xml.GDocument;
 import kr.graha.post.lib.Record;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) LinkParam 정보
@@ -52,6 +54,7 @@ public class LinkParam {
 	private String value = null;
 	private String type = null;
 	private String ref = null;
+	private String cond = null;
 	protected String getName() {
 		return this.name;
 	}
@@ -75,6 +78,12 @@ public class LinkParam {
 	}
 	protected void setRef(String ref) {
 		this.ref = ref;
+	}
+	protected String getCond() {
+		return this.cond;
+	}
+	protected void setCond(String cond) {
+		this.cond = cond;
 	}
 	protected static String nodeName() {
 		return LinkParam.nodeName;
@@ -105,6 +114,8 @@ public class LinkParam {
 							this.setType(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "ref")) {
 							this.setRef(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -122,12 +133,13 @@ public class LinkParam {
 		element.setAttribute("value", this.getValue());
 		element.setAttribute("type", this.getType());
 		element.setAttribute("ref", this.getRef());
+		element.setAttribute("cond", this.getCond());
 		return element;
 	}
-	protected static Buffer param(String tabName, List<LinkParam> params, int indent, boolean rdf, boolean full) {
-		return LinkParam.param(null, null, tabName, params, indent, rdf, full);
+	protected static Buffer param(String tabName, List<LinkParam> params, Record record, int indent, boolean rdf, boolean full) {
+		return LinkParam.param(null, null, tabName, params, record, indent, rdf, full);
 	}
-	protected static Buffer param(List<Table> tables, List<Command> commands, String tabName, List<LinkParam> params, int indent, boolean rdf, boolean full) {
+	protected static Buffer param(List<Table> tables, List<Command> commands, String tabName, List<LinkParam> params, Record record, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
 		if(STR.valid(params)) {
 			xsl.append(indent, "<xsl:variable name=\"hrefparam\">");
@@ -136,42 +148,76 @@ public class LinkParam {
 			boolean isContainsConst = false;
 			for(int i = 0; i < params.size(); i++) {
 				LinkParam param = (LinkParam)params.get(i);
-				if(STR.compareIgnoreCase(param.getType(), "query")) {
-					if(STR.valid(param.getValue()) && param.getValue().indexOf(".") > 0) {
+				AuthInfo authInfo = null;
+				if(STR.valid(param.getCond())) {
+					authInfo = AuthUtility.parse(param.getCond());
+				}
+				if(authInfo != null && AuthUtility.testInServer(authInfo, record)) {
+					if(!AuthUtility.auth(authInfo, record)) {
+						return null;
+					} else {
+						authInfo = null;
+					}
+				}
+				if(authInfo != null) {
+					xsl.append("<xsl:if test=\"" + AuthUtility.testExpr(authInfo, record, rdf) + "\">");
+				}
+				String type = param.getType();
+				String value = param.getValue();
+				if(!STR.valid(type)) {
+					if(STR.valid(value)) {
+						if(STR.startsWithIgnoreCase(value, "query.")) {
+							value = value.substring(6);
+							type = "query";
+						} else if(STR.startsWithIgnoreCase(value, "prop.")) {
+							value = value.substring(5);
+							type = "prop";
+						} else if(STR.startsWithIgnoreCase(value, "param.")) {
+							value = value.substring(6);
+							type = "param";
+						}
+					} else {
+						value = param.getName();
+						type = "param";
+					}
+				}
+				
+				if(STR.compareIgnoreCase(type, "query")) {
+					if(STR.valid(value) && value.indexOf(".") > 0) {
 						expr = kr.graha.post.xml.GRow.childNodePath(
-							param.getValue().substring(0, param.getValue().indexOf(".")),
-							param.getValue().substring(param.getValue().indexOf(".") + 1),
+							value.substring(0, value.indexOf(".")),
+							value.substring(value.indexOf(".") + 1),
 							rdf
 						);
 					} else if(tabName == null || STR.valid(param.getRef())) {
-						expr = kr.graha.post.xml.GRow.childNodePath(param.getRef(), param.getValue(), rdf);
+						expr = kr.graha.post.xml.GRow.childNodePath(param.getRef(), value, rdf);
 					} else {
 						if(full) {
-							expr = kr.graha.post.xml.GRow.childNodePath(tabName, param.getValue(), rdf);
+							expr = kr.graha.post.xml.GRow.childNodePath(tabName, value, rdf);
 						} else {
-							expr = kr.graha.post.xml.GRow.childNodeName(param.getValue(), rdf);
+							expr = kr.graha.post.xml.GRow.childNodeName(value, rdf);
 						}
 					}
 					paramList.add(expr);
-				} else if(STR.compareIgnoreCase(param.getType(), "param")) {
-					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", param.getValue(), rdf);
+				} else if(STR.compareIgnoreCase(type, "param")) {
+					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", value, rdf);
 					paramList.add(expr);
-				} else if(STR.vexistsIgnoreCase(param.getType(), "prop", "result")) {
-					expr = kr.graha.post.xml.GParam.childNodePath(param.getType(), param.getValue(), rdf);
+				} else if(STR.vexistsIgnoreCase(type, "prop", "result")) {
+					expr = kr.graha.post.xml.GParam.childNodePath(type, value, rdf);
 					paramList.add(expr);
-				} else if(!STR.valid(param.getType())) {
-					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", param.getValue(), rdf);
+				} else if(!STR.valid(type)) {
+					expr = kr.graha.post.xml.GParam.childNodePath("linkparam", value, rdf);
 					paramList.add(expr);
-				} else if(STR.vexistsIgnoreCase(param.getType(), "default", "const")) {
+				} else if(STR.vexistsIgnoreCase(type, "default", "const")) {
 				}
-				if(STR.vexistsIgnoreCase(param.getType(), "query", "param", "prop", "result")) {
+				if(STR.vexistsIgnoreCase(type, "query", "param", "prop", "result")) {
 					xsl.append("<xsl:if test=\"");
 					if(
 						(
-							!STR.valid(param.getType()) ||
-							STR.compareIgnoreCase(param.getType(), "param")
+							!STR.valid(type) ||
+							STR.compareIgnoreCase(type, "param")
 						) &&
-						STR.compareIgnoreCase(param.getValue(), "page")
+						STR.compareIgnoreCase(value, "page")
 					) {
 						xsl.append("(");
 						xsl.append(expr);
@@ -192,9 +238,13 @@ public class LinkParam {
 				if(isContainsConst) {
 					xsl.append("&amp;");
 				} else if(i > 0) {
-					if(paramList != null && paramList.size() > 1) {
+					int paramListSize = (paramList.size() - 1);
+					if(STR.vexistsIgnoreCase(type, "default", "const")) {
+						paramListSize = paramList.size();
+					}
+					if(paramList != null && paramListSize > 0) {
 						xsl.append("<xsl:if test=\"");
-						for(int x = 0; x < (paramList.size() - 1); x++) {
+						for(int x = 0; x < paramListSize; x++) {
 							if(x > 0) {
 								xsl.append(" or ");
 							}
@@ -217,134 +267,201 @@ public class LinkParam {
 						xsl.append("\">&amp;</xsl:if>");
 					}
 				}
-				if(!STR.valid(param.getType()) || STR.vexistsIgnoreCase(param.getType(), "query", "param", "prop", "result")) {
+				if(!STR.valid(type) || STR.vexistsIgnoreCase(type, "query", "param", "prop", "result")) {
 					xsl.append(param.getName() + "=");
 					xsl.append("<xsl:value-of select=\"" + expr + "\"/>");
 					xsl.append("</xsl:if>");
-				} else if(STR.vexistsIgnoreCase(param.getType(), "default", "const")) {
+				} else if(STR.vexistsIgnoreCase(type, "default", "const")) {
 					xsl.append(param.getName() + "=");
-					xsl.append(param.getValue());
+					xsl.append(value);
 					isContainsConst = true;
+				}
+				if(authInfo != null) {
+					xsl.append("</xsl:if>");
 				}
 			}
 			xsl.appendL("</xsl:variable>");
 		}
 		return xsl;
 	}
-	protected Buffer hidden(List<Table> tables, List<Command> commands, int indent, boolean rdf) {
-		return this.hidden(tables, commands, true, indent, rdf);
+	protected Buffer hidden(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf) {
+		return this.hidden(tables, commands, param, true, indent, rdf);
 	}
-	protected Buffer hidden(String tabName, int indent, boolean rdf, boolean full) {
-		return this.hidden(null, null, tabName, true, indent, rdf, full);
+	protected Buffer hidden(String tabName, Record param, int indent, boolean rdf, boolean full) {
+		return this.hidden(null, null, tabName, param, true, indent, rdf, full);
 	}
-	protected Buffer hidden(List<Table> tables, List<Command> commands, boolean hideBlank, int indent, boolean rdf) {
-		return this.hidden(tables, commands, null, hideBlank, indent, rdf, true);
+	protected Buffer hidden(List<Table> tables, List<Command> commands, Record param, boolean hideBlank, int indent, boolean rdf) {
+		return this.hidden(tables, commands, null, param, hideBlank, indent, rdf, true);
 	}
-	protected Buffer hidden(List<Table> tables, List<Command> commands, String tabName, boolean hideBlank, int indent, boolean rdf, boolean full) {
+	protected Buffer hidden(List<Table> tables, List<Command> commands, String tabName, Record param, boolean hideBlank, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
+		int internalIndent = indent;
 		String expr = null;
-		if(STR.compareIgnoreCase(this.getType(), "query")) {
-			if(STR.valid(this.getValue()) && this.getValue().indexOf(".") > 0) {
+		
+		String type = this.getType();
+		String value = this.getValue();
+		if(!STR.valid(type)) {
+			if(STR.valid(value)) {
+				if(STR.startsWithIgnoreCase(value, "query.")) {
+					value = value.substring(6);
+					type = "query";
+				} else if(STR.startsWithIgnoreCase(value, "prop.")) {
+					value = value.substring(5);
+					type = "prop";
+				} else if(STR.startsWithIgnoreCase(value, "param.")) {
+					value = value.substring(6);
+					type = "param";
+				}
+			} else {
+				value = this.getName();
+				type = "param";
+			}
+		}
+		if(STR.compareIgnoreCase(type, "query")) {
+			if(STR.valid(value) && value.indexOf(".") > 0) {
 				expr = kr.graha.post.xml.GRow.childNodePath(
-					this.getValue().substring(0, this.getValue().indexOf(".")),
-					this.getValue().substring(this.getValue().indexOf(".") + 1),
+					value.substring(0, value.indexOf(".")),
+					value.substring(value.indexOf(".") + 1),
 					rdf
 				);
 			} else if(STR.valid(this.getRef())) {
-				expr = kr.graha.post.xml.GRow.childNodePath(this.getRef(), this.getValue(), rdf);
+				expr = kr.graha.post.xml.GRow.childNodePath(this.getRef(), value, rdf);
 			} else {
 				if(full) {
-					expr = kr.graha.post.xml.GRow.childNodePath(tabName, this.getValue(), rdf);
+					expr = kr.graha.post.xml.GRow.childNodePath(tabName, value, rdf);
 				} else {
-					expr = kr.graha.post.xml.GRow.childNodeName(this.getValue(), rdf);
+					expr = kr.graha.post.xml.GRow.childNodeName(value, rdf);
 				}
 			}
-		} else if(STR.vexistsIgnoreCase(this.getType(), "param", "prop", "result", "error")) {
-			expr = kr.graha.post.xml.GParam.childNodePath(this.getType(), this.getValue(), rdf);
-		} else if(!STR.valid(this.getType())) {
-			expr = kr.graha.post.xml.GParam.childNodePath("param", this.getValue(), rdf);
-		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
+		} else if(STR.vexistsIgnoreCase(type, "param", "prop", "result", "error")) {
+			expr = kr.graha.post.xml.GParam.childNodePath(type, value, rdf);
+		} else if(!STR.valid(type)) {
+			expr = kr.graha.post.xml.GParam.childNodePath("param", value, rdf);
+		} else if(STR.vexistsIgnoreCase(type, "default", "const")) {
 		} else {
 			throw new GrahaParsingException("type is empty or query, param, prop, result, error, default, const");
 		}
-		if(!STR.valid(this.getType()) || STR.vexistsIgnoreCase(this.getType(), "query", "param", "prop", "result", "error")) {
+		AuthInfo authInfo = null;
+		if(STR.valid(this.getCond())) {
+			authInfo = AuthUtility.parse(this.getCond());
+		}
+		if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
+			if(!AuthUtility.auth(authInfo, param)) {
+				return null;
+			} else {
+				authInfo = null;
+			}
+		}
+		if(authInfo != null) {
+			xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
+			internalIndent++;
+		}
+		if(!STR.valid(type) || STR.vexistsIgnoreCase(type, "query", "param", "prop", "result", "error")) {
 			if(hideBlank) {
 				if(
 					(
-						!STR.valid(this.getType()) ||
-						STR.compareIgnoreCase(this.getType(), "param")
+						!STR.valid(type) ||
+						STR.compareIgnoreCase(type, "param")
 					) &&
-					STR.compareIgnoreCase(this.getValue(), "page")
+					STR.compareIgnoreCase(value, "page")
 				) {
-					xsl.appendL(indent, "<xsl:if test=\"" + expr + " and " + expr + " > 1\">");
+					xsl.appendL(internalIndent, "<xsl:if test=\"" + expr + " and " + expr + " > 1\">");
 				} else {
-					xsl.appendL(indent, "<xsl:if test=\"" + expr + " and " + expr + " != ''\">");
+					xsl.appendL(internalIndent, "<xsl:if test=\"" + expr + " and " + expr + " != ''\">");
 				}
 			}
-			xsl.appendL(indent + 1, "<input>");
+			xsl.appendL(internalIndent + 1, "<input>");
 			if(STR.valid(this.getRef())) {
-				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-ref\">" + this.getRef() + "</xsl:attribute>");
+				xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"data-graha-ref\">" + this.getRef() + "</xsl:attribute>");
 			}
-			if(STR.valid(this.getType())) {
-				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-type\">" + this.getType() + "</xsl:attribute>");
+			if(STR.valid(type)) {
+				xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"data-graha-type\">" + type + "</xsl:attribute>");
 			}
-			if(STR.valid(this.getValue())) {
-				xsl.appendL(indent + 2, "<xsl:attribute name=\"data-graha-value\">" + this.getValue() + "</xsl:attribute>");
+			if(STR.valid(value)) {
+				xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"data-graha-value\">" + value + "</xsl:attribute>");
 			}
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + expr + "\" /></xsl:attribute>");
-			xsl.appendL(indent + 1, "</input>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\"><xsl:value-of select=\"" + expr + "\" /></xsl:attribute>");
+			xsl.appendL(internalIndent + 1, "</input>");
 			if(hideBlank) {
-				xsl.appendL(indent, "</xsl:if>");
+				xsl.appendL(internalIndent, "</xsl:if>");
 			}
-		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
-			xsl.appendL(indent + 1, "<input>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
-			xsl.appendL(indent + 2, "<xsl:attribute name=\"value\">" + this.getValue() + "</xsl:attribute>");
-			xsl.appendL(indent + 1, "</input>");
+		} else if(STR.vexistsIgnoreCase(type, "default", "const")) {
+			xsl.appendL(internalIndent + 1, "<input>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"type\">hidden</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"class\">graha " + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 2, "<xsl:attribute name=\"value\">" + value + "</xsl:attribute>");
+			xsl.appendL(internalIndent + 1, "</input>");
+		}
+		if(authInfo != null) {
+			xsl.appendL(indent, "</xsl:if>");
 		}
 		return xsl;
 	}
 	protected void execute(GRedirect redirect, GDocument document, Record param) {
-		GRedirectParam redirectParam = new GRedirectParam(this.getName());
-		if(STR.compareIgnoreCase(this.getType(), "query")) {
-			if(STR.valid(this.getValue()) && this.getValue().indexOf(".") > 0) {
-				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(
-					this.getValue().substring(0, this.getValue().indexOf(".")),
-					this.getValue().substring(this.getValue().indexOf(".") + 1),
-					document
-				));
-			} else if(STR.valid(this.getRef())) {
-				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(this.getRef(), this.getValue(), document));
-			} else {
-				redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(null, this.getValue(), document));
-			}
-		} else if(STR.vexistsIgnoreCase(this.getType(), "param", "prop", "result", "error")) {
-			redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(this.getType(), this.getValue(), param));
-		} else if(!STR.valid(this.getType())) {
-			redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(null, this.getValue(), param));
-		} else if(STR.vexistsIgnoreCase(this.getType(), "default", "const")) {
-			redirectParam.setValue(this.getValue());
-		} else {
-			throw new GrahaParsingException("type is empty or query, param, prop, result, error, default, const");
+		AuthInfo authInfo = null;
+		if(STR.valid(this.getCond())) {
+			authInfo = AuthUtility.parse(this.getCond());
 		}
-		if(STR.nonempty(redirectParam.getValue())) {
-			if(
-				(
-					!STR.valid(this.getType()) ||
-					STR.compareIgnoreCase(this.getType(), "param")
-				) &&
-				STR.compareIgnoreCase(this.getValue(), "page")
-			) {
-				if(STR.intValue(redirectParam.getValue(), 0) > 1) {
+		if(authInfo == null || AuthUtility.auth(authInfo, param)) {
+			GRedirectParam redirectParam = new GRedirectParam(this.getName());
+			String type = this.getType();
+			String value = this.getValue();
+			if(!STR.valid(type)) {
+				if(STR.valid(value)) {
+					if(STR.startsWithIgnoreCase(value, "query.")) {
+						value = value.substring(6);
+						type = "query";
+					} else if(STR.startsWithIgnoreCase(value, "prop.")) {
+						value = value.substring(5);
+						type = "prop";
+					} else if(STR.startsWithIgnoreCase(value, "param.")) {
+						value = value.substring(6);
+						type = "param";
+					}
+				} else {
+					value = this.getName();
+					type = "param";
+				}
+			}
+			if(STR.compareIgnoreCase(type, "query")) {
+				if(STR.valid(value) && value.indexOf(".") > 0) {
+					redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(
+						value.substring(0, value.indexOf(".")),
+						value.substring(value.indexOf(".") + 1),
+						document
+					));
+				} else if(STR.valid(this.getRef())) {
+					redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(this.getRef(), value, document));
+				} else {
+					redirectParam.setValue(kr.graha.post.xml.GRow.childNodeValue(null, value, document));
+				}
+			} else if(STR.vexistsIgnoreCase(type, "param", "prop", "result", "error")) {
+				redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(type, value, param));
+			} else if(!STR.valid(type)) {
+				redirectParam.setValue(kr.graha.post.xml.GParam.childNodeValue(null, value, param));
+			} else if(STR.vexistsIgnoreCase(type, "default", "const")) {
+				redirectParam.setValue(value);
+			} else {
+				throw new GrahaParsingException("type is empty or query, param, prop, result, error, default, const");
+			}
+			if(STR.nonempty(redirectParam.getValue())) {
+				if(
+					(
+						!STR.valid(type) ||
+						STR.compareIgnoreCase(type, "param")
+					) &&
+					STR.compareIgnoreCase(value, "page")
+				) {
+					if(STR.intValue(redirectParam.getValue(), 0) > 1) {
+						redirect.add(redirectParam);
+					}
+				} else {
 					redirect.add(redirectParam);
 				}
-			} else {
-				redirect.add(redirectParam);
 			}
 		}
 	}

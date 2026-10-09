@@ -80,7 +80,8 @@ public class Command extends SQLExecutor {
 	private List<Encrypt> encrypts = null;
 	private List<DecryptColumn> decrypt = null;
 	private List<PatternColumn> pattern = null;
-	private Boolean valid = null;
+	private Boolean validForXsl = null;
+	private Boolean validForXml = null;
 	private String getEncrypt() {
 		return this.encrypt;
 	}
@@ -130,20 +131,34 @@ public class Command extends SQLExecutor {
 	private void setSqlCnt(Node sqlCnt) {
 		this.sqlCnt = sqlCnt;
 	}
-	protected boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+	protected boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	private void add(Param param) {
 		if(this.param == null) {
@@ -343,7 +358,7 @@ public class Command extends SQLExecutor {
 		ConnectionFactory connectionFactory, 
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException {
-		if(!this.valid(params)) {
+		if(!this.validForXml(params)) {
 			return 0;
 		}
 		int result = 0;
@@ -366,7 +381,7 @@ public class Command extends SQLExecutor {
 			for(int x = 0; x < this.getParamSize(params); x++) {
 				Param p = this.getParam(x, params);
 				if(STR.startsWithIgnoreCase(p.getValue(), "sequence.")) {
-					Integer nextSequenceValue = SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory());
+					Integer nextSequenceValue = SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory(), params);
 					SQLParameter parameter =  new SQLParameter(nextSequenceValue, p.getDataType());
 					parameters.add(parameter);
 				} else if(STR.startsWithIgnoreCase(p.getValue(), "generator.")) {
@@ -508,6 +523,12 @@ public class Command extends SQLExecutor {
 			DB.close(pstmt);
 			pstmt = null;
 		} catch (SQLException e) {
+			LOG.severe(sql);
+			if(parameters != null) {
+				for(int i = 0; i < parameters.size(); i++) {
+					LOG.severe(parameters.get(i).toString());
+				}
+			}
 			LOG.severe(e);
 			throw e;
 		} finally {

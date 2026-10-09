@@ -363,7 +363,11 @@ public class Link {
 				xsl.appendL("</xsl:attribute>");
 				if(STR.compareIgnoreCase(this.getAppearance(), "submit")) {
 					xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
-					xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+					if(STR.valid(this.getMsg())) {
+						xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+					} else {
+						xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, null);</xsl:attribute>");
+					}
 				}
 				if(STR.valid(this.getName())) {
 					xsl.appendL(indent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
@@ -390,7 +394,7 @@ public class Link {
 				}
 				if(STR.valid(this.param)) {
 					for(int i = 0; i < this.param.size(); i++) {
-						xsl.append(((LinkParam)this.param.get(i)).hidden((tabName == null) ? "" : tabName, indent + 1, rdf, full));
+						xsl.append(((LinkParam)this.param.get(i)).hidden((tabName == null) ? "" : tabName, param, indent + 1, rdf, full));
 					}
 				}
 
@@ -446,7 +450,7 @@ public class Link {
 					xsl.appendL("</xsl:attribute>");
 				}
 				if(this.param != null && this.param.size() > 0) {
-					xsl.append(LinkParam.param((tabName == null) ? "" : tabName, this.param, indent + 1, rdf, full));
+					xsl.append(LinkParam.param((tabName == null) ? "" : tabName, this.param, param, indent + 1, rdf, full));
 				}
 				xsl.append(indent + 1, "<xsl:attribute name=\"href\">");
 				if(STR.compareIgnoreCase(this.getType(), "query")) {
@@ -543,7 +547,7 @@ public class Link {
 				if(this.isValidHref()) {
 					xsl.append(internalIndent, "<a>");
 					if(this.param != null && this.param.size() > 0) {
-						xsl.append(LinkParam.param(tables, commands, null, this.param, internalIndent + 1, rdf, true));
+						xsl.append(LinkParam.param(tables, commands, null, this.param, param, internalIndent + 1, rdf, true));
 					}
 					xsl.append(internalIndent + 1, "<xsl:attribute name=\"href\">");
 					xsl.append(Link.getPath(this.getPath(), param, rdf));
@@ -593,7 +597,11 @@ public class Link {
 					xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"action\">" + Link.getPath(this.getPath(), param, rdf) + "</xsl:attribute>");
 					if(STR.compareIgnoreCase(this.getType(), "submit")) {
 						xsl.appendL(indent + 1, "<xsl:attribute name=\"method\">post</xsl:attribute>");
-						xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+						if(STR.valid(this.getMsg())) {
+							xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, '" + this.getMsg() + "');</xsl:attribute>");
+						} else {
+							xsl.appendL(indent + 1, "<xsl:attribute name=\"onsubmit\">return check_submit(this, null);</xsl:attribute>");
+						}
 					}
 					if(STR.valid(this.getName())) {
 						xsl.appendL(internalIndent + 1, "<xsl:attribute name=\"name\">" + this.getName() + "</xsl:attribute>");
@@ -622,7 +630,7 @@ public class Link {
 					}
 					if(STR.valid(this.param)) {
 						for(int i = 0; i < this.param.size(); i++) {
-							xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, indent + 1, rdf));
+							xsl.append(((LinkParam)this.param.get(i)).hidden(tables, commands, param, indent + 1, rdf));
 						}
 					}
 				}
@@ -665,7 +673,11 @@ public class Link {
 			if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {
 				xsl.append("if(this.form == null) {");
 			}
-			xsl.append("if(check_submit(document.getElementById(\"" + queryId + "\"), '" + layoutMsg + "')) {");
+			if(STR.valid(layoutMsg)) {
+				xsl.append("if(check_submit(document.getElementById(\"" + queryId + "\"), '" + layoutMsg + "')) {");
+			} else {
+				xsl.append("if(check_submit(document.getElementById(\"" + queryId + "\"), null)) {");
+			}
 			xsl.append("document.getElementById(\"" + queryId + "\").submit();");
 			xsl.append("}");
 			if(param.equals(Record.key(Record.PREFIX_TYPE_SYSTEM, "suffix"), ".html")) {

@@ -57,7 +57,8 @@ public class Column extends Param {
 	private String follow = null;
 	private String constraint = null;
 	private String select = null;
-	private Boolean valid = null;
+	private Boolean validForXml = null;
+	private Boolean validForXsl = null;
 	
 	public String getName() {
 		return super.getName();
@@ -143,20 +144,34 @@ public class Column extends Param {
 	private void setSelect(String select) {
 		this.select = select;
 	}
-	protected boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+	protected boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	protected static String nodeName() {
 		return Column.nodeName;
@@ -281,9 +296,9 @@ public class Column extends Param {
 				if(sqlType == Table.SQL_TYPE_INSERT) {
 					if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SEQUENCE, key))) {
 						if(this.getDataType() == Param.DATA_TYPE_INT) {
-							params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, key), SQLExecutor.getNextSequenceIntegerValue(this.getInsert(), connectionFactory));
+							params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, key), SQLExecutor.getNextSequenceIntegerValue(this.getInsert(), connectionFactory, params));
 						} else {
-							params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, key), SQLExecutor.getNextSequenceLongValue(this.getInsert(), connectionFactory));
+							params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, key), SQLExecutor.getNextSequenceLongValue(this.getInsert(), connectionFactory, params));
 						}
 					}
 					value = super.getValue(params, Record.key(Record.PREFIX_TYPE_SEQUENCE, key), encryptor);
@@ -334,9 +349,9 @@ public class Column extends Param {
 							} else if(STR.startsWithIgnoreCase(column.getInsert(), "sequence.")) {
 								if(!params.hasKey(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()))) {
 									if(this.getDataType() == Param.DATA_TYPE_INT) {
-										params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), SQLExecutor.getNextSequenceIntegerValue(column.getInsert(), connectionFactory));
+										params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), SQLExecutor.getNextSequenceIntegerValue(column.getInsert(), connectionFactory, params));
 									} else {
-										params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), SQLExecutor.getNextSequenceLongValue(column.getInsert(), connectionFactory));
+										params.put(Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), SQLExecutor.getNextSequenceLongValue(column.getInsert(), connectionFactory, params));
 									}
 								}
 								value = super.getValue(params, Record.key(Record.PREFIX_TYPE_SEQUENCE, column.getValue()), encryptor);

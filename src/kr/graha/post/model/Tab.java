@@ -60,7 +60,8 @@ public class Tab {
 	private String cond = null;
 	private String htmltype = null;
 	
-	private Boolean valid = null;
+	private Boolean validForXsl = null;
+	private Boolean validForXml = null;
 	
 	protected String getName() {
 		return this.name;
@@ -122,22 +123,36 @@ public class Tab {
 		}
 		this.row.add(row);
 	}
-	protected boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+	protected boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				} else {
 					tabAuthInfo = null;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	protected static String nodeName() {
 		return Tab.nodeName;

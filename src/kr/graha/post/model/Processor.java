@@ -307,7 +307,12 @@ public class Processor extends SQLExecutor {
 				for(int x = 0; x < this.getParamSize(params); x++) {
 					Param p = (Param)this.getParam(x, params);
 					if(STR.startsWithIgnoreCase(p.getValue(), "sequence.")) {
-						SQLParameter parameter =  new SQLParameter(SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory()), p.getDataType());
+						SQLParameter parameter =  null;
+						if(p.getDataType() == Param.DATA_TYPE_INT) {
+							parameter =  new SQLParameter(SQLExecutor.getNextSequenceIntegerValue(p.getValue(), super.getConnectionFactory(), params), p.getDataType());
+						} else {
+							parameter =  new SQLParameter(SQLExecutor.getNextSequenceLongValue(p.getValue(), super.getConnectionFactory(), params), p.getDataType());
+						}
 						parameters.add(parameter);
 					} else if(STR.startsWithIgnoreCase(p.getValue(), "generator.")) {
 						SQLParameter parameter =  new SQLParameter(SQLExecutor.getPKGeneratorValue(p.getValue(), p.getName(), p.getDataType(), params, super.getConnectionFactory()), p.getDataType());

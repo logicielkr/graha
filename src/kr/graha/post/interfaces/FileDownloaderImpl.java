@@ -48,8 +48,10 @@ public class FileDownloaderImpl implements FileDownloader {
 		HttpServletResponse response,
 		Record params
 	) throws IOException {
+		int fileSize = Long.valueOf(Files.size(path)).intValue();
+		int writed = 0;
 		LOG.config("File Path = " + path.toUri().getPath());
-		response.setContentLength((int)Files.size(path));
+		response.setContentLength(fileSize);
 		response.setDateHeader("Last-Modified", Files.getLastModifiedTime(path).toMillis());
 		response.setHeader("Accept-Ranges", "bytes");
 		String mimeType = request.getServletContext().getMimeType(fileName);
@@ -65,13 +67,16 @@ public class FileDownloaderImpl implements FileDownloader {
 			int len = 0;
 			while((len = fis.read(buffer)) >= 0) {
 				out.write(buffer, 0, len);
+				writed += len;
 			}
 			out.flush();
 			out.close();
 			out = null;
+			response.flushBuffer();
 			fis.close();
 			fis = null;
 		} catch(IOException e) {
+			LOG.severe("fileSize = " + fileSize + ", writed = " + writed);
 			LOG.severe(e);
 			throw e;
 		} finally {

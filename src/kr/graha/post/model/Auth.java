@@ -63,7 +63,8 @@ public class Auth extends SQLExecutor {
 	private List<Encrypt> encrypts = null;
 	
 	private String cond = null;
-	private Boolean valid = null;
+	private Boolean validForXsl = null;
+	private Boolean validForXml = null;
 	
 	private String getEncrypt() {
 		return this.encrypt;
@@ -108,20 +109,34 @@ public class Auth extends SQLExecutor {
 		}
 		this.encrypts.add(encrypt);
 	}
-	protected boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+	protected boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	private int getParamSize(Record record) {
 		return Tile.getParamSize(this.param, record);
@@ -246,7 +261,7 @@ public class Auth extends SQLExecutor {
 		return element;
 	}
 	protected boolean check(Record params, ConnectionFactory connectionFactory) throws NoSuchProviderException, SQLException {
-		if(!this.valid(params)) {
+		if(!this.validForXml(params)) {
 			return true;
 		}
 		boolean result = false;

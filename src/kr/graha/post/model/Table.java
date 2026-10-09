@@ -83,12 +83,13 @@ public class Table extends SQLExecutor {
 	private Node order = null;
 	private List<Where> where = null;
 	private String cond = null;
-	private Boolean valid = null;
+	private Boolean validForXsl = null;
+	private Boolean validForXml = null;
 	private Column getPrimaryColumnForInsert(Record param) {
 		if(this.getColumn() != null && this.getColumn().size() > 0) {
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				if(
-					((Column)this.getColumn().get(i)).valid(param) &&
+					((Column)this.getColumn().get(i)).validForXml(param) &&
 					STR.trueValue(((Column)this.getColumn().get(i)).getPrimary()) &&
 					STR.compareIgnoreCase("generate", ((Column)this.getColumn().get(i)).getInsert())
 				) {
@@ -103,7 +104,7 @@ public class Table extends SQLExecutor {
 			if(this.getColumn() != null && this.getColumn().size() > 0) {
 				for(int i = 0; i < this.getColumn().size(); i++) {
 					if(
-						((Column)this.getColumn().get(i)).valid(param) &&
+						((Column)this.getColumn().get(i)).validForXml(param) &&
 						STR.trueValue(((Column)this.getColumn().get(i)).getPrimary()) &&
 						STR.compareIgnoreCase(columnValue, ((Column)this.getColumn().get(i)).getValue())
 					) {
@@ -118,7 +119,7 @@ public class Table extends SQLExecutor {
 		if(STR.valid(columnNameOrValue)) {
 			if(this.getColumn() != null && this.getColumn().size() > 0) {
 				for(int i = 0; i < this.getColumn().size(); i++) {
-					if(!((Column)this.getColumn().get(i)).valid(param)) {
+					if(!((Column)this.getColumn().get(i)).validForXml(param)) {
 						continue;
 					}
 					if(STR.compareIgnoreCase(columnNameOrValue, ((Column)this.getColumn().get(i)).getName())) {
@@ -148,7 +149,7 @@ public class Table extends SQLExecutor {
 		if(this.getColumn() != null) {
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				Column c = (Column)this.getColumn().get(i);
-				if(c.valid(param) && STR.trueValue(c.getForeign())) {
+				if(c.validForXml(param) && STR.trueValue(c.getForeign())) {
 					return true;
 				}
 			}
@@ -240,20 +241,34 @@ public class Table extends SQLExecutor {
 		}
 		this.where.add(where);
 	}
-	protected boolean valid(Record params) {
-		if(this.valid == null) {
-			this.valid = true;
+	protected boolean validForXsl(Record params) {
+		if(this.validForXsl == null) {
+			this.validForXsl = true;
 			AuthInfo tabAuthInfo = null;
 			if(STR.valid(this.getCond())) {
 				tabAuthInfo = AuthUtility.parse(this.getCond());
 			}
 			if(tabAuthInfo != null && AuthUtility.testInServer(tabAuthInfo, params)) {
 				if(!AuthUtility.auth(tabAuthInfo, params)) {
-					this.valid = false;
+					this.validForXsl = false;
 				}
 			}
 		}
-		return this.valid.booleanValue();
+		return this.validForXsl.booleanValue();
+	}
+	protected boolean validForXml(Record params) {
+		if(this.validForXml == null) {
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo == null || AuthUtility.auth(authInfo, params)) {
+				this.validForXml = true;
+			} else {
+				this.validForXml = false;
+			}
+		}
+		return this.validForXml.booleanValue();
 	}
 	protected static String nodeName() {
 		return Table.nodeName;
@@ -396,7 +411,7 @@ public class Table extends SQLExecutor {
 		ConnectionFactory connectionFactory,
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException {
-		if(!this.valid(param)) {
+		if(!this.validForXml(param)) {
 			return 0;
 		}
 		boolean exists = false;
@@ -404,7 +419,7 @@ public class Table extends SQLExecutor {
 		if(this.getColumn() != null && this.getColumn().size() > 0) {
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				if(
-					((Column)this.getColumn().get(i)).valid(param) &&
+					((Column)this.getColumn().get(i)).validForXml(param) &&
 					(
 						STR.trueValue(((Column)this.getColumn().get(i)).getPrimary()) ||
 						STR.trueValue(((Column)this.getColumn().get(i)).getForeign())
@@ -425,7 +440,7 @@ public class Table extends SQLExecutor {
 				for(int i = 0; i < this.getColumn().size(); i++) {
 					Column c = this.getColumn().get(i);
 					if(
-						c.valid(param) &&
+						c.validForXml(param) &&
 						(
 							STR.startsWithIgnoreCase(c.getValue(), "param.") ||
 							STR.trueValue(c.getSelect())
@@ -438,7 +453,11 @@ public class Table extends SQLExecutor {
 						index++;
 					}
 				}
-				sqlForSelect.appendL("from " + this.getTableName(param));
+				sqlForSelect.append("from " + this.getTableName(param));
+				if(STR.valid(this.getName())) {
+					sqlForSelect.append(" as " + this.getName());
+				}
+				sqlForSelect.appendL();
 				boolean findForeignColumn = this.existsForeignColumn(param);
 				sqlForSelect.append(this.sqlForWhere(param, encryptor, null, -1, parameters, findForeignColumn, Query.QUERY_FUNC_TYPE_INSERT));
 				if(this.getOrder() != null) {
@@ -448,7 +467,7 @@ public class Table extends SQLExecutor {
 					index = 0;
 					for(int i = 0; i < this.getColumn().size(); i++) {
 						Column c = this.getColumn().get(i);
-						if(c.valid(param) && STR.trueValue(c.getPrimary())) {
+						if(c.validForXml(param) && STR.trueValue(c.getPrimary())) {
 							if(index == 0) {
 								sqlForSelect.append("order by ");
 							} else {
@@ -506,7 +525,7 @@ public class Table extends SQLExecutor {
 			Map<String, String> map = new java.util.Hashtable<String, String>();
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				Column c = this.getColumn().get(i);
-				if(c.valid(param) && STR.valid(c.getEncrypt())) {
+				if(c.validForXml(param) && STR.valid(c.getEncrypt())) {
 					map.put(c.getName(), c.getEncrypt());
 				}
 			}
@@ -519,7 +538,7 @@ public class Table extends SQLExecutor {
 			Map<String, String> map = new java.util.Hashtable<String, String>();
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				Column c = this.getColumn().get(i);
-				if(c.valid(param) && STR.valid(c.getPattern())) {
+				if(c.validForXml(param) && STR.valid(c.getPattern())) {
 					map.put(c.getName(), c.getPattern());
 				}
 			}
@@ -535,7 +554,7 @@ public class Table extends SQLExecutor {
 		ConnectionFactory connectionFactory,
 		int queryFuncType
 	) throws NoSuchProviderException, SQLException {
-		if(!this.valid(params)) {
+		if(!this.validForXml(params)) {
 			return 0;
 		}
 		super.setConnectionFactory(connectionFactory);
@@ -567,10 +586,10 @@ public class Table extends SQLExecutor {
 				Col col = cols.get(x);
 				if(STR.vexistsIgnoreCase(col.getType(), "hidden", "select", "radio")) {
 				} else {
-					if(params.hasKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx))) {
+					if(params.hasKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getLowerName() + "." + idx))) {
 						cr.has = true;
 					}
-					if(params.containsKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getName() + "." + idx))) {
+					if(params.containsKey(Record.key(Record.PREFIX_TYPE_PARAM, col.getLowerName() + "." + idx))) {
 						cr.contains = true;
 					}
 				}
@@ -582,7 +601,7 @@ public class Table extends SQLExecutor {
 		if(STR.valid(tabs)) {
 			for(int i = 0; i < tabs.size(); i++) {
 				tab = tabs.get(i);
-				if(tab.valid(params) && STR.compareIgnoreCase(tableOrCommandName, tab.getName())) {
+				if(tab.validForXml(params) && STR.compareIgnoreCase(tableOrCommandName, tab.getName())) {
 					break;
 				} else {
 					tab = null;
@@ -635,7 +654,7 @@ public class Table extends SQLExecutor {
 				} else {
 					for(int i = 0; i < this.getColumn().size(); i++) {
 						Column c = this.getColumn().get(i);
-						if(!c.valid(params)) {
+						if(!c.validForXml(params)) {
 							continue;
 						}
 						if(
@@ -656,7 +675,7 @@ public class Table extends SQLExecutor {
 				}
 				for(int i = 0; i < this.getColumn().size(); i++) {
 					Column c = this.getColumn().get(i);
-					if(STR.trueValue(c.getPrimary()) && c.valid(params)) {
+					if(STR.trueValue(c.getPrimary()) && c.validForXml(params)) {
 						if(!params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN, c.getValue() + "." + idx))) {
 							cr.hasPk = false;
 						}
@@ -695,7 +714,7 @@ public class Table extends SQLExecutor {
 					(
 						STR.trueValue(c.getPrimary()) &&
 						!params.hasKey(Record.key(Record.PREFIX_TYPE_UNKNOWN,c.getValue()))
-					)  && c.valid(params)
+					)  && c.validForXml(params)
 				) {
 					sqlType = Table.SQL_TYPE_INSERT;
 				}
@@ -843,7 +862,7 @@ public class Table extends SQLExecutor {
 				if(STR.trueValue(c.getPrimary()) && STR.compareIgnoreCase(c.getInsert(), "generate")) {
 					continue;
 				}
-				if(!c.valid(params)) {
+				if(!c.validForXml(params)) {
 					continue;
 				}
 				if(index > 0) {
@@ -860,7 +879,7 @@ public class Table extends SQLExecutor {
 				if(STR.trueValue(c.getPrimary()) && STR.compareIgnoreCase(c.getInsert(), "generate")) {
 					continue;
 				}
-				if(!c.valid(params)) {
+				if(!c.validForXml(params)) {
 					continue;
 				}
 				if(index > 0) {
@@ -910,6 +929,10 @@ public class Table extends SQLExecutor {
 	) throws NoSuchProviderException, SQLException {
 		Buffer sqlForUpdate = new Buffer();
 		sqlForUpdate.appendL("update " + this.getTableName(params));
+		if(STR.valid(this.getName())) {
+			sqlForUpdate.append(" as " + this.getName());
+		}
+		sqlForUpdate.appendL();
 		List<SQLParameter> parameters = new ArrayList();
 		if(STR.valid(this.getColumn())) {
 			int index = 0;
@@ -918,7 +941,7 @@ public class Table extends SQLExecutor {
 				if(STR.trueValue(c.getPrimary()) || STR.compareIgnoreCase(c.getOnly(), "insert")) {
 					continue;
 				}
-				if(!c.valid(params)) {
+				if(!c.validForXml(params)) {
 					continue;
 				}
 				if(index > 0) {
@@ -975,6 +998,10 @@ public class Table extends SQLExecutor {
 	) throws NoSuchProviderException, SQLException {
 		Buffer sqlForDelete = new Buffer();
 		sqlForDelete.appendL("delete from " + this.getTableName(params));
+		if(STR.valid(this.getName())) {
+			sqlForDelete.append(" as " + this.getName());
+		}
+		sqlForDelete.appendL();
 		List<SQLParameter> parameters = new ArrayList();
 		sqlForDelete.append(this.sqlForWhere(params, encryptor, grow, idx, parameters, false, queryFuncType));
 		return new SQLInfo(sqlForDelete, parameters);
@@ -999,7 +1026,7 @@ public class Table extends SQLExecutor {
 			int index = 0;
 			for(int i = 0; i < this.getColumn().size(); i++) {
 				Column c = this.getColumn().get(i);
-				if(!c.valid(params)) {
+				if(!c.validForXml(params)) {
 					continue;
 				}
 				if(

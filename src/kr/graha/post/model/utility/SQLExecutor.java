@@ -102,7 +102,7 @@ public abstract class SQLExecutor {
 			org.w3c.dom.Node n = (org.w3c.dom.Node)list.item(i);
 			if(n.getNodeType() == org.w3c.dom.Node.TEXT_NODE || n.getNodeType() == org.w3c.dom.Node.CDATA_SECTION_NODE ) {
 				if(nodeType == SQLExecutor.NODE_TYPE_SQL || nodeType == SQLExecutor.NODE_TYPE_TILE) {
-					sql.appendL(n.getNodeValue());
+					sql.append(n.getNodeValue());
 				} else {
 					String result  = TextParser.parse(n.getNodeValue(), params);
 					if(STR.valid(result)) {
@@ -129,10 +129,11 @@ public abstract class SQLExecutor {
 						}
 					}
 			} else {
-				LOG.warning(
+				LOG.info(
 					"NodeName = " + n.getNodeName(),
-					"NodeType = " + n.getNodeType(),
-	
+					"NodeType = " + n.getNodeType()
+/*
+					,
 					"2	ATTRIBUTE_NODE",
 					"4	CDATA_SECTION_NODE",
 					"8	COMMENT_NODE",
@@ -151,6 +152,7 @@ public abstract class SQLExecutor {
 					"12	NOTATION_NODE",
 					"7	PROCESSING_INSTRUCTION_NODE",
 					"3	TEXT_NODE"
+*/
 				);
 			}
 		}
@@ -309,29 +311,35 @@ public abstract class SQLExecutor {
 		}
 		return null;
 	}
-	private static Object getNextSequenceValue(String sequenceName, ConnectionFactory connectionFactory, int dataType) throws SQLException {
+	private static Object getNextSequenceValue(String sequenceName, ConnectionFactory connectionFactory, Record params, int dataType) throws SQLException {
 		Object result = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
 			if(connectionFactory != null && connectionFactory.getConnection() != null) {
+				String parsedSequenceName  = null;
 				if(STR.startsWithIgnoreCase(sequenceName, "sequence.")) {
-					pstmt = connectionFactory.getConnection().prepareStatement(connectionFactory.sqlForSequence(sequenceName.substring(9)));
+					parsedSequenceName = TextParser.parse(sequenceName.substring(9), params);
 				} else {
-					pstmt = connectionFactory.getConnection().prepareStatement(connectionFactory.sqlForSequence(sequenceName));
+					parsedSequenceName = TextParser.parse(sequenceName, params);
 				}
-				rs = pstmt.executeQuery();
-				if(rs.next()) {
-					if(dataType == Param.DATA_TYPE_INT) {
-						result = rs.getInt(1);
-					} else if(dataType == Param.DATA_TYPE_LONG) {
-						result = rs.getLong(1);
+				if(STR.valid(parsedSequenceName)) {
+					pstmt = connectionFactory.getConnection().prepareStatement(connectionFactory.sqlForSequence(parsedSequenceName));
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						if(dataType == Param.DATA_TYPE_INT) {
+							result = rs.getInt(1);
+						} else if(dataType == Param.DATA_TYPE_LONG) {
+							result = rs.getLong(1);
+						}
 					}
+					DB.close(rs);
+					rs = null;
+					DB.close(pstmt);
+					pstmt = null;
+				} else {
+					LOG.severe("parsedSequenceName is null, sequenceName = /" + sequenceName + "/");
 				}
-				DB.close(rs);
-				rs = null;
-				DB.close(pstmt);
-				pstmt = null;
 			} else {
 				LOG.severe("connectionFactory or connectionFactory.getConnection() is null");
 			}
@@ -346,15 +354,15 @@ public abstract class SQLExecutor {
 		}
 		return result;
 	}
-	public static Integer getNextSequenceIntegerValue(String sequenceName, ConnectionFactory connectionFactory) throws SQLException {
-		Object result = getNextSequenceValue(sequenceName, connectionFactory, Param.DATA_TYPE_INT);
+	public static Integer getNextSequenceIntegerValue(String sequenceName, ConnectionFactory connectionFactory, Record params) throws SQLException {
+		Object result = getNextSequenceValue(sequenceName, connectionFactory, params, Param.DATA_TYPE_INT);
 		if(result != null && result instanceof Integer) {
 			return (Integer)result;
 		}
 		return null;
 	}
-	public static Long getNextSequenceLongValue(String sequenceName, ConnectionFactory connectionFactory) throws SQLException {
-		Object result = getNextSequenceValue(sequenceName, connectionFactory, Param.DATA_TYPE_LONG);
+	public static Long getNextSequenceLongValue(String sequenceName, ConnectionFactory connectionFactory, Record params) throws SQLException {
+		Object result = getNextSequenceValue(sequenceName, connectionFactory, params, Param.DATA_TYPE_LONG);
 		if(result != null && result instanceof Long) {
 			return (Long)result;
 		}

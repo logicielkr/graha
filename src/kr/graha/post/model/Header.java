@@ -507,8 +507,20 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < this.style.size(); i++) {
 				Style s = (Style)this.style.get(i);
-				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
-				} else {
+				boolean unique = true;
+				if(STR.valid(s.getName())) {
+					if(this.contains(s, childHeaders)) {
+						unique = false;
+					} else {
+						for(int x = 0; x < i; x++) {
+							Style p = (Style)this.style.get(x);
+							if(STR.valid(p.getName()) && STR.trueValue(p.getOverride()) && STR.compareIgnoreCase(s.getName(), p.getName())) {
+								unique = false;
+							}
+						}
+					}
+				}
+				if(unique) {
 					xsl.append(s.toXSL(param, rdf));
 				}
 			}
@@ -521,8 +533,20 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < this.script.size(); i++) {
 				Script s = (Script)this.script.get(i);
-				if(STR.valid(s.getName()) && this.contains(s, childHeaders)) {
-				} else {
+				boolean unique = true;
+				if(STR.valid(s.getName())) {
+					if(this.contains(s, childHeaders)) {
+						unique = false;
+					} else {
+						for(int x = 0; x < i; x++) {
+							Script p = (Script)this.script.get(x);
+							if(STR.valid(p.getName()) && STR.trueValue(p.getOverride()) && STR.compareIgnoreCase(s.getName(), p.getName())) {
+								unique = false;
+							}
+						}
+					}
+				}
+				if(unique) {
 					xsl.append(s.toXSL(param, rdf));
 				}
 			}
@@ -560,8 +584,27 @@ public class Header {
 			Buffer xsl = new Buffer();
 			for(int i = 0; i < heads.size(); i++) {
 				Head head = (Head)heads.get(i);
-				if(STR.valid(head.getName()) && this.contains(headType, head, childHeaders)) {
-				} else if(headPosition == head.getPosition(headType)) {
+				boolean unique = true;
+				if(headPosition != head.getPosition(headType)) {
+					unique = false;
+				} else if(STR.valid(head.getName())) {
+					if(this.contains(headType, head, childHeaders)) {
+						unique = false;
+					} else {
+						for(int x = 0; x < i; x++) {
+							Head p = (Head)heads.get(x);
+							if(
+								STR.valid(p.getName()) &&
+								STR.trueValue(p.getOverride()) &&
+								STR.compareIgnoreCase(head.getName(), p.getName()) &&
+								head.getPosition(headType) == p.getPosition(headType)
+							) {
+								unique = false;
+							}
+						}
+					}
+				}
+				if(unique) {
 					xsl.append(head.toXSL(param, rdf));
 				}
 			}

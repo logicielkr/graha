@@ -173,7 +173,7 @@ public class ValidationCommand extends Auth {
 			xsl.appendL(");");
 			xsl.appendL(indent, "if(_msg != null) {");
 			xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-			xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_msg, not_null:true});");
+			xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(_msg), func:\"" + this.getFunc() + "\"});");
 			xsl.appendL(indent + 2, "result = false;");
 			xsl.appendL(indent + 1, "} else {");
 			xsl.appendL(indent + 2, "alert(_getMessage(_msg));");
@@ -191,7 +191,7 @@ public class ValidationCommand extends Auth {
 		return null;
 	}
 	protected void validate(Record params, ConnectionFactory connectionFactory, List<String> msgs) throws NoSuchProviderException, SQLException {
-		if(!super.valid(params)) {
+		if(!super.validForXml(params)) {
 			return;
 		}
 		if(

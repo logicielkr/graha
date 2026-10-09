@@ -208,9 +208,9 @@ public class Style {
 			if(STR.compareIgnoreCase(this.getOnly(), "ie")) {
 				xsl.appendL(internalIndent, "<xsl:comment>[if IE]>");
 				if(STR.valid(this.getMedia())) {
-					xsl.appendL(internalIndent + 1, "&lt;style type=\"text/css\">");
-				} else {
 					xsl.appendL(internalIndent + 1, "&lt;style type=\"text/css\" media=\"" + this.getMedia() + "\">");
+				} else {
+					xsl.appendL(internalIndent + 1, "&lt;style type=\"text/css\">");
 				}
 				xsl.appendL(this.getTextContent().trim());
 				xsl.appendL(internalIndent + 1, "&lt;/style>");

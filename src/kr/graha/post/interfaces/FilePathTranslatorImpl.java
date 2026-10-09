@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.UnsupportedEncodingException;
 import kr.graha.helper.LOG;
+import kr.graha.helper.STR;
 import javax.servlet.http.HttpServletRequest;
 import kr.graha.post.lib.Record;
 
@@ -48,7 +49,7 @@ public class FilePathTranslatorImpl implements FilePathTranslator {
 	) {
 		Path path = null;
 		try {
-			path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
+			path = Paths.get(new URI("file://" + basePath + java.io.File.separator + STR.encodeURIComponent(fileName)));
 			return path;
 		} catch (URISyntaxException | UnsupportedEncodingException e) {
 			LOG.severe(e);

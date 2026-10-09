@@ -261,56 +261,56 @@ public class ValidationParam {
 			if(STR.valid(this.getFormat())) {
 				xsl.appendL(indent + 2, "if(!_format(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getFormat() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "format" + ":\"" + this.getFormat() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "format" + ":\"" + this.getFormat() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getDateFormat())) {
 				xsl.appendL(indent + 2, "if(!_dateFormat(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getDateFormat() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "date_format" + ":\"" + this.getDateFormat() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "date_format" + ":\"" + this.getDateFormat() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getNotNull())) {
 				xsl.appendL(indent + 2, "if(!_notNull(form, \"" + this.getName() + "\" + \".\" + index)) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "not_null" + ":true});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "not_null" + ":true});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMaxLength())) {
 				xsl.appendL(indent + 2, "if(!_maxLength(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getMaxLength() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "max_length" + ":\"" + this.getMaxLength() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "max_length" + ":\"" + this.getMaxLength() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMinLength())) {
 				xsl.appendL(indent + 2, "if(!_minLength(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getMinLength() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "min_length" + ":\"" + this.getMinLength() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "min_length" + ":\"" + this.getMinLength() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMaxValue())) {
 				xsl.appendL(indent + 2, "if(!_maxValue(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getMaxValue() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "max_value" + ":\"" + this.getMaxValue() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "max_value" + ":\"" + this.getMaxValue() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMinValue())) {
 				xsl.appendL(indent + 2, "if(!_minValue(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getMinValue() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "min_value" + ":\"" + this.getMinValue() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "min_value" + ":\"" + this.getMinValue() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getNumberFormat())) {
 				xsl.appendL(indent + 2, "if(!_numberFormat(form, \"" + this.getName() + "\" + \".\" + index, \"" + this.getNumberFormat() + "\")) {");
 				xsl.appendL(indent + 3, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:\"" + this.getMsg() + "\", " + "number_format" + ":\"" + this.getNumberFormat() + "\"});");
+				xsl.appendL(indent + 4, "out.push({param:\"" + this.getName() + "\" + \".\" + index, msg:_getMessage(\"" + this.getMsg() + "\"), " + "number_format" + ":\"" + this.getNumberFormat() + "\"});");
 				exists = true;
 				this.toXSLBottomTile(xsl, indent);
 			}
@@ -322,49 +322,49 @@ public class ValidationParam {
 			if(STR.valid(this.getFormat())) {
 				xsl.appendL(indent, "if(!_format(form, \"" + this.getName() + "\", \"" + this.getFormat() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "format" + ":\"" + this.getFormat() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "format" + ":\"" + this.getFormat() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getDateFormat())) {
 				xsl.appendL(indent, "if(!_dateFormat(form, \"" + this.getName() + "\", \"" + this.getDateFormat() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "date_format" + ":\"" + this.getDateFormat() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "date_format" + ":\"" + this.getDateFormat() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getNotNull())) {
 				xsl.appendL(indent, "if(!_notNull(form, \"" + this.getName() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "not_null" + ":true});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "not_null" + ":true});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMaxLength())) {
 				xsl.appendL(indent, "if(!_maxLength(form, \"" + this.getName() + "\", \"" + this.getMaxLength() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "max_length" + ":\"" + this.getMaxLength() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "max_length" + ":\"" + this.getMaxLength() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMinLength())) {
 				xsl.appendL(indent, "if(!_minLength(form, \"" + this.getName() + "\", \"" + this.getMinLength() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "min_length" + ":\"" + this.getMinLength() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "min_length" + ":\"" + this.getMinLength() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMaxValue())) {
 				xsl.appendL(indent, "if(!_maxValue(form, \"" + this.getName() + "\", \"" + this.getMaxValue() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "max_value" + ":\"" + this.getMaxValue() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "max_value" + ":\"" + this.getMaxValue() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getMinValue())) {
 				xsl.appendL(indent, "if(!_minValue(form, \"" + this.getName() + "\", \"" + this.getMinValue() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "min_value" + ":\"" + this.getMinValue() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "min_value" + ":\"" + this.getMinValue() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 			if(STR.valid(this.getNumberFormat())) {
 				xsl.appendL(indent, "if(!_numberFormat(form, \"" + this.getName() + "\", \"" + this.getNumberFormat() + "\")) {");
 				xsl.appendL(indent + 1, "if(arguments.length > 1) {");
-				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:\"" + this.getMsg() + "\", " + "number_format" + ":\"" + this.getNumberFormat() + "\"});");
+				xsl.appendL(indent + 2, "out.push({param:\"" + this.getName() + "\", msg:_getMessage(\"" + this.getMsg() + "\"), " + "number_format" + ":\"" + this.getNumberFormat() + "\"});");
 				this.toXSLBottomTile(xsl, indent);
 			}
 		}

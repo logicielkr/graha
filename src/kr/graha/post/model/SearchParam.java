@@ -24,6 +24,7 @@ package kr.graha.post.model;
 import java.util.List;
 import java.util.ArrayList;
 import kr.graha.post.lib.Buffer;
+import kr.graha.post.lib.Record;
 import kr.graha.helper.STR;
 import kr.graha.helper.LOG;
 import org.w3c.dom.Node;
@@ -31,6 +32,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import kr.graha.post.element.XmlElement;
+import kr.graha.post.model.utility.AuthUtility;
+import kr.graha.post.model.utility.AuthInfo;
 
 /**
  * Graha(그라하) SearchParam 정보
@@ -54,6 +57,12 @@ public class SearchParam extends LinkParam {
 	}
 	private void setHidden(String hidden) {
 		this.hidden = hidden;
+	}
+	protected String getCond() {
+		return super.getCond();
+	}
+	protected void setCond(String cond) {
+		super.setCond(cond);
 	}
 	protected String getType() {
 		return super.getType();
@@ -156,6 +165,8 @@ public class SearchParam extends LinkParam {
 					) {
 						if(STR.compareIgnoreCase(node.getNodeName(), "hidden")) {
 							this.setHidden(node.getNodeValue());
+						} else if(STR.compareIgnoreCase(node.getNodeName(), "cond")) {
+							this.setCond(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "type")) {
 							this.setType(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "ref")) {
@@ -180,6 +191,7 @@ public class SearchParam extends LinkParam {
 	protected XmlElement element() {
 		XmlElement element = new XmlElement(SearchParam.nodeName());
 		element.setAttribute("hidden", this.getHidden());
+		element.setAttribute("cond", this.getCond());
 		element.setAttribute("type", this.getType());
 		element.setAttribute("ref", this.getRef());
 		element.setAttribute("value", this.getValue());
@@ -192,9 +204,9 @@ public class SearchParam extends LinkParam {
 		}
 		return element;
 	}
-	protected Buffer search(List<Table> tables, List<Command> commands, int indent, boolean rdf) {
+	protected Buffer search(List<Table> tables, List<Command> commands, Record param, int indent, boolean rdf) {
 		if(STR.trueValue(this.getHidden())) {
-			return super.hidden(tables, commands, indent, rdf);
+			return super.hidden(tables, commands, param, indent, rdf);
 		} else {
 			String valueExpr = null;
 			if(STR.valid(this.getValue())) {
@@ -220,50 +232,68 @@ public class SearchParam extends LinkParam {
 				valueExpr = kr.graha.post.xml.GParam.childNodePath("param", this.getName(), rdf);
 			}
 			Buffer xsl = new Buffer();
+			int internalIndent = indent;
+			AuthInfo authInfo = null;
+			if(STR.valid(this.getCond())) {
+				authInfo = AuthUtility.parse(this.getCond());
+			}
+			if(authInfo != null && AuthUtility.testInServer(authInfo, param)) {
+				if(!AuthUtility.auth(authInfo, param)) {
+					return null;
+				} else {
+					authInfo = null;
+				}
+			}
+			if(authInfo != null) {
+				xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, param, rdf) + "\">");
+				internalIndent++;
+			}
 			if(STR.compareIgnoreCase(this.getType(), "select")) {
-				xsl.appendL(indent, "<select name=\"" + this.getName() + "\" class=\"graha " + this.getName() + "\" value=\"{" + valueExpr + "}\">");
+				xsl.appendL(internalIndent, "<select name=\"" + this.getName() + "\" class=\"graha " + this.getName() + "\" value=\"{" + valueExpr + "}\">");
 				if(STR.valid(this.getForName())) {
-					xsl.appendL(indent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
+					xsl.appendL(internalIndent + 1, "<xsl:for-each select=\"" + kr.graha.post.xml.GCode.optionNodePath(this.getForName(), rdf) + "\">");
 					if(valueExpr == null) {
-						xsl.appendL(indent + 2, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+						xsl.appendL(internalIndent + 2, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
 					} else {
-						xsl.appendL(indent + 2, "<xsl:choose>");
-						xsl.appendL(indent + 3, "<xsl:when test=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + " = " + valueExpr  + "\">");
-						xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
-						xsl.appendL(indent + 3, "</xsl:when>");
-						xsl.appendL(indent + 3, "<xsl:otherwise>");
-						xsl.appendL(indent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
-						xsl.appendL(indent + 3, "</xsl:otherwise>");
-						xsl.appendL(indent + 2, "</xsl:choose>");
+						xsl.appendL(internalIndent + 2, "<xsl:choose>");
+						xsl.appendL(internalIndent + 3, "<xsl:when test=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + " = " + valueExpr  + "\">");
+						xsl.appendL(internalIndent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"  selected=\"selected\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+						xsl.appendL(internalIndent + 3, "</xsl:when>");
+						xsl.appendL(internalIndent + 3, "<xsl:otherwise>");
+						xsl.appendL(internalIndent + 4, "<option value=\"{@" + kr.graha.post.xml.GCode.optionChildAttrName("value", rdf) + "}\"><xsl:value-of select=\"@" + kr.graha.post.xml.GCode.optionChildAttrName("label", rdf) + "\" /></option>");
+						xsl.appendL(internalIndent + 3, "</xsl:otherwise>");
+						xsl.appendL(internalIndent + 2, "</xsl:choose>");
 					}
-					xsl.appendL(indent + 1, "</xsl:for-each>");
+					xsl.appendL(internalIndent + 1, "</xsl:for-each>");
 				} else {
 					if(STR.valid(this.option)) {
 						for(int i = 0; i < this.option.size(); i++) {
 							Option obj = (Option)this.option.get(i);
 							if(valueExpr == null) {
-								xsl.appendL(indent + 1, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
+								xsl.appendL(internalIndent + 1, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
 							} else {
-								xsl.appendL(indent + 1, "<xsl:choose>");
-								xsl.appendL(indent + 2, "<xsl:when test=\"" + valueExpr + " = '" + obj.getValue() + "'\">");
-								xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\" selected=\"selected\">" + obj.getLabel() + "</option>");
-								xsl.appendL(indent + 2, "</xsl:when>");
-								xsl.appendL(indent + 2, "<xsl:otherwise>");
-								xsl.appendL(indent + 3, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
-								xsl.appendL(indent + 2, "</xsl:otherwise>");
-								xsl.appendL(indent + 1, "</xsl:choose>");
+								xsl.appendL(internalIndent + 1, "<xsl:choose>");
+								xsl.appendL(internalIndent + 2, "<xsl:when test=\"" + valueExpr + " = '" + obj.getValue() + "'\">");
+								xsl.appendL(internalIndent + 3, "<option value=\"" + obj.getValue() + "\" selected=\"selected\">" + obj.getLabel() + "</option>");
+								xsl.appendL(internalIndent + 2, "</xsl:when>");
+								xsl.appendL(internalIndent + 2, "<xsl:otherwise>");
+								xsl.appendL(internalIndent + 3, "<option value=\"" + obj.getValue() + "\">" + obj.getLabel() + "</option>");
+								xsl.appendL(internalIndent + 2, "</xsl:otherwise>");
+								xsl.appendL(internalIndent + 1, "</xsl:choose>");
 							}
 						}
 					}
 				}
-				xsl.appendL(indent, "</select>");
+				xsl.appendL(internalIndent, "</select>");
 			} else {
 				if(valueExpr == null) {
-					xsl.appendL(indent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" />");
+					xsl.appendL(internalIndent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" />");
 				} else {
-					xsl.appendL(indent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
+					xsl.appendL(internalIndent, "<input type=\"text\" class=\"graha "+ this.getName() + "\" name=\""+ this.getName() + "\" value=\"{" + valueExpr + "}\" />");
 				}
-				
+			}
+			if(authInfo != null) {
+				xsl.appendL(indent, "</xsl:if>");
 			}
 			return xsl;
 		}

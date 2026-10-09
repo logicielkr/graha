@@ -108,7 +108,7 @@ public class GFile {
 	}
 	private String escapeFileName(URI uri) {
 //		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D").replace("+", "%2B");
-		return decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
+		return this.decodeFileName(uri).replace("%", "%25").replace("#", "%23").replace(";", "%3b").replace("|", "%7c").replace("?", "%3F").replace("[", "%5B").replace("]", "%5D");
 	}
 /**
  * URI 객체로부터 파일이름만 가져온다.

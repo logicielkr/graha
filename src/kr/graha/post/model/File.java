@@ -372,7 +372,7 @@ public class File {
 				if(fileName == null) {
 					path = Paths.get(new URI("file://" + basePath));
 				} else {
-					path = Paths.get(new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20")));
+					path = Paths.get(new URI("file://" + basePath + java.io.File.separator + STR.encodeURIComponent(fileName)));
 				}
 			} catch (URISyntaxException e) {
 				LOG.severe(e);
@@ -405,12 +405,12 @@ public class File {
 		int index = 0;
 		while(true) {
 			if(index == 0) {
-				uri = new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+				uri = new URI("file://" + basePath + java.io.File.separator + STR.encodeURIComponent(fileName));
 			} else {
 				if(fileName.lastIndexOf(".") > 0) {
-					uri = new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName.substring(0, fileName.lastIndexOf(".")), "UTF-8").replaceAll("\\+", "%20")  + "-" + index + "." + java.net.URLEncoder.encode(fileName.substring(fileName.lastIndexOf(".") + 1), "UTF-8").replaceAll("\\+", "%20"));
+					uri = new URI("file://" + basePath + java.io.File.separator + STR.encodeURIComponent(fileName.substring(0, fileName.lastIndexOf(".")))  + "-" + index + "." + STR.encodeURIComponent(fileName.substring(fileName.lastIndexOf(".") + 1)));
 				} else {
-					uri = new URI("file://" + basePath + java.io.File.separator + java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20") + "-" + index);
+					uri = new URI("file://" + basePath + java.io.File.separator + STR.encodeURIComponent(fileName) + "-" + index);
 				}
 			}
 			if(Files.notExists(Paths.get(uri))) {

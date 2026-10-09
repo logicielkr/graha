@@ -126,9 +126,12 @@ public class GRedirect {
 			xml.appendL(2, "<RDF:li><RDF:item>");
 			xml.appendL(3, "<uc:path>" + this.getPath() + "</uc:path>");
 			xml.appendL(3, "<uc:autoredirect>" + this.getAutoredirect() + "</uc:autoredirect>");
-			
-			xml.appendL(3, "<uc:label>" + this.getLabel() + "</uc:label>");
-			xml.appendL(3, "<uc:type>" + this.getType() + "</uc:type>");
+			if(STR.valid(this.getLabel())) {
+				xml.appendL(3, "<uc:label>" + this.getLabel() + "</uc:label>");
+			}
+			if(STR.valid(this.getType())) {
+				xml.appendL(3, "<uc:type>" + this.getType() + "</uc:type>");
+			}
 			
 			if(this.msgs != null && this.msgs.size() > 0) {
 				xml.appendL(3, "<uc:msgs>");
@@ -149,6 +152,13 @@ public class GRedirect {
 			xml.appendL(2, "<redirect>");
 			xml.appendL(3, "<path>" + this.getPath() + "</path>");
 			xml.appendL(3, "<autoredirect>" + this.getAutoredirect() + "</autoredirect>");
+			if(STR.valid(this.getLabel())) {
+				xml.appendL(3, "<label>" + this.getLabel() + "</label>");
+			}
+			if(STR.valid(this.getType())) {
+				xml.appendL(3, "<type>" + this.getType() + "</type>");
+			}
+			
 			if(this.msgs != null && this.msgs.size() > 0) {
 				xml.appendL(3, "<msgs>");
 				for(int i = 0; i < this.msgs.size(); i++) {

@@ -29,6 +29,9 @@ import java.text.DateFormat;
 import java.util.Locale;
 import java.util.List;
 import java.text.ParseException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Graha(그라하) String 관련 유틸리티
@@ -533,6 +536,12 @@ public final class STR {
 			return ((Long)value).intValue();
 		}
 		return STR.intValue(value.toString(), defaultValue);
+	}
+	public static String decodeURIComponent(String str) throws UnsupportedEncodingException {
+		return URLDecoder.decode(str.replace("+", "%2B"), "UTF-8");
+	}
+	public static String encodeURIComponent(String str) throws UnsupportedEncodingException {
+		return URLEncoder.encode(str, "UTF-8").replaceAll("\\+", "%20");
 	}
 }
 

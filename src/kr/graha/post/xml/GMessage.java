@@ -77,4 +77,24 @@ public class GMessage {
 			return "/document/messages/message[name='" + name + "']/label";
 		}
 	}
+	public static void template(Buffer xml, int indent, boolean rdf) {
+		xml.appendL(indent, "<xsl:template name=\"message\">");
+		xml.appendL(indent + 1, "<xsl:param name=\"name\" />");
+		xml.appendL(indent + 1, "<xsl:choose>");
+		if(rdf) {
+			xml.append(indent + 2, "<xsl:when test=\"starts-with($name, 'message.') and /RDF:RDF/RDF:Seq[@RDF:about='urn:root:messages']/RDF:li/RDF:item[uc:name=substring($name, 9)]/uc:label and /RDF:RDF/RDF:Seq[@RDF:about='urn:root:messages']/RDF:li/RDF:item[uc:name=substring($name, 9)]/uc:label != ''\">");
+			xml.append("<xsl:value-of select=\"/RDF:RDF/RDF:Seq[@RDF:about='urn:root:messages']/RDF:li/RDF:item[uc:name=substring($name, 9)]/uc:label\" />");
+			xml.appendL("</xsl:when>");
+		} else {
+			xml.append(indent + 2, "<xsl:when test=\"starts-with($name, 'message.') and /document/messages/message[name=substring($name, 9)]/label and /document/messages/message[name=substring($name, 9)]/label != ''\">");
+			xml.append("<xsl:value-of select=\"/document/messages/message[name=substring($name, 9)]/label\" />");
+			xml.appendL("</xsl:when>");
+		}
+		xml.append(indent + 2, "<xsl:otherwise>");
+		xml.append("<xsl:value-of select=\"$name\" />");
+		xml.append("<xsl:value-of select=\"substring($name, 9)\" />");
+		xml.appendL("</xsl:otherwise>");
+		xml.appendL(indent + 1, "</xsl:choose>");
+		xml.appendL(indent, "</xsl:template>");
+	}
 }
