@@ -22,6 +22,7 @@
 package kr.graha.post.xml;
 
 import kr.graha.post.lib.Buffer;
+import kr.graha.helper.STR;
 
 /**
  * GOption
@@ -40,10 +41,22 @@ public class GOption {
 	public String getValue() {
 		return this.value;
 	}
+	public String getEscapedValue() {
+		if(STR.valid(this.value)) {
+			return this.value.replaceAll("&", "&amp;");
+		}
+		return this.value;
+	}
 	public void setValue(String value) {
 		this.value = value;
 	}
 	public String getLabel() {
+		return this.label;
+	}
+	public String getEscapedLabel() {
+		if(STR.valid(this.label)) {
+			return this.label.replaceAll("&", "&amp;");
+		}
 		return this.label;
 	}
 	public void setLabel(String label) {

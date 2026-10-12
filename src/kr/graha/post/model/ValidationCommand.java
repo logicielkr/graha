@@ -163,6 +163,10 @@ public class ValidationCommand extends Auth {
 			if(authInfo != null) {
 				xsl.appendL(indent, "<xsl:if test=\"" + AuthUtility.testExpr(authInfo, params, rdf) + "\">");
 			}
+			if(STR.valid(this.getName())) {
+				xsl.appendL(indent, "if(arguments.length &lt; 3 || (arguments.length &gt; 2 &amp;&amp; (elementName == \"" + this.getName() + "\" || elementName == null))) {");
+				indent++;
+			}
 			xsl.append(indent, "var _msg = " + this.getFunc() + "(form");
 			if(STR.valid(this.getName())) {
 				xsl.append(", \"" + this.getName() + "\"");
@@ -183,6 +187,10 @@ public class ValidationCommand extends Auth {
 			xsl.appendL(indent + 2, "return false;");
 			xsl.appendL(indent + 1, "}");
 			xsl.appendL(indent, "}");
+			if(STR.valid(this.getName())) {
+				indent--;
+				xsl.appendL(indent, "}");
+			}
 			if(authInfo != null) {
 				xsl.appendL(indent, "</xsl:if>");
 			}

@@ -468,8 +468,8 @@ public final class STR {
 		if(value == null) {
 			return null;
 		}
-		value = value.replace(" ", "");
-		value = value.replace(",", "");
+		value = value.replaceAll(" ", "");
+		value = value.replaceAll(",", "");
 		if(value != null && value.equals("")) {
 			return null;
 		}
@@ -496,8 +496,8 @@ public final class STR {
 		if(value == null) {
 			return defaultValue;
 		}
-		value = value.replace(" ", "");
-		value = value.replace(",", "");
+		value = value.replaceAll(" ", "");
+		value = value.replaceAll(",", "");
 		if(value != null && value.equals("")) {
 			return defaultValue;
 		}
@@ -538,7 +538,7 @@ public final class STR {
 		return STR.intValue(value.toString(), defaultValue);
 	}
 	public static String decodeURIComponent(String str) throws UnsupportedEncodingException {
-		return URLDecoder.decode(str.replace("+", "%2B"), "UTF-8");
+		return URLDecoder.decode(str.replaceAll("+", "%2B"), "UTF-8");
 	}
 	public static String encodeURIComponent(String str) throws UnsupportedEncodingException {
 		return URLEncoder.encode(str, "UTF-8").replaceAll("\\+", "%20");

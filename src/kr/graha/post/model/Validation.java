@@ -155,18 +155,6 @@ public class Validation {
 	}
 	protected Buffer toXSL(Record param, int indent, boolean rdf) {
 		Buffer xsl = new Buffer();
-		/*
-		if(STR.valid(this.param)) {
-			for(int i = 0; i < this.param.size(); i++) {
-				Object obj = this.param.get(i);
-				if(obj instanceof ValidationParam) {
-					xsl.append(((ValidationParam)obj).toXSL(param, indent, rdf));
-				} else if(obj instanceof ValidationCommand) {
-					xsl.append(((ValidationCommand)obj).toValidationXSL(param, indent, rdf));
-				}
-			}
-		}
-		*/
 		if(STR.valid(this.param)) {
 			for(int i = 0; i < this.param.size(); i++) {
 				Object obj = this.param.get(i);

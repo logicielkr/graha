@@ -71,6 +71,8 @@ public class Prop extends SQLExecutor {
 	private String isPublic = null;
 	private String time = null;
 	private String override = null;
+//	private String converter = null;
+//	private String delimiter = null;
 	private Node sql = null;
 	private List param = null;
 	private List<Encrypt> encrypts = null;
@@ -118,6 +120,20 @@ public class Prop extends SQLExecutor {
 	private void setOverride(String override) {
 		this.override = override;
 	}
+/*
+	private String getConverter() {
+		return this.converter;
+	}
+	private void setConverter(String converter) {
+		this.converter = converter;
+	}
+	private String getDelimiter() {
+		return this.delimiter;
+	}
+	private void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
+	}
+*/
 	private Node getSql() {
 		return this.sql;
 	}
@@ -184,6 +200,10 @@ public class Prop extends SQLExecutor {
 							this.setTime(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "override")) {
 							this.setOverride(node.getNodeValue());
+//						} else if(STR.compareIgnoreCase(node.getNodeName(), "converter")) {
+//							this.setConverter(node.getNodeValue());
+//						} else if(STR.compareIgnoreCase(node.getNodeName(), "delimiter")) {
+//							this.setDelimiter(node.getNodeValue());
 						} else if(STR.compareIgnoreCase(node.getNodeName(), "xml:base")) {
 						} else {
 							LOG.warning("invalid attrName(" + node.getNodeName() + ")");
@@ -255,6 +275,8 @@ public class Prop extends SQLExecutor {
 		element.setAttribute("public", this.getIsPublic());
 		element.setAttribute("time", this.getTime());
 		element.setAttribute("override", this.getOverride());
+//		element.setAttribute("converter", this.getConverter());
+//		element.setAttribute("delimiter", this.getDelimiter());
 		element.appendChild(this.getSql());
 		if(this.param != null && this.param.size() > 0) {
 			XmlElement child = element.createElement("params");
@@ -312,61 +334,71 @@ public class Prop extends SQLExecutor {
 			}
 			String value = TextParser.parse(this.getValue(), params);
 			if(STR.valid(value)) {
-				params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName()), value);
+				params.put(Record.key(Record.PREFIX_TYPE_PROP, this.getName()), value);
 				if(STR.trueValue(this.getIsPublic())) {
-					params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName(), "public"), "true");
+					params.put(Record.key(Record.PREFIX_TYPE_PROP, this.getName(), "public"), "true");
 				}
 			}
-		} else if(time > Prop.Before_Connection) {
-			super.setConnectionFactory(connectionFactory);
-			Buffer sql = super.parseSQL(this.sql, params);
-			if(sql == null) {
-				LOG.severe("prop(" + this.getName() + ") must be defined value or sql");
-				throw new GrahaParsingException("prop(" + this.getName() + ") must be defined value or sql");
-			}
-			Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try {
-				List<SQLParameter> parameters = new ArrayList();
-				if(STR.valid(this.param)) {
-					for(int i = 0; i < this.getParamSize(params); i++) {
-						Param p = (Param)this.getParam(i, params);
-						SQLParameter parameter =  p.getValue(
-							params,
-							encryptor
-						);
-						if(parameter != null) {
-							parameters.add(parameter);
-						}
+		} else {
+			if(this.sql != null) {
+				if(time > Prop.Before_Connection) {
+					super.setConnectionFactory(connectionFactory);
+					Buffer sql = super.parseSQL(this.sql, params);
+					if(sql == null) {
+						LOG.severe("prop(" + this.getName() + ") must be defined valid sql");
+						throw new GrahaParsingException("prop(" + this.getName() + ") must be defined valid sql");
 					}
-				}
-				pstmt = super.prepareStatement(sql);
-				super.bind(pstmt, parameters);
-				rs = pstmt.executeQuery();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				if(rs.next()) {
-					for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-						if(rs.getString(i) != null) {
-							params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName() + "." + rsmd.getColumnName(i)), rs.getString(i));
-							if(STR.trueValue(this.getIsPublic())) {
-								params.puts(Record.key(Record.PREFIX_TYPE_PROP, this.getName() + "." + rsmd.getColumnName(i), "public"), true);
+					Map<String, Encryptor> encryptor = super.getEncryptor(this.encrypt, this.encrypts);
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					try {
+						List<SQLParameter> parameters = new ArrayList();
+						if(STR.valid(this.param)) {
+							for(int i = 0; i < this.getParamSize(params); i++) {
+								Param p = (Param)this.getParam(i, params);
+								SQLParameter parameter =  p.getValue(
+									params,
+									encryptor
+								);
+								if(parameter != null) {
+									parameters.add(parameter);
+								}
 							}
 						}
+						pstmt = super.prepareStatement(sql);
+						super.bind(pstmt, parameters);
+						rs = pstmt.executeQuery();
+						ResultSetMetaData rsmd = rs.getMetaData();
+						if(rs.next()) {
+							for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+								if(rs.getString(i) != null) {
+									params.put(Record.key(Record.PREFIX_TYPE_PROP, this.getName() + "." + rsmd.getColumnName(i)), rs.getString(i));
+									if(STR.trueValue(this.getIsPublic())) {
+										params.put(Record.key(Record.PREFIX_TYPE_PROP, this.getName() + "." + rsmd.getColumnName(i), "public"), true);
+									}
+								}
+							}
+						}
+						DB.close(rs);
+						rs = null;
+						DB.close(pstmt);
+						pstmt = null;
+					} catch (SQLException | NoSuchProviderException e) {
+						LOG.severe(e);
+						throw e;
+					} finally {
+						DB.close(rs);
+						rs = null;
+						DB.close(pstmt);
+						pstmt = null;
 					}
 				}
-				DB.close(rs);
-				rs = null;
-				DB.close(pstmt);
-				pstmt = null;
-			} catch (SQLException | NoSuchProviderException e) {
-				LOG.severe(e);
-				throw e;
-			} finally {
-				DB.close(rs);
-				rs = null;
-				DB.close(pstmt);
-				pstmt = null;
+			} else {
+				if(!STR.valid(this.getTime()) && time >= Prop.Before_Before_Processor) {
+					return;
+				}
+				params.remove(Record.key(Record.PREFIX_TYPE_PROP, this.getName()));
+				params.remove(Record.key(Record.PREFIX_TYPE_PROP, this.getName(), "public"));
 			}
 		}
 	}

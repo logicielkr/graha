@@ -134,6 +134,12 @@ public class Record<K, V> {
 	public void puts(Key key, String value) {
 		this.puts(key, (Object)value);
 	}
+/**
+ * kr/graha/post/model/Prop.java 에서만 호출한다.
+ */
+	public void remove(Key key) {
+		this.map.remove(key);
+	}
 	public void puts(Key key, Object value) {
 		/*
 		if(key.startsWith("prop.")) {

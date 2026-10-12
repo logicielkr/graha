@@ -144,7 +144,7 @@ public class QueryXSLImpl extends QueryImpl {
 		}
 		if(STR.valid(super.getValidation())) {
 			xsl.appendL(indent, "<script>");
-			xsl.appendL(indent, "function _check(form, out) {");
+			xsl.appendL(indent, "function _check(form, out, elementName) {");
 			xsl.appendL(indent + 1, "var result = true;");
 			xsl.appendL(indent + 1, "var index;");
 			for(int i = 0; i < super.getValidation().size(); i++) {

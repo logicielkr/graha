@@ -532,6 +532,30 @@ public class Col {
 	) {
 		return tag(param, indent, table, col, tabName, "td", rdf, div, full, queryFuncType, Tab.VIEW_TYPE_UNKNOWN);
 	}
+	private Buffer title(String title, Buffer value, String path, String defaultValuePath, int indent, Record param, boolean rdf, boolean full) {
+		if(STR.compareIgnoreCase(title, "${value}")) {
+			if(value != null) {
+				return value;
+			} else {
+				Buffer xsl = new Buffer();
+				if(STR.valid(this.getDefaultValue())) {
+					xsl.appendL("<xsl:choose>");
+					xsl.appendL(indent + 1, "<xsl:when test=\"" + path + " and " + path + " != ''\">");
+					xsl.appendL(indent + 2, "<xsl:value-of select=\"" + path + "\" />");
+					xsl.appendL(indent + 1, "</xsl:when>");
+					xsl.appendL(indent + 1, "<xsl:otherwise>");
+					xsl.appendL(indent + 2, "<xsl:value-of select=\"" + defaultValuePath + "\" />");
+					xsl.appendL(indent + 1, "</xsl:otherwise>");
+					xsl.append(indent, "</xsl:choose>");
+				} else {
+					xsl.append("<xsl:value-of select=\"" + path + "\" />");
+				}
+				return xsl;
+			}
+		} else {
+			return TextParser.parseForXSL(title, param, rdf, full);
+		}
+	}
 	private Buffer tag(
 		Record param,
 		int indent,
@@ -673,7 +697,10 @@ public class Col {
 						xsl.appendL(indent + 2, "<xsl:attribute name=\"" + v[0] + "\">" + TextParser.parseForXSL(v[1], param, rdf, full) + "</xsl:attribute>");
 					}
 				}
-				String value = this.value(indent + 1, tabName, rdf, div, full).toString();
+				Buffer value = this.value(indent + 1, tabName, rdf, div, full);
+				if(STR.valid(this.getTitle())) {
+					xsl.appendL(indent + 2, "<xsl:attribute name=\"title\">" + this.title(this.getTitle(), value, null, null, 0, param, rdf, full) + "</xsl:attribute>");
+				}
 				if(this.link != null && this.link.size() > 0) {
 					for(int i = 0; i < this.link.size(); i++) {
 						xsl.append(((Link)this.link.get(i)).link(param, tabName, value, indent + 1, rdf, full));
@@ -924,13 +951,13 @@ public class Col {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"autocomplete\">" + this.getAutocomplete() + "</xsl:attribute>");
 			}
 			if(STR.valid(this.getPlaceholder())) {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"placeholder\">" + this.getPlaceholder() + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"placeholder\">" + this.title(this.getPlaceholder(), null, path, defaultValuePath, indent + 1, param, rdf, full) + "</xsl:attribute>");
 			}
 			if(STR.valid(this.getPattern())) {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"pattern\">" + this.getPattern() + "</xsl:attribute>");
 			}
 			if(STR.valid(this.getTitle())) {
-				xsl.appendL(indent + 1, "<xsl:attribute name=\"title\">" + this.getTitle() + "</xsl:attribute>");
+				xsl.appendL(indent + 1, "<xsl:attribute name=\"title\">" + this.title(this.getTitle(), null, path, defaultValuePath, indent + 1, param, rdf, full) + "</xsl:attribute>");
 			}
 			if(STR.valid(this.getRequired())) {
 				xsl.appendL(indent + 1, "<xsl:attribute name=\"required\">" + this.getRequired() + "</xsl:attribute>");

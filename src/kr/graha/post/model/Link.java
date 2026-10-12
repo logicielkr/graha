@@ -327,7 +327,7 @@ public class Link {
 		}
 		return false;
 	}
-	protected Buffer link(Record param, String tabName, String label, int indent, boolean rdf, boolean full) {
+	protected Buffer link(Record param, String tabName, Buffer label, int indent, boolean rdf, boolean full) {
 		Buffer xsl = new Buffer();
 		AuthInfo authInfo = null;
 		if(STR.valid(this.getCond())) {
