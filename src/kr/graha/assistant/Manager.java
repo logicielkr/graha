@@ -235,7 +235,7 @@ public class Manager extends HttpServlet {
 			out.close();
 		}
 		
-		return out.toString(StandardCharsets.UTF_8);
+		return out.toString(StandardCharsets.UTF_8.toString());
 	}
 	private int sendHTML(HttpServletRequest request, HttpServletResponse response, StringBuilder xml, String xid) {
 		response.setCharacterEncoding("UTF-8");
